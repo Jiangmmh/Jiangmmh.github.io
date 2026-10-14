@@ -1,0 +1,174 @@
+/* ==============================
+   正文排版
+   ============================== */
+
+.post-content {
+  line-height: 1.85;
+}
+
+/* 正文标题 */
+.post-content h1 {
+  font-size: 1.7rem;
+  line-height: 1.4;
+}
+
+.post-content h2 {
+  font-size: 1.4rem;
+  line-height: 1.5;
+  margin-top: 2em;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid var(--border);
+}
+
+.post-content h3 {
+  font-size: 1.18rem;
+  line-height: 1.5;
+  margin-top: 1.6em;
+}
+
+.post-content h4 {
+  font-size: 1.05rem;
+}
+
+/* 文章标题 */
+.post-title {
+  font-size: 2rem;
+  line-height: 1.4;
+  letter-spacing: -0.02em;
+}
+
+/* 图片 */
+.post-content img {
+  border-radius: 8px;
+}
+
+/* ==============================
+   行内代码
+   ============================== */
+
+.post-content code:not(pre code) {
+  padding: 0.15em 0.4em;
+  border-radius: 5px;
+  background: var(--code-bg);
+  font-size: 0.92em;
+}
+
+/* ==============================
+   移动端适配
+   ============================== */
+
+@media (max-width: 768px) {
+  .post-title {
+    font-size: 1.65rem;
+  }
+
+  .post-content h1 {
+    font-size: 1.5rem;
+  }
+
+  .post-content h2 {
+    font-size: 1.25rem;
+  }
+
+  .post-content h3 {
+    font-size: 1.1rem;
+  }
+}
+
+
+
+
+
+
+
+/* Photo gallery */
+.photo-gallery {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin: 1.5rem 0;
+}
+
+.photo-gallery-item {
+    display: block;
+    overflow: hidden;
+    aspect-ratio: 4 / 3;
+    border-radius: 8px;
+    background: var(--code-bg);
+}
+
+.photo-gallery-item img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.photo-gallery-item:hover img {
+    transform: scale(1.05);
+}
+
+@media (max-width: 768px) {
+    .photo-gallery {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+}
+
+
+/* 文章目录：桌面端固定在左侧 */
+@media screen and (min-width: 1400px) {
+    .post-single {
+        position: relative;
+    }
+
+    .post-single .toc {
+        position: fixed;
+        top: 100px;
+
+        /* 加宽目录 */
+        left: max(20px, calc((100vw - 1100px) / 2 - 340px));
+        width: 300px;
+
+        max-height: calc(100vh - 130px);
+        overflow-y: auto;
+        overflow-x: hidden;
+        z-index: 10;
+    }
+
+    .post-single .toc details {
+        padding: 12px;
+    }
+
+    .post-single .toc ul {
+        padding-left: 14px;
+        margin: 6px 0;
+    }
+
+    .post-single .toc li {
+        margin: 5px 0;
+        line-height: 1.5;
+    }
+
+    .post-single .toc a {
+        font-size: 13px;
+        line-height: 1.5;
+        overflow-wrap: break-word;
+        word-break: normal;
+    }
+}
+
+/* TOC: 当前阅读章节高亮 */
+.post-single .toc .inner a.active {
+    color: var(--primary);
+    font-weight: 700;
+    border-left: 3px solid var(--primary);
+    padding-left: 8px;
+    background: var(--code-bg);
+    border-radius: 3px;
+}
+
+.post-single .toc .inner a {
+    transition: color 0.2s ease, background-color 0.2s ease;
+}

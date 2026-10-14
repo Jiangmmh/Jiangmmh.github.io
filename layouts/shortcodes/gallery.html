@@ -1,0 +1,13 @@
+
+<div class="photo-gallery">
+  {{- range .Params -}}
+    <a class="photo-gallery-item"
+       href="{{ . | relURL }}"
+       target="_blank"
+       rel="noopener">
+      <img src="{{ . | relURL }}"
+           alt="照片"
+           loading="lazy">
+    </a>
+  {{- end -}}
+</div>

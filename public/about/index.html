@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>关于我 | Minghan的博客</title>
+<meta name="keywords" content="">
+<meta name="description" content="About
+欢迎来到Minghan的博客。
+这里主要记录我在计算机科学与工程领域的学习、实践和思考，希望通过持续的实验、源码阅读与项目实践，深入理解计算机软硬件系统的工作原理。
+除了技术外，我还会分享一些阅读其他文章和书籍的笔记。
+技术方向
+C&#43;&#43; 与软件工程
+
+Modern C&#43;&#43;、STL 与泛型编程
+并发编程、内存管理与性能优化
+数据结构、算法与工程实践
+
+操作系统与计算机系统
+
+Linux 内核与操作系统实验
+Pintos、xv6 等教学操作系统
+进程管理、虚拟内存、文件系统
+系统编程与调试工具
+
+计算机网络与分布式系统
+
+TCP/IP、Socket 网络编程
+高性能网络与存储系统
+分布式系统的基本原理与实践
+
+计算机体系结构
+
+RISC-V 处理器设计
+Verilog、数字逻辑与计算机组成
+处理器流水线与硬件验证
+
+关于这个博客
+我希望把这里建设成一个长期维护的技术知识库，主要记录：
+
+学习笔记：整理课程、书籍与技术文档中的核心知识。
+实验记录：记录实现过程、调试思路与遇到的问题。
+源码分析：从代码出发理解系统的设计与实现。
+项目实践：通过实际项目验证所学知识。
+
+联系与交流
+如果你对文章内容有建议，或者希望交流相关技术，可以通过 GitHub 与我联系。
+
+GitHub：Jiangmmh
+
+持续学习，深入原理，动手实践。">
+<meta name="author" content="">
+<link rel="canonical" href="http://localhost:1313/about/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.8bceea2043d3c19389d1d33836b2f7c2896b4a4a3c8e2053a68ce38213859cf2.css" integrity="sha256-i87qIEPTwZOJ0dM4NrL3wolrSko8jiBTpozjghOFnPI=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/about/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="http://localhost:1313/about/">
+  <meta property="og:site_name" content="Minghan的博客">
+  <meta property="og:title" content="关于我">
+  <meta property="og:description" content="About 欢迎来到Minghan的博客。
+这里主要记录我在计算机科学与工程领域的学习、实践和思考，希望通过持续的实验、源码阅读与项目实践，深入理解计算机软硬件系统的工作原理。
+除了技术外，我还会分享一些阅读其他文章和书籍的笔记。
+技术方向 C&#43;&#43; 与软件工程 Modern C&#43;&#43;、STL 与泛型编程 并发编程、内存管理与性能优化 数据结构、算法与工程实践 操作系统与计算机系统 Linux 内核与操作系统实验 Pintos、xv6 等教学操作系统 进程管理、虚拟内存、文件系统 系统编程与调试工具 计算机网络与分布式系统 TCP/IP、Socket 网络编程 高性能网络与存储系统 分布式系统的基本原理与实践 计算机体系结构 RISC-V 处理器设计 Verilog、数字逻辑与计算机组成 处理器流水线与硬件验证 关于这个博客 我希望把这里建设成一个长期维护的技术知识库，主要记录：
+学习笔记：整理课程、书籍与技术文档中的核心知识。 实验记录：记录实现过程、调试思路与遇到的问题。 源码分析：从代码出发理解系统的设计与实现。 项目实践：通过实际项目验证所学知识。 联系与交流 如果你对文章内容有建议，或者希望交流相关技术，可以通过 GitHub 与我联系。
+GitHub：Jiangmmh 持续学习，深入原理，动手实践。">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:published_time" content="2026-10-14T00:00:00+00:00">
+    <meta property="article:modified_time" content="2026-10-14T00:00:00+00:00">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="关于我">
+  <meta name="twitter:description" content="About 欢迎来到Minghan的博客。
+这里主要记录我在计算机科学与工程领域的学习、实践和思考，希望通过持续的实验、源码阅读与项目实践，深入理解计算机软硬件系统的工作原理。
+除了技术外，我还会分享一些阅读其他文章和书籍的笔记。
+技术方向 C&#43;&#43; 与软件工程 Modern C&#43;&#43;、STL 与泛型编程 并发编程、内存管理与性能优化 数据结构、算法与工程实践 操作系统与计算机系统 Linux 内核与操作系统实验 Pintos、xv6 等教学操作系统 进程管理、虚拟内存、文件系统 系统编程与调试工具 计算机网络与分布式系统 TCP/IP、Socket 网络编程 高性能网络与存储系统 分布式系统的基本原理与实践 计算机体系结构 RISC-V 处理器设计 Verilog、数字逻辑与计算机组成 处理器流水线与硬件验证 关于这个博客 我希望把这里建设成一个长期维护的技术知识库，主要记录：
+学习笔记：整理课程、书籍与技术文档中的核心知识。 实验记录：记录实现过程、调试思路与遇到的问题。 源码分析：从代码出发理解系统的设计与实现。 项目实践：通过实际项目验证所学知识。 联系与交流 如果你对文章内容有建议，或者希望交流相关技术，可以通过 GitHub 与我联系。
+GitHub：Jiangmmh 持续学习，深入原理，动手实践。">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "关于我",
+      "item": "http://localhost:1313/about/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "关于我",
+  "name": "关于我",
+  "description": "About 欢迎来到Minghan的博客。\n这里主要记录我在计算机科学与工程领域的学习、实践和思考，希望通过持续的实验、源码阅读与项目实践，深入理解计算机软硬件系统的工作原理。\n除了技术外，我还会分享一些阅读其他文章和书籍的笔记。\n技术方向 C++ 与软件工程 Modern C++、STL 与泛型编程 并发编程、内存管理与性能优化 数据结构、算法与工程实践 操作系统与计算机系统 Linux 内核与操作系统实验 Pintos、xv6 等教学操作系统 进程管理、虚拟内存、文件系统 系统编程与调试工具 计算机网络与分布式系统 TCP/IP、Socket 网络编程 高性能网络与存储系统 分布式系统的基本原理与实践 计算机体系结构 RISC-V 处理器设计 Verilog、数字逻辑与计算机组成 处理器流水线与硬件验证 关于这个博客 我希望把这里建设成一个长期维护的技术知识库，主要记录：\n学习笔记：整理课程、书籍与技术文档中的核心知识。 实验记录：记录实现过程、调试思路与遇到的问题。 源码分析：从代码出发理解系统的设计与实现。 项目实践：通过实际项目验证所学知识。 联系与交流 如果你对文章内容有建议，或者希望交流相关技术，可以通过 GitHub 与我联系。\nGitHub：Jiangmmh 持续学习，深入原理，动手实践。\n",
+  "keywords": [
+    
+  ],
+  "articleBody": "About 欢迎来到Minghan的博客。\n这里主要记录我在计算机科学与工程领域的学习、实践和思考，希望通过持续的实验、源码阅读与项目实践，深入理解计算机软硬件系统的工作原理。\n除了技术外，我还会分享一些阅读其他文章和书籍的笔记。\n技术方向 C++ 与软件工程 Modern C++、STL 与泛型编程 并发编程、内存管理与性能优化 数据结构、算法与工程实践 操作系统与计算机系统 Linux 内核与操作系统实验 Pintos、xv6 等教学操作系统 进程管理、虚拟内存、文件系统 系统编程与调试工具 计算机网络与分布式系统 TCP/IP、Socket 网络编程 高性能网络与存储系统 分布式系统的基本原理与实践 计算机体系结构 RISC-V 处理器设计 Verilog、数字逻辑与计算机组成 处理器流水线与硬件验证 关于这个博客 我希望把这里建设成一个长期维护的技术知识库，主要记录：\n学习笔记：整理课程、书籍与技术文档中的核心知识。 实验记录：记录实现过程、调试思路与遇到的问题。 源码分析：从代码出发理解系统的设计与实现。 项目实践：通过实际项目验证所学知识。 联系与交流 如果你对文章内容有建议，或者希望交流相关技术，可以通过 GitHub 与我联系。\nGitHub：Jiangmmh 持续学习，深入原理，动手实践。\n",
+  "wordCount" : "41",
+  "inLanguage": "en",
+  "datePublished": "2026-10-14T00:00:00Z",
+  "dateModified": "2026-10-14T00:00:00Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "http://localhost:1313/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Minghan的博客",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "http://localhost:1313/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="header-nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="Minghan的博客 (Alt + H)">Minghan的博客</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" class="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg class="sun" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu" class="menu">
+            <li>
+                <a href="http://localhost:1313/posts/" title="文章">
+                    <span>文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/archives/" title="归档">
+                    <span>归档</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/categories/" title="分类">
+                    <span>分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="标签">
+                    <span>标签</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/photos/" title="照片墙">
+                    <span>照片墙</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/about/" title="关于">
+                    <span class="active">关于</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <nav class="breadcrumbs" role="navigation" aria-label="Breadcrumb">
+            <a href="/">Home</a>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+        <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+</nav>
+    <h1 class="post-title entry-hint-parent">
+      关于我
+    </h1>
+    <div class="post-meta">
+
+<span title='2026-10-14 00:00:00 +0000 UTC'>October 14, 2026</span>&nbsp;·&nbsp;<span>1 min</span>&nbsp;·&nbsp;<span>41 words</span>
+
+</div>
+  </header> <details class="toc"  open>
+    <summary accesskey="c" title="(Alt + C)">
+        <span class="title">Table of Contents</span>
+    </summary>
+
+    <div class="inner"><ul>
+            <li>
+                <a href="#about" aria-label="About">About</a></li>
+            <li>
+                <a href="#%e6%8a%80%e6%9c%af%e6%96%b9%e5%90%91" aria-label="技术方向">技术方向</a><ul>
+                    
+            <li>
+                <a href="#c-%e4%b8%8e%e8%bd%af%e4%bb%b6%e5%b7%a5%e7%a8%8b" aria-label="C&#43;&#43; 与软件工程">C++ 与软件工程</a></li>
+            <li>
+                <a href="#%e6%93%8d%e4%bd%9c%e7%b3%bb%e7%bb%9f%e4%b8%8e%e8%ae%a1%e7%ae%97%e6%9c%ba%e7%b3%bb%e7%bb%9f" aria-label="操作系统与计算机系统">操作系统与计算机系统</a></li>
+            <li>
+                <a href="#%e8%ae%a1%e7%ae%97%e6%9c%ba%e7%bd%91%e7%bb%9c%e4%b8%8e%e5%88%86%e5%b8%83%e5%bc%8f%e7%b3%bb%e7%bb%9f" aria-label="计算机网络与分布式系统">计算机网络与分布式系统</a></li>
+            <li>
+                <a href="#%e8%ae%a1%e7%ae%97%e6%9c%ba%e4%bd%93%e7%b3%bb%e7%bb%93%e6%9e%84" aria-label="计算机体系结构">计算机体系结构</a></li></ul>
+            </li>
+            <li>
+                <a href="#%e5%85%b3%e4%ba%8e%e8%bf%99%e4%b8%aa%e5%8d%9a%e5%ae%a2" aria-label="关于这个博客">关于这个博客</a></li>
+            <li>
+                <a href="#%e8%81%94%e7%b3%bb%e4%b8%8e%e4%ba%a4%e6%b5%81" aria-label="联系与交流">联系与交流</a>
+            </li>
+        </ul>
+    </div>
+</details>
+
+  <div class="post-content md-content"><h2 id="about">About<a hidden class="anchor" aria-hidden="true" href="#about">#</a></h2>
+<p>欢迎来到Minghan的博客。</p>
+<p>这里主要记录我在计算机科学与工程领域的学习、实践和思考，希望通过持续的实验、源码阅读与项目实践，深入理解计算机软硬件系统的工作原理。</p>
+<p>除了技术外，我还会分享一些阅读其他文章和书籍的笔记。</p>
+<h2 id="技术方向">技术方向<a hidden class="anchor" aria-hidden="true" href="#技术方向">#</a></h2>
+<h3 id="c-与软件工程">C++ 与软件工程<a hidden class="anchor" aria-hidden="true" href="#c-与软件工程">#</a></h3>
+<ul>
+<li>Modern C++、STL 与泛型编程</li>
+<li>并发编程、内存管理与性能优化</li>
+<li>数据结构、算法与工程实践</li>
+</ul>
+<h3 id="操作系统与计算机系统">操作系统与计算机系统<a hidden class="anchor" aria-hidden="true" href="#操作系统与计算机系统">#</a></h3>
+<ul>
+<li>Linux 内核与操作系统实验</li>
+<li>Pintos、xv6 等教学操作系统</li>
+<li>进程管理、虚拟内存、文件系统</li>
+<li>系统编程与调试工具</li>
+</ul>
+<h3 id="计算机网络与分布式系统">计算机网络与分布式系统<a hidden class="anchor" aria-hidden="true" href="#计算机网络与分布式系统">#</a></h3>
+<ul>
+<li>TCP/IP、Socket 网络编程</li>
+<li>高性能网络与存储系统</li>
+<li>分布式系统的基本原理与实践</li>
+</ul>
+<h3 id="计算机体系结构">计算机体系结构<a hidden class="anchor" aria-hidden="true" href="#计算机体系结构">#</a></h3>
+<ul>
+<li>RISC-V 处理器设计</li>
+<li>Verilog、数字逻辑与计算机组成</li>
+<li>处理器流水线与硬件验证</li>
+</ul>
+<h2 id="关于这个博客">关于这个博客<a hidden class="anchor" aria-hidden="true" href="#关于这个博客">#</a></h2>
+<p>我希望把这里建设成一个长期维护的技术知识库，主要记录：</p>
+<ul>
+<li><strong>学习笔记</strong>：整理课程、书籍与技术文档中的核心知识。</li>
+<li><strong>实验记录</strong>：记录实现过程、调试思路与遇到的问题。</li>
+<li><strong>源码分析</strong>：从代码出发理解系统的设计与实现。</li>
+<li><strong>项目实践</strong>：通过实际项目验证所学知识。</li>
+</ul>
+<h2 id="联系与交流">联系与交流<a hidden class="anchor" aria-hidden="true" href="#联系与交流">#</a></h2>
+<p>如果你对文章内容有建议，或者希望交流相关技术，可以通过 GitHub 与我联系。</p>
+<ul>
+<li>GitHub：<a href="https://github.com/Jiangmmh">Jiangmmh</a></li>
+</ul>
+<p>持续学习，深入原理，动手实践。</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="http://localhost:1313/">Minghan的博客</a></span> · 
+
+    
+    
+    <span>
+        Powered by
+        <a href="https://gohugo.io/?utm_source=papermod" rel="noopener" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" id="top-link" class="top-link hidden" aria-label="go to top" title="Go to Top (Alt + G)" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevrons-up">
+        <polyline points="17 11 12 6 7 11"></polyline>
+        <polyline points="17 18 12 13 7 18"></polyline>
+    </svg>
+</a><script src="/js/toc-scrollspy.js" defer></script>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var toplink = document.getElementById("top-link");
+    window.onscroll = function () {
+        const scrollThreshold = window.innerHeight;
+        if (document.body.scrollTop > scrollThreshold || document.documentElement.scrollTop > scrollThreshold) {
+            toplink.classList.remove("hidden");
+        } else {
+            toplink.classList.add("hidden");
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

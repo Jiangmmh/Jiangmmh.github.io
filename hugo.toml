@@ -1,16 +1,73 @@
 baseURL = "https://Jiangmmh.github.io/"
-languageCode = "zh-cn"
+locale = "zh-CN"
 title = "Minghan的博客"
 theme = "PaperMod"
 
 [params]
+  env = "production"
   defaultTheme = "auto"
   ShowReadingTime = true
   ShowToc = true
+  TocOpen = true
+  ShowCodeCopyButtons = true
+  ShowPostNavLinks = true
+  ShowBreadCrumbs = true
+  ShowWordCount = true
+  ShowShareButtons = false
+
+ [params.homeInfoParams]
+    Title = "Things worth understanding."
+    Content = "记录值得深入理解的技术问题：C++、算法、操作系统、网络、数据库与计算机体系结构。少一些浮于表面的结论，多一些原理、代码与实践。"
+    
+  [[params.socialIcons]]
+    name = "github"
+    url = "https://github.com/Jiangmmh"
+
+  [[params.socialIcons]]
+  name = "wechat"
+  url = "/images/QRcode.jpg"
+  title = "微信"
+
+[markup.highlight]
+  noClasses = false
+  codeFences = true
+  guessSyntax = false
+  style = "github"
+  lineNos = false
+  tabWidth = 4
 
 [menu]
+  [[menu.main]]
+    identifier = "posts"
+    name = "文章"
+    url = "/posts/"
+    weight = 10
+
   [[menu.main]]
     identifier = "archives"
     name = "归档"
     url = "/archives/"
-    weight = 10
+    weight = 20
+
+  [[menu.main]]
+  identifier = "categories"
+  name = "分类"
+  url = "/categories/"
+  weight = 30
+
+  [[menu.main]]
+  identifier = "tags"
+  name = "标签"
+  url = "/tags/"
+  weight = 40
+
+  [[menu.main]]
+  name = "照片墙"
+  url = "/photos/"
+  weight = 50
+
+  [[menu.main]]
+    identifier = "about"
+    name = "关于"
+    url = "/about/"
+    weight = 60
