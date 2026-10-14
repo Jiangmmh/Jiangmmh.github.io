@@ -7,11 +7,12 @@
 C++11标准起支持 #include &lt;functional> std::function&lt;void(TreeNode*, string)> dfs = [&](TreeNode* node, string s) { if (!node) return; // ... dfs(node->left, s); // 直接用 dfs，因为 dfs 已经声明了 dfs(node->right, s); }; dfs(root, ""); C++14标准支持 auto dfs = [&](auto&& self, TreeNode* node, string s) -> void { if (!node) return; // ... self(self, node->left, s); // 把自己作为参数传进去 self(self, node->right, s); }; dfs(dfs, root, ""); // 调用时也要把自己传进去 在我的解法实现中采用的是C++14标准的写法。
 一、遍历二叉树 1. 二叉树的前序遍历 法一：DFS
 树的先序遍历的顺序是：根-左-右
-因为树本身就是递归定义的，即树的子树本身就是一棵树。
-class Solution { vector&lt;int> ans; void dfs(TreeNode* root) { if (root) { ans.push_back(root->val); dfs(root->left); dfs(root->right); } } public: vector&lt;int> preorderTraversal(TreeNode* root) { dfs(root); return ans; } }; 法二：非递归法
+因为树本身就是递归定义的，即树的子树本身就是一棵树，所以树的算法大多通过递归来实现。
+在遍历过程中
+如果当前节点为空，直接返回； 如果当前节点非空，先访问当前节点，然后依次递归访问左右子树 class Solution { vector&lt;int> ans; void dfs(TreeNode* root) { if (root) { ans.push_back(root->val); dfs(root->left); dfs(root->right); } } public: vector&lt;int> preorderTraversal(TreeNode* root) { dfs(root); return ans; } }; 法二：非递归法
 使用一个栈来实现，对于每个节点先处理当前节点（中），然后依次压入右子树和左子树，根据栈的特点，得到的顺序是先左后右。
 class Solution { public: vector&lt;int> preorderTraversal(TreeNode* root) { vector&lt;int> ans; if (!root) return ans; stack&lt;TreeNode*> st; st.push(root); while (!st.empty()) { auto node = st.top(); st.pop(); if (node) { ans.push_back(node->val); if (node->right) st.push(node->right); if (node->left) st.push(node->left); } } return ans; } }; 2. 二叉树的中序遍历 法一：DFS
-...</p></div><footer class=entry-footer><span title='2026-10-14 22:02:01 +0800 +0800'>October 14, 2026</span>&nbsp;·&nbsp;<span>8 min</span>&nbsp;·&nbsp;<span>1514 words</span></footer><a class=entry-link aria-label="post link to Leetecode 二叉树(一)-遍历&自顶向下DFS" href=https://Jiangmmh.github.io/posts/leetecode-tree01/></a></article><article class=post-entry><header class=entry-header><h2 class=entry-hint-parent>如何快速构建一个静态博客?</h2></header><div class=entry-content><p>关键问题：如何快速、省心地搭建一个静态博客？
+...</p></div><footer class=entry-footer><span title='2026-10-14 22:02:01 +0800 +0800'>October 14, 2026</span>&nbsp;·&nbsp;<span>8 min</span>&nbsp;·&nbsp;<span>1517 words</span></footer><a class=entry-link aria-label="post link to Leetecode 二叉树(一)-遍历&自顶向下DFS" href=https://Jiangmmh.github.io/posts/leetecode-tree01/></a></article><article class=post-entry><header class=entry-header><h2 class=entry-hint-parent>如何快速构建一个静态博客?</h2></header><div class=entry-content><p>关键问题：如何快速、省心地搭建一个静态博客？
 1. 为什么写博客？ 写技术博客最重要的意义，不只是记录自己学过什么，而是将知识转化为能够被验证、复用和分享的成果。
 检验理解程度。 能够把一个技术问题讲清楚，往往意味着自己已经建立了较为完整的知识体系。 建立个人知识库。 将零散的学习笔记整理成结构化、可持续积累的技术资料。 推动实践。 通过总结项目中的问题与解决方案，促使自己真正动手实现，而不是停留在理论层面。 促进知识共享。 让自己的思考和实践成果能够被他人阅读、检验和复用。 展示技术能力。 一篇有深度的技术文章，往往比简单罗列技术栈更能体现一个人的理解与实践能力。 2. 快速搭建一个静态博客 2.1 方案选择 搭建静态博客有很多种方案。本文介绍的是 Hugo + GitHub Pages，它们分别负责网站生成和静态页面托管。
 这套方案具有以下特点：
