@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Minghan的博客</title><link>https://Jiangmmh.github.io/</link><description>Recent content on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Wed, 14 Oct 2026 11:44:43 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/index.xml" rel="self" type="application/rss+xml"/><item><title>如何快速构建一个静态博客?</title><link>https://Jiangmmh.github.io/posts/hello-world/</link><pubDate>Wed, 14 Oct 2026 11:44:43 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/hello-world/</guid><description>&lt;blockquote>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Minghan的博客</title><link>https://Jiangmmh.github.io/</link><description>Recent content on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Wed, 14 Oct 2026 13:30:00 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/index.xml" rel="self" type="application/rss+xml"/><item><title>关于记录</title><link>https://Jiangmmh.github.io/moments/2026-10-13/</link><pubDate>Wed, 14 Oct 2026 13:30:00 +0800</pubDate><guid>https://Jiangmmh.github.io/moments/2026-10-13/</guid><description>&lt;p>以前不写博客的时候，总觉得坚持写就会很了不起。现在有坚持写了，发现写出有营养、高质量才是关键。&lt;/p></description></item><item><title>如何快速构建一个静态博客?</title><link>https://Jiangmmh.github.io/posts/hello-world/</link><pubDate>Wed, 14 Oct 2026 11:44:43 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/hello-world/</guid><description>&lt;blockquote>
 &lt;p>关键问题：如何快速、省心地搭建一个静态博客？&lt;/p>&lt;/blockquote>
 &lt;h2 id="1-为什么写博客">1. 为什么写博客？&lt;/h2>
 &lt;p>写技术博客最重要的意义，不只是记录自己学过什么，而是将知识转化为能够被验证、复用和分享的成果。&lt;/p>
@@ -71,4 +71,7 @@
 &lt;ul>
 &lt;li>GitHub：&lt;a href="https://github.com/Jiangmmh">Jiangmmh&lt;/a>&lt;/li>
 &lt;/ul>
-&lt;p>持续学习，深入原理，动手实践。&lt;/p></description></item><item><title>照片墙</title><link>https://Jiangmmh.github.io/photos/</link><pubDate>Wed, 14 Oct 2026 00:00:00 +0000</pubDate><guid>https://Jiangmmh.github.io/photos/</guid><description>记录生活中的风景与瞬间</description></item></channel></rss>
+&lt;p>持续学习，深入原理，动手实践。&lt;/p></description></item><item><title>照片墙</title><link>https://Jiangmmh.github.io/photos/</link><pubDate>Wed, 14 Oct 2026 00:00:00 +0000</pubDate><guid>https://Jiangmmh.github.io/photos/</guid><description>记录生活中的风景与瞬间</description></item><item><title>关于记录</title><link>https://Jiangmmh.github.io/moments/2026-10-14/</link><pubDate>Tue, 13 Oct 2026 16:30:00 +0800</pubDate><guid>https://Jiangmmh.github.io/moments/2026-10-14/</guid><description>&lt;p>最近在折腾自己的博客。&lt;/p>
+&lt;p>比起每次都花很长时间写一篇完整的文章，
+我更希望能有一个地方，随时记录学习过程中的想法。&lt;/p>
+&lt;p>有些事情不一定要等到想明白之后才开始记录。&lt;/p></description></item></channel></rss>
