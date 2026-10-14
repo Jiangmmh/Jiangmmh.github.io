@@ -5,16 +5,27 @@
     <link>http://localhost:1313/</link>
     <description>Recent content on Minghan的博客</description>
     <generator>Hugo</generator>
-    <language>en</language>
-    <lastBuildDate>Wed, 14 Oct 2026 11:44:43 +0800</lastBuildDate>
+    <language>zh-CN</language>
+    <lastBuildDate>Wed, 14 Oct 2026 16:30:00 +0800</lastBuildDate>
     <atom:link href="http://localhost:1313/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>关于记录</title>
+      <link>http://localhost:1313/moments/2026-10-13/</link>
+      <pubDate>Wed, 14 Oct 2026 16:30:00 +0800</pubDate>
+      <guid>http://localhost:1313/moments/2026-10-13/</guid>
+      <description>&lt;p&gt;最近在折腾自己的博客。&lt;/p&gt;
+&lt;p&gt;比起每次都花很长时间写一篇完整的文章，
+我更希望能有一个地方，随时记录学习过程中的想法。&lt;/p&gt;
+&lt;p&gt;有些事情不一定要等到想明白之后才开始记录。&lt;/p&gt;</description>
+    </item>
     <item>
       <title>如何快速构建一个静态博客?</title>
       <link>http://localhost:1313/posts/hello-world/</link>
       <pubDate>Wed, 14 Oct 2026 11:44:43 +0800</pubDate>
       <guid>http://localhost:1313/posts/hello-world/</guid>
       <description>&lt;blockquote&gt;
-&lt;p&gt;关键问题：如何快速、省心地搭建一个静态博客？&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;关键问题：如何快速、省心地搭建一个静态博客？&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;h2 id=&#34;1-为什么写博客&#34;&gt;1. 为什么写博客？&lt;/h2&gt;
 &lt;p&gt;写技术博客最重要的意义，不只是记录自己学过什么，而是将知识转化为能够被验证、复用和分享的成果。&lt;/p&gt;
 &lt;ul&gt;
@@ -43,7 +54,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;GitHub Actions 自动部署
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;      ↓
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;GitHub Pages 发布网站
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;完成初始化后，日常写作只需要编辑 Markdown 文件并推送到 GitHub，剩余的构建与部署工作就可以交给 GitHub Actions 自动完成。&lt;/p&gt;</description>
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;完成初始化后，日常写作只需要编辑 Markdown 文件并推送到 GitHub，剩余的构建与部署工作就可以交给 GitHub Actions 自动完成。&lt;/p&gt;
+&lt;h3 id=&#34;22-创建博客&#34;&gt;2.2 创建博客&lt;/h3&gt;
+&lt;h4 id=&#34;第一步安装-hugo&#34;&gt;第一步：安装 Hugo&lt;/h4&gt;
+&lt;p&gt;Hugo 是一个使用 Go 编写的静态网站生成器。本文以 macOS 为例，使用 Homebrew 安装：&lt;/p&gt;</description>
     </item>
     <item>
       <title>关于我</title>
@@ -101,6 +115,13 @@
       <pubDate>Wed, 14 Oct 2026 00:00:00 +0000</pubDate>
       <guid>http://localhost:1313/photos/</guid>
       <description>记录生活中的风景与瞬间</description>
+    </item>
+    <item>
+      <title>关于记录</title>
+      <link>http://localhost:1313/moments/2026-10-14/</link>
+      <pubDate>Tue, 13 Oct 2026 17:30:00 +0800</pubDate>
+      <guid>http://localhost:1313/moments/2026-10-14/</guid>
+      <description>&lt;p&gt;以前不写博客的时候，总觉得坚持写就会很了不起。现在有坚持写了，发现写出有营养、高质量才是关键。&lt;/p&gt;</description>
     </item>
   </channel>
 </rss>

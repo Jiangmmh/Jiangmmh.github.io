@@ -172,3 +172,145 @@
 .post-single .toc .inner a {
     transition: color 0.2s ease, background-color 0.2s ease;
 }
+
+
+/* 极简随记时间线 */
+.moments-page {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.moments-timeline {
+    margin-top: 32px;
+}
+
+.moment-item {
+    display: grid;
+    grid-template-columns: 76px 16px minmax(0, 1fr);
+    column-gap: 16px;
+    position: relative;
+    padding-bottom: 34px;
+}
+
+.moment-date {
+    text-align: right;
+    padding-top: 2px;
+}
+
+.moment-date time {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.moment-day {
+    color: var(--primary);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.moment-year,
+.moment-time {
+    color: var(--secondary);
+    font-size: 12px;
+}
+
+.moment-marker {
+    display: flex;
+    justify-content: center;
+    position: relative;
+}
+
+.moment-marker::after {
+    content: "";
+    position: absolute;
+    top: 12px;
+    bottom: -34px;
+    width: 1px;
+    background: var(--border);
+}
+
+.moment-item:last-child .moment-marker::after {
+    display: none;
+}
+
+.moment-marker span {
+    position: relative;
+    z-index: 1;
+    width: 9px;
+    height: 9px;
+    margin-top: 5px;
+    border-radius: 50%;
+    background: var(--primary);
+}
+
+.moment-body {
+    min-width: 0;
+    line-height: 1.8;
+    overflow-wrap: anywhere;
+}
+
+.moment-body > :first-child {
+    margin-top: 0;
+}
+
+.moment-body > :last-child {
+    margin-bottom: 0;
+}
+
+.moment-body p {
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+@media (max-width: 480px) {
+    .moment-item {
+        grid-template-columns: 54px 12px minmax(0, 1fr);
+        column-gap: 10px;
+        padding-bottom: 28px;
+    }
+
+    .moment-day {
+        font-size: 12px;
+    }
+
+    .moment-year,
+    .moment-time {
+        font-size: 11px;
+    }
+
+    .moment-marker::after {
+        bottom: -28px;
+    }
+}
+
+
+/* 随记图片：与正文宽度一致 */
+.moment-images {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+    width: 100%;
+    margin-top: 14px;
+}
+
+.moment-images a {
+    display: block;
+    width: 100%;
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+.moment-images img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+    margin: 0;
+    border-radius: 8px;
+}
+
+/* 多张图片也保持与正文等宽，按顺序纵向排列 */
+.moment-images a img {
+    object-fit: contain;
+}

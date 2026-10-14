@@ -1,0 +1,55 @@
+
+{{ define "main" }}
+<div class="moments-page">
+  <header class="page-header">
+    <h1>{{ .Title }}</h1>
+    {{ with .Description }}
+      <div class="post-description">{{ . }}</div>
+    {{ end }}
+  </header>
+
+  <div class="moments-timeline">
+    {{ range .RegularPages.ByDate.Reverse }}
+      <article class="moment-item">
+        <div class="moment-date">
+          <time datetime="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}">
+            <span class="moment-day">{{ .Date.Format "01-02" }}</span>
+            <span class="moment-year">{{ .Date.Format "2006" }}</span>
+            <span class="moment-time">{{ .Date.Format "15:04" }}</span>
+          </time>
+        </div>
+
+        <div class="moment-marker">
+          <span></span>
+        </div>
+
+        <!-- <div class="moment-body">
+          {{ .Content }}
+        </div> -->
+
+<div class="moment-body">
+  {{ .Content }}
+
+  {{ with .Params.images }}
+    <div class="moment-images">
+      {{ range . }}
+        <a href="{{ . | safeURL }}" target="_blank" rel="noopener">
+          <img
+            src="{{ . | safeURL }}"
+            alt="随记图片"
+            loading="lazy"
+            decoding="async"
+          >
+        </a>
+      {{ end }}
+    </div>
+  {{ end }}
+</div>
+
+      </article>
+    {{ else }}
+      <p>还没有随记，等待第一条记录。</p>
+    {{ end }}
+  </div>
+</div>
+{{ end }}
