@@ -194,6 +194,35 @@
 
 <article class="post-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">UCLA Computer Architecture Lec1
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>最近在尝试自己实现一个RISC-V处理器，在实现的过程中遇到了一些问题，不得其解。
+遂找到了这门UCLA的计算机体系课，该课程正好是以RISC-V作为目标来讲解的，并且包含完整的Lectures、Slides、Homework和Programming Assignment。
+1. 课程介绍 课程网址：Computer Systems Architecture Fall 2025
+课程介绍：
+本课程旨在学习现代微处理器的基础知识及其与其他单元的交互，例如存储层次结构、GPU和I/O。在高层面上，计算机体系结构是选择和互连硬件组件以创建满足功能、性能和成本目标的计算机的科学与工程。更具体地说，在本课程中，你将学习架构计算机的基本原理和技术，包括设计指令集体系结构（ISA）、流水线和指令级并行。 你将通过使用C/C&#43;&#43;为一个简单的RISC ISA设计和实现一个多级流水线超标量处理器，来更详细地学习这些主题。此外，你将学习现代处理器设计中使用的各种体系结构技术，包括超标量设计、乱序执行、GPU体系结构和缓存层次结构。
+2. Why this course？ 两点重要原因:
+所有计算机科学家和工程师都需要知道：软件与底层硬件是如何交互的？ 系统设计非常非常非常重要！ 思考下面这两个问题？
+为什么机器学习的能力越来越强？ 为什么20年无法发明GPT？ 这张图中的三个要素解释了这一点:
+算力：并行计算硬件的发展为机器学习计算提供了“动力” 大数据：移动互联网/物联网的发展带来了海量数据 算法：深度学习算法的创新和发展 其中，正是计算硬件的性能提高，使得海量数据与算法创新能够真正地落地。
+Neural Scaling Law：Larger the model → better the performance.
+这条定律表达的是模型越大，能力越强。
+那么大模型的主要需求是什么？
+更快的算力 更大的内存 关键问题：How did we make hardware better?
+更多晶体管：往芯片中塞入更多的 transistor（晶体管） 支持更多的特性：包括流水线、乱序执行、缓存等 硬件专门化：为常用任务设计专门等硬件，例如矩阵运算 3. Course Workload 这门课将关注RISC-V ISA，包括RISC-V标准、微架构（实现）、实现策略（流水线、预测、并行）、存储的设计（缓存和主存）、多核设计（一致性）。 课程材料包括：
+Lectures，视频&#43;slides Homewokrs，5个书面作业 Projects，3个编程作业 CA1：使用C/C&#43;&#43;实现一个模拟器，模拟支持13条指令的单周期RISC-V处理器 CA2：设计一个branch predictor CA3：设计并实现一个模拟器，模拟支持out-of-order (OoO) 的超标量处理器 4. 软件工程已死？ 大模型和Agent的发展，使得软件开发的工作岗位正在逐渐减少。
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-15 15:53:21 +0800 CST'>October 15, 2026</span>&nbsp;·&nbsp;<span>1 min</span>&nbsp;·&nbsp;<span>84 words</span></footer>
+  <a class="entry-link" aria-label="post link to UCLA Computer Architecture Lec1" href="http://localhost:1313/posts/ucla-ca-01/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">Leetecode 二叉树(一)-遍历&amp;自顶向下DFS
     </h2>
   </header>
@@ -204,15 +233,16 @@
 C&#43;&#43;11标准起支持 #include &lt;functional&gt; std::function&lt;void(TreeNode*, string)&gt; dfs = [&amp;](TreeNode* node, string s) { if (!node) return; // ... dfs(node-&gt;left, s); // 直接用 dfs，因为 dfs 已经声明了 dfs(node-&gt;right, s); }; dfs(root, &#34;&#34;); C&#43;&#43;14标准支持 auto dfs = [&amp;](auto&amp;&amp; self, TreeNode* node, string s) -&gt; void { if (!node) return; // ... self(self, node-&gt;left, s); // 把自己作为参数传进去 self(self, node-&gt;right, s); }; dfs(dfs, root, &#34;&#34;); // 调用时也要把自己传进去 在我的解法实现中采用的是C&#43;&#43;14标准的写法。
 一、遍历二叉树 1. 二叉树的前序遍历 法一：DFS
 树的先序遍历的顺序是：根-左-右
-因为树本身就是递归定义的，即树的子树本身就是一棵树。
-class Solution { vector&lt;int&gt; ans; void dfs(TreeNode* root) { if (root) { ans.push_back(root-&gt;val); dfs(root-&gt;left); dfs(root-&gt;right); } } public: vector&lt;int&gt; preorderTraversal(TreeNode* root) { dfs(root); return ans; } }; 法二：非递归法
+因为树本身就是递归定义的，即树的子树本身就是一棵树，所以树的算法大多通过递归来实现。
+在遍历过程中
+如果当前节点为空，直接返回； 如果当前节点非空，先访问当前节点，然后依次递归访问左右子树 class Solution { vector&lt;int&gt; ans; void dfs(TreeNode* root) { if (root) { ans.push_back(root-&gt;val); dfs(root-&gt;left); dfs(root-&gt;right); } } public: vector&lt;int&gt; preorderTraversal(TreeNode* root) { dfs(root); return ans; } }; 法二：非递归法
 使用一个栈来实现，对于每个节点先处理当前节点（中），然后依次压入右子树和左子树，根据栈的特点，得到的顺序是先左后右。
 class Solution { public: vector&lt;int&gt; preorderTraversal(TreeNode* root) { vector&lt;int&gt; ans; if (!root) return ans; stack&lt;TreeNode*&gt; st; st.push(root); while (!st.empty()) { auto node = st.top(); st.pop(); if (node) { ans.push_back(node-&gt;val); if (node-&gt;right) st.push(node-&gt;right); if (node-&gt;left) st.push(node-&gt;left); } } return ans; } }; 2. 二叉树的中序遍历 法一：DFS
 ...</p>
   </div>
   <footer class="entry-footer">
 
-<span title='2026-10-14 22:02:01 +0800 CST'>October 14, 2026</span>&nbsp;·&nbsp;<span>8 min</span>&nbsp;·&nbsp;<span>1514 words</span></footer>
+<span title='2026-10-14 22:02:01 +0800 CST'>October 14, 2026</span>&nbsp;·&nbsp;<span>8 min</span>&nbsp;·&nbsp;<span>1517 words</span></footer>
   <a class="entry-link" aria-label="post link to Leetecode 二叉树(一)-遍历&自顶向下DFS" href="http://localhost:1313/posts/leetecode-tree01/"></a>
 </article>
 

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Computer Architecture on Minghan的博客</title>
+    <link>http://localhost:1313/categories/computer-architecture/</link>
+    <description>Recent content in Computer Architecture on Minghan的博客</description>
+    <generator>Hugo</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Thu, 15 Oct 2026 15:53:21 +0800</lastBuildDate>
+    <atom:link href="http://localhost:1313/categories/computer-architecture/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>UCLA Computer Architecture Lec1</title>
+      <link>http://localhost:1313/posts/ucla-ca-01/</link>
+      <pubDate>Thu, 15 Oct 2026 15:53:21 +0800</pubDate>
+      <guid>http://localhost:1313/posts/ucla-ca-01/</guid>
+      <description>&lt;p&gt;最近在尝试自己实现一个RISC-V处理器，在实现的过程中遇到了一些问题，不得其解。&lt;/p&gt;
+&lt;p&gt;遂找到了这门UCLA的计算机体系课，该课程正好是以RISC-V作为目标来讲解的，并且包含完整的Lectures、Slides、Homework和Programming Assignment。&lt;/p&gt;
+&lt;h1 id=&#34;1-课程介绍&#34;&gt;1. 课程介绍&lt;/h1&gt;
+&lt;p&gt;课程网址：&lt;a href=&#34;https://ssysarch.ee.ucla.edu/courses/F25/index.html&#34;&gt;Computer Systems Architecture Fall 2025&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;课程介绍：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;本课程旨在学习&lt;strong&gt;现代微处理器&lt;/strong&gt;的基础知识及其与&lt;strong&gt;其他单元&lt;/strong&gt;的交互，例如&lt;strong&gt;存储层次结构&lt;/strong&gt;、&lt;strong&gt;GPU&lt;/strong&gt;和&lt;strong&gt;I/O&lt;/strong&gt;。在高层面上，计算机体系结构是&lt;strong&gt;选择和互连硬件组件&lt;/strong&gt;以创建满足功能、性能和成本目标的计算机的&lt;strong&gt;科学与工程&lt;/strong&gt;。更具体地说，在本课程中，你将学习架构计算机的基本原理和技术，包括&lt;strong&gt;设计指令集体系结构（ISA）&lt;/strong&gt;、&lt;strong&gt;流水线&lt;/strong&gt;和&lt;strong&gt;指令级并行&lt;/strong&gt;。
+&lt;strong&gt;你将通过使用C/C++为一个简单的RISC ISA设计和实现一个多级流水线超标量处理器&lt;/strong&gt;，来更详细地学习这些主题。此外，你将学习现代处理器设计中使用的各种体系结构技术，包括&lt;strong&gt;超标量设计&lt;/strong&gt;、&lt;strong&gt;乱序执行&lt;/strong&gt;、&lt;strong&gt;GPU体系结构&lt;/strong&gt;和&lt;strong&gt;缓存层次结构&lt;/strong&gt;。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h1 id=&#34;2-why-this-course&#34;&gt;2. Why this course？&lt;/h1&gt;
+&lt;p&gt;&lt;strong&gt;两点重要原因:&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;所有计算机科学家和工程师都需要知道：软件与底层硬件是如何交互的？&lt;/li&gt;
+&lt;li&gt;系统设计非常非常非常重要！&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;思考下面这两个问题？&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;为什么机器学习的能力越来越强？&lt;/li&gt;
+&lt;li&gt;为什么20年无法发明GPT？
+&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/im1.png&#34;&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这张图中的三个要素解释了这一点:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;算力：并行计算硬件的发展为机器学习计算提供了“动力”&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;大数据：移动互联网/物联网的发展带来了海量数据&lt;/li&gt;
+&lt;li&gt;算法：深度学习算法的创新和发展&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;其中，正是计算硬件的性能提高，使得海量数据与算法创新能够真正地落地。&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/im2.png&#34;&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Neural Scaling Law&lt;/strong&gt;：&lt;strong&gt;Larger the model → better the performance&lt;/strong&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;这条定律表达的是模型越大，能力越强。&lt;/p&gt;
+&lt;p&gt;那么大模型的主要需求是什么？&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;更快的算力&lt;/li&gt;
+&lt;li&gt;更大的内存&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;关键问题：How did we make hardware better?&lt;/strong&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;更多晶体管：往芯片中塞入更多的 &lt;strong&gt;transistor&lt;/strong&gt;（晶体管）&lt;/li&gt;
+&lt;li&gt;支持更多的特性：包括流水线、乱序执行、缓存等&lt;/li&gt;
+&lt;li&gt;硬件专门化：为常用任务设计专门等硬件，例如矩阵运算&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;3-course-workload&#34;&gt;3. Course Workload&lt;/h1&gt;
+&lt;p&gt;这门课将关注RISC-V ISA，包括&lt;strong&gt;RISC-V标准&lt;/strong&gt;、&lt;strong&gt;微架构（实现）&lt;/strong&gt;、&lt;strong&gt;实现策略（流水线、预测、并行）&lt;/strong&gt;、&lt;strong&gt;存储的设计（缓存和主存）&lt;/strong&gt;、&lt;strong&gt;多核设计（一致性）&lt;/strong&gt;。
+&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/im4.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;课程材料包括：&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Lectures，视频+slides&lt;/li&gt;
+&lt;li&gt;Homewokrs，5个书面作业&lt;/li&gt;
+&lt;li&gt;Projects，3个编程作业
+&lt;ul&gt;
+&lt;li&gt;CA1：使用C/C++实现一个模拟器，模拟支持13条指令的单周期RISC-V处理器&lt;/li&gt;
+&lt;li&gt;CA2：设计一个branch predictor&lt;/li&gt;
+&lt;li&gt;CA3：设计并实现一个模拟器，模拟支持out-of-order (OoO) 的超标量处理器&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;4-软件工程已死&#34;&gt;4. 软件工程已死？&lt;/h1&gt;
+&lt;p&gt;大模型和Agent的发展，使得软件开发的工作岗位正在逐渐减少。&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

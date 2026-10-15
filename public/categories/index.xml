@@ -6,8 +6,15 @@
     <description>Recent content in Categories on Minghan的博客</description>
     <generator>Hugo</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Wed, 14 Oct 2026 22:02:01 +0800</lastBuildDate>
+    <lastBuildDate>Thu, 15 Oct 2026 15:53:21 +0800</lastBuildDate>
     <atom:link href="http://localhost:1313/categories/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Computer Architecture</title>
+      <link>http://localhost:1313/categories/computer-architecture/</link>
+      <pubDate>Thu, 15 Oct 2026 15:53:21 +0800</pubDate>
+      <guid>http://localhost:1313/categories/computer-architecture/</guid>
+      <description></description>
+    </item>
     <item>
       <title>Leetecode</title>
       <link>http://localhost:1313/categories/leetecode/</link>
@@ -23,10 +30,10 @@
       <description></description>
     </item>
     <item>
-      <title>算法</title>
-      <link>http://localhost:1313/categories/%E7%AE%97%E6%B3%95/</link>
+      <title>UCLA-CA</title>
+      <link>http://localhost:1313/categories/ucla-ca/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/categories/%E7%AE%97%E6%B3%95/</guid>
+      <guid>http://localhost:1313/categories/ucla-ca/</guid>
       <description></description>
     </item>
   </channel>
