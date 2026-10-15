@@ -8,7 +8,7 @@ categories: ["Computer Architecture"]
 
 最近在尝试自己实现一个RISC-V处理器，在实现的过程中遇到了一些问题，不得其解。
 
-遂找到了这门UCLA的计算机体系课，该课程正好是以RISC-V作为目标来讲解的，并且包含完整的Lectures、Slides、Homework和Programming Assignment。
+遂找到了这门UCLA的计算机体系结构课，该课程正好是以RISC-V作为目标来讲解的，并且包含完整的Lectures、Slides、Homework和Programming Assignment。
 # 1. 课程介绍
 
 课程网址：[Computer Systems Architecture Fall 2025](https://ssysarch.ee.ucla.edu/courses/F25/index.html)
