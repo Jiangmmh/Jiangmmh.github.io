@@ -1,5 +1,16 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Minghan的博客</title><link>https://Jiangmmh.github.io/</link><description>Recent content on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Thu, 15 Oct 2026 15:53:21 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/index.xml" rel="self" type="application/rss+xml"/><item><title>UCLA Computer Architecture Lec1</title><link>https://Jiangmmh.github.io/posts/ucla-ca-01/</link><pubDate>Thu, 15 Oct 2026 15:53:21 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/ucla-ca-01/</guid><description>&lt;p>最近在尝试自己实现一个RISC-V处理器，在实现的过程中遇到了一些问题，不得其解。&lt;/p>
-&lt;p>遂找到了这门UCLA的计算机体系课，该课程正好是以RISC-V作为目标来讲解的，并且包含完整的Lectures、Slides、Homework和Programming Assignment。&lt;/p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Minghan的博客</title><link>https://Jiangmmh.github.io/</link><description>Recent content on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Thu, 15 Oct 2026 20:11:00 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/index.xml" rel="self" type="application/rss+xml"/><item><title>如何在AI时代自处？</title><link>https://Jiangmmh.github.io/moments/2026-10-15/</link><pubDate>Thu, 15 Oct 2026 20:11:00 +0800</pubDate><guid>https://Jiangmmh.github.io/moments/2026-10-15/</guid><description>&lt;p>作为一个CS从业者，如何在AI时代存活下去？&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>把基础的知识学扎实，彻底弄懂，并能批判性地思考，而不仅是记忆。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>在自己感兴趣的主题上深耕，做真正有价值的项目（产品），成为该领域的专家。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>此外，还要扩展自己的知识面，不要仅限自己熟悉的领域。&lt;/p>
+&lt;/li>
+&lt;/ol></description></item><item><title>UCLA Computer Architecture Lec1</title><link>https://Jiangmmh.github.io/posts/ucla-ca-01/</link><pubDate>Thu, 15 Oct 2026 15:53:21 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/ucla-ca-01/</guid><description>&lt;p>最近在尝试自己实现一个RISC-V处理器，在实现的过程中遇到了一些问题，不得其解。&lt;/p>
+&lt;p>遂找到了这门UCLA的计算机体系结构课，该课程正好是以RISC-V作为目标来讲解的，并且包含完整的Lectures、Slides、Homework和Programming Assignment。&lt;/p>
 &lt;h1 id="1-课程介绍">1. 课程介绍&lt;/h1>
 &lt;p>课程网址：&lt;a href="https://ssysarch.ee.ucla.edu/courses/F25/index.html">Computer Systems Architecture Fall 2025&lt;/a>&lt;/p>
 &lt;p>课程介绍：&lt;/p>
@@ -140,7 +151,7 @@
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">};&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="2-二叉树的中序遍历">2. &lt;strong>二叉树的中序遍历&lt;/strong>&lt;/h2>
-&lt;p>&lt;strong>法一：DFS&lt;/strong>&lt;/p></description></item><item><title>关于记录</title><link>https://Jiangmmh.github.io/moments/2026-10-13/</link><pubDate>Wed, 14 Oct 2026 13:30:00 +0800</pubDate><guid>https://Jiangmmh.github.io/moments/2026-10-13/</guid><description>&lt;p>以前不写博客的时候，总觉得坚持写就会很了不起。现在有坚持写了，发现写出有营养、高质量才是关键。&lt;/p></description></item><item><title>如何快速构建一个静态博客?</title><link>https://Jiangmmh.github.io/posts/hello-world/</link><pubDate>Wed, 14 Oct 2026 11:44:43 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/hello-world/</guid><description>&lt;blockquote>
+&lt;p>&lt;strong>法一：DFS&lt;/strong>&lt;/p></description></item><item><title>如何快速构建一个静态博客?</title><link>https://Jiangmmh.github.io/posts/hello-world/</link><pubDate>Wed, 14 Oct 2026 11:44:43 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/hello-world/</guid><description>&lt;blockquote>
 &lt;p>关键问题：如何快速、省心地搭建一个静态博客？&lt;/p>&lt;/blockquote>
 &lt;h2 id="1-为什么写博客">1. 为什么写博客？&lt;/h2>
 &lt;p>写技术博客最重要的意义，不只是记录自己学过什么，而是将知识转化为能够被验证、复用和分享的成果。&lt;/p>
@@ -213,7 +224,7 @@
 &lt;ul>
 &lt;li>GitHub：&lt;a href="https://github.com/Jiangmmh">Jiangmmh&lt;/a>&lt;/li>
 &lt;/ul>
-&lt;p>持续学习，深入原理，动手实践。&lt;/p></description></item><item><title>照片墙</title><link>https://Jiangmmh.github.io/photos/</link><pubDate>Wed, 14 Oct 2026 00:00:00 +0000</pubDate><guid>https://Jiangmmh.github.io/photos/</guid><description>记录生活中的风景与瞬间</description></item><item><title>关于记录</title><link>https://Jiangmmh.github.io/moments/2026-10-14/</link><pubDate>Tue, 13 Oct 2026 16:30:00 +0800</pubDate><guid>https://Jiangmmh.github.io/moments/2026-10-14/</guid><description>&lt;p>最近在折腾自己的博客。&lt;/p>
+&lt;p>持续学习，深入原理，动手实践。&lt;/p></description></item><item><title>照片墙</title><link>https://Jiangmmh.github.io/photos/</link><pubDate>Wed, 14 Oct 2026 00:00:00 +0000</pubDate><guid>https://Jiangmmh.github.io/photos/</guid><description>记录生活中的风景与瞬间</description></item><item><title>关于记录</title><link>https://Jiangmmh.github.io/moments/2026-10-13/</link><pubDate>Tue, 13 Oct 2026 16:30:00 +0800</pubDate><guid>https://Jiangmmh.github.io/moments/2026-10-13/</guid><description>&lt;p>最近在折腾自己的博客。&lt;/p>
 &lt;p>比起每次都花很长时间写一篇完整的文章，
 我更希望能有一个地方，随时记录学习过程中的想法。&lt;/p>
 &lt;p>有些事情不一定要等到想明白之后才开始记录。&lt;/p></description></item></channel></rss>

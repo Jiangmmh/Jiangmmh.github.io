@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Computer Architecture on Minghan的博客</title><link>https://Jiangmmh.github.io/categories/computer-architecture/</link><description>Recent content in Computer Architecture on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Thu, 15 Oct 2026 15:53:21 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/categories/computer-architecture/index.xml" rel="self" type="application/rss+xml"/><item><title>UCLA Computer Architecture Lec1</title><link>https://Jiangmmh.github.io/posts/ucla-ca-01/</link><pubDate>Thu, 15 Oct 2026 15:53:21 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/ucla-ca-01/</guid><description>&lt;p>最近在尝试自己实现一个RISC-V处理器，在实现的过程中遇到了一些问题，不得其解。&lt;/p>
-&lt;p>遂找到了这门UCLA的计算机体系课，该课程正好是以RISC-V作为目标来讲解的，并且包含完整的Lectures、Slides、Homework和Programming Assignment。&lt;/p>
+&lt;p>遂找到了这门UCLA的计算机体系结构课，该课程正好是以RISC-V作为目标来讲解的，并且包含完整的Lectures、Slides、Homework和Programming Assignment。&lt;/p>
 &lt;h1 id="1-课程介绍">1. 课程介绍&lt;/h1>
 &lt;p>课程网址：&lt;a href="https://ssysarch.ee.ucla.edu/courses/F25/index.html">Computer Systems Architecture Fall 2025&lt;/a>&lt;/p>
 &lt;p>课程介绍：&lt;/p>
