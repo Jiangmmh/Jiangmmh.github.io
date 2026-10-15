@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>UCLA-CA on Minghan的博客</title><link>https://Jiangmmh.github.io/tags/ucla-ca/</link><description>Recent content in UCLA-CA on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Thu, 15 Oct 2026 15:53:21 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/tags/ucla-ca/index.xml" rel="self" type="application/rss+xml"/><item><title>UCLA Computer Architecture Lec1</title><link>https://Jiangmmh.github.io/posts/ucla-ca-01/</link><pubDate>Thu, 15 Oct 2026 15:53:21 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/ucla-ca-01/</guid><description>&lt;p>最近在尝试自己实现一个RISC-V处理器，在实现的过程中遇到了一些问题，不得其解。&lt;/p>
+&lt;p>遂找到了这门UCLA的计算机体系课，该课程正好是以RISC-V作为目标来讲解的，并且包含完整的Lectures、Slides、Homework和Programming Assignment。&lt;/p>
+&lt;h1 id="1-课程介绍">1. 课程介绍&lt;/h1>
+&lt;p>课程网址：&lt;a href="https://ssysarch.ee.ucla.edu/courses/F25/index.html">Computer Systems Architecture Fall 2025&lt;/a>&lt;/p>
+&lt;p>课程介绍：&lt;/p>
+&lt;blockquote>
+&lt;p>本课程旨在学习&lt;strong>现代微处理器&lt;/strong>的基础知识及其与&lt;strong>其他单元&lt;/strong>的交互，例如&lt;strong>存储层次结构&lt;/strong>、&lt;strong>GPU&lt;/strong>和&lt;strong>I/O&lt;/strong>。在高层面上，计算机体系结构是&lt;strong>选择和互连硬件组件&lt;/strong>以创建满足功能、性能和成本目标的计算机的&lt;strong>科学与工程&lt;/strong>。更具体地说，在本课程中，你将学习架构计算机的基本原理和技术，包括&lt;strong>设计指令集体系结构（ISA）&lt;/strong>、&lt;strong>流水线&lt;/strong>和&lt;strong>指令级并行&lt;/strong>。
+&lt;strong>你将通过使用C/C++为一个简单的RISC ISA设计和实现一个多级流水线超标量处理器&lt;/strong>，来更详细地学习这些主题。此外，你将学习现代处理器设计中使用的各种体系结构技术，包括&lt;strong>超标量设计&lt;/strong>、&lt;strong>乱序执行&lt;/strong>、&lt;strong>GPU体系结构&lt;/strong>和&lt;strong>缓存层次结构&lt;/strong>。&lt;/p>&lt;/blockquote>
+&lt;h1 id="2-why-this-course">2. Why this course？&lt;/h1>
+&lt;p>&lt;strong>两点重要原因:&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>所有计算机科学家和工程师都需要知道：软件与底层硬件是如何交互的？&lt;/li>
+&lt;li>系统设计非常非常非常重要！&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>思考下面这两个问题？&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>为什么机器学习的能力越来越强？&lt;/li>
+&lt;li>为什么20年无法发明GPT？
+&lt;img loading="lazy" src="https://Jiangmmh.github.io/images/posts/im1.png">&lt;/li>
+&lt;/ul>
+&lt;p>这张图中的三个要素解释了这一点:&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>算力：并行计算硬件的发展为机器学习计算提供了“动力”&lt;/strong>&lt;/li>
+&lt;li>大数据：移动互联网/物联网的发展带来了海量数据&lt;/li>
+&lt;li>算法：深度学习算法的创新和发展&lt;/li>
+&lt;/ul>
+&lt;p>其中，正是计算硬件的性能提高，使得海量数据与算法创新能够真正地落地。&lt;/p>
+&lt;p>&lt;img loading="lazy" src="https://Jiangmmh.github.io/images/posts/im2.png">&lt;/p>
+&lt;blockquote>
+&lt;p>&lt;strong>Neural Scaling Law&lt;/strong>：&lt;strong>Larger the model → better the performance&lt;/strong>.&lt;/p>&lt;/blockquote>
+&lt;p>这条定律表达的是模型越大，能力越强。&lt;/p>
+&lt;p>那么大模型的主要需求是什么？&lt;/p>
+&lt;ul>
+&lt;li>更快的算力&lt;/li>
+&lt;li>更大的内存&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>&lt;strong>关键问题：How did we make hardware better?&lt;/strong>&lt;/p>&lt;/blockquote>
+&lt;ul>
+&lt;li>更多晶体管：往芯片中塞入更多的 &lt;strong>transistor&lt;/strong>（晶体管）&lt;/li>
+&lt;li>支持更多的特性：包括流水线、乱序执行、缓存等&lt;/li>
+&lt;li>硬件专门化：为常用任务设计专门等硬件，例如矩阵运算&lt;/li>
+&lt;/ul>
+&lt;h1 id="3-course-workload">3. Course Workload&lt;/h1>
+&lt;p>这门课将关注RISC-V ISA，包括&lt;strong>RISC-V标准&lt;/strong>、&lt;strong>微架构（实现）&lt;/strong>、&lt;strong>实现策略（流水线、预测、并行）&lt;/strong>、&lt;strong>存储的设计（缓存和主存）&lt;/strong>、&lt;strong>多核设计（一致性）&lt;/strong>。
+&lt;img loading="lazy" src="https://Jiangmmh.github.io/images/posts/im4.png">&lt;/p>
+&lt;p>&lt;strong>课程材料包括：&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Lectures，视频+slides&lt;/li>
+&lt;li>Homewokrs，5个书面作业&lt;/li>
+&lt;li>Projects，3个编程作业
+&lt;ul>
+&lt;li>CA1：使用C/C++实现一个模拟器，模拟支持13条指令的单周期RISC-V处理器&lt;/li>
+&lt;li>CA2：设计一个branch predictor&lt;/li>
+&lt;li>CA3：设计并实现一个模拟器，模拟支持out-of-order (OoO) 的超标量处理器&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;h1 id="4-软件工程已死">4. 软件工程已死？&lt;/h1>
+&lt;p>大模型和Agent的发展，使得软件开发的工作岗位正在逐渐减少。&lt;/p></description></item></channel></rss>
