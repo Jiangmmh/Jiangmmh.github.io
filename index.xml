@@ -1,4 +1,52 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Minghan的博客</title><link>https://Jiangmmh.github.io/</link><description>Recent content on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Thu, 15 Oct 2026 20:11:00 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/index.xml" rel="self" type="application/rss+xml"/><item><title>如何在AI时代自处？</title><link>https://Jiangmmh.github.io/moments/2026-10-15/</link><pubDate>Thu, 15 Oct 2026 20:11:00 +0800</pubDate><guid>https://Jiangmmh.github.io/moments/2026-10-15/</guid><description>&lt;p>作为一个CS从业者，如何在AI时代存活下去？&lt;/p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Minghan的博客</title><link>https://Jiangmmh.github.io/</link><description>Recent content on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Thu, 15 Oct 2026 20:55:46 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/index.xml" rel="self" type="application/rss+xml"/><item><title>UCLA Computer Architecture Lec2</title><link>https://Jiangmmh.github.io/posts/ucla-ca-02/</link><pubDate>Thu, 15 Oct 2026 20:55:46 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/ucla-ca-02/</guid><description>&lt;h1 id="1-main-objective-of-architecting-a-computer">1. Main objective of architecting a computer&lt;/h1>
+&lt;blockquote>
+&lt;p>&lt;strong>关键目标：Make efficient computer.&lt;/strong>&lt;/p>&lt;/blockquote>
+&lt;p>&lt;strong>何谓高效？&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>🌟性能（Performance）&lt;/strong>&lt;/li>
+&lt;li>低能耗（Power Consumption）&lt;/li>
+&lt;li>成本（Cost）&lt;/li>
+&lt;li>可靠&amp;amp;安全（Reliable &amp;amp; Secure）&lt;/li>
+&lt;/ul>
+&lt;h1 id="2-处理器的发展">2. 处理器的发展&lt;/h1>
+&lt;blockquote>
+&lt;p>注：这部分内容来自我过去的笔记。&lt;/p>&lt;/blockquote>
+&lt;h2 id="21-过去">2.1 过去&lt;/h2>
+&lt;blockquote>
+&lt;p>&lt;strong>摩尔定律:&lt;/strong> 集成电路上的晶体管数目大约每两年翻一番，而成本几乎不增加。虽名为“定律”，描述的却是一种经验关系，而非科学定律。&lt;/p>&lt;/blockquote>
+&lt;p>下图的横轴为年份，纵轴为微处理器中即成的晶体管数量，可以看到从1970年代开始到当下一直呈现出线性增长的趋势。&lt;/p>
+&lt;p>&lt;img loading="lazy" src="https://Jiangmmh.github.io/images/posts/ucla-ca/im7.png">&lt;/p>
+&lt;blockquote>
+&lt;p>&lt;strong>Dennard Scaling（登纳德缩放比例定律）：&lt;/strong>
+当晶体管的尺寸（长宽高）每年缩小约 &lt;strong>30%&lt;/strong>（即工艺节点推进一代）时，只要&lt;strong>电压&lt;/strong>和&lt;strong>电流&lt;/strong>也等比例地降低，芯片的&lt;strong>功率密度（每平方毫米的功耗）将保持不变&lt;/strong>。&lt;/p>&lt;/blockquote>
+&lt;p>Dennard Scaling定律量化了随着晶体管尺寸的缩小，其所需加上的电压和电流是多少。&lt;/p>
+&lt;p>该定律揭示了：随着晶体管尺寸的缩小，所需的电压和电流也等比例降低，由功率计算公式：P = IV，&lt;strong>只要晶体管尺寸能够持续缩小，即使在单位面积上放入更多的晶体管，功耗也不会增加，因而无需考虑散热等问题。&lt;/strong>&lt;/p>
+&lt;blockquote>
+&lt;p>&lt;strong>Insight&lt;/strong>：根据摩尔定律和德纳德缩放定律，处理器每年都会更快、更便宜、能耗更低。&lt;/p>&lt;/blockquote>
+&lt;h2 id="22-现在和未来">2.2 现在和未来&lt;/h2>
+&lt;blockquote>
+&lt;p>晶体管本该像完美的开关，但尺寸太小后，即使处于“关断”状态，电子也会像漏水一样穿过去，产生静态功耗。&lt;/p>&lt;/blockquote>
+&lt;p>等到了2005年左右，继续缩小晶体管的尺寸会导致&lt;strong>静态功耗（static power leakage）&lt;/strong> 剧增。Dennard Scaling定律失效，无法继续降低电压，进而导致频率无法继续提高（功耗太大，发热无法解决）。&lt;/p>
+&lt;p>随着Dennard Scaling定律的失效，处理器行业发生了急转弯：&lt;strong>既然单个核心不能再快了，那就用多出来的晶体管，塞进更多的核心。&lt;/strong>&lt;/p>
+&lt;p>程序性能的进一步提升要依赖于多核处理器、专用并行芯片和&lt;strong>并行化的程序&lt;/strong>。&lt;/p>
+&lt;p>Amdahl’s Law给出了程序性能提高的上限取决于该程序并行部分的比例（因为单核性能难以继续提高）。&lt;/p>
+&lt;p>&lt;img loading="lazy" src="https://Jiangmmh.github.io/images/posts/ucla-ca/im6.png">&lt;/p>
+&lt;p>&lt;strong>未来处理器发展的趋势如下：&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>晶体管数量仍在不断增加&lt;/li>
+&lt;li>时钟频率难以继续提高&lt;/li>
+&lt;li>处理器Core的数量不断增加&lt;/li>
+&lt;li>结果：并行程序的性能随之增加，但串行程序的性能几乎不变&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img loading="lazy" src="https://Jiangmmh.github.io/images/posts/ucla-ca/im8.png">&lt;/p>
+&lt;p>但是现在继续增多处理器核心的策略也遇到了瓶颈，见这篇文章：https://www.bohrium.com/sciencepedia/feynman/keyword/dark_silicon&lt;/p>
+&lt;p>总结：&lt;/p>
+&lt;p>&lt;img loading="lazy" src="https://Jiangmmh.github.io/images/posts/ucla-ca/im9.png">&lt;/p>
+&lt;h1 id="3-冯诺依曼机与risc-v">3. 冯诺依曼机与RISC-V&lt;/h1>
+&lt;blockquote>
+&lt;p>这部分内容介绍了冯诺依曼机的特点（存储程序）、RISCV处理器与CISC处理器的区别、RISC-V处理器（寄存器、指令）。&lt;/p>&lt;/blockquote>
+&lt;h2 id="31-冯诺依曼机">3.1 冯诺依曼机&lt;/h2>
+&lt;p>&lt;strong>冯诺依曼提出了一个重要观念：存储程序计算机。&lt;/strong>&lt;/p></description></item><item><title>如何在AI时代自处？</title><link>https://Jiangmmh.github.io/moments/2026-10-15/</link><pubDate>Thu, 15 Oct 2026 20:11:00 +0800</pubDate><guid>https://Jiangmmh.github.io/moments/2026-10-15/</guid><description>&lt;p>作为一个CS从业者，如何在AI时代存活下去？&lt;/p>
 &lt;ol>
 &lt;li>
 &lt;p>把基础的知识学扎实，彻底弄懂，并能批判性地思考，而不仅是记忆。&lt;/p>
@@ -27,7 +75,7 @@
 &lt;ul>
 &lt;li>为什么机器学习的能力越来越强？&lt;/li>
 &lt;li>为什么20年无法发明GPT？
-&lt;img loading="lazy" src="https://Jiangmmh.github.io/images/posts/im1.png">&lt;/li>
+&lt;img loading="lazy" src="https://Jiangmmh.github.io/images/posts/ucla-ca/im1.png">&lt;/li>
 &lt;/ul>
 &lt;p>这张图中的三个要素解释了这一点:&lt;/p>
 &lt;ul>
@@ -36,7 +84,7 @@
 &lt;li>算法：深度学习算法的创新和发展&lt;/li>
 &lt;/ul>
 &lt;p>其中，正是计算硬件的性能提高，使得海量数据与算法创新能够真正地落地。&lt;/p>
-&lt;p>&lt;img loading="lazy" src="https://Jiangmmh.github.io/images/posts/im2.png">&lt;/p>
+&lt;p>&lt;img loading="lazy" src="https://Jiangmmh.github.io/images/posts/ucla-ca/im2.png">&lt;/p>
 &lt;blockquote>
 &lt;p>&lt;strong>Neural Scaling Law&lt;/strong>：&lt;strong>Larger the model → better the performance&lt;/strong>.&lt;/p>&lt;/blockquote>
 &lt;p>这条定律表达的是模型越大，能力越强。&lt;/p>
@@ -54,7 +102,7 @@
 &lt;/ul>
 &lt;h1 id="3-course-workload">3. Course Workload&lt;/h1>
 &lt;p>这门课将关注RISC-V ISA，包括&lt;strong>RISC-V标准&lt;/strong>、&lt;strong>微架构（实现）&lt;/strong>、&lt;strong>实现策略（流水线、预测、并行）&lt;/strong>、&lt;strong>存储的设计（缓存和主存）&lt;/strong>、&lt;strong>多核设计（一致性）&lt;/strong>。
-&lt;img loading="lazy" src="https://Jiangmmh.github.io/images/posts/im4.png">&lt;/p>
+&lt;img loading="lazy" src="https://Jiangmmh.github.io/images/posts/ucla-ca/im4.png">&lt;/p>
 &lt;p>&lt;strong>课程材料包括：&lt;/strong>&lt;/p>
 &lt;ul>
 &lt;li>Lectures，视频+slides&lt;/li>
@@ -68,7 +116,7 @@
 &lt;/li>
 &lt;/ul>
 &lt;h1 id="4-软件工程已死">4. 软件工程已死？&lt;/h1>
-&lt;p>大模型和Agent的发展，使得软件开发的工作岗位正在逐渐减少。&lt;/p></description></item><item><title>Leetecode 二叉树(一)-遍历&amp;自顶向下DFS</title><link>https://Jiangmmh.github.io/posts/leetecode-tree01/</link><pubDate>Wed, 14 Oct 2026 22:02:01 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/leetecode-tree01/</guid><description>&lt;p>题目来自灵神的题单：https://leetcode.cn/discuss/post/3142882/fen-xiang-gun-ti-dan-lian-biao-er-cha-sh-6srp/。&lt;/p>
+&lt;p>大模型和Agent的发展，使得软件开发的工作岗位正在逐渐减少。&lt;/p></description></item><item><title>Leetecode 二叉树(一)</title><link>https://Jiangmmh.github.io/posts/leetecode-tree01/</link><pubDate>Wed, 14 Oct 2026 22:02:01 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/leetecode-tree01/</guid><description>&lt;p>题目来自灵神的题单：&lt;a href="https://leetcode.cn/discuss/post/3142882/fen-xiang-gun-ti-dan-lian-biao-er-cha-sh-6srp/">二叉树题单&lt;/a>。&lt;/p>
 &lt;p>&lt;strong>在做时带着问题去做下面的题目：&lt;/strong>&lt;/p>
 &lt;ul>
 &lt;li>一般来说，DFS 的递归边界是空节点。&lt;/li>
@@ -224,7 +272,76 @@
 &lt;ul>
 &lt;li>GitHub：&lt;a href="https://github.com/Jiangmmh">Jiangmmh&lt;/a>&lt;/li>
 &lt;/ul>
-&lt;p>持续学习，深入原理，动手实践。&lt;/p></description></item><item><title>照片墙</title><link>https://Jiangmmh.github.io/photos/</link><pubDate>Wed, 14 Oct 2026 00:00:00 +0000</pubDate><guid>https://Jiangmmh.github.io/photos/</guid><description>记录生活中的风景与瞬间</description></item><item><title>关于记录</title><link>https://Jiangmmh.github.io/moments/2026-10-13/</link><pubDate>Tue, 13 Oct 2026 16:30:00 +0800</pubDate><guid>https://Jiangmmh.github.io/moments/2026-10-13/</guid><description>&lt;p>最近在折腾自己的博客。&lt;/p>
+&lt;p>持续学习，深入原理，动手实践。&lt;/p></description></item><item><title>照片墙</title><link>https://Jiangmmh.github.io/photos/</link><pubDate>Wed, 14 Oct 2026 00:00:00 +0000</pubDate><guid>https://Jiangmmh.github.io/photos/</guid><description>记录生活中的风景与瞬间</description></item><item><title>Leetecode 链表</title><link>https://Jiangmmh.github.io/posts/leetecode-linkedlist/</link><pubDate>Tue, 13 Oct 2026 21:14:25 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/leetecode-linkedlist/</guid><description>&lt;p>这篇文章记录了链表相关的重点算法题（共51道），使用C++实现。&lt;/p>
+&lt;p>题目链接见灵神的题单：&lt;a href="https://leetcode.cn/discuss/post/3142882/fen-xiang-gun-ti-dan-lian-biao-er-cha-sh-6srp/">链表题单&lt;/a>。&lt;/p>
+&lt;h1 id="一遍历链表">一、遍历链表&lt;/h1>
+&lt;h2 id="1-二进制链表转整数">1. &lt;strong>二进制链表转整数&lt;/strong>&lt;/h2>
+&lt;p>链表元素均为0或1，整个链表表示一个二进制数（最高位在链表头部），将该链表转换为该二进制数的十进制值。&lt;/p>
+&lt;p>思路：将ans初始化为0，遍历该链表，每遇到一个节点就将ans左移一位并加上当前节点的值。&lt;/p>
+&lt;p>时间复杂度为：O(n)，n为链表长度&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-cpp" data-lang="cpp">&lt;span class="line">&lt;span class="cl">&lt;span class="k">class&lt;/span> &lt;span class="nc">Solution&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">public&lt;/span>&lt;span class="o">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kt">int&lt;/span> &lt;span class="n">getDecimalValue&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">ListNode&lt;/span>&lt;span class="o">*&lt;/span> &lt;span class="n">head&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kt">int&lt;/span> &lt;span class="n">ans&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">for&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="k">auto&lt;/span> &lt;span class="n">cur&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">head&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="n">cur&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="n">cur&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">cur&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">next&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">ans&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">ans&lt;/span> &lt;span class="o">&amp;lt;&amp;lt;&lt;/span> &lt;span class="mi">1&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="n">cur&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">val&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">ans&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">};&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="2-找出临界点之间的最小和最大距">2. &lt;strong>找出临界点之间的最小和最大距&lt;/strong>&lt;/h2>
+&lt;blockquote>
+&lt;p>临界点就是极值点（严格大于或小于两侧元素）。&lt;/p>&lt;/blockquote>
+&lt;p>我的思路：先遍历链表，找出全部的临界点，再遍历找出的临界点数组，得到最大和最小临界点距离。&lt;/p>
+&lt;ul>
+&lt;li>编写函数findLocalMinMax，找出全部临界点，并返回临界点的下标数组localMinMax&lt;/li>
+&lt;li>最大临界点距离就是localMinMax第一个元素与最后一个元素之差&lt;/li>
+&lt;li>最小临界点距离就是localMinMax中相邻元素之差的最小值&lt;/li>
+&lt;/ul>
+&lt;p>时间复杂度：O(n), n为输入链表的长度&lt;/p>
+&lt;p>空间复杂度：O(n)&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-cpp" data-lang="cpp">&lt;span class="line">&lt;span class="cl">&lt;span class="k">class&lt;/span> &lt;span class="nc">Solution&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">vector&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="kt">int&lt;/span>&lt;span class="o">&amp;gt;&lt;/span> &lt;span class="n">findLocalMinMax&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">ListNode&lt;/span> &lt;span class="o">*&lt;/span>&lt;span class="n">head&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">vector&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="kt">int&lt;/span>&lt;span class="o">&amp;gt;&lt;/span> &lt;span class="n">ans&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="o">!&lt;/span>&lt;span class="n">head&lt;/span> &lt;span class="o">||&lt;/span> &lt;span class="o">!&lt;/span>&lt;span class="n">head&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">next&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="k">return&lt;/span> &lt;span class="n">ans&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">auto&lt;/span> &lt;span class="n">prev&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">head&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kt">int&lt;/span> &lt;span class="n">idx&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="mi">1&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">for&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="k">auto&lt;/span> &lt;span class="n">cur&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">head&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">next&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="n">cur&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">next&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="n">cur&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">cur&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">next&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1">// 取出前驱和后继的值
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="kt">int&lt;/span> &lt;span class="n">p&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">prev&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">val&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">q&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">cur&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">next&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">val&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kt">int&lt;/span> &lt;span class="n">x&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">cur&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">val&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="p">((&lt;/span>&lt;span class="n">p&lt;/span> &lt;span class="o">&amp;lt;&lt;/span> &lt;span class="n">x&lt;/span> &lt;span class="o">&amp;amp;&amp;amp;&lt;/span> &lt;span class="n">q&lt;/span> &lt;span class="o">&amp;lt;&lt;/span> &lt;span class="n">x&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="o">||&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">p&lt;/span> &lt;span class="o">&amp;gt;&lt;/span> &lt;span class="n">x&lt;/span> &lt;span class="o">&amp;amp;&amp;amp;&lt;/span> &lt;span class="n">q&lt;/span> &lt;span class="o">&amp;gt;&lt;/span> &lt;span class="n">x&lt;/span>&lt;span class="p">))&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">ans&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">push_back&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">idx&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">prev&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">cur&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">idx&lt;/span>&lt;span class="o">++&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">ans&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">public&lt;/span>&lt;span class="o">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">vector&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="kt">int&lt;/span>&lt;span class="o">&amp;gt;&lt;/span> &lt;span class="n">nodesBetweenCriticalPoints&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">ListNode&lt;/span>&lt;span class="o">*&lt;/span> &lt;span class="n">head&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1">// 找到全部的临界点
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="n">vector&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="kt">int&lt;/span>&lt;span class="o">&amp;gt;&lt;/span> &lt;span class="n">localMinMax&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">findLocalMinMax&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">head&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kt">int&lt;/span> &lt;span class="n">n&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">localMinMax&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">size&lt;/span>&lt;span class="p">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1">// 临界点数量少于两个，直接返回 {-1, -1}
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="k">if&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">n&lt;/span> &lt;span class="o">&amp;lt;&lt;/span> &lt;span class="mi">2&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="k">return&lt;/span> &lt;span class="p">{&lt;/span>&lt;span class="o">-&lt;/span>&lt;span class="mi">1&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="o">-&lt;/span>&lt;span class="mi">1&lt;/span>&lt;span class="p">};&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kt">int&lt;/span> &lt;span class="n">maxDistance&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">localMinMax&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="n">n&lt;/span>&lt;span class="o">-&lt;/span>&lt;span class="mi">1&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="o">-&lt;/span> &lt;span class="n">localMinMax&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mi">0&lt;/span>&lt;span class="p">];&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kt">int&lt;/span> &lt;span class="n">minDistance&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">INT_MAX&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">for&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="kt">int&lt;/span> &lt;span class="n">i&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="mi">1&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="n">i&lt;/span> &lt;span class="o">&amp;lt;&lt;/span> &lt;span class="n">n&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="n">i&lt;/span>&lt;span class="o">++&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">minDistance&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">min&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">minDistance&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">localMinMax&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="n">i&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="o">-&lt;/span> &lt;span class="n">localMinMax&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="n">i&lt;/span>&lt;span class="o">-&lt;/span>&lt;span class="mi">1&lt;/span>&lt;span class="p">]);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="p">{&lt;/span>&lt;span class="n">minDistance&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">maxDistance&lt;/span>&lt;span class="p">};&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">};&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>优化：可以在遍历链表的过程中，记录第一个临界点的位置和记录前一个临界点的位置，来得到最大和最小临界点距离，将空间复杂度降为O(1)。&lt;/p></description></item><item><title>关于记录</title><link>https://Jiangmmh.github.io/moments/2026-10-13/</link><pubDate>Tue, 13 Oct 2026 16:30:00 +0800</pubDate><guid>https://Jiangmmh.github.io/moments/2026-10-13/</guid><description>&lt;p>最近在折腾自己的博客。&lt;/p>
 &lt;p>比起每次都花很长时间写一篇完整的文章，
 我更希望能有一个地方，随时记录学习过程中的想法。&lt;/p>
 &lt;p>有些事情不一定要等到想明白之后才开始记录。&lt;/p></description></item></channel></rss>
