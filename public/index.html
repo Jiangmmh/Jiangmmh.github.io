@@ -194,12 +194,46 @@
 
 <article class="post-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">UCLA Computer Architecture Lec2
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>1. Main objective of architecting a computer 关键目标：Make efficient computer.
+何谓高效？
+🌟性能（Performance） 低能耗（Power Consumption） 成本（Cost） 可靠&amp;安全（Reliable &amp; Secure） 2. 处理器的发展 注：这部分内容来自我过去的笔记。
+2.1 过去 摩尔定律: 集成电路上的晶体管数目大约每两年翻一番，而成本几乎不增加。虽名为“定律”，描述的却是一种经验关系，而非科学定律。
+下图的横轴为年份，纵轴为微处理器中即成的晶体管数量，可以看到从1970年代开始到当下一直呈现出线性增长的趋势。
+Dennard Scaling（登纳德缩放比例定律）： 当晶体管的尺寸（长宽高）每年缩小约 30%（即工艺节点推进一代）时，只要电压和电流也等比例地降低，芯片的功率密度（每平方毫米的功耗）将保持不变。
+Dennard Scaling定律量化了随着晶体管尺寸的缩小，其所需加上的电压和电流是多少。
+该定律揭示了：随着晶体管尺寸的缩小，所需的电压和电流也等比例降低，由功率计算公式：P = IV，只要晶体管尺寸能够持续缩小，即使在单位面积上放入更多的晶体管，功耗也不会增加，因而无需考虑散热等问题。
+Insight：根据摩尔定律和德纳德缩放定律，处理器每年都会更快、更便宜、能耗更低。
+2.2 现在和未来 晶体管本该像完美的开关，但尺寸太小后，即使处于“关断”状态，电子也会像漏水一样穿过去，产生静态功耗。
+等到了2005年左右，继续缩小晶体管的尺寸会导致静态功耗（static power leakage） 剧增。Dennard Scaling定律失效，无法继续降低电压，进而导致频率无法继续提高（功耗太大，发热无法解决）。
+随着Dennard Scaling定律的失效，处理器行业发生了急转弯：既然单个核心不能再快了，那就用多出来的晶体管，塞进更多的核心。
+程序性能的进一步提升要依赖于多核处理器、专用并行芯片和并行化的程序。
+Amdahl’s Law给出了程序性能提高的上限取决于该程序并行部分的比例（因为单核性能难以继续提高）。
+未来处理器发展的趋势如下：
+晶体管数量仍在不断增加 时钟频率难以继续提高 处理器Core的数量不断增加 结果：并行程序的性能随之增加，但串行程序的性能几乎不变 但是现在继续增多处理器核心的策略也遇到了瓶颈，见这篇文章：https://www.bohrium.com/sciencepedia/feynman/keyword/dark_silicon
+总结：
+3. 冯诺依曼机与RISC-V 这部分内容介绍了冯诺依曼机的特点（存储程序）、RISCV处理器与CISC处理器的区别、RISC-V处理器（寄存器、指令）。
+3.1 冯诺依曼机 冯诺依曼提出了一个重要观念：存储程序计算机。
+将内存视为一个按字节编址的数组 将程序（指令）与数据一起存储在内存中 然后让计算机自动地取指-执行。 冯诺依曼机的五大部件：
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-15 20:55:46 +0800 CST'>October 15, 2026</span>&nbsp;·&nbsp;<span>1 min</span>&nbsp;·&nbsp;<span>128 words</span></footer>
+  <a class="entry-link" aria-label="post link to UCLA Computer Architecture Lec2" href="http://localhost:1313/posts/ucla-ca-02/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">UCLA Computer Architecture Lec1
     </h2>
   </header>
   <div class="entry-content">
     <p>最近在尝试自己实现一个RISC-V处理器，在实现的过程中遇到了一些问题，不得其解。
-遂找到了这门UCLA的计算机体系课，该课程正好是以RISC-V作为目标来讲解的，并且包含完整的Lectures、Slides、Homework和Programming Assignment。
+遂找到了这门UCLA的计算机体系结构课，该课程正好是以RISC-V作为目标来讲解的，并且包含完整的Lectures、Slides、Homework和Programming Assignment。
 1. 课程介绍 课程网址：Computer Systems Architecture Fall 2025
 课程介绍：
 本课程旨在学习现代微处理器的基础知识及其与其他单元的交互，例如存储层次结构、GPU和I/O。在高层面上，计算机体系结构是选择和互连硬件组件以创建满足功能、性能和成本目标的计算机的科学与工程。更具体地说，在本课程中，你将学习架构计算机的基本原理和技术，包括设计指令集体系结构（ISA）、流水线和指令级并行。 你将通过使用C/C&#43;&#43;为一个简单的RISC ISA设计和实现一个多级流水线超标量处理器，来更详细地学习这些主题。此外，你将学习现代处理器设计中使用的各种体系结构技术，包括超标量设计、乱序执行、GPU体系结构和缓存层次结构。
@@ -223,11 +257,11 @@ Lectures，视频&#43;slides Homewokrs，5个书面作业 Projects，3个编程�
 
 <article class="post-entry"> 
   <header class="entry-header">
-    <h2 class="entry-hint-parent">Leetecode 二叉树(一)-遍历&amp;自顶向下DFS
+    <h2 class="entry-hint-parent">Leetecode 二叉树(一)
     </h2>
   </header>
   <div class="entry-content">
-    <p>题目来自灵神的题单：https://leetcode.cn/discuss/post/3142882/fen-xiang-gun-ti-dan-lian-biao-er-cha-sh-6srp/。
+    <p>题目来自灵神的题单：二叉树题单。
 在做时带着问题去做下面的题目：
 一般来说，DFS 的递归边界是空节点。 在什么情况下，要额外把叶子节点作为递归边界？ 在什么情况下，DFS 需要有返回值？什么情况下不需要有返回值？ 在什么情况下，题目更适合用自顶向下的方法解决？ 什么情况下更适合用自底向上的方法解决？ C&#43;&#43;不同标准下，支持递归的Lambda表达式写法：
 C&#43;&#43;11标准起支持 #include &lt;functional&gt; std::function&lt;void(TreeNode*, string)&gt; dfs = [&amp;](TreeNode* node, string s) { if (!node) return; // ... dfs(node-&gt;left, s); // 直接用 dfs，因为 dfs 已经声明了 dfs(node-&gt;right, s); }; dfs(root, &#34;&#34;); C&#43;&#43;14标准支持 auto dfs = [&amp;](auto&amp;&amp; self, TreeNode* node, string s) -&gt; void { if (!node) return; // ... self(self, node-&gt;left, s); // 把自己作为参数传进去 self(self, node-&gt;right, s); }; dfs(dfs, root, &#34;&#34;); // 调用时也要把自己传进去 在我的解法实现中采用的是C&#43;&#43;14标准的写法。
@@ -243,7 +277,7 @@ class Solution { public: vector&lt;int&gt; preorderTraversal(TreeNode* root) { v
   <footer class="entry-footer">
 
 <span title='2026-10-14 22:02:01 +0800 CST'>October 14, 2026</span>&nbsp;·&nbsp;<span>8 min</span>&nbsp;·&nbsp;<span>1517 words</span></footer>
-  <a class="entry-link" aria-label="post link to Leetecode 二叉树(一)-遍历&自顶向下DFS" href="http://localhost:1313/posts/leetecode-tree01/"></a>
+  <a class="entry-link" aria-label="post link to Leetecode 二叉树(一)" href="http://localhost:1313/posts/leetecode-tree01/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -265,6 +299,30 @@ class Solution { public: vector&lt;int&gt; preorderTraversal(TreeNode* root) { v
 
 <span title='2026-10-14 11:44:43 +0800 CST'>October 14, 2026</span>&nbsp;·&nbsp;<span>6 min</span>&nbsp;·&nbsp;<span>1268 words</span></footer>
   <a class="entry-link" aria-label="post link to 如何快速构建一个静态博客?" href="http://localhost:1313/posts/hello-world/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Leetecode 链表
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>这篇文章记录了链表相关的重点算法题（共51道），使用C&#43;&#43;实现。
+题目链接见灵神的题单：链表题单。
+一、遍历链表 1. 二进制链表转整数 链表元素均为0或1，整个链表表示一个二进制数（最高位在链表头部），将该链表转换为该二进制数的十进制值。
+思路：将ans初始化为0，遍历该链表，每遇到一个节点就将ans左移一位并加上当前节点的值。
+时间复杂度为：O(n)，n为链表长度
+class Solution { public: int getDecimalValue(ListNode* head) { int ans = 0; for (auto cur = head; cur; cur = cur-&gt;next) { ans = (ans &lt;&lt; 1) &#43; cur-&gt;val; } return ans; } }; 2. 找出临界点之间的最小和最大距 临界点就是极值点（严格大于或小于两侧元素）。
+我的思路：先遍历链表，找出全部的临界点，再遍历找出的临界点数组，得到最大和最小临界点距离。
+编写函数findLocalMinMax，找出全部临界点，并返回临界点的下标数组localMinMax 最大临界点距离就是localMinMax第一个元素与最后一个元素之差 最小临界点距离就是localMinMax中相邻元素之差的最小值 时间复杂度：O(n), n为输入链表的长度
+空间复杂度：O(n)
+class Solution { vector&lt;int&gt; findLocalMinMax(ListNode *head) { vector&lt;int&gt; ans; if (!head || !head-&gt;next) return ans; auto prev = head; int idx = 1; for (auto cur = head-&gt;next; cur-&gt;next; cur = cur-&gt;next) { // 取出前驱和后继的值 int p = prev-&gt;val, q = cur-&gt;next-&gt;val; int x = cur-&gt;val; if ((p &lt; x &amp;&amp; q &lt; x) || (p &gt; x &amp;&amp; q &gt; x)) { ans.push_back(idx); } prev = cur; idx&#43;&#43;; } return ans; } public: vector&lt;int&gt; nodesBetweenCriticalPoints(ListNode* head) { // 找到全部的临界点 vector&lt;int&gt; localMinMax = findLocalMinMax(head); int n = localMinMax.size(); // 临界点数量少于两个，直接返回 {-1, -1} if (n &lt; 2) return {-1, -1}; int maxDistance = localMinMax[n-1] - localMinMax[0]; int minDistance = INT_MAX; for (int i = 1; i &lt; n; i&#43;&#43;) { minDistance = min(minDistance, localMinMax[i] - localMinMax[i-1]); } return {minDistance, maxDistance}; } }; 优化：可以在遍历链表的过程中，记录第一个临界点的位置和记录前一个临界点的位置，来得到最大和最小临界点距离，将空间复杂度降为O(1)。
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-13 21:14:25 +0800 CST'>October 13, 2026</span>&nbsp;·&nbsp;<span>25 min</span>&nbsp;·&nbsp;<span>5136 words</span></footer>
+  <a class="entry-link" aria-label="post link to Leetecode 链表" href="http://localhost:1313/posts/leetecode-linkedlist/"></a>
 </article>
     </main>
     

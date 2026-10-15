@@ -6,15 +6,90 @@
     <description>Recent content in Posts on Minghan的博客</description>
     <generator>Hugo</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Thu, 15 Oct 2026 15:53:21 +0800</lastBuildDate>
+    <lastBuildDate>Thu, 15 Oct 2026 20:55:46 +0800</lastBuildDate>
     <atom:link href="http://localhost:1313/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>UCLA Computer Architecture Lec2</title>
+      <link>http://localhost:1313/posts/ucla-ca-02/</link>
+      <pubDate>Thu, 15 Oct 2026 20:55:46 +0800</pubDate>
+      <guid>http://localhost:1313/posts/ucla-ca-02/</guid>
+      <description>&lt;h1 id=&#34;1-main-objective-of-architecting-a-computer&#34;&gt;1. Main objective of architecting a computer&lt;/h1&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;关键目标：Make efficient computer.&lt;/strong&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;何谓高效？&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;🌟性能（Performance）&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;低能耗（Power Consumption）&lt;/li&gt;
+&lt;li&gt;成本（Cost）&lt;/li&gt;
+&lt;li&gt;可靠&amp;amp;安全（Reliable &amp;amp; Secure）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;2-处理器的发展&#34;&gt;2. 处理器的发展&lt;/h1&gt;
+&lt;blockquote&gt;
+&lt;p&gt;注：这部分内容来自我过去的笔记。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;21-过去&#34;&gt;2.1 过去&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;**摩尔定律：**集成电路上的晶体管数目大约每两年翻一番，而成本几乎不增加。虽名为“定律”，描述的却是一种经验关系，而非科学定律。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;static/images/posts/image.png&#34;&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Dennard Scaling（登纳德缩放比例定律）：&lt;/strong&gt;
+当晶体管的尺寸（长宽高）每年缩小约 &lt;strong&gt;30%&lt;/strong&gt;（即工艺节点推进一代）时，只要&lt;strong&gt;电压&lt;/strong&gt;和&lt;strong&gt;电流&lt;/strong&gt;也等比例地降低，芯片的&lt;strong&gt;功率密度（每平方毫米的功耗）将保持不变&lt;/strong&gt;。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Dennard Scaling定律量化了随着晶体管尺寸的缩小，其所需加上的电压和电流是多少。&lt;/p&gt;
+&lt;p&gt;该定律揭示了：随着晶体管尺寸的缩小，所需的电压和电流也等比例降低，由功率计算公式：P = IV，&lt;strong&gt;只要晶体管尺寸能够持续缩小，即使在单位面积上放入更多的晶体管，功耗也不会增加，因而无需考虑散热等问题。&lt;/strong&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;结论：根据摩尔定律和德纳德缩放定律，处理器每年都会更快、更便宜、能耗更低。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;22-现在和未来&#34;&gt;2.2 现在和未来&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;晶体管本该像完美的开关，但尺寸太小后，即使处于“关断”状态，电子也会像漏水一样穿过去，产生静态功耗。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;等到了2005年左右，继续缩小晶体管的尺寸会导致**静态功耗（static power leakage）**剧增，Dennard Scaling定律失效，无法继续降低电压，进而导致频率无法继续提高（功耗太大，发热无法解决）。&lt;/p&gt;
+&lt;p&gt;随着Dennard Scaling定律的失效，处理器行业发生了急转弯：&lt;strong&gt;既然单个核心不能再快了，那就用多出来的晶体管，塞进更多的核心。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;这就使得程序性能的进一步提升依赖于多核处理器、专用并行芯片和&lt;strong&gt;并行化的程序&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;Amdahl’s Law给出了程序性能提高的上限取决于该程序并行部分的比例（因为单核性能难以继续提高）。&lt;/p&gt;
+&lt;p&gt;!image.png&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;未来处理器发展的趋势如下：&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;晶体管数量仍在不断增加&lt;/li&gt;
+&lt;li&gt;时钟频率难以继续提高&lt;/li&gt;
+&lt;li&gt;处理器Core的数量不断增加&lt;/li&gt;
+&lt;li&gt;结果：并行程序的性能随之增加，但串行程序的性能几乎不变&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;!image.png&lt;/p&gt;
+&lt;p&gt;但是现在继续增多处理器核心的策略也遇到了瓶颈，见这篇文章：https://www.bohrium.com/sciencepedia/feynman/keyword/dark_silicon&lt;/p&gt;
+&lt;p&gt;总结：&lt;/p&gt;
+&lt;p&gt;!image.png&lt;/p&gt;
+&lt;h1 id=&#34;3-冯诺依曼机与risc-v&#34;&gt;3. 冯诺依曼机与RISC-V&lt;/h1&gt;
+&lt;blockquote&gt;
+&lt;p&gt;这部分内容介绍了冯诺依曼机的特点（存储程序）、RISCV处理器与CISC处理器的区别、RISC-V处理器（寄存器、指令）。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;31-冯诺依曼机&#34;&gt;3.1 冯诺依曼机&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;冯诺依曼提出了一个重要观念：存储程序计算机。&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;将内存视为一个按字节编址的数组&lt;/li&gt;
+&lt;li&gt;将程序（指令）与数据一起存储在内存中&lt;/li&gt;
+&lt;li&gt;然后让计算机自动地取指-执行。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;冯诺依曼机的五大部件：&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;运算器，负责算数逻辑运算&lt;/li&gt;
+&lt;li&gt;控制器，负责控制&lt;/li&gt;
+&lt;li&gt;存储器，存储指令和数据&lt;/li&gt;
+&lt;li&gt;输入设备&lt;/li&gt;
+&lt;li&gt;输出设备&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;冯诺依曼机的贡献在于将硬件要执行的功能以软件的形式存储在内存中（&lt;strong&gt;存储程序&lt;/strong&gt;），而不是直接嵌入到硬件，这就使得计算机从一种只能执行单一任务的专用设备变成了可以执行任何任务的&lt;strong&gt;通用计算设备&lt;/strong&gt;（只要能提供对应的软件）。&lt;/p&gt;</description>
+    </item>
     <item>
       <title>UCLA Computer Architecture Lec1</title>
       <link>http://localhost:1313/posts/ucla-ca-01/</link>
       <pubDate>Thu, 15 Oct 2026 15:53:21 +0800</pubDate>
       <guid>http://localhost:1313/posts/ucla-ca-01/</guid>
       <description>&lt;p&gt;最近在尝试自己实现一个RISC-V处理器，在实现的过程中遇到了一些问题，不得其解。&lt;/p&gt;
-&lt;p&gt;遂找到了这门UCLA的计算机体系课，该课程正好是以RISC-V作为目标来讲解的，并且包含完整的Lectures、Slides、Homework和Programming Assignment。&lt;/p&gt;
+&lt;p&gt;遂找到了这门UCLA的计算机体系结构课，该课程正好是以RISC-V作为目标来讲解的，并且包含完整的Lectures、Slides、Homework和Programming Assignment。&lt;/p&gt;
 &lt;h1 id=&#34;1-课程介绍&#34;&gt;1. 课程介绍&lt;/h1&gt;
 &lt;p&gt;课程网址：&lt;a href=&#34;https://ssysarch.ee.ucla.edu/courses/F25/index.html&#34;&gt;Computer Systems Architecture Fall 2025&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;课程介绍：&lt;/p&gt;

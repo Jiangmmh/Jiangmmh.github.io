@@ -1,12 +1,12 @@
 ---
-title: "Leetecode 二叉树(一)-遍历&自顶向下DFS"
+title: "Leetecode 二叉树(一)"
 date: '2026-10-14T22:02:01+08:00'
 draft: false
 tags: ["二叉树"]
 categories: [Leetecode]
 ---
 
-题目来自灵神的题单：https://leetcode.cn/discuss/post/3142882/fen-xiang-gun-ti-dan-lian-biao-er-cha-sh-6srp/。
+题目来自灵神的题单：[二叉树题单](https://leetcode.cn/discuss/post/3142882/fen-xiang-gun-ti-dan-lian-biao-er-cha-sh-6srp/)。
 
 **在做时带着问题去做下面的题目：**
 - 一般来说，DFS 的递归边界是空节点。

@@ -30,7 +30,7 @@ categories: ["Computer Architecture"]
 
 - 为什么机器学习的能力越来越强？
 - 为什么20年无法发明GPT？
-![](/images/posts/im1.png)
+![](/images/posts/ucla-ca/im1.png)
 
 这张图中的三个要素解释了这一点:
 - **算力：并行计算硬件的发展为机器学习计算提供了“动力”**
@@ -39,7 +39,7 @@ categories: ["Computer Architecture"]
 
 其中，正是计算硬件的性能提高，使得海量数据与算法创新能够真正地落地。
 
-![](/images/posts/im2.png)
+![](/images/posts/ucla-ca/im2.png)
 
 > **Neural Scaling Law**：**Larger the model → better the performance**.
 > 
@@ -60,7 +60,7 @@ categories: ["Computer Architecture"]
 # 3. Course Workload
 
 这门课将关注RISC-V ISA，包括**RISC-V标准**、**微架构（实现）**、**实现策略（流水线、预测、并行）**、**存储的设计（缓存和主存）**、**多核设计（一致性）**。
-![](/images/posts/im4.png)
+![](/images/posts/ucla-ca/im4.png)
 
 **课程材料包括：**
 - Lectures，视频+slides
@@ -81,13 +81,13 @@ categories: ["Computer Architecture"]
 - 在自己感兴趣的主题上深耕，做出真正有价值的项目（产品），成为该领域的专家
 - 与此同时，还要扩展自己的知识面，不要仅限自己熟悉的领域
 
-![](/images/posts/im3.png)
+![](/images/posts/ucla-ca/im3.png)
 
 # 5. 计算机系统的抽象层次
 
 我们关注的是软硬件之间的接口——ISA，以及如何更好的实现该ISA。
 
-![](/images/posts/im5.png)
+![](/images/posts/ucla-ca/im5.png)
 
 不去过多考虑：
 

@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>UCLA Computer Architecture Lec2 | Minghan的博客</title>
+<meta name="keywords" content="UCLA-CA, RISC-V">
+<meta name="description" content="1. Main objective of architecting a computer
+
+关键目标：Make efficient computer.
+
+何谓高效？
+
+🌟性能（Performance）
+低能耗（Power Consumption）
+成本（Cost）
+可靠&amp;安全（Reliable &amp; Secure）
+
+2. 处理器的发展
+
+注：这部分内容来自我过去的笔记。
+
+2.1 过去
+
+摩尔定律: 集成电路上的晶体管数目大约每两年翻一番，而成本几乎不增加。虽名为“定律”，描述的却是一种经验关系，而非科学定律。
+
+下图的横轴为年份，纵轴为微处理器中即成的晶体管数量，可以看到从1970年代开始到当下一直呈现出线性增长的趋势。
+
+
+Dennard Scaling（登纳德缩放比例定律）：
+当晶体管的尺寸（长宽高）每年缩小约 30%（即工艺节点推进一代）时，只要电压和电流也等比例地降低，芯片的功率密度（每平方毫米的功耗）将保持不变。
+
+Dennard Scaling定律量化了随着晶体管尺寸的缩小，其所需加上的电压和电流是多少。
+该定律揭示了：随着晶体管尺寸的缩小，所需的电压和电流也等比例降低，由功率计算公式：P = IV，只要晶体管尺寸能够持续缩小，即使在单位面积上放入更多的晶体管，功耗也不会增加，因而无需考虑散热等问题。
+
+Insight：根据摩尔定律和德纳德缩放定律，处理器每年都会更快、更便宜、能耗更低。
+
+2.2 现在和未来
+
+晶体管本该像完美的开关，但尺寸太小后，即使处于“关断”状态，电子也会像漏水一样穿过去，产生静态功耗。
+
+等到了2005年左右，继续缩小晶体管的尺寸会导致静态功耗（static power leakage） 剧增。Dennard Scaling定律失效，无法继续降低电压，进而导致频率无法继续提高（功耗太大，发热无法解决）。
+随着Dennard Scaling定律的失效，处理器行业发生了急转弯：既然单个核心不能再快了，那就用多出来的晶体管，塞进更多的核心。
+程序性能的进一步提升要依赖于多核处理器、专用并行芯片和并行化的程序。
+Amdahl’s Law给出了程序性能提高的上限取决于该程序并行部分的比例（因为单核性能难以继续提高）。
+
+未来处理器发展的趋势如下：
+
+晶体管数量仍在不断增加
+时钟频率难以继续提高
+处理器Core的数量不断增加
+结果：并行程序的性能随之增加，但串行程序的性能几乎不变
+
+
+但是现在继续增多处理器核心的策略也遇到了瓶颈，见这篇文章：https://www.bohrium.com/sciencepedia/feynman/keyword/dark_silicon
+总结：
+
+3. 冯诺依曼机与RISC-V
+
+这部分内容介绍了冯诺依曼机的特点（存储程序）、RISCV处理器与CISC处理器的区别、RISC-V处理器（寄存器、指令）。
+
+3.1 冯诺依曼机
+冯诺依曼提出了一个重要观念：存储程序计算机。
+
+将内存视为一个按字节编址的数组
+将程序（指令）与数据一起存储在内存中
+然后让计算机自动地取指-执行。
+
+冯诺依曼机的五大部件：">
+<meta name="author" content="">
+<link rel="canonical" href="http://localhost:1313/posts/ucla-ca-02/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.eb75d3d7085f23c257559d796647d69a016c4ff05121443dd8956c46642c5330.css" integrity="sha256-63XT1whfI8JXVZ15ZkfWmgFsT/BRIUQ92JVsRmQsUzA=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/ucla-ca-02/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="http://localhost:1313/posts/ucla-ca-02/">
+  <meta property="og:site_name" content="Minghan的博客">
+  <meta property="og:title" content="UCLA Computer Architecture Lec2">
+  <meta property="og:description" content="1. Main objective of architecting a computer 关键目标：Make efficient computer.
+何谓高效？
+🌟性能（Performance） 低能耗（Power Consumption） 成本（Cost） 可靠&amp;安全（Reliable &amp; Secure） 2. 处理器的发展 注：这部分内容来自我过去的笔记。
+2.1 过去 摩尔定律: 集成电路上的晶体管数目大约每两年翻一番，而成本几乎不增加。虽名为“定律”，描述的却是一种经验关系，而非科学定律。
+下图的横轴为年份，纵轴为微处理器中即成的晶体管数量，可以看到从1970年代开始到当下一直呈现出线性增长的趋势。
+Dennard Scaling（登纳德缩放比例定律）： 当晶体管的尺寸（长宽高）每年缩小约 30%（即工艺节点推进一代）时，只要电压和电流也等比例地降低，芯片的功率密度（每平方毫米的功耗）将保持不变。
+Dennard Scaling定律量化了随着晶体管尺寸的缩小，其所需加上的电压和电流是多少。
+该定律揭示了：随着晶体管尺寸的缩小，所需的电压和电流也等比例降低，由功率计算公式：P = IV，只要晶体管尺寸能够持续缩小，即使在单位面积上放入更多的晶体管，功耗也不会增加，因而无需考虑散热等问题。
+Insight：根据摩尔定律和德纳德缩放定律，处理器每年都会更快、更便宜、能耗更低。
+2.2 现在和未来 晶体管本该像完美的开关，但尺寸太小后，即使处于“关断”状态，电子也会像漏水一样穿过去，产生静态功耗。
+等到了2005年左右，继续缩小晶体管的尺寸会导致静态功耗（static power leakage） 剧增。Dennard Scaling定律失效，无法继续降低电压，进而导致频率无法继续提高（功耗太大，发热无法解决）。
+随着Dennard Scaling定律的失效，处理器行业发生了急转弯：既然单个核心不能再快了，那就用多出来的晶体管，塞进更多的核心。
+程序性能的进一步提升要依赖于多核处理器、专用并行芯片和并行化的程序。
+Amdahl’s Law给出了程序性能提高的上限取决于该程序并行部分的比例（因为单核性能难以继续提高）。
+未来处理器发展的趋势如下：
+晶体管数量仍在不断增加 时钟频率难以继续提高 处理器Core的数量不断增加 结果：并行程序的性能随之增加，但串行程序的性能几乎不变 但是现在继续增多处理器核心的策略也遇到了瓶颈，见这篇文章：https://www.bohrium.com/sciencepedia/feynman/keyword/dark_silicon
+总结：
+3. 冯诺依曼机与RISC-V 这部分内容介绍了冯诺依曼机的特点（存储程序）、RISCV处理器与CISC处理器的区别、RISC-V处理器（寄存器、指令）。
+3.1 冯诺依曼机 冯诺依曼提出了一个重要观念：存储程序计算机。
+将内存视为一个按字节编址的数组 将程序（指令）与数据一起存储在内存中 然后让计算机自动地取指-执行。 冯诺依曼机的五大部件：">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-10-15T20:55:46+08:00">
+    <meta property="article:modified_time" content="2026-10-15T20:55:46+08:00">
+    <meta property="article:tag" content="UCLA-CA">
+    <meta property="article:tag" content="RISC-V">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="UCLA Computer Architecture Lec2">
+  <meta name="twitter:description" content="1. Main objective of architecting a computer 关键目标：Make efficient computer.
+何谓高效？
+🌟性能（Performance） 低能耗（Power Consumption） 成本（Cost） 可靠&amp;安全（Reliable &amp; Secure） 2. 处理器的发展 注：这部分内容来自我过去的笔记。
+2.1 过去 摩尔定律: 集成电路上的晶体管数目大约每两年翻一番，而成本几乎不增加。虽名为“定律”，描述的却是一种经验关系，而非科学定律。
+下图的横轴为年份，纵轴为微处理器中即成的晶体管数量，可以看到从1970年代开始到当下一直呈现出线性增长的趋势。
+Dennard Scaling（登纳德缩放比例定律）： 当晶体管的尺寸（长宽高）每年缩小约 30%（即工艺节点推进一代）时，只要电压和电流也等比例地降低，芯片的功率密度（每平方毫米的功耗）将保持不变。
+Dennard Scaling定律量化了随着晶体管尺寸的缩小，其所需加上的电压和电流是多少。
+该定律揭示了：随着晶体管尺寸的缩小，所需的电压和电流也等比例降低，由功率计算公式：P = IV，只要晶体管尺寸能够持续缩小，即使在单位面积上放入更多的晶体管，功耗也不会增加，因而无需考虑散热等问题。
+Insight：根据摩尔定律和德纳德缩放定律，处理器每年都会更快、更便宜、能耗更低。
+2.2 现在和未来 晶体管本该像完美的开关，但尺寸太小后，即使处于“关断”状态，电子也会像漏水一样穿过去，产生静态功耗。
+等到了2005年左右，继续缩小晶体管的尺寸会导致静态功耗（static power leakage） 剧增。Dennard Scaling定律失效，无法继续降低电压，进而导致频率无法继续提高（功耗太大，发热无法解决）。
+随着Dennard Scaling定律的失效，处理器行业发生了急转弯：既然单个核心不能再快了，那就用多出来的晶体管，塞进更多的核心。
+程序性能的进一步提升要依赖于多核处理器、专用并行芯片和并行化的程序。
+Amdahl’s Law给出了程序性能提高的上限取决于该程序并行部分的比例（因为单核性能难以继续提高）。
+未来处理器发展的趋势如下：
+晶体管数量仍在不断增加 时钟频率难以继续提高 处理器Core的数量不断增加 结果：并行程序的性能随之增加，但串行程序的性能几乎不变 但是现在继续增多处理器核心的策略也遇到了瓶颈，见这篇文章：https://www.bohrium.com/sciencepedia/feynman/keyword/dark_silicon
+总结：
+3. 冯诺依曼机与RISC-V 这部分内容介绍了冯诺依曼机的特点（存储程序）、RISCV处理器与CISC处理器的区别、RISC-V处理器（寄存器、指令）。
+3.1 冯诺依曼机 冯诺依曼提出了一个重要观念：存储程序计算机。
+将内存视为一个按字节编址的数组 将程序（指令）与数据一起存储在内存中 然后让计算机自动地取指-执行。 冯诺依曼机的五大部件：">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "http://localhost:1313/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "UCLA Computer Architecture Lec2",
+      "item": "http://localhost:1313/posts/ucla-ca-02/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "UCLA Computer Architecture Lec2",
+  "name": "UCLA Computer Architecture Lec2",
+  "description": "1. Main objective of architecting a computer 关键目标：Make efficient computer.\n何谓高效？\n🌟性能（Performance） 低能耗（Power Consumption） 成本（Cost） 可靠\u0026amp;安全（Reliable \u0026amp; Secure） 2. 处理器的发展 注：这部分内容来自我过去的笔记。\n2.1 过去 摩尔定律: 集成电路上的晶体管数目大约每两年翻一番，而成本几乎不增加。虽名为“定律”，描述的却是一种经验关系，而非科学定律。\n下图的横轴为年份，纵轴为微处理器中即成的晶体管数量，可以看到从1970年代开始到当下一直呈现出线性增长的趋势。\nDennard Scaling（登纳德缩放比例定律）： 当晶体管的尺寸（长宽高）每年缩小约 30%（即工艺节点推进一代）时，只要电压和电流也等比例地降低，芯片的功率密度（每平方毫米的功耗）将保持不变。\nDennard Scaling定律量化了随着晶体管尺寸的缩小，其所需加上的电压和电流是多少。\n该定律揭示了：随着晶体管尺寸的缩小，所需的电压和电流也等比例降低，由功率计算公式：P = IV，只要晶体管尺寸能够持续缩小，即使在单位面积上放入更多的晶体管，功耗也不会增加，因而无需考虑散热等问题。\nInsight：根据摩尔定律和德纳德缩放定律，处理器每年都会更快、更便宜、能耗更低。\n2.2 现在和未来 晶体管本该像完美的开关，但尺寸太小后，即使处于“关断”状态，电子也会像漏水一样穿过去，产生静态功耗。\n等到了2005年左右，继续缩小晶体管的尺寸会导致静态功耗（static power leakage） 剧增。Dennard Scaling定律失效，无法继续降低电压，进而导致频率无法继续提高（功耗太大，发热无法解决）。\n随着Dennard Scaling定律的失效，处理器行业发生了急转弯：既然单个核心不能再快了，那就用多出来的晶体管，塞进更多的核心。\n程序性能的进一步提升要依赖于多核处理器、专用并行芯片和并行化的程序。\nAmdahl’s Law给出了程序性能提高的上限取决于该程序并行部分的比例（因为单核性能难以继续提高）。\n未来处理器发展的趋势如下：\n晶体管数量仍在不断增加 时钟频率难以继续提高 处理器Core的数量不断增加 结果：并行程序的性能随之增加，但串行程序的性能几乎不变 但是现在继续增多处理器核心的策略也遇到了瓶颈，见这篇文章：https://www.bohrium.com/sciencepedia/feynman/keyword/dark_silicon\n总结：\n3. 冯诺依曼机与RISC-V 这部分内容介绍了冯诺依曼机的特点（存储程序）、RISCV处理器与CISC处理器的区别、RISC-V处理器（寄存器、指令）。\n3.1 冯诺依曼机 冯诺依曼提出了一个重要观念：存储程序计算机。\n将内存视为一个按字节编址的数组 将程序（指令）与数据一起存储在内存中 然后让计算机自动地取指-执行。 冯诺依曼机的五大部件：\n",
+  "keywords": [
+    "UCLA-CA", "RISC-V"
+  ],
+  "articleBody": "1. Main objective of architecting a computer 关键目标：Make efficient computer.\n何谓高效？\n🌟性能（Performance） 低能耗（Power Consumption） 成本（Cost） 可靠\u0026安全（Reliable \u0026 Secure） 2. 处理器的发展 注：这部分内容来自我过去的笔记。\n2.1 过去 摩尔定律: 集成电路上的晶体管数目大约每两年翻一番，而成本几乎不增加。虽名为“定律”，描述的却是一种经验关系，而非科学定律。\n下图的横轴为年份，纵轴为微处理器中即成的晶体管数量，可以看到从1970年代开始到当下一直呈现出线性增长的趋势。\nDennard Scaling（登纳德缩放比例定律）： 当晶体管的尺寸（长宽高）每年缩小约 30%（即工艺节点推进一代）时，只要电压和电流也等比例地降低，芯片的功率密度（每平方毫米的功耗）将保持不变。\nDennard Scaling定律量化了随着晶体管尺寸的缩小，其所需加上的电压和电流是多少。\n该定律揭示了：随着晶体管尺寸的缩小，所需的电压和电流也等比例降低，由功率计算公式：P = IV，只要晶体管尺寸能够持续缩小，即使在单位面积上放入更多的晶体管，功耗也不会增加，因而无需考虑散热等问题。\nInsight：根据摩尔定律和德纳德缩放定律，处理器每年都会更快、更便宜、能耗更低。\n2.2 现在和未来 晶体管本该像完美的开关，但尺寸太小后，即使处于“关断”状态，电子也会像漏水一样穿过去，产生静态功耗。\n等到了2005年左右，继续缩小晶体管的尺寸会导致静态功耗（static power leakage） 剧增。Dennard Scaling定律失效，无法继续降低电压，进而导致频率无法继续提高（功耗太大，发热无法解决）。\n随着Dennard Scaling定律的失效，处理器行业发生了急转弯：既然单个核心不能再快了，那就用多出来的晶体管，塞进更多的核心。\n程序性能的进一步提升要依赖于多核处理器、专用并行芯片和并行化的程序。\nAmdahl’s Law给出了程序性能提高的上限取决于该程序并行部分的比例（因为单核性能难以继续提高）。\n未来处理器发展的趋势如下：\n晶体管数量仍在不断增加 时钟频率难以继续提高 处理器Core的数量不断增加 结果：并行程序的性能随之增加，但串行程序的性能几乎不变 但是现在继续增多处理器核心的策略也遇到了瓶颈，见这篇文章：https://www.bohrium.com/sciencepedia/feynman/keyword/dark_silicon\n总结：\n3. 冯诺依曼机与RISC-V 这部分内容介绍了冯诺依曼机的特点（存储程序）、RISCV处理器与CISC处理器的区别、RISC-V处理器（寄存器、指令）。\n3.1 冯诺依曼机 冯诺依曼提出了一个重要观念：存储程序计算机。\n将内存视为一个按字节编址的数组 将程序（指令）与数据一起存储在内存中 然后让计算机自动地取指-执行。 冯诺依曼机的五大部件：\n运算器，负责算数逻辑运算 控制器，负责控制 存储器，存储指令和数据 输入设备 输出设备 冯诺依曼机的贡献在于将硬件要执行的功能以软件的形式存储在内存中（存储程序），而不是直接嵌入到硬件，这就使得计算机从一种只能执行单一任务的专用设备变成了可以执行任何任务的通用计算设备（只要能提供对应的软件）。\n3.2 RISC-V和指令 什么是RISC-V？\n一个开源的RISC指令集架构 由UC Berkeley于2010年开发 主要由开源社区维护 RISC-V有不同的扩展和模型 本课程关注RV32I这个版本 RISC是什么？\nRISC表示“Reduced Instruction Set Computers”，精简指令集计算机 与之对应的是CISC，复杂指令集计算机 RISC与CISC的区别 指令长度：前者固定，后者可变 指令功能：前者简单，后者强大 复杂度：前者较简单，容易实现；后者较复杂 指令由什么组成？\n一条指令包含的信息有：指令的功能 + 操作的对象 RV32I指令的长度统一为32位 操作对象包括寄存器、立即数（指令直接给出）和内存 RISC-V的寄存器 RV32提供了32个寄存器，位宽均为32位 这些寄存器构成了一个寄存器文件，存在于处理器中 寄存器被命名为X0~X32，其中X0接地，恒为0 RISC-V的立即数 立即数来自于指令中直接给出的数值，但立即数位数不足32位，因此需要将其扩展到32位，一般使用符号扩展。 RISC-V的内存 内存可以被视为一个按字节编址的数组。 RISC-V仅支持通过load指令和store指令来访问内存。包括： lw, lb, lh, lbu, lhu sw, sb, sh（store指令无需考虑扩展问题，直接存入内存对应地址即可） 指令功能 算数逻辑运算 访存操作 控制流 RISC-V指令长度均为32位，共6种不同的指令格式：\n根据opcode、funct3和funct7字段的内容确定具体的指令功能 rs1和rs2为两个源寄存器索、rd为目的寄存器 imm为立即数，需要进行位扩展 下面是RV32I支持的指令：\n此外RISC-V汇编器还提供了很多伪指令，这些伪指令会通过汇编转换为真正的RISC-V指令：\nRISC-V的Calling Convention：\n将32个寄存器中的29个划分为Caller保存和Callee保存 其中a0～a7作为函数的参数，ra存储返回地址，a0和a1作为函数的返回值 ",
+  "wordCount" : "128",
+  "inLanguage": "en",
+  "datePublished": "2026-10-15T20:55:46+08:00",
+  "dateModified": "2026-10-15T20:55:46+08:00",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "http://localhost:1313/posts/ucla-ca-02/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Minghan的博客",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "http://localhost:1313/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="header-nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="Minghan的博客 (Alt + H)">Minghan的博客</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" class="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg class="sun" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu" class="menu">
+            <li>
+                <a href="http://localhost:1313/posts/" title="文章">
+                    <span>文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/archives/" title="归档">
+                    <span>归档</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/categories/" title="分类">
+                    <span>分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/moments/" title="随记">
+                    <span>随记</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="标签">
+                    <span>标签</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/photos/" title="照片墙">
+                    <span>照片墙</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/about/" title="关于">
+                    <span>关于</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <nav class="breadcrumbs" role="navigation" aria-label="Breadcrumb">
+            <a href="/">Home</a>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+            <a href="/posts/">Posts</a>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+        <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+</nav>
+    <h1 class="post-title entry-hint-parent">
+      UCLA Computer Architecture Lec2
+    </h1>
+    <div class="post-meta">
+
+<span title='2026-10-15 20:55:46 +0800 CST'>October 15, 2026</span>&nbsp;·&nbsp;<span>1 min</span>&nbsp;·&nbsp;<span>128 words</span>
+
+</div>
+  </header> <details class="toc"  open>
+    <summary accesskey="c" title="(Alt + C)">
+        <span class="title">Table of Contents</span>
+    </summary>
+
+    <div class="inner"><ul>
+            <li>
+                <a href="#1-main-objective-of-architecting-a-computer" aria-label="1. Main objective of architecting a computer">1. Main objective of architecting a computer</a></li>
+            <li>
+                <a href="#2-%e5%a4%84%e7%90%86%e5%99%a8%e7%9a%84%e5%8f%91%e5%b1%95" aria-label="2. 处理器的发展">2. 处理器的发展</a><ul>
+                    
+            <li>
+                <a href="#21-%e8%bf%87%e5%8e%bb" aria-label="2.1 过去">2.1 过去</a></li>
+            <li>
+                <a href="#22-%e7%8e%b0%e5%9c%a8%e5%92%8c%e6%9c%aa%e6%9d%a5" aria-label="2.2 现在和未来">2.2 现在和未来</a></li></ul>
+            </li>
+            <li>
+                <a href="#3-%e5%86%af%e8%af%ba%e4%be%9d%e6%9b%bc%e6%9c%ba%e4%b8%8erisc-v" aria-label="3. 冯诺依曼机与RISC-V">3. 冯诺依曼机与RISC-V</a><ul>
+                    
+            <li>
+                <a href="#31-%e5%86%af%e8%af%ba%e4%be%9d%e6%9b%bc%e6%9c%ba" aria-label="3.1 冯诺依曼机">3.1 冯诺依曼机</a></li>
+            <li>
+                <a href="#32-risc-v%e5%92%8c%e6%8c%87%e4%bb%a4" aria-label="3.2 RISC-V和指令">3.2 RISC-V和指令</a>
+            </li>
+        </ul>
+        </li>
+        </ul>
+    </div>
+</details>
+
+  <div class="post-content md-content"><h1 id="1-main-objective-of-architecting-a-computer">1. Main objective of architecting a computer<a hidden class="anchor" aria-hidden="true" href="#1-main-objective-of-architecting-a-computer">#</a></h1>
+<blockquote>
+<p><strong>关键目标：Make efficient computer.</strong></p>
+</blockquote>
+<p><strong>何谓高效？</strong></p>
+<ul>
+<li><strong>🌟性能（Performance）</strong></li>
+<li>低能耗（Power Consumption）</li>
+<li>成本（Cost）</li>
+<li>可靠&amp;安全（Reliable &amp; Secure）</li>
+</ul>
+<h1 id="2-处理器的发展">2. 处理器的发展<a hidden class="anchor" aria-hidden="true" href="#2-处理器的发展">#</a></h1>
+<blockquote>
+<p>注：这部分内容来自我过去的笔记。</p>
+</blockquote>
+<h2 id="21-过去">2.1 过去<a hidden class="anchor" aria-hidden="true" href="#21-过去">#</a></h2>
+<blockquote>
+<p><strong>摩尔定律:</strong> 集成电路上的晶体管数目大约每两年翻一番，而成本几乎不增加。虽名为“定律”，描述的却是一种经验关系，而非科学定律。</p>
+</blockquote>
+<p>下图的横轴为年份，纵轴为微处理器中即成的晶体管数量，可以看到从1970年代开始到当下一直呈现出线性增长的趋势。</p>
+<p><img loading="lazy" src="/images/posts/ucla-ca/im7.png"></p>
+<blockquote>
+<p><strong>Dennard Scaling（登纳德缩放比例定律）：</strong>
+当晶体管的尺寸（长宽高）每年缩小约 <strong>30%</strong>（即工艺节点推进一代）时，只要<strong>电压</strong>和<strong>电流</strong>也等比例地降低，芯片的<strong>功率密度（每平方毫米的功耗）将保持不变</strong>。</p>
+</blockquote>
+<p>Dennard Scaling定律量化了随着晶体管尺寸的缩小，其所需加上的电压和电流是多少。</p>
+<p>该定律揭示了：随着晶体管尺寸的缩小，所需的电压和电流也等比例降低，由功率计算公式：P = IV，<strong>只要晶体管尺寸能够持续缩小，即使在单位面积上放入更多的晶体管，功耗也不会增加，因而无需考虑散热等问题。</strong></p>
+<blockquote>
+<p><strong>Insight</strong>：根据摩尔定律和德纳德缩放定律，处理器每年都会更快、更便宜、能耗更低。</p>
+</blockquote>
+<h2 id="22-现在和未来">2.2 现在和未来<a hidden class="anchor" aria-hidden="true" href="#22-现在和未来">#</a></h2>
+<blockquote>
+<p>晶体管本该像完美的开关，但尺寸太小后，即使处于“关断”状态，电子也会像漏水一样穿过去，产生静态功耗。</p>
+</blockquote>
+<p>等到了2005年左右，继续缩小晶体管的尺寸会导致<strong>静态功耗（static power leakage）</strong> 剧增。Dennard Scaling定律失效，无法继续降低电压，进而导致频率无法继续提高（功耗太大，发热无法解决）。</p>
+<p>随着Dennard Scaling定律的失效，处理器行业发生了急转弯：<strong>既然单个核心不能再快了，那就用多出来的晶体管，塞进更多的核心。</strong></p>
+<p>程序性能的进一步提升要依赖于多核处理器、专用并行芯片和<strong>并行化的程序</strong>。</p>
+<p>Amdahl’s Law给出了程序性能提高的上限取决于该程序并行部分的比例（因为单核性能难以继续提高）。</p>
+<p><img loading="lazy" src="/images/posts/ucla-ca/im6.png"></p>
+<p><strong>未来处理器发展的趋势如下：</strong></p>
+<ul>
+<li>晶体管数量仍在不断增加</li>
+<li>时钟频率难以继续提高</li>
+<li>处理器Core的数量不断增加</li>
+<li>结果：并行程序的性能随之增加，但串行程序的性能几乎不变</li>
+</ul>
+<p><img loading="lazy" src="/images/posts/ucla-ca/im8.png"></p>
+<p>但是现在继续增多处理器核心的策略也遇到了瓶颈，见这篇文章：https://www.bohrium.com/sciencepedia/feynman/keyword/dark_silicon</p>
+<p>总结：</p>
+<p><img loading="lazy" src="/images/posts/ucla-ca/im9.png"></p>
+<h1 id="3-冯诺依曼机与risc-v">3. 冯诺依曼机与RISC-V<a hidden class="anchor" aria-hidden="true" href="#3-冯诺依曼机与risc-v">#</a></h1>
+<blockquote>
+<p>这部分内容介绍了冯诺依曼机的特点（存储程序）、RISCV处理器与CISC处理器的区别、RISC-V处理器（寄存器、指令）。</p>
+</blockquote>
+<h2 id="31-冯诺依曼机">3.1 冯诺依曼机<a hidden class="anchor" aria-hidden="true" href="#31-冯诺依曼机">#</a></h2>
+<p><strong>冯诺依曼提出了一个重要观念：存储程序计算机。</strong></p>
+<ul>
+<li>将内存视为一个按字节编址的数组</li>
+<li>将程序（指令）与数据一起存储在内存中</li>
+<li>然后让计算机自动地取指-执行。</li>
+</ul>
+<p><strong>冯诺依曼机的五大部件：</strong></p>
+<ul>
+<li>运算器，负责算数逻辑运算</li>
+<li>控制器，负责控制</li>
+<li>存储器，存储指令和数据</li>
+<li>输入设备</li>
+<li>输出设备</li>
+</ul>
+<p>冯诺依曼机的贡献在于将硬件要执行的功能以软件的形式存储在内存中（<strong>存储程序</strong>），而不是直接嵌入到硬件，这就使得计算机从一种只能执行单一任务的专用设备变成了可以执行任何任务的<strong>通用计算设备</strong>（只要能提供对应的软件）。</p>
+<h2 id="32-risc-v和指令">3.2 RISC-V和指令<a hidden class="anchor" aria-hidden="true" href="#32-risc-v和指令">#</a></h2>
+<p><strong>什么是RISC-V？</strong></p>
+<ul>
+<li>一个开源的RISC指令集架构</li>
+<li>由UC Berkeley于2010年开发</li>
+<li>主要由开源社区维护</li>
+<li>RISC-V有不同的扩展和模型
+<ul>
+<li>本课程关注RV32I这个版本</li>
+</ul>
+</li>
+</ul>
+<p><strong>RISC是什么？</strong></p>
+<ul>
+<li>RISC表示“Reduced Instruction Set Computers”，精简指令集计算机</li>
+<li>与之对应的是CISC，复杂指令集计算机</li>
+<li>RISC与CISC的区别
+<ul>
+<li>指令长度：前者固定，后者可变</li>
+<li>指令功能：前者简单，后者强大</li>
+<li>复杂度：前者较简单，容易实现；后者较复杂</li>
+</ul>
+</li>
+</ul>
+<p><strong>指令由什么组成？</strong></p>
+<ul>
+<li>一条指令包含的信息有：指令的功能 + 操作的对象</li>
+<li>RV32I指令的长度统一为32位</li>
+<li><strong>操作对象</strong>包括寄存器、立即数（指令直接给出）和内存
+<ul>
+<li><strong>RISC-V的寄存器</strong>
+<ul>
+<li>RV32提供了32个寄存器，位宽均为32位</li>
+<li>这些寄存器构成了一个寄存器文件，存在于处理器中</li>
+<li>寄存器被命名为X0~X32，其中X0接地，恒为0</li>
+</ul>
+</li>
+<li><strong>RISC-V的立即数</strong>
+<ul>
+<li>立即数来自于指令中直接给出的数值，但立即数位数不足32位，因此需要将其扩展到32位，一般使用符号扩展。</li>
+</ul>
+</li>
+<li><strong>RISC-V的内存</strong>
+<ul>
+<li>内存可以被视为一个按字节编址的数组。</li>
+<li>RISC-V仅支持通过load指令和store指令来访问内存。包括：
+<ul>
+<li>lw, lb, lh, lbu, lhu</li>
+<li>sw, sb, sh（store指令无需考虑扩展问题，直接存入内存对应地址即可）</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>指令功能</strong>
+<ul>
+<li>算数逻辑运算</li>
+<li>访存操作</li>
+<li>控制流</li>
+</ul>
+</li>
+</ul>
+<p>RISC-V指令长度均为32位，共6种不同的指令格式：</p>
+<ul>
+<li>根据opcode、funct3和funct7字段的内容确定具体的指令功能</li>
+<li>rs1和rs2为两个源寄存器索、rd为目的寄存器</li>
+<li>imm为立即数，需要进行位扩展</li>
+</ul>
+<p><img loading="lazy" src="/images/posts/ucla-ca/im10.png"></p>
+<p>下面是RV32I支持的指令：</p>
+<p><img loading="lazy" src="/images/posts/ucla-ca/im11.png">
+<img loading="lazy" src="/images/posts/ucla-ca/im12.png"></p>
+<p><img loading="lazy" src="/images/posts/ucla-ca/im13.png"></p>
+<p>此外RISC-V汇编器还提供了很多伪指令，这些伪指令会通过汇编转换为真正的RISC-V指令：</p>
+<p><img loading="lazy" src="/images/posts/ucla-ca/im14.png"></p>
+<p>RISC-V的Calling Convention：</p>
+<ul>
+<li>将32个寄存器中的29个划分为Caller保存和Callee保存</li>
+<li>其中a0～a7作为函数的参数，ra存储返回地址，a0和a1作为函数的返回值</li>
+</ul>
+<p><img loading="lazy" src="/images/posts/ucla-ca/im15.png"></p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="http://localhost:1313/tags/ucla-ca/">UCLA-CA</a></li>
+      <li><a href="http://localhost:1313/tags/risc-v/">RISC-V</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="next" href="http://localhost:1313/posts/ucla-ca-01/">
+    <span class="title">Next »</span>
+    <span>UCLA Computer Architecture Lec1</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="http://localhost:1313/">Minghan的博客</a></span> · 
+
+    
+    
+    <span>
+        Powered by
+        <a href="https://gohugo.io/?utm_source=papermod" rel="noopener" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" id="top-link" class="top-link hidden" aria-label="go to top" title="Go to Top (Alt + G)" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevrons-up">
+        <polyline points="17 11 12 6 7 11"></polyline>
+        <polyline points="17 18 12 13 7 18"></polyline>
+    </svg>
+</a><script src="/js/toc-scrollspy.js" defer></script>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var toplink = document.getElementById("top-link");
+    window.onscroll = function () {
+        const scrollThreshold = window.innerHeight;
+        if (document.body.scrollTop > scrollThreshold || document.documentElement.scrollTop > scrollThreshold) {
+            toplink.classList.remove("hidden");
+        } else {
+            toplink.classList.add("hidden");
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

@@ -162,12 +162,49 @@
 
 <article class="post-entry tag-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">UCLA Computer Architecture Lec2
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>1. Main objective of architecting a computer 关键目标：Make efficient computer.
+何谓高效？
+🌟性能（Performance） 低能耗（Power Consumption） 成本（Cost） 可靠&amp;安全（Reliable &amp; Secure） 2. 处理器的发展 注：这部分内容来自我过去的笔记。
+2.1 过去 **摩尔定律：**集成电路上的晶体管数目大约每两年翻一番，而成本几乎不增加。虽名为“定律”，描述的却是一种经验关系，而非科学定律。
+Dennard Scaling（登纳德缩放比例定律）： 当晶体管的尺寸（长宽高）每年缩小约 30%（即工艺节点推进一代）时，只要电压和电流也等比例地降低，芯片的功率密度（每平方毫米的功耗）将保持不变。
+Dennard Scaling定律量化了随着晶体管尺寸的缩小，其所需加上的电压和电流是多少。
+该定律揭示了：随着晶体管尺寸的缩小，所需的电压和电流也等比例降低，由功率计算公式：P = IV，只要晶体管尺寸能够持续缩小，即使在单位面积上放入更多的晶体管，功耗也不会增加，因而无需考虑散热等问题。
+结论：根据摩尔定律和德纳德缩放定律，处理器每年都会更快、更便宜、能耗更低。
+2.2 现在和未来 晶体管本该像完美的开关，但尺寸太小后，即使处于“关断”状态，电子也会像漏水一样穿过去，产生静态功耗。
+等到了2005年左右，继续缩小晶体管的尺寸会导致**静态功耗（static power leakage）**剧增，Dennard Scaling定律失效，无法继续降低电压，进而导致频率无法继续提高（功耗太大，发热无法解决）。
+随着Dennard Scaling定律的失效，处理器行业发生了急转弯：既然单个核心不能再快了，那就用多出来的晶体管，塞进更多的核心。
+这就使得程序性能的进一步提升依赖于多核处理器、专用并行芯片和并行化的程序。
+Amdahl’s Law给出了程序性能提高的上限取决于该程序并行部分的比例（因为单核性能难以继续提高）。
+!image.png
+未来处理器发展的趋势如下：
+晶体管数量仍在不断增加 时钟频率难以继续提高 处理器Core的数量不断增加 结果：并行程序的性能随之增加，但串行程序的性能几乎不变 !image.png
+但是现在继续增多处理器核心的策略也遇到了瓶颈，见这篇文章：https://www.bohrium.com/sciencepedia/feynman/keyword/dark_silicon
+总结：
+!image.png
+3. 冯诺依曼机与RISC-V 这部分内容介绍了冯诺依曼机的特点（存储程序）、RISCV处理器与CISC处理器的区别、RISC-V处理器（寄存器、指令）。
+3.1 冯诺依曼机 冯诺依曼提出了一个重要观念：存储程序计算机。
+将内存视为一个按字节编址的数组 将程序（指令）与数据一起存储在内存中 然后让计算机自动地取指-执行。 冯诺依曼机的五大部件：
+运算器，负责算数逻辑运算 控制器，负责控制 存储器，存储指令和数据 输入设备 输出设备 冯诺依曼机的贡献在于将硬件要执行的功能以软件的形式存储在内存中（存储程序），而不是直接嵌入到硬件，这就使得计算机从一种只能执行单一任务的专用设备变成了可以执行任何任务的通用计算设备（只要能提供对应的软件）。
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-15 20:55:46 +0800 CST'>October 15, 2026</span>&nbsp;·&nbsp;<span>1 min</span>&nbsp;·&nbsp;<span>134 words</span></footer>
+  <a class="entry-link" aria-label="post link to UCLA Computer Architecture Lec2" href="http://localhost:1313/posts/ucla-ca-02/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">UCLA Computer Architecture Lec1
     </h2>
   </header>
   <div class="entry-content">
     <p>最近在尝试自己实现一个RISC-V处理器，在实现的过程中遇到了一些问题，不得其解。
-遂找到了这门UCLA的计算机体系课，该课程正好是以RISC-V作为目标来讲解的，并且包含完整的Lectures、Slides、Homework和Programming Assignment。
+遂找到了这门UCLA的计算机体系结构课，该课程正好是以RISC-V作为目标来讲解的，并且包含完整的Lectures、Slides、Homework和Programming Assignment。
 1. 课程介绍 课程网址：Computer Systems Architecture Fall 2025
 课程介绍：
 本课程旨在学习现代微处理器的基础知识及其与其他单元的交互，例如存储层次结构、GPU和I/O。在高层面上，计算机体系结构是选择和互连硬件组件以创建满足功能、性能和成本目标的计算机的科学与工程。更具体地说，在本课程中，你将学习架构计算机的基本原理和技术，包括设计指令集体系结构（ISA）、流水线和指令级并行。 你将通过使用C/C&#43;&#43;为一个简单的RISC ISA设计和实现一个多级流水线超标量处理器，来更详细地学习这些主题。此外，你将学习现代处理器设计中使用的各种体系结构技术，包括超标量设计、乱序执行、GPU体系结构和缓存层次结构。

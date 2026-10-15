@@ -6,20 +6,31 @@
     <description>Recent content on Minghan的博客</description>
     <generator>Hugo</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Wed, 14 Oct 2026 13:30:00 +0800</lastBuildDate>
+    <lastBuildDate>Thu, 15 Oct 2026 20:11:00 +0800</lastBuildDate>
     <atom:link href="http://localhost:1313/moments/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>关于记录</title>
-      <link>http://localhost:1313/moments/2026-10-13/</link>
-      <pubDate>Wed, 14 Oct 2026 13:30:00 +0800</pubDate>
-      <guid>http://localhost:1313/moments/2026-10-13/</guid>
-      <description>&lt;p&gt;以前不写博客的时候，总觉得坚持写就会很了不起。现在有坚持写了，发现写出有营养、高质量才是关键。&lt;/p&gt;</description>
+      <title>如何在AI时代自处？</title>
+      <link>http://localhost:1313/moments/2026-10-15/</link>
+      <pubDate>Thu, 15 Oct 2026 20:11:00 +0800</pubDate>
+      <guid>http://localhost:1313/moments/2026-10-15/</guid>
+      <description>&lt;p&gt;作为一个CS从业者，如何在AI时代存活下去？&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;把基础的知识学扎实，彻底弄懂，并能批判性地思考，而不仅是记忆。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;在自己感兴趣的主题上深耕，做真正有价值的项目（产品），成为该领域的专家。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;此外，还要扩展自己的知识面，不要仅限自己熟悉的领域。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;</description>
     </item>
     <item>
       <title>关于记录</title>
-      <link>http://localhost:1313/moments/2026-10-14/</link>
+      <link>http://localhost:1313/moments/2026-10-13/</link>
       <pubDate>Tue, 13 Oct 2026 16:30:00 +0800</pubDate>
-      <guid>http://localhost:1313/moments/2026-10-14/</guid>
+      <guid>http://localhost:1313/moments/2026-10-13/</guid>
       <description>&lt;p&gt;最近在折腾自己的博客。&lt;/p&gt;
 &lt;p&gt;比起每次都花很长时间写一篇完整的文章，
 我更希望能有一个地方，随时记录学习过程中的想法。&lt;/p&gt;
