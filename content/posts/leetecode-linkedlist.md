@@ -1,11 +1,11 @@
 ---
 title: "Leetecode 链表"
-date: '2026-10-13T21:14:25+08:00'
+date: '2026-10-14T21:14:25+08:00'
 draft: false
 tags: ["链表"]
 categories: [Leetecode]
 ---
-这篇文章记录了链表相关的重点算法题（共51道），使用C++实现。
+这篇文章记录了链表相关的重点算法题  （共51道），使用C++实现。
 
 题目链接见灵神的题单：[链表题单](https://leetcode.cn/discuss/post/3142882/fen-xiang-gun-ti-dan-lian-biao-er-cha-sh-6srp/)。
 
