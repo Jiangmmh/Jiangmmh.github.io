@@ -2,13 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>http://localhost:1313/posts/leetecode-tree02/</loc>
-    <lastmod>2026-10-16T11:20:25+08:00</lastmod>
-  </url><url>
     <loc>http://localhost:1313/categories/</loc>
     <lastmod>2026-10-16T11:20:25+08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/categories/leetecode/</loc>
+    <lastmod>2026-10-16T11:20:25+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/posts/leetecode-tree02/</loc>
     <lastmod>2026-10-16T11:20:25+08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/</loc>
@@ -26,7 +26,7 @@
     <loc>http://localhost:1313/tags/%E8%87%AA%E5%BA%95%E5%90%91%E4%B8%8Adfs/</loc>
     <lastmod>2026-10-16T11:20:25+08:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/books/soul-of-new-machine/</loc>
+    <loc>http://localhost:1313/books/300year/</loc>
     <lastmod>2026-10-16T00:00:00+00:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/books/</loc>
@@ -85,6 +85,15 @@
   </url><url>
     <loc>http://localhost:1313/moments/2026-10-13/</loc>
     <lastmod>2026-10-13T16:30:00+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/books/zeng-guo-fan/</loc>
+    <lastmod>2026-09-11T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/books/jiang-bi-ting/</loc>
+    <lastmod>2026-09-11T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/books/nvidia/</loc>
+    <lastmod>2026-09-11T00:00:00+00:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/archives/</loc>
   </url>
