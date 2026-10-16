@@ -152,14 +152,14 @@
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">dfs&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">dfs&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">root&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s">&amp;#34;&amp;#34;&lt;/span>&lt;span class="p">);&lt;/span> &lt;span class="c1">// 调用时也要把自己传进去
 &lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在我的解法实现中采用的是C++14标准的写法。&lt;/p>
 &lt;h1 id="一遍历二叉树">一、遍历二叉树&lt;/h1>
-&lt;h2 id="1-二叉树的前序遍历">1. &lt;strong>二叉树的前序遍历&lt;/strong>&lt;/h2>
-&lt;p>&lt;strong>法一：DFS&lt;/strong>&lt;/p>
-&lt;p>树的先序遍历的顺序是：根-左-右&lt;/p>
 &lt;p>因为树本身就是递归定义的，即树的子树本身就是一棵树，所以树的算法大多通过递归来实现。&lt;/p>
-&lt;p>在遍历过程中&lt;/p>
+&lt;h2 id="1-二叉树的前序遍历">1. &lt;strong>二叉树的前序遍历&lt;/strong>&lt;/h2>
+&lt;p>&lt;strong>法一：DFS&lt;/strong>
+树的先序遍历的顺序是：根-左-右&lt;/p>
+&lt;p>在遍历过程中:&lt;/p>
 &lt;ul>
 &lt;li>如果当前节点为空，直接返回；&lt;/li>
-&lt;li>如果当前节点非空，先访问当前节点，然后依次递归访问左右子树&lt;/li>
+&lt;li>如果当前节点非空，先访问当前节点，然后依次递归访问左右子树；&lt;/li>
 &lt;/ul>
 &lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-cpp" data-lang="cpp">&lt;span class="line">&lt;span class="cl">&lt;span class="k">class&lt;/span> &lt;span class="nc">Solution&lt;/span> &lt;span class="p">{&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">vector&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="kt">int&lt;/span>&lt;span class="o">&amp;gt;&lt;/span> &lt;span class="n">ans&lt;/span>&lt;span class="p">;&lt;/span>

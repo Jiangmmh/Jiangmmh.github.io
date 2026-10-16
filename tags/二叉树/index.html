@@ -7,14 +7,13 @@
 在做时带着问题去做下面的题目：
 一般来说，DFS 的递归边界是空节点。 在什么情况下，要额外把叶子节点作为递归边界？ 在什么情况下，DFS 需要有返回值？什么情况下不需要有返回值？ 在什么情况下，题目更适合用自顶向下的方法解决？ 什么情况下更适合用自底向上的方法解决？ C++不同标准下，支持递归的Lambda表达式写法：
 C++11标准起支持 #include &lt;functional> std::function&lt;void(TreeNode*, string)> dfs = [&](TreeNode* node, string s) { if (!node) return; // ... dfs(node->left, s); // 直接用 dfs，因为 dfs 已经声明了 dfs(node->right, s); }; dfs(root, ""); C++14标准支持 auto dfs = [&](auto&& self, TreeNode* node, string s) -> void { if (!node) return; // ... self(self, node->left, s); // 把自己作为参数传进去 self(self, node->right, s); }; dfs(dfs, root, ""); // 调用时也要把自己传进去 在我的解法实现中采用的是C++14标准的写法。
-一、遍历二叉树 1. 二叉树的前序遍历 法一：DFS
-树的先序遍历的顺序是：根-左-右
-因为树本身就是递归定义的，即树的子树本身就是一棵树，所以树的算法大多通过递归来实现。
-在遍历过程中
-如果当前节点为空，直接返回； 如果当前节点非空，先访问当前节点，然后依次递归访问左右子树 class Solution { vector&lt;int> ans; void dfs(TreeNode* root) { if (root) { ans.push_back(root->val); dfs(root->left); dfs(root->right); } } public: vector&lt;int> preorderTraversal(TreeNode* root) { dfs(root); return ans; } }; 法二：非递归法
+一、遍历二叉树 因为树本身就是递归定义的，即树的子树本身就是一棵树，所以树的算法大多通过递归来实现。
+1. 二叉树的前序遍历 法一：DFS 树的先序遍历的顺序是：根-左-右
+在遍历过程中:
+如果当前节点为空，直接返回； 如果当前节点非空，先访问当前节点，然后依次递归访问左右子树； class Solution { vector&lt;int> ans; void dfs(TreeNode* root) { if (root) { ans.push_back(root->val); dfs(root->left); dfs(root->right); } } public: vector&lt;int> preorderTraversal(TreeNode* root) { dfs(root); return ans; } }; 法二：非递归法
 使用一个栈来实现，对于每个节点先处理当前节点（中），然后依次压入右子树和左子树，根据栈的特点，得到的顺序是先左后右。
 class Solution { public: vector&lt;int> preorderTraversal(TreeNode* root) { vector&lt;int> ans; if (!root) return ans; stack&lt;TreeNode*> st; st.push(root); while (!st.empty()) { auto node = st.top(); st.pop(); if (node) { ans.push_back(node->val); if (node->right) st.push(node->right); if (node->left) st.push(node->left); } } return ans; } }; 2. 二叉树的中序遍历 法一：DFS
-...</p></div><footer class=entry-footer><span title='2026-10-14 22:02:01 +0800 +0800'>October 14, 2026</span>&nbsp;·&nbsp;<span>8 min</span>&nbsp;·&nbsp;<span>1517 words</span></footer><a class=entry-link aria-label="post link to Leetecode 二叉树(一)" href=https://Jiangmmh.github.io/posts/leetecode-tree01/></a></article></main><footer class=footer><span>&copy; 2026 <a href=https://Jiangmmh.github.io/>Minghan的博客</a></span> ·
+...</p></div><footer class=entry-footer><span title='2026-10-14 22:02:01 +0800 +0800'>October 14, 2026</span>&nbsp;·&nbsp;<span>8 min</span>&nbsp;·&nbsp;<span>1579 words</span></footer><a class=entry-link aria-label="post link to Leetecode 二叉树(一)" href=https://Jiangmmh.github.io/posts/leetecode-tree01/></a></article></main><footer class=footer><span>&copy; 2026 <a href=https://Jiangmmh.github.io/>Minghan的博客</a></span> ·
 <span>Powered by
 <a href="https://gohugo.io/?utm_source=papermod" rel=noopener target=_blank>Hugo</a> &
 <a href=https://github.com/adityatelange/hugo-PaperMod/ rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top id=top-link class="top-link hidden" aria-label="go to top" title="Go to Top (Alt + G)" accesskey=g><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevrons-up"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg>
