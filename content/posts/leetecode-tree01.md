@@ -2,7 +2,7 @@
 title: "Leetecode 二叉树(一)"
 date: '2026-10-14T22:02:01+08:00'
 draft: false
-tags: ["二叉树"]
+tags: [二叉树, DFS自顶向下]
 categories: [Leetecode]
 ---
 
@@ -704,8 +704,9 @@ public:
 ```
 
 ## 16. **节点与其祖先之间的最大差值**
+这里主要介绍自顶向下DFS：
 
-这里的最大差值是求绝对值后的结果。因此只需在DFS遍历过程中记录祖先节点的最大值和最小值就可以计算出从根节点当前节点的最大差值。
+最大差值是求绝对值后的结果。因此在DFS “递” 的过程中记录祖先节点的最大值和最小值（作为参数传递）就可以计算出从根节点当前节点的最大差值。
 
 时间复杂度为O(n)，空间复杂度为O(n)。
 
@@ -725,7 +726,7 @@ public:
 
             preMax = max(preMax, x);
             preMin = min(preMin, x);
-
+            
             self(self, node->left, preMax, preMin);
             self(self, node->right, preMax, preMin);
         };

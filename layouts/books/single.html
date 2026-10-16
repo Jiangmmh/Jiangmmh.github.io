@@ -1,0 +1,44 @@
+
+{{ define "main" }}
+<article class="post-single book-single">
+  <header class="post-header">
+    <h1 class="post-title">{{ .Title }}</h1>
+  </header>
+
+  <div class="book-detail">
+    {{ with .Resources.GetMatch "cover.*" }}
+      <img
+        class="book-detail-cover"
+        src="{{ .RelPermalink }}"
+        alt="{{ $.Title }} 封面"
+      >
+    {{ end }}
+
+    <div class="book-detail-info">
+      {{ with .Params.author }}
+        <p><strong>作者：</strong>{{ . }}</p>
+      {{ end }}
+
+      {{ with .Params.publisher }}
+        <p><strong>出版社：</strong>{{ . }}</p>
+      {{ end }}
+
+      {{ with .Params.publicationDate }}
+        <p><strong>出版时间：</strong>{{ . }}</p>
+      {{ end }}
+
+      {{ with .Params.finishDate }}
+        <p><strong>阅读完成：</strong>{{ . | time.Format "2006-01-02" }}</p>
+      {{ end }}
+
+      {{ with .Params.description }}
+        <p>{{ . }}</p>
+      {{ end }}
+    </div>
+  </div>
+
+  <div class="book-content">
+    {{ .Content }}
+  </div>
+</article>
+{{ end }}

@@ -1,0 +1,67 @@
+{{ define "main" }}
+<div class="books-page">
+  <header class="page-header">
+    <h1>{{ .Title }}</h1>
+    {{ with .Description }}
+      <div class="post-description">{{ . }}</div>
+    {{ end }}
+  </header>
+
+  <div class="books-grid">
+    {{ range .RegularPages.ByDate.Reverse }}
+      <a class="book-card" href="{{ .RelPermalink }}">
+        <div class="book-cover">
+          {{ with .Resources.GetMatch "cover.*" }}
+            <img
+              src="{{ .RelPermalink }}"
+              alt="{{ $.Title }} 封面"
+              loading="lazy"
+              decoding="async"
+            >
+          {{ else }}
+            <div class="book-cover-placeholder">
+              暂无封面
+            </div>
+          {{ end }}
+        </div>
+
+        <div class="book-info">
+          <h2>{{ .Title }}</h2>
+
+          {{ with .Params.author }}
+            <p class="book-meta">
+              <strong>作者：</strong>{{ . }}
+            </p>
+          {{ end }}
+
+          {{ with .Params.publisher }}
+            <p class="book-meta">
+              <strong>出版社：</strong>{{ . }}
+            </p>
+          {{ end }}
+
+          {{ with .Params.publicationDate }}
+            <p class="book-meta">
+              <strong>出版时间：</strong>{{ . }}
+            </p>
+          {{ end }}
+
+          {{ with .Params.finishDate }}
+            <p class="book-meta">
+              <strong>阅读完成：</strong>{{ . | time.Format "2006-01-02" }}
+            </p>
+          {{ end }}
+
+          {{ with .Params.description }}
+            <p class="book-description">{{ . }}</p>
+          {{ end }}
+
+          <span class="book-notes-link">查看读书笔记 →</span>
+        </div>
+      </a>
+    {{ else }}
+      <p>还没有添加书籍。</p>
+    {{ end }}
+  </div>
+</div>
+{{ end }}

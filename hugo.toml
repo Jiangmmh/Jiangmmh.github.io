@@ -76,7 +76,13 @@ theme = "PaperMod"
   weight = 60
 
   [[menu.main]]
+  identifier = "books"
+  name = "阅读"
+  url = "/books/"
+  weight = 70
+
+  [[menu.main]]
     identifier = "about"
     name = "关于"
     url = "/about/"
-    weight = 70
+    weight = 80

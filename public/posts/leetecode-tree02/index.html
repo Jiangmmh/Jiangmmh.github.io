@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Leetecode 二叉树(二) | Minghan的博客</title>
+<meta name="keywords" content="二叉树, 自底向上DFS">
+<meta name="description" content="一、自底向上 DFS（后序遍历）
+在二叉树系列的前一篇博客中其实已经提到过了自顶向下和自底向上的区别了，这里再啰嗦一遍。
+
+自顶向下，指从根节点往叶子节点 “递”的过程中 更新结果
+自底向上，指先递归处理叶子节点，在 “归“的过程中 更新结果
+
+21. 二叉树的最大深度
+自底向上的解法：
+先递归得到左右子树各自的最大深度，然后取大者&#43;1作为结果返回。
+时间复杂度：O(n)，空间复杂度：O(n)
+class Solution {
+public:
+    int maxDepth(TreeNode* root) {
+		    // base case
+        if (!root) return 0; 
+
+        // 递归求解左右子树的最大深度
+        int l = maxDepth(root-&gt;left);
+        int r = maxDepth(root-&gt;right);
+
+        return max(l, r) &#43; 1;
+    }
+};
+22. 二叉树的最小深度
+
+注意：最小深度必须从根到叶子，即当一个节点只有一个孩子时，不能直接返回，而是要继续递归直至叶子节点。
+
+自底向上的解法
+有这么几种情况：
+
+当前节点为空，直接返回0
+左子树为空，右子树不为空，返回minDepth(root-&gt;right) &#43; 1
+右子树为空，左子树不为空，返回minDepth(root-&gt;left) &#43; 1
+左右子树均不为空，返回min(min_l, min_r)&#43;1
+
+时间复杂度：O(n)，空间复杂度：O(n)
+class Solution {
+public:
+    int minDepth(TreeNode* root) {
+        if (!root) return 0;
+        if (!root-&gt;left &amp;&amp; root-&gt;right) return minDepth(root-&gt;right) &#43; 1;
+        if (!root-&gt;right &amp;&amp; root-&gt;left) return minDepth(root-&gt;left) &#43; 1;
+
+        int min_l = minDepth(root-&gt;left);
+        int min_r = minDepth(root-&gt;right);
+
+        return min(min_l, min_r)&#43;1;
+    }
+};
+23. 单值二叉树
+题目要求判断树中各节点的值是否均相同，我的思路：
+
+使用变量rootval记录根节点的值（题目保证树非空）
+准备一个初值为true的bool变量ans记录答案
+遍历整棵二叉树，如果发现存在节点值不等于rootval，则将ans置为false
+最后返回ans即可
+
+class Solution {
+public:
+    bool isUnivalTree(TreeNode* root) {
+        // 树非空
+        int rootval = root-&gt;val;
+        bool ans = true;
+
+        auto dfs = [&amp;](auto&amp;&amp; self, TreeNode* node) {
+            if (!node) return;
+            if (node-&gt;val != rootval) {
+                ans = false;
+                return ;
+            }
+            self(self, node-&gt;left);
+            self(self, node-&gt;right);
+        };
+
+        dfs(dfs, root);
+        return ans;
+    }
+};
+24. 相同的树
+题目要求：判断两棵树上对应节点的值是否完全相同">
+<meta name="author" content="">
+<link rel="canonical" href="http://localhost:1313/posts/leetecode-tree02/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.f9490c4bd2e7d3fd9e21909b0bc528878329710db51c69d38b7057b37e889c1d.css" integrity="sha256-&#43;UkMS9Ln0/2eIZCbC8Uoh4MpcQ21HGnTi3BXs36InB0=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/leetecode-tree02/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="http://localhost:1313/posts/leetecode-tree02/">
+  <meta property="og:site_name" content="Minghan的博客">
+  <meta property="og:title" content="Leetecode 二叉树(二)">
+  <meta property="og:description" content="一、自底向上 DFS（后序遍历） 在二叉树系列的前一篇博客中其实已经提到过了自顶向下和自底向上的区别了，这里再啰嗦一遍。
+自顶向下，指从根节点往叶子节点 “递”的过程中 更新结果 自底向上，指先递归处理叶子节点，在 “归“的过程中 更新结果 21. 二叉树的最大深度 自底向上的解法：
+先递归得到左右子树各自的最大深度，然后取大者&#43;1作为结果返回。
+时间复杂度：O(n)，空间复杂度：O(n)
+class Solution { public: int maxDepth(TreeNode* root) { // base case if (!root) return 0; // 递归求解左右子树的最大深度 int l = maxDepth(root-&gt;left); int r = maxDepth(root-&gt;right); return max(l, r) &#43; 1; } }; 22. 二叉树的最小深度 注意：最小深度必须从根到叶子，即当一个节点只有一个孩子时，不能直接返回，而是要继续递归直至叶子节点。
+自底向上的解法
+有这么几种情况：
+当前节点为空，直接返回0 左子树为空，右子树不为空，返回minDepth(root-&gt;right) &#43; 1 右子树为空，左子树不为空，返回minDepth(root-&gt;left) &#43; 1 左右子树均不为空，返回min(min_l, min_r)&#43;1 时间复杂度：O(n)，空间复杂度：O(n)
+class Solution { public: int minDepth(TreeNode* root) { if (!root) return 0; if (!root-&gt;left &amp;&amp; root-&gt;right) return minDepth(root-&gt;right) &#43; 1; if (!root-&gt;right &amp;&amp; root-&gt;left) return minDepth(root-&gt;left) &#43; 1; int min_l = minDepth(root-&gt;left); int min_r = minDepth(root-&gt;right); return min(min_l, min_r)&#43;1; } }; 23. 单值二叉树 题目要求判断树中各节点的值是否均相同，我的思路：
+使用变量rootval记录根节点的值（题目保证树非空） 准备一个初值为true的bool变量ans记录答案 遍历整棵二叉树，如果发现存在节点值不等于rootval，则将ans置为false 最后返回ans即可 class Solution { public: bool isUnivalTree(TreeNode* root) { // 树非空 int rootval = root-&gt;val; bool ans = true; auto dfs = [&amp;](auto&amp;&amp; self, TreeNode* node) { if (!node) return; if (node-&gt;val != rootval) { ans = false; return ; } self(self, node-&gt;left); self(self, node-&gt;right); }; dfs(dfs, root); return ans; } }; 24. 相同的树 题目要求：判断两棵树上对应节点的值是否完全相同">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-10-16T11:20:25+08:00">
+    <meta property="article:modified_time" content="2026-10-16T11:20:25+08:00">
+    <meta property="article:tag" content="二叉树">
+    <meta property="article:tag" content="自底向上DFS">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Leetecode 二叉树(二)">
+  <meta name="twitter:description" content="一、自底向上 DFS（后序遍历） 在二叉树系列的前一篇博客中其实已经提到过了自顶向下和自底向上的区别了，这里再啰嗦一遍。
+自顶向下，指从根节点往叶子节点 “递”的过程中 更新结果 自底向上，指先递归处理叶子节点，在 “归“的过程中 更新结果 21. 二叉树的最大深度 自底向上的解法：
+先递归得到左右子树各自的最大深度，然后取大者&#43;1作为结果返回。
+时间复杂度：O(n)，空间复杂度：O(n)
+class Solution { public: int maxDepth(TreeNode* root) { // base case if (!root) return 0; // 递归求解左右子树的最大深度 int l = maxDepth(root-&gt;left); int r = maxDepth(root-&gt;right); return max(l, r) &#43; 1; } }; 22. 二叉树的最小深度 注意：最小深度必须从根到叶子，即当一个节点只有一个孩子时，不能直接返回，而是要继续递归直至叶子节点。
+自底向上的解法
+有这么几种情况：
+当前节点为空，直接返回0 左子树为空，右子树不为空，返回minDepth(root-&gt;right) &#43; 1 右子树为空，左子树不为空，返回minDepth(root-&gt;left) &#43; 1 左右子树均不为空，返回min(min_l, min_r)&#43;1 时间复杂度：O(n)，空间复杂度：O(n)
+class Solution { public: int minDepth(TreeNode* root) { if (!root) return 0; if (!root-&gt;left &amp;&amp; root-&gt;right) return minDepth(root-&gt;right) &#43; 1; if (!root-&gt;right &amp;&amp; root-&gt;left) return minDepth(root-&gt;left) &#43; 1; int min_l = minDepth(root-&gt;left); int min_r = minDepth(root-&gt;right); return min(min_l, min_r)&#43;1; } }; 23. 单值二叉树 题目要求判断树中各节点的值是否均相同，我的思路：
+使用变量rootval记录根节点的值（题目保证树非空） 准备一个初值为true的bool变量ans记录答案 遍历整棵二叉树，如果发现存在节点值不等于rootval，则将ans置为false 最后返回ans即可 class Solution { public: bool isUnivalTree(TreeNode* root) { // 树非空 int rootval = root-&gt;val; bool ans = true; auto dfs = [&amp;](auto&amp;&amp; self, TreeNode* node) { if (!node) return; if (node-&gt;val != rootval) { ans = false; return ; } self(self, node-&gt;left); self(self, node-&gt;right); }; dfs(dfs, root); return ans; } }; 24. 相同的树 题目要求：判断两棵树上对应节点的值是否完全相同">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "http://localhost:1313/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Leetecode 二叉树(二)",
+      "item": "http://localhost:1313/posts/leetecode-tree02/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Leetecode 二叉树(二)",
+  "name": "Leetecode 二叉树(二)",
+  "description": "一、自底向上 DFS（后序遍历） 在二叉树系列的前一篇博客中其实已经提到过了自顶向下和自底向上的区别了，这里再啰嗦一遍。\n自顶向下，指从根节点往叶子节点 “递”的过程中 更新结果 自底向上，指先递归处理叶子节点，在 “归“的过程中 更新结果 21. 二叉树的最大深度 自底向上的解法：\n先递归得到左右子树各自的最大深度，然后取大者+1作为结果返回。\n时间复杂度：O(n)，空间复杂度：O(n)\nclass Solution { public: int maxDepth(TreeNode* root) { // base case if (!root) return 0; // 递归求解左右子树的最大深度 int l = maxDepth(root-\u0026gt;left); int r = maxDepth(root-\u0026gt;right); return max(l, r) + 1; } }; 22. 二叉树的最小深度 注意：最小深度必须从根到叶子，即当一个节点只有一个孩子时，不能直接返回，而是要继续递归直至叶子节点。\n自底向上的解法\n有这么几种情况：\n当前节点为空，直接返回0 左子树为空，右子树不为空，返回minDepth(root-\u0026gt;right) + 1 右子树为空，左子树不为空，返回minDepth(root-\u0026gt;left) + 1 左右子树均不为空，返回min(min_l, min_r)+1 时间复杂度：O(n)，空间复杂度：O(n)\nclass Solution { public: int minDepth(TreeNode* root) { if (!root) return 0; if (!root-\u0026gt;left \u0026amp;\u0026amp; root-\u0026gt;right) return minDepth(root-\u0026gt;right) + 1; if (!root-\u0026gt;right \u0026amp;\u0026amp; root-\u0026gt;left) return minDepth(root-\u0026gt;left) + 1; int min_l = minDepth(root-\u0026gt;left); int min_r = minDepth(root-\u0026gt;right); return min(min_l, min_r)+1; } }; 23. 单值二叉树 题目要求判断树中各节点的值是否均相同，我的思路：\n使用变量rootval记录根节点的值（题目保证树非空） 准备一个初值为true的bool变量ans记录答案 遍历整棵二叉树，如果发现存在节点值不等于rootval，则将ans置为false 最后返回ans即可 class Solution { public: bool isUnivalTree(TreeNode* root) { // 树非空 int rootval = root-\u0026gt;val; bool ans = true; auto dfs = [\u0026amp;](auto\u0026amp;\u0026amp; self, TreeNode* node) { if (!node) return; if (node-\u0026gt;val != rootval) { ans = false; return ; } self(self, node-\u0026gt;left); self(self, node-\u0026gt;right); }; dfs(dfs, root); return ans; } }; 24. 相同的树 题目要求：判断两棵树上对应节点的值是否完全相同\n",
+  "keywords": [
+    "二叉树", "自底向上DFS"
+  ],
+  "articleBody": "一、自底向上 DFS（后序遍历） 在二叉树系列的前一篇博客中其实已经提到过了自顶向下和自底向上的区别了，这里再啰嗦一遍。\n自顶向下，指从根节点往叶子节点 “递”的过程中 更新结果 自底向上，指先递归处理叶子节点，在 “归“的过程中 更新结果 21. 二叉树的最大深度 自底向上的解法：\n先递归得到左右子树各自的最大深度，然后取大者+1作为结果返回。\n时间复杂度：O(n)，空间复杂度：O(n)\nclass Solution { public: int maxDepth(TreeNode* root) { // base case if (!root) return 0; // 递归求解左右子树的最大深度 int l = maxDepth(root-\u003eleft); int r = maxDepth(root-\u003eright); return max(l, r) + 1; } }; 22. 二叉树的最小深度 注意：最小深度必须从根到叶子，即当一个节点只有一个孩子时，不能直接返回，而是要继续递归直至叶子节点。\n自底向上的解法\n有这么几种情况：\n当前节点为空，直接返回0 左子树为空，右子树不为空，返回minDepth(root-\u003eright) + 1 右子树为空，左子树不为空，返回minDepth(root-\u003eleft) + 1 左右子树均不为空，返回min(min_l, min_r)+1 时间复杂度：O(n)，空间复杂度：O(n)\nclass Solution { public: int minDepth(TreeNode* root) { if (!root) return 0; if (!root-\u003eleft \u0026\u0026 root-\u003eright) return minDepth(root-\u003eright) + 1; if (!root-\u003eright \u0026\u0026 root-\u003eleft) return minDepth(root-\u003eleft) + 1; int min_l = minDepth(root-\u003eleft); int min_r = minDepth(root-\u003eright); return min(min_l, min_r)+1; } }; 23. 单值二叉树 题目要求判断树中各节点的值是否均相同，我的思路：\n使用变量rootval记录根节点的值（题目保证树非空） 准备一个初值为true的bool变量ans记录答案 遍历整棵二叉树，如果发现存在节点值不等于rootval，则将ans置为false 最后返回ans即可 class Solution { public: bool isUnivalTree(TreeNode* root) { // 树非空 int rootval = root-\u003eval; bool ans = true; auto dfs = [\u0026](auto\u0026\u0026 self, TreeNode* node) { if (!node) return; if (node-\u003eval != rootval) { ans = false; return ; } self(self, node-\u003eleft); self(self, node-\u003eright); }; dfs(dfs, root); return ans; } }; 24. 相同的树 题目要求：判断两棵树上对应节点的值是否完全相同\n思路：递归比较\n如果p和q中有一棵树为空，那么只有两棵树均为空才可能返回true 如果p和q的值不等，直接返回false 依次递归比较p和q的左子树、右子树，两者均需要返回true才算相同 class Solution { public: bool isSameTree(TreeNode* p, TreeNode* q) { if (!p || !q) return p == q; if (p-\u003eval != q-\u003eval) return false; return isSameTree(p-\u003eleft, q-\u003eleft) \u0026\u0026 isSameTree(p-\u003eright, q-\u003eright); } }; 25. 对称二叉树 题目要求：判断一棵树是否对称，即对于任意子树，其左右子树对应节点的值均相同。\n思路：同上题\n如果p和q中有一棵树为空，那么只有两棵树均为空才可能返回true 如果p和q的值不等，直接返回false 在递归比较时，注意p的左子树要与q的右子树比较，p的右子树要与q的左子树比较 class Solution { public: bool isSymmetric(TreeNode* root) { auto dfs = [\u0026](auto\u0026\u0026 self, TreeNode* p, TreeNode *q) { if (!p || !q) return p == q; if (p-\u003eval != q-\u003eval) return false; return self(self, p-\u003eleft, q-\u003eright) \u0026\u0026 self(self, p-\u003eright, q-\u003eleft); }; return dfs(dfs, root-\u003eleft, root-\u003eright); } }; 27. 翻转等价二叉树 题目要求：判断两棵二叉树能否在若干次翻转后等价\n注意这里所谓的翻转后等价，其实就是指两棵树对称或直接等价。\n有了前面两道题的经验，写出来不难。\nclass Solution { public: bool flipEquiv(TreeNode* root1, TreeNode* root2) { if (!root1 || !root2) return root1 == root2; if (root1-\u003eval != root2-\u003eval) return false; return (flipEquiv(root1-\u003eleft, root2-\u003eleft) \u0026\u0026 flipEquiv(root1-\u003eright, root2-\u003eright)) || (flipEquiv(root1-\u003eleft, root2-\u003eright) \u0026\u0026 flipEquiv(root1-\u003eright, root2-\u003eleft)); } }; 28. 找出克隆二叉树中的相同节点 思路：直接递归搜索树cloned，从中找到值与target相同的节点，返回其指针即可。\nclass Solution { public: TreeNode* getTargetCopy(TreeNode* original, TreeNode* cloned, TreeNode* target) { TreeNode* ans = nullptr; auto dfs = [\u0026](auto\u0026\u0026 self, TreeNode* c) { if (!c) return ; if (c-\u003eval == target-\u003eval) { ans = c; return ; } self(self, c-\u003eleft); self(self, c-\u003eright); }; dfs(dfs, cloned); return ans; } }; 29. 平衡二叉树 要求：判断一棵二叉树是否平衡。\n思路：当前树的深度 等于 左子树的深度 与 右子树的深度 中的 最大值 +1 。\n解法一：自顶向下递归\n编写一个求二叉树最大深度的函数，分别计算出左右子树的深度，要求差值不超过1，再递归判断左右子树是否平衡。\n时间复杂度：O(nlogn)，空间复杂度：O(n)\nclass Solution { public: bool isBalanced(TreeNode* root) { if (root == nullptr) return true; return abs(depth(root-\u003eleft) - depth(root-\u003eright)) \u003c 2 \u0026\u0026 isBalanced(root-\u003eleft) \u0026\u0026 isBalanced(root-\u003eright); } private: int depth(TreeNode* root) { if (root == nullptr) return 0; return max(depth(root-\u003eleft), depth(root-\u003eright)) + 1; } }; 解法二：自底向上递归\n解法一采用是自顶向下的思路，其中会反复调用depth求树的深度，而很多depth操作都是重复的、不必要的。因此考虑自底向上的思路，在判断子树是否平衡的同时，不断将当前深度往上传，而不是每次都从上到下求深度。\n这里定义了一个函数dfs，它的作用有两点：\n判断是否平衡，如果发现树不平衡就直接返回-1 如果树暂时平衡，则向上返回当前的深度 时间复杂度：O(n)，空间复杂度：O(n)\nclass Solution { public: bool isBalanced(TreeNode* root) { auto dfs = [\u0026](auto\u0026\u0026 self, TreeNode* node) -\u003e int { if (!node) return 0; // 判断左子树是否平衡+求深度 int l = self(self, node-\u003eleft); if (l == -1) return -1; // 及时剪枝 // 判断右子树是否平衡+求深度 int r = self(self, node-\u003eright); if (r == -1) return -1; // 及时剪枝 // 先判断平衡，如果平衡就返回最大深度，否则返回-1表示不平衡 return abs(l - r) \u003c 2 ? max(l, r) + 1 : -1; }; return dfs(dfs, root) != -1; } }; 30. 翻转二叉树 题目要求：翻转整棵二叉树，对于每个节点都调换左右子树。\n思路：先反转左右子树，然后再更新根节点的指针。\nclass Solution { public: TreeNode* invertTree(TreeNode* root) { if (!root) return root; // 先对左右子树进行翻转 auto l = invertTree(root-\u003eleft); auto r = invertTree(root-\u003eright); // 再调换当前节点的左右子树 root-\u003eleft = r; root-\u003eright = l; return root; } }; 31. 合并二叉树 题目要求：合并两颗二叉树对应位置的节点，如果节点均存在就求和。\n思路：将root1作为要返回的二叉树，同步遍历两棵树：\n如果两棵树均为空，返回nullptr 如果有一个颗树为空，返回另一棵树 否则，将root2上的值加到root1中，然后递归处理左右子树 最后返回root1 class Solution { public: TreeNode* mergeTrees(TreeNode* root1, TreeNode* root2) { if (!root1 \u0026\u0026 !root2) return nullptr; if (!root1 \u0026\u0026 root2) return root2; if (!root2 \u0026\u0026 root1) return root1; root1-\u003eval += root2-\u003eval; root1-\u003eleft = mergeTrees(root1-\u003eleft, root2-\u003eleft); root1-\u003eright = mergeTrees(root1-\u003eright, root2-\u003eright); return root1; } }; 32. 计算布尔二叉树的值 典型的自底向上DFS，对于任意一个分支节点（运算符），要计算以它为根的子树的值，就必须先计算出其左右子树的结果，再用该节点的运算符进行计算。\nclass Solution { public: bool evaluateTree(TreeNode* root) { if (root-\u003eval == 0) return false; if (root-\u003eval == 1) return true; if (root-\u003eval == 2) { return evaluateTree(root-\u003eleft) || evaluateTree(root-\u003eright); } if (root-\u003eval == 3) { return evaluateTree(root-\u003eleft) \u0026\u0026 evaluateTree(root-\u003eright); } return false; } }; 33. 出现次数最多的子树元素和 思路：自底向上递归求树的和，在递归过程中使用哈希表mp记录所有子树的和出现的次数，并使用变量cnt记录所遇到的出现次数最多的子树和。\n最后将哈希表中所有出现次数为cnt的和全部加入结果集ans并返回。\nclass Solution { public: vector\u003cint\u003e findFrequentTreeSum(TreeNode* root) { unordered_map\u003cint, int\u003e mp; int cnt = 0; auto dfs = [\u0026](auto\u0026\u0026 self, TreeNode* node) -\u003e int { if (!node) return 0; int sl = self(self, node-\u003eleft); int sr = self(self, node-\u003eright); int sum = sl + sr + node-\u003eval; mp[sum]++; cnt = max(cnt, mp[sum]); return sum; }; vector\u003cint\u003e ans; dfs(dfs, root); for (auto item : mp) { if (item.second == cnt) { ans.push_back(item.first); } } return ans; } }; 34. ",
+  "wordCount" : "706",
+  "inLanguage": "en",
+  "datePublished": "2026-10-16T11:20:25+08:00",
+  "dateModified": "2026-10-16T11:20:25+08:00",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "http://localhost:1313/posts/leetecode-tree02/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Minghan的博客",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "http://localhost:1313/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="header-nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="Minghan的博客 (Alt + H)">Minghan的博客</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" class="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg class="sun" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu" class="menu">
+            <li>
+                <a href="http://localhost:1313/posts/" title="文章">
+                    <span>文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/archives/" title="归档">
+                    <span>归档</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/categories/" title="分类">
+                    <span>分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/moments/" title="随记">
+                    <span>随记</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="标签">
+                    <span>标签</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/photos/" title="照片墙">
+                    <span>照片墙</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/books/" title="阅读">
+                    <span>阅读</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/about/" title="关于">
+                    <span>关于</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <nav class="breadcrumbs" role="navigation" aria-label="Breadcrumb">
+            <a href="/">Home</a>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+            <a href="/posts/">Posts</a>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+        <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+</nav>
+    <h1 class="post-title entry-hint-parent">
+      Leetecode 二叉树(二)
+    </h1>
+    <div class="post-meta">
+
+<span title='2026-10-16 11:20:25 +0800 CST'>October 16, 2026</span>&nbsp;·&nbsp;<span>4 min</span>&nbsp;·&nbsp;<span>706 words</span>
+
+</div>
+  </header> <details class="toc"  open>
+    <summary accesskey="c" title="(Alt + C)">
+        <span class="title">Table of Contents</span>
+    </summary>
+
+    <div class="inner"><ul>
+            <li>
+                <a href="#%e4%b8%80%e8%87%aa%e5%ba%95%e5%90%91%e4%b8%8a-dfs%e5%90%8e%e5%ba%8f%e9%81%8d%e5%8e%86" aria-label="一、自底向上 DFS（后序遍历）">一、自底向上 DFS（后序遍历）</a><ul>
+                    
+            <li>
+                <a href="#21-%e4%ba%8c%e5%8f%89%e6%a0%91%e7%9a%84%e6%9c%80%e5%a4%a7%e6%b7%b1%e5%ba%a6" aria-label="21. 二叉树的最大深度">21. 二叉树的最大深度</a></li>
+            <li>
+                <a href="#22-%e4%ba%8c%e5%8f%89%e6%a0%91%e7%9a%84%e6%9c%80%e5%b0%8f%e6%b7%b1%e5%ba%a6" aria-label="22. 二叉树的最小深度">22. 二叉树的最小深度</a></li>
+            <li>
+                <a href="#23-%e5%8d%95%e5%80%bc%e4%ba%8c%e5%8f%89%e6%a0%91" aria-label="23. 单值二叉树">23. 单值二叉树</a></li>
+            <li>
+                <a href="#24-%e7%9b%b8%e5%90%8c%e7%9a%84%e6%a0%91" aria-label="24. 相同的树">24. 相同的树</a></li>
+            <li>
+                <a href="#25-%e5%af%b9%e7%a7%b0%e4%ba%8c%e5%8f%89%e6%a0%91" aria-label="25. 对称二叉树">25. 对称二叉树</a></li>
+            <li>
+                <a href="#27-%e7%bf%bb%e8%bd%ac%e7%ad%89%e4%bb%b7%e4%ba%8c%e5%8f%89%e6%a0%91" aria-label="27. 翻转等价二叉树">27. 翻转等价二叉树</a></li>
+            <li>
+                <a href="#28-%e6%89%be%e5%87%ba%e5%85%8b%e9%9a%86%e4%ba%8c%e5%8f%89%e6%a0%91%e4%b8%ad%e7%9a%84%e7%9b%b8%e5%90%8c%e8%8a%82%e7%82%b9" aria-label="28. 找出克隆二叉树中的相同节点">28. 找出克隆二叉树中的相同节点</a></li>
+            <li>
+                <a href="#29-%e5%b9%b3%e8%a1%a1%e4%ba%8c%e5%8f%89%e6%a0%91" aria-label="29. 平衡二叉树">29. 平衡二叉树</a></li>
+            <li>
+                <a href="#30-%e7%bf%bb%e8%bd%ac%e4%ba%8c%e5%8f%89%e6%a0%91" aria-label="30. 翻转二叉树">30. 翻转二叉树</a></li>
+            <li>
+                <a href="#31-%e5%90%88%e5%b9%b6%e4%ba%8c%e5%8f%89%e6%a0%91" aria-label="31. 合并二叉树">31. 合并二叉树</a></li>
+            <li>
+                <a href="#32-%e8%ae%a1%e7%ae%97%e5%b8%83%e5%b0%94%e4%ba%8c%e5%8f%89%e6%a0%91%e7%9a%84%e5%80%bc" aria-label="32. 计算布尔二叉树的值">32. 计算布尔二叉树的值</a></li>
+            <li>
+                <a href="#33-%e5%87%ba%e7%8e%b0%e6%ac%a1%e6%95%b0%e6%9c%80%e5%a4%9a%e7%9a%84%e5%ad%90%e6%a0%91%e5%85%83%e7%b4%a0%e5%92%8c" aria-label="33. 出现次数最多的子树元素和">33. 出现次数最多的子树元素和</a></li>
+            <li>
+                <a href="#34" aria-label="34.">34.</a>
+            </li>
+        </ul>
+        </li>
+        </ul>
+    </div>
+</details>
+
+  <div class="post-content md-content"><h1 id="一自底向上-dfs后序遍历">一、<strong>自底向上 DFS（后序遍历）</strong><a hidden class="anchor" aria-hidden="true" href="#一自底向上-dfs后序遍历">#</a></h1>
+<p>在二叉树系列的前一篇博客中其实已经提到过了自顶向下和自底向上的区别了，这里再啰嗦一遍。</p>
+<ul>
+<li>自顶向下，指从根节点往叶子节点 <strong>“递”的过程中</strong> 更新结果</li>
+<li>自底向上，指先递归处理叶子节点，在 <strong>“归“的过程中</strong> 更新结果</li>
+</ul>
+<h2 id="21-二叉树的最大深度">21. <strong>二叉树的最大深度</strong><a hidden class="anchor" aria-hidden="true" href="#21-二叉树的最大深度">#</a></h2>
+<p><strong>自底向上的解法：</strong></p>
+<p>先递归得到左右子树各自的最大深度，然后取大者+1作为结果返回。</p>
+<p>时间复杂度：O(n)，空间复杂度：O(n)</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Solution</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">maxDepth</span><span class="p">(</span><span class="n">TreeNode</span><span class="o">*</span> <span class="n">root</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		    <span class="c1">// base case
+</span></span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">root</span><span class="p">)</span> <span class="k">return</span> <span class="mi">0</span><span class="p">;</span> 
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">// 递归求解左右子树的最大深度
+</span></span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">l</span> <span class="o">=</span> <span class="n">maxDepth</span><span class="p">(</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">r</span> <span class="o">=</span> <span class="n">maxDepth</span><span class="p">(</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nf">max</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></div><h2 id="22-二叉树的最小深度">22. <strong>二叉树的最小深度</strong><a hidden class="anchor" aria-hidden="true" href="#22-二叉树的最小深度">#</a></h2>
+<blockquote>
+<p>注意：最小深度必须从根到叶子，即当一个节点只有一个孩子时，不能直接返回，而是要继续递归直至叶子节点。</p>
+</blockquote>
+<p><strong>自底向上的解法</strong></p>
+<p>有这么几种情况：</p>
+<ul>
+<li>当前节点为空，直接返回0</li>
+<li><strong>左子树为空，右子树不为空</strong>，返回minDepth(root-&gt;right) + 1</li>
+<li><strong>右子树为空，左子树不为空</strong>，返回minDepth(root-&gt;left) + 1</li>
+<li>左右子树均不为空，返回min(min_l, min_r)+1</li>
+</ul>
+<p>时间复杂度：O(n)，空间复杂度：O(n)</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Solution</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">minDepth</span><span class="p">(</span><span class="n">TreeNode</span><span class="o">*</span> <span class="n">root</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">root</span><span class="p">)</span> <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">left</span> <span class="o">&amp;&amp;</span> <span class="n">root</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">)</span> <span class="k">return</span> <span class="n">minDepth</span><span class="p">(</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">right</span> <span class="o">&amp;&amp;</span> <span class="n">root</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">)</span> <span class="k">return</span> <span class="n">minDepth</span><span class="p">(</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">min_l</span> <span class="o">=</span> <span class="n">minDepth</span><span class="p">(</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">min_r</span> <span class="o">=</span> <span class="n">minDepth</span><span class="p">(</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nf">min</span><span class="p">(</span><span class="n">min_l</span><span class="p">,</span> <span class="n">min_r</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></div><h2 id="23-单值二叉树">23. <strong>单值二叉树</strong><a hidden class="anchor" aria-hidden="true" href="#23-单值二叉树">#</a></h2>
+<p>题目要求判断树中各节点的值是否均相同，我的思路：</p>
+<ul>
+<li>使用变量rootval记录根节点的值（题目保证树非空）</li>
+<li>准备一个初值为true的bool变量ans记录答案</li>
+<li>遍历整棵二叉树，如果发现存在节点值不等于rootval，则将ans置为false</li>
+<li>最后返回ans即可</li>
+</ul>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Solution</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">bool</span> <span class="n">isUnivalTree</span><span class="p">(</span><span class="n">TreeNode</span><span class="o">*</span> <span class="n">root</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// 树非空
+</span></span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">rootval</span> <span class="o">=</span> <span class="n">root</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">bool</span> <span class="n">ans</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">auto</span> <span class="n">dfs</span> <span class="o">=</span> <span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="k">auto</span><span class="o">&amp;&amp;</span> <span class="n">self</span><span class="p">,</span> <span class="n">TreeNode</span><span class="o">*</span> <span class="n">node</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">node</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">node</span><span class="o">-&gt;</span><span class="n">val</span> <span class="o">!=</span> <span class="n">rootval</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">ans</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                <span class="k">return</span> <span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">dfs</span><span class="p">(</span><span class="n">dfs</span><span class="p">,</span> <span class="n">root</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">ans</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></div><h2 id="24-相同的树">24. <strong>相同的树</strong><a hidden class="anchor" aria-hidden="true" href="#24-相同的树">#</a></h2>
+<p>题目要求：判断两棵树上对应节点的值是否完全相同</p>
+<p>思路：递归比较</p>
+<ul>
+<li>如果p和q中有一棵树为空，那么只有两棵树均为空才可能返回true</li>
+<li>如果p和q的值不等，直接返回false</li>
+<li>依次递归比较p和q的左子树、右子树，两者均需要返回true才算相同</li>
+</ul>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Solution</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">bool</span> <span class="n">isSameTree</span><span class="p">(</span><span class="n">TreeNode</span><span class="o">*</span> <span class="n">p</span><span class="p">,</span> <span class="n">TreeNode</span><span class="o">*</span> <span class="n">q</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">p</span> <span class="o">||</span> <span class="o">!</span><span class="n">q</span><span class="p">)</span> <span class="k">return</span> <span class="n">p</span> <span class="o">==</span> <span class="n">q</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">p</span><span class="o">-&gt;</span><span class="n">val</span> <span class="o">!=</span> <span class="n">q</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">)</span> <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nf">isSameTree</span><span class="p">(</span><span class="n">p</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">,</span> <span class="n">q</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">)</span> 
+</span></span><span class="line"><span class="cl">            <span class="o">&amp;&amp;</span> <span class="n">isSameTree</span><span class="p">(</span><span class="n">p</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">,</span> <span class="n">q</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></div><h2 id="25-对称二叉树">25. <strong>对称二叉树</strong><a hidden class="anchor" aria-hidden="true" href="#25-对称二叉树">#</a></h2>
+<p>题目要求：判断一棵树是否对称，即对于任意子树，其左右子树对应节点的值均相同。</p>
+<p>思路：同上题</p>
+<ul>
+<li>如果p和q中有一棵树为空，那么只有两棵树均为空才可能返回true</li>
+<li>如果p和q的值不等，直接返回false</li>
+<li>在递归比较时，注意p的左子树要与q的右子树比较，p的右子树要与q的左子树比较</li>
+</ul>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Solution</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">bool</span> <span class="n">isSymmetric</span><span class="p">(</span><span class="n">TreeNode</span><span class="o">*</span> <span class="n">root</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">auto</span> <span class="n">dfs</span> <span class="o">=</span> <span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="k">auto</span><span class="o">&amp;&amp;</span> <span class="n">self</span><span class="p">,</span> <span class="n">TreeNode</span><span class="o">*</span> <span class="n">p</span><span class="p">,</span> <span class="n">TreeNode</span> <span class="o">*</span><span class="n">q</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">p</span> <span class="o">||</span> <span class="o">!</span><span class="n">q</span><span class="p">)</span> <span class="k">return</span> <span class="n">p</span> <span class="o">==</span> <span class="n">q</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">p</span><span class="o">-&gt;</span><span class="n">val</span> <span class="o">!=</span> <span class="n">q</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">)</span> <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="nf">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">p</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">,</span> <span class="n">q</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                <span class="o">&amp;&amp;</span> <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">p</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">,</span> <span class="n">q</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nf">dfs</span><span class="p">(</span><span class="n">dfs</span><span class="p">,</span> <span class="n">root</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">,</span> <span class="n">root</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></div><h2 id="27-翻转等价二叉树">27. <strong>翻转等价二叉树</strong><a hidden class="anchor" aria-hidden="true" href="#27-翻转等价二叉树">#</a></h2>
+<p>题目要求：判断两棵二叉树能否在若干次翻转后等价</p>
+<blockquote>
+<p>注意这里所谓的翻转后等价，其实就是指两棵树对称或直接等价。</p>
+</blockquote>
+<p>有了前面两道题的经验，写出来不难。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Solution</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">bool</span> <span class="n">flipEquiv</span><span class="p">(</span><span class="n">TreeNode</span><span class="o">*</span> <span class="n">root1</span><span class="p">,</span> <span class="n">TreeNode</span><span class="o">*</span> <span class="n">root2</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">root1</span> <span class="o">||</span> <span class="o">!</span><span class="n">root2</span><span class="p">)</span> <span class="k">return</span> <span class="n">root1</span> <span class="o">==</span> <span class="n">root2</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">root1</span><span class="o">-&gt;</span><span class="n">val</span> <span class="o">!=</span> <span class="n">root2</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">)</span> <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> 
+</span></span><span class="line"><span class="cl">            <span class="p">(</span><span class="n">flipEquiv</span><span class="p">(</span><span class="n">root1</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">,</span> <span class="n">root2</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">flipEquiv</span><span class="p">(</span><span class="n">root1</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">,</span> <span class="n">root2</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">))</span> <span class="o">||</span>
+</span></span><span class="line"><span class="cl">            <span class="p">(</span><span class="n">flipEquiv</span><span class="p">(</span><span class="n">root1</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">,</span> <span class="n">root2</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">flipEquiv</span><span class="p">(</span><span class="n">root1</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">,</span> <span class="n">root2</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></div><h2 id="28-找出克隆二叉树中的相同节点">28. <strong>找出克隆二叉树中的相同节点</strong><a hidden class="anchor" aria-hidden="true" href="#28-找出克隆二叉树中的相同节点">#</a></h2>
+<p>思路：直接递归搜索树cloned，从中找到值与target相同的节点，返回其指针即可。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Solution</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">TreeNode</span><span class="o">*</span> <span class="n">getTargetCopy</span><span class="p">(</span><span class="n">TreeNode</span><span class="o">*</span> <span class="n">original</span><span class="p">,</span> <span class="n">TreeNode</span><span class="o">*</span> <span class="n">cloned</span><span class="p">,</span> <span class="n">TreeNode</span><span class="o">*</span> <span class="n">target</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">TreeNode</span><span class="o">*</span> <span class="n">ans</span> <span class="o">=</span> <span class="k">nullptr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        
+</span></span><span class="line"><span class="cl">        <span class="k">auto</span> <span class="n">dfs</span> <span class="o">=</span> <span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="k">auto</span><span class="o">&amp;&amp;</span> <span class="n">self</span><span class="p">,</span> <span class="n">TreeNode</span><span class="o">*</span> <span class="n">c</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">c</span><span class="p">)</span> <span class="k">return</span> <span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">val</span> <span class="o">==</span> <span class="n">target</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">ans</span> <span class="o">=</span> <span class="n">c</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                <span class="k">return</span> <span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">c</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">c</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">dfs</span><span class="p">(</span><span class="n">dfs</span><span class="p">,</span> <span class="n">cloned</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">ans</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></div><h2 id="29-平衡二叉树">29. 平衡二叉树<a hidden class="anchor" aria-hidden="true" href="#29-平衡二叉树">#</a></h2>
+<p>要求：判断一棵二叉树是否平衡。</p>
+<p>思路：<strong>当前树的深度</strong> 等于 <strong>左子树的深度</strong> 与 <strong>右子树的深度</strong> 中的 <strong>最大值</strong> +1 。</p>
+<p><strong>解法一：自顶向下递归</strong></p>
+<p>编写一个求二叉树最大深度的函数，分别计算出左右子树的深度，要求差值不超过1，再递归判断左右子树是否平衡。</p>
+<p>时间复杂度：O(nlogn)，空间复杂度：O(n)</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Solution</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">bool</span> <span class="n">isBalanced</span><span class="p">(</span><span class="n">TreeNode</span><span class="o">*</span> <span class="n">root</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">==</span> <span class="k">nullptr</span><span class="p">)</span> <span class="k">return</span> <span class="nb">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nf">abs</span><span class="p">(</span><span class="n">depth</span><span class="p">(</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">)</span> <span class="o">-</span> <span class="n">depth</span><span class="p">(</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mi">2</span>
+</span></span><span class="line"><span class="cl">	          <span class="o">&amp;&amp;</span> <span class="n">isBalanced</span><span class="p">(</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">isBalanced</span><span class="p">(</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="k">private</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">depth</span><span class="p">(</span><span class="n">TreeNode</span><span class="o">*</span> <span class="n">root</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">==</span> <span class="k">nullptr</span><span class="p">)</span> <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nf">max</span><span class="p">(</span><span class="n">depth</span><span class="p">(</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">),</span> <span class="n">depth</span><span class="p">(</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></div><p><strong>解法二：自底向上递归</strong></p>
+<p>解法一采用是自顶向下的思路，其中会反复调用depth求树的深度，而很多depth操作都是重复的、不必要的。因此考虑自底向上的思路，在判断子树是否平衡的同时，不断将当前深度往上传，而不是每次都从上到下求深度。</p>
+<p>这里定义了一个函数dfs，它的作用有两点：</p>
+<ul>
+<li>判断是否平衡，如果发现树不平衡就直接返回-1</li>
+<li>如果树暂时平衡，则向上返回当前的深度</li>
+</ul>
+<p>时间复杂度：O(n)，空间复杂度：O(n)</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Solution</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">bool</span> <span class="n">isBalanced</span><span class="p">(</span><span class="n">TreeNode</span><span class="o">*</span> <span class="n">root</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">auto</span> <span class="n">dfs</span> <span class="o">=</span> <span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="k">auto</span><span class="o">&amp;&amp;</span> <span class="n">self</span><span class="p">,</span> <span class="n">TreeNode</span><span class="o">*</span> <span class="n">node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">node</span><span class="p">)</span> <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="c1">// 判断左子树是否平衡+求深度
+</span></span></span><span class="line"><span class="cl">            <span class="kt">int</span> <span class="n">l</span> <span class="o">=</span> <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">l</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span> <span class="c1">// 及时剪枝
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="c1">// 判断右子树是否平衡+求深度
+</span></span></span><span class="line"><span class="cl">            <span class="kt">int</span> <span class="n">r</span> <span class="o">=</span> <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">r</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span> <span class="c1">// 及时剪枝
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="c1">// 先判断平衡，如果平衡就返回最大深度，否则返回-1表示不平衡
+</span></span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="nf">abs</span><span class="p">(</span><span class="n">l</span> <span class="o">-</span> <span class="n">r</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="o">?</span> <span class="n">max</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">};</span>
+</span></span><span class="line"><span class="cl">				
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nf">dfs</span><span class="p">(</span><span class="n">dfs</span><span class="p">,</span> <span class="n">root</span><span class="p">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></div><h2 id="30-翻转二叉树">30. <strong>翻转二叉树</strong><a hidden class="anchor" aria-hidden="true" href="#30-翻转二叉树">#</a></h2>
+<p>题目要求：翻转整棵二叉树，对于每个节点都调换左右子树。</p>
+<p>思路：先反转左右子树，然后再更新根节点的指针。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Solution</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">TreeNode</span><span class="o">*</span> <span class="n">invertTree</span><span class="p">(</span><span class="n">TreeNode</span><span class="o">*</span> <span class="n">root</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">root</span><span class="p">)</span> <span class="k">return</span> <span class="n">root</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">// 先对左右子树进行翻转
+</span></span></span><span class="line"><span class="cl">        <span class="k">auto</span> <span class="n">l</span> <span class="o">=</span> <span class="n">invertTree</span><span class="p">(</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">auto</span> <span class="n">r</span> <span class="o">=</span> <span class="n">invertTree</span><span class="p">(</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        
+</span></span><span class="line"><span class="cl">        <span class="c1">// 再调换当前节点的左右子树
+</span></span></span><span class="line"><span class="cl">        <span class="n">root</span><span class="o">-&gt;</span><span class="n">left</span> <span class="o">=</span> <span class="n">r</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">root</span><span class="o">-&gt;</span><span class="n">right</span> <span class="o">=</span> <span class="n">l</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">root</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></div><h2 id="31-合并二叉树">31. <strong>合并二叉树</strong><a hidden class="anchor" aria-hidden="true" href="#31-合并二叉树">#</a></h2>
+<p>题目要求：合并两颗二叉树对应位置的节点，如果节点均存在就求和。</p>
+<p>思路：将root1作为要返回的二叉树，同步遍历两棵树：</p>
+<ul>
+<li>如果两棵树均为空，返回nullptr</li>
+<li>如果有一个颗树为空，返回另一棵树</li>
+<li>否则，将root2上的值加到root1中，然后递归处理左右子树</li>
+<li>最后返回root1</li>
+</ul>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Solution</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">TreeNode</span><span class="o">*</span> <span class="n">mergeTrees</span><span class="p">(</span><span class="n">TreeNode</span><span class="o">*</span> <span class="n">root1</span><span class="p">,</span> <span class="n">TreeNode</span><span class="o">*</span> <span class="n">root2</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">root1</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">root2</span><span class="p">)</span> <span class="k">return</span> <span class="k">nullptr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">root1</span> <span class="o">&amp;&amp;</span> <span class="n">root2</span><span class="p">)</span> <span class="k">return</span> <span class="n">root2</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">root2</span> <span class="o">&amp;&amp;</span> <span class="n">root1</span><span class="p">)</span> <span class="k">return</span> <span class="n">root1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">root1</span><span class="o">-&gt;</span><span class="n">val</span> <span class="o">+=</span> <span class="n">root2</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">root1</span><span class="o">-&gt;</span><span class="n">left</span> <span class="o">=</span> <span class="n">mergeTrees</span><span class="p">(</span><span class="n">root1</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">,</span> <span class="n">root2</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">root1</span><span class="o">-&gt;</span><span class="n">right</span> <span class="o">=</span> <span class="n">mergeTrees</span><span class="p">(</span><span class="n">root1</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">,</span> <span class="n">root2</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">root1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></div><h2 id="32-计算布尔二叉树的值">32. <strong>计算布尔二叉树的值</strong><a hidden class="anchor" aria-hidden="true" href="#32-计算布尔二叉树的值">#</a></h2>
+<p>典型的自底向上DFS，对于任意一个分支节点（运算符），要计算以它为根的子树的值，就必须先计算出其左右子树的结果，再用该节点的运算符进行计算。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Solution</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">bool</span> <span class="n">evaluateTree</span><span class="p">(</span><span class="n">TreeNode</span><span class="o">*</span> <span class="n">root</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">val</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">val</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="k">return</span> <span class="nb">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">val</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="nf">evaluateTree</span><span class="p">(</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">)</span> 
+</span></span><span class="line"><span class="cl">                <span class="o">||</span> <span class="n">evaluateTree</span><span class="p">(</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">val</span> <span class="o">==</span> <span class="mi">3</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="nf">evaluateTree</span><span class="p">(</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">)</span> 
+</span></span><span class="line"><span class="cl">                <span class="o">&amp;&amp;</span> <span class="n">evaluateTree</span><span class="p">(</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></div><h2 id="33-出现次数最多的子树元素和">33. <strong>出现次数最多的子树元素和</strong><a hidden class="anchor" aria-hidden="true" href="#33-出现次数最多的子树元素和">#</a></h2>
+<p>思路：自底向上递归求树的和，在递归过程中使用哈希表mp记录所有子树的和出现的次数，并使用变量cnt记录所遇到的出现次数最多的子树和。</p>
+<p>最后将哈希表中所有出现次数为cnt的和全部加入结果集ans并返回。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Solution</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">findFrequentTreeSum</span><span class="p">(</span><span class="n">TreeNode</span><span class="o">*</span> <span class="n">root</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">unordered_map</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">mp</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">cnt</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">auto</span> <span class="n">dfs</span> <span class="o">=</span> <span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="k">auto</span><span class="o">&amp;&amp;</span> <span class="n">self</span><span class="p">,</span> <span class="n">TreeNode</span><span class="o">*</span> <span class="n">node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">node</span><span class="p">)</span> <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="kt">int</span> <span class="n">sl</span> <span class="o">=</span> <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="kt">int</span> <span class="n">sr</span> <span class="o">=</span> <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="kt">int</span> <span class="n">sum</span> <span class="o">=</span> <span class="n">sl</span> <span class="o">+</span> <span class="n">sr</span> <span class="o">+</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">mp</span><span class="p">[</span><span class="n">sum</span><span class="p">]</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">cnt</span> <span class="o">=</span> <span class="n">max</span><span class="p">(</span><span class="n">cnt</span><span class="p">,</span> <span class="n">mp</span><span class="p">[</span><span class="n">sum</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="n">sum</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">ans</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">dfs</span><span class="p">(</span><span class="n">dfs</span><span class="p">,</span> <span class="n">root</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="nl">item</span> <span class="p">:</span> <span class="n">mp</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">item</span><span class="p">.</span><span class="n">second</span> <span class="o">==</span> <span class="n">cnt</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">ans</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">item</span><span class="p">.</span><span class="n">first</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">ans</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></div><h2 id="34">34.<a hidden class="anchor" aria-hidden="true" href="#34">#</a></h2>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="http://localhost:1313/tags/%E4%BA%8C%E5%8F%89%E6%A0%91/">二叉树</a></li>
+      <li><a href="http://localhost:1313/tags/%E8%87%AA%E5%BA%95%E5%90%91%E4%B8%8Adfs/">自底向上DFS</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="next" href="http://localhost:1313/posts/ucla-ca-02/">
+    <span class="title">Next »</span>
+    <span>UCLA Computer Architecture Lec2</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="http://localhost:1313/">Minghan的博客</a></span> · 
+
+    
+    
+    <span>
+        Powered by
+        <a href="https://gohugo.io/?utm_source=papermod" rel="noopener" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" id="top-link" class="top-link hidden" aria-label="go to top" title="Go to Top (Alt + G)" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevrons-up">
+        <polyline points="17 11 12 6 7 11"></polyline>
+        <polyline points="17 18 12 13 7 18"></polyline>
+    </svg>
+</a><script src="/js/toc-scrollspy.js" defer></script>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var toplink = document.getElementById("top-link");
+    window.onscroll = function () {
+        const scrollThreshold = window.innerHeight;
+        if (document.body.scrollTop > scrollThreshold || document.documentElement.scrollTop > scrollThreshold) {
+            toplink.classList.remove("hidden");
+        } else {
+            toplink.classList.add("hidden");
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

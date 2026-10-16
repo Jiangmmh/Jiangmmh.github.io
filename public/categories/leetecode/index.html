@@ -10,7 +10,7 @@
 <meta name="description" content="">
 <meta name="author" content="">
 <link rel="canonical" href="http://localhost:1313/categories/leetecode/">
-<link crossorigin="anonymous" href="/assets/css/stylesheet.eb75d3d7085f23c257559d796647d69a016c4ff05121443dd8956c46642c5330.css" integrity="sha256-63XT1whfI8JXVZ15ZkfWmgFsT/BRIUQ92JVsRmQsUzA=" rel="preload stylesheet" as="style">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.ccad108c083b3419b4f99d297d8c4e91405873bf643ecd74531a0a275513704f.css" integrity="sha256-zK0QjAg7NBm0&#43;Z0pfYxOkUBYc79kPs10UxoKJ1UTcE8=" rel="preload stylesheet" as="style">
 <link rel="icon" href="http://localhost:1313/favicon.ico">
 <link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
@@ -135,6 +135,11 @@
                 </a>
             </li>
             <li>
+                <a href="http://localhost:1313/books/" title="阅读">
+                    <span>阅读</span>
+                </a>
+            </li>
+            <li>
                 <a href="http://localhost:1313/about/" title="关于">
                     <span>关于</span>
                 </a>
@@ -162,6 +167,30 @@
 
 <article class="post-entry tag-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>一、自底向上 DFS（后序遍历） 在二叉树系列的前一篇博客中其实已经提到过了自顶向下和自底向上的区别了，这里再啰嗦一遍。
+自顶向下，指从根节点往叶子节点 “递”的过程中 更新结果 自底向上，指先递归处理叶子节点，在 “归“的过程中 更新结果 21. 二叉树的最大深度 自底向上的解法：
+先递归得到左右子树各自的最大深度，然后取大者&#43;1作为结果返回。
+时间复杂度：O(n)，空间复杂度：O(n)
+class Solution { public: int maxDepth(TreeNode* root) { // base case if (!root) return 0; // 递归求解左右子树的最大深度 int l = maxDepth(root-&gt;left); int r = maxDepth(root-&gt;right); return max(l, r) &#43; 1; } }; 22. 二叉树的最小深度 注意：最小深度必须从根到叶子，即当一个节点只有一个孩子时，不能直接返回，而是要继续递归直至叶子节点。
+自底向上的解法
+有这么几种情况：
+当前节点为空，直接返回0 左子树为空，右子树不为空，返回minDepth(root-&gt;right) &#43; 1 右子树为空，左子树不为空，返回minDepth(root-&gt;left) &#43; 1 左右子树均不为空，返回min(min_l, min_r)&#43;1 时间复杂度：O(n)，空间复杂度：O(n)
+class Solution { public: int minDepth(TreeNode* root) { if (!root) return 0; if (!root-&gt;left &amp;&amp; root-&gt;right) return minDepth(root-&gt;right) &#43; 1; if (!root-&gt;right &amp;&amp; root-&gt;left) return minDepth(root-&gt;left) &#43; 1; int min_l = minDepth(root-&gt;left); int min_r = minDepth(root-&gt;right); return min(min_l, min_r)&#43;1; } }; 23. 单值二叉树 题目要求判断树中各节点的值是否均相同，我的思路：
+使用变量rootval记录根节点的值（题目保证树非空） 准备一个初值为true的bool变量ans记录答案 遍历整棵二叉树，如果发现存在节点值不等于rootval，则将ans置为false 最后返回ans即可 class Solution { public: bool isUnivalTree(TreeNode* root) { // 树非空 int rootval = root-&gt;val; bool ans = true; auto dfs = [&amp;](auto&amp;&amp; self, TreeNode* node) { if (!node) return; if (node-&gt;val != rootval) { ans = false; return ; } self(self, node-&gt;left); self(self, node-&gt;right); }; dfs(dfs, root); return ans; } }; 24. 相同的树 题目要求：判断两棵树上对应节点的值是否完全相同
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-16 11:20:25 +0800 CST'>October 16, 2026</span>&nbsp;·&nbsp;<span>4 min</span>&nbsp;·&nbsp;<span>706 words</span></footer>
+  <a class="entry-link" aria-label="post link to " href="http://localhost:1313/posts/leetecode-tree02/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">Leetecode 二叉树(一)
     </h2>
   </header>
@@ -180,7 +209,7 @@ class Solution { public: vector&lt;int&gt; preorderTraversal(TreeNode* root) { v
   </div>
   <footer class="entry-footer">
 
-<span title='2026-10-14 22:02:01 +0800 CST'>October 14, 2026</span>&nbsp;·&nbsp;<span>8 min</span>&nbsp;·&nbsp;<span>1579 words</span></footer>
+<span title='2026-10-14 22:02:01 +0800 CST'>October 14, 2026</span>&nbsp;·&nbsp;<span>8 min</span>&nbsp;·&nbsp;<span>1582 words</span></footer>
   <a class="entry-link" aria-label="post link to Leetecode 二叉树(一)" href="http://localhost:1313/posts/leetecode-tree01/"></a>
 </article>
 
