@@ -162,27 +162,26 @@
 
 <article class="post-entry tag-entry"> 
   <header class="entry-header">
-    <h2 class="entry-hint-parent">Leetecode 二叉树(一)-遍历&amp;自顶向下DFS
+    <h2 class="entry-hint-parent">Leetecode 二叉树(一)
     </h2>
   </header>
   <div class="entry-content">
-    <p>题目来自灵神的题单：https://leetcode.cn/discuss/post/3142882/fen-xiang-gun-ti-dan-lian-biao-er-cha-sh-6srp/。
+    <p>题目来自灵神的题单：二叉树题单。
 在做时带着问题去做下面的题目：
 一般来说，DFS 的递归边界是空节点。 在什么情况下，要额外把叶子节点作为递归边界？ 在什么情况下，DFS 需要有返回值？什么情况下不需要有返回值？ 在什么情况下，题目更适合用自顶向下的方法解决？ 什么情况下更适合用自底向上的方法解决？ C&#43;&#43;不同标准下，支持递归的Lambda表达式写法：
 C&#43;&#43;11标准起支持 #include &lt;functional&gt; std::function&lt;void(TreeNode*, string)&gt; dfs = [&amp;](TreeNode* node, string s) { if (!node) return; // ... dfs(node-&gt;left, s); // 直接用 dfs，因为 dfs 已经声明了 dfs(node-&gt;right, s); }; dfs(root, &#34;&#34;); C&#43;&#43;14标准支持 auto dfs = [&amp;](auto&amp;&amp; self, TreeNode* node, string s) -&gt; void { if (!node) return; // ... self(self, node-&gt;left, s); // 把自己作为参数传进去 self(self, node-&gt;right, s); }; dfs(dfs, root, &#34;&#34;); // 调用时也要把自己传进去 在我的解法实现中采用的是C&#43;&#43;14标准的写法。
-一、遍历二叉树 1. 二叉树的前序遍历 法一：DFS
-树的先序遍历的顺序是：根-左-右
-因为树本身就是递归定义的，即树的子树本身就是一棵树，所以树的算法大多通过递归来实现。
-在遍历过程中
-如果当前节点为空，直接返回； 如果当前节点非空，先访问当前节点，然后依次递归访问左右子树 class Solution { vector&lt;int&gt; ans; void dfs(TreeNode* root) { if (root) { ans.push_back(root-&gt;val); dfs(root-&gt;left); dfs(root-&gt;right); } } public: vector&lt;int&gt; preorderTraversal(TreeNode* root) { dfs(root); return ans; } }; 法二：非递归法
+一、遍历二叉树 因为树本身就是递归定义的，即树的子树本身就是一棵树，所以树的算法大多通过递归来实现。
+1. 二叉树的前序遍历 法一：DFS 树的先序遍历的顺序是：根-左-右
+在遍历过程中:
+如果当前节点为空，直接返回； 如果当前节点非空，先访问当前节点，然后依次递归访问左右子树； class Solution { vector&lt;int&gt; ans; void dfs(TreeNode* root) { if (root) { ans.push_back(root-&gt;val); dfs(root-&gt;left); dfs(root-&gt;right); } } public: vector&lt;int&gt; preorderTraversal(TreeNode* root) { dfs(root); return ans; } }; 法二：非递归法
 使用一个栈来实现，对于每个节点先处理当前节点（中），然后依次压入右子树和左子树，根据栈的特点，得到的顺序是先左后右。
 class Solution { public: vector&lt;int&gt; preorderTraversal(TreeNode* root) { vector&lt;int&gt; ans; if (!root) return ans; stack&lt;TreeNode*&gt; st; st.push(root); while (!st.empty()) { auto node = st.top(); st.pop(); if (node) { ans.push_back(node-&gt;val); if (node-&gt;right) st.push(node-&gt;right); if (node-&gt;left) st.push(node-&gt;left); } } return ans; } }; 2. 二叉树的中序遍历 法一：DFS
 ...</p>
   </div>
   <footer class="entry-footer">
 
-<span title='2026-10-14 22:02:01 +0800 CST'>October 14, 2026</span>&nbsp;·&nbsp;<span>8 min</span>&nbsp;·&nbsp;<span>1517 words</span></footer>
-  <a class="entry-link" aria-label="post link to Leetecode 二叉树(一)-遍历&自顶向下DFS" href="http://localhost:1313/posts/leetecode-tree01/"></a>
+<span title='2026-10-14 22:02:01 +0800 CST'>October 14, 2026</span>&nbsp;·&nbsp;<span>8 min</span>&nbsp;·&nbsp;<span>1579 words</span></footer>
+  <a class="entry-link" aria-label="post link to Leetecode 二叉树(一)" href="http://localhost:1313/posts/leetecode-tree01/"></a>
 </article>
     </main>
     

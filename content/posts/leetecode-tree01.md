@@ -45,18 +45,17 @@ dfs(dfs, root, "");   // 调用时也要把自己传进去
 在我的解法实现中采用的是C++14标准的写法。
 
 # 一、遍历二叉树
+因为树本身就是递归定义的，即树的子树本身就是一棵树，所以树的算法大多通过递归来实现。
 
 ## 1. **二叉树的前序遍历**
 
 **法一：DFS**
-
 树的先序遍历的顺序是：根-左-右
 
-因为树本身就是递归定义的，即树的子树本身就是一棵树，所以树的算法大多通过递归来实现。
 
-在遍历过程中
+在遍历过程中:
 - 如果当前节点为空，直接返回；
-- 如果当前节点非空，先访问当前节点，然后依次递归访问左右子树
+- 如果当前节点非空，先访问当前节点，然后依次递归访问左右子树；
 
 
 ```cpp
@@ -198,9 +197,9 @@ public:
                     prev->right = root;
                     root = root->left;
                     continue;
-                }
-								
-								// 如果是第二次访问root
+                }	
+			    
+                // 第二次访问root，恢复叶子
                 prev->right = nullptr;
             } 
             ans.push_back(root->val);
@@ -236,13 +235,15 @@ public:二叉树的后序遍历
 ```
 
 **法二：非递归写法**
+后序遍历的顺序为：左右中；反过来看正好是：中右左。
+可以利用先序遍历的思路求解中右左的访问序列，最后将结果取反。
 
 ```cpp
 class Solution {
     vector<int> ans;
 public:
     vector<int> postorderTraversal(TreeNode* root) {
-        // 左右中 = ～中右左
+        // 
         // 而先序遍历的顺序为中左右
         if (!root) return ans;
         stack<TreeNode*> st;
@@ -262,11 +263,9 @@ public:
 
 ## 4. **叶子相似的树**
 
-思路：从根节点开始，按顺序遍历两颗树（仅记录叶子节点）。然后比较遍历结果。
+思路：分别遍历这两棵树，构造出叶子节点序列，最后然后比较这两个序列即可。
 
-C++中的vector支持直接进行比较。
-
-注意这里的lambda表达式的定义，这是C++14标准提出的。
+因为C++中的vector支持直接进行比较，所以就不需要自己写循环了。
 
 ```cpp
 class Solution {
@@ -295,7 +294,7 @@ public:
 
 翻译：统计不同节点值的个数。
 
-思路：DFS遍历，使用一个哈希set记录不同节点值
+思路：DFS遍历，使用一个哈希set记录不同节点值。
 
 ```cpp
 class Solution {
@@ -317,8 +316,8 @@ public:
 ```
 
 ## 6. **左叶子之和**
-
-dfs查看每个节点的左子树是否为叶子，如果是叶子就将其值加到ans。
+题目需求：求所有左叶子节点的和。
+DFS遍历，查看每个节点的左子树是否为叶子，如果是叶子就将其值加到ans。
 
 ```cpp
 class Solution {
@@ -346,9 +345,11 @@ public:
 
 ## 7. **二叉树中第二小的节点**
 
-按照题目给出的二叉树的特点，整个二叉树的最小值一定为根节点的值，我们需要遍历二叉树找到**第二小**的节点。这里要注意一个问题：该二叉树所有节点的值可能相同，该情况下应当返回-1。
+按照题目给出的二叉树的特点，整个二叉树的最小值一定为根节点的值，我们需要遍历二叉树找到**第二小**的节点。
 
-思路：将结果变量ans初始化为-1，使用dfs遍历整棵树，只有在节点值与根节点值不同时才考虑更新结果。
+这里要注意一个问题：当二叉树所有节点的值可能相同，该情况下应当返回-1。
+
+思路：将结果变量ans初始化为-1，使用DFS遍历整棵树，只有在节点值与根节点值不同时才考虑更新结果。
 
 - 如果ans为-1，说明还未记录，用当前节点值更新ans
 - 否则，取当前节点值和ans的小者更新ans
@@ -390,10 +391,9 @@ public:
 ## 8. **二叉树的最大深度**
 
 **法一：自底向上**
+> 所谓**自底向上**，是指先得到子树的答案，然后根据子树的答案求解整棵二叉树的答案。
 
 先递归得到左右子树各自的最大深度，然后取大者+1，就得到了当前这个二叉树的最大深度。
-
-所谓自底向上就是指先得到子树的答案，然后根据子树的答案求解整棵二叉树的答案。
 
 时间复杂度：O(n)，空间复杂度：O(n)
 
@@ -402,8 +402,8 @@ class Solution {
 public:
     int maxDepth(TreeNode* root) {
         if (!root) return 0;
-        int max_l = maxDepth(root->left);
-        int max_r = maxDepth(root->right);
+        int max_l = maxDepth(root->left);  // 左子树的最大深度
+        int max_r = maxDepth(root->right); // 右子树的最大深度
         return max(max_l, max_r) + 1;
     }
 };
@@ -411,7 +411,7 @@ public:
 
 **法二：自顶向下**
 
-从根节点开始不断往子树去求解答案。
+所谓自顶向下，指从根节点开始不断往子树递归的过程中更新答案，无需等待递归返回。
 
 时间复杂度：O(n)，空间复杂度：O(n)
 
@@ -421,7 +421,7 @@ public:
     int maxDepth(TreeNode* root) {
         int ans = 0;
 
-        auto dfs = & -> void {
+        auto dfs = [&](auto&& self, TreeNode* node, int depth) -> void {
             if (!node) return ;
             ans = max(ans, depth);
             self(self, node->left, depth+1);
@@ -476,7 +476,7 @@ public:
         int ans = INT_MAX;
         auto dfs = & {
             if (!node || depth >= ans) return ; // 剪枝
-            if (!node->left && !node->right) {
+            if (!node->left && !node->right) {  // 到达叶子节点，更新结果
                 ans = min(ans, depth);
                 return ;
             }
@@ -490,8 +490,9 @@ public:
 ```
 
 ## 10. **路径总和**
+题目需求：判断是否存在从根到叶子的路径上的全部节点之和等于targetSum。
 
-dfs遍历整棵树，分这么几种情况：
+DFS遍历整棵树，分这么几种情况：
 
 - 当前节点为空，直接返回false
 - 当前节点为叶子，将当前节点的值与targetSum进行比较，如果相等说明找到了目标路径，返回true，否则返回false
@@ -521,16 +522,13 @@ class Solution {
 public:
     int sumNumbers(TreeNode* root) {
         int ans = 0;
-        auto dfs = & {
+        auto dfs = [&](auto&& self, TreeNode* node, int num) {
             if (!node) return ;
-            
             num = num * 10 + node->val;
-            
             if (!node->left && !node->right) {
                 ans += num;
                 return ;
             }
-            
             self(self, node->left, num);
             self(self, node->right, num);
         };
@@ -563,7 +561,7 @@ public:
     vector<int> rightSideView(TreeNode* root) {
         vector<int> ans;
         int max_depth = 0;
-        auto dfs = & {
+        auto dfs = [&](auto&& self, TreeNode* node, int depth) {
             if (!node) return;
             if (depth > max_depth) {
                 ans.push_back(node->val);
@@ -580,8 +578,9 @@ public:
 ```
 
 ## 13. **统计二叉树中好节点的数目**
+好节点 X 定义为：从根到该节点 X 所经过的节点中，没有任何节点的值大于 X 的值。
 
-在dfs时，使用参数preMax记录从根节点到当前节点的路径上遇到的最大值，如果当前节点的值大于等于preMax就将其记录到结果变量ans中，更新preMax，然后递归处理左右子树。
+在DFS时，使用参数preMax记录从根节点到当前节点的路径上遇到的最大值，如果当前节点的值大于等于preMax就将其记录到结果变量ans中，更新preMax，然后递归处理左右子树。
 
 ```cpp
 class Solution {
@@ -589,7 +588,7 @@ public:
     int goodNodes(TreeNode* root) {
         int ans = 0;
         
-        auto dfs = & -> void {
+        auto dfs = [&](auto&& self, TreeNode* node, int preMax) -> void {
             if (!node) return;
             if (node->val >= preMax) {
                 ans++;
@@ -599,7 +598,7 @@ public:
             self(self, node->left, preMax);
             self(self, node->right, preMax);
         };
-
+    
         dfs(dfs, root, INT_MIN);
         return ans;
     }
@@ -622,7 +621,7 @@ public:
     int sumEvenGrandparent(TreeNode* root) {
         int ans = 0;
         
-        auto dfs = & -> void {
+        auto dfs = [&](auto&& self, TreeNode* node, TreeNode* p, TreeNode* gp) -> void {
             if (!node) return;
             if (gp) {
                 // 祖父存在
@@ -653,7 +652,7 @@ class Solution {
 public:
     string smallestFromLeaf(TreeNode* root) {
         vector<string> path;
-        auto dfs = & {
+        auto dfs = [&](auto&& self, TreeNode* node, string s) {
             if (!node) return;
             
             s += node->val + 'a';
@@ -706,7 +705,7 @@ public:
 
 ## 16. **节点与其祖先之间的最大差值**
 
-这里的最大差值是求绝对值后的结果。因此只需在DFS遍历过程中记录祖先节点的最大值和最小值就可以计算出从根节点到当前阶段为止的最大差值。
+这里的最大差值是求绝对值后的结果。因此只需在DFS遍历过程中记录祖先节点的最大值和最小值就可以计算出从根节点当前节点的最大差值。
 
 时间复杂度为O(n)，空间复杂度为O(n)。
 
@@ -717,7 +716,7 @@ public:
         int ans = INT_MIN;
         int rootval = root->val;
 
-        auto dfs = & -> void {
+        auto dfs = [&](auto&& self, TreeNode* node, int preMax, int preMin) {
             if (!node) return ;
 
             int x = node->val;
@@ -746,7 +745,7 @@ class Solution {
 public:
     int sumRootToLeaf(TreeNode* root) {
         int sum = 0;
-        auto dfs = & -> void {
+        auto dfs = [&](auto&& self, TreeNode* node, int num) {
             if (!node) return ;
             num = (num << 1) + node->val;
             if (!node->left && !node->right) sum += num;
@@ -773,8 +772,8 @@ public:
             auto node = new TreeNode(val, root, nullptr);
             return node;
         }
-				
-        auto dfs = & -> void {
+		
+        auto dfs = [&](auto&& self, TreeNode* node, int cur_depth) {
             if (!node) return ;
             if (cur_depth == depth-1) {
                 auto leftNode = new TreeNode(val);
@@ -799,7 +798,7 @@ public:
 
 ## 19. **二叉树中的最长交错路径**
 
-> 注意：最长交错路径不要求从根节点开始，也可以从其他节点开始！
+> 注意：最长交错路径不要求从根节点开始，而是可以从任意节点开始！
 > 
 
 使用ans记录最长交错路径长度，在DFS的参数重，使用length记录到当前节点所经过的交错路径长度，dir_left表示上一次的方向是否向左。
@@ -818,8 +817,8 @@ class Solution {
 public:
     int longestZigZag(TreeNode* root) {
         int ans = 0;
-
-        auto dfs = & -> void {
+        
+        auto dfs = [&](auto&& self, TreeNode* node, int length, bool dir_left) {
             if (!node) return ;
             ans = max(ans, length);
             if (dir_left) {

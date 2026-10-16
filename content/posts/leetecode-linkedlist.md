@@ -1227,7 +1227,7 @@ public:
 
 ## 34. **相交链表**
 
-!image.png
+![](/images/posts/leetecode-ll/image1.png)
 
 ```cpp
 class Solution {
@@ -1988,7 +1988,7 @@ public:
 
 跳表在进行查找时，首先从当前的最高层 L(n) 层开始查找，在当前层水平地逐个比较直至当前节点的下一个节点大于等于目标节点，然后移动至下一层进行查找，重复这个过程直至到达第一层。此时，若下一个节点是目标节点，则成功查找；反之，则元素不存在。由于从高层往低层开始查找，由于低层出现的元素可能不会出现在高层，因此跳表在进行查找的过程中会跳过一些元素，相比于有序链表的查询，跳表的查询速度会更快。
 
-!image.png
+![](/images/posts/leetecode-ll/image3.png)
 
 下面的代码参考了Redis中跳表的实现：
 
@@ -2254,7 +2254,7 @@ public:
 > 记住原理，能写出来就行。
 > 
 
-!image.png
+![](/images/posts/leetecode-ll/image.png)
 
 ```cpp
 class Solution {
