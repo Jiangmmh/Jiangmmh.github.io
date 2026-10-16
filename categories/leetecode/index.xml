@@ -1,4 +1,82 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Leetecode on Minghan的博客</title><link>https://Jiangmmh.github.io/categories/leetecode/</link><description>Recent content in Leetecode on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Wed, 14 Oct 2026 22:02:01 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/categories/leetecode/index.xml" rel="self" type="application/rss+xml"/><item><title>Leetecode 二叉树(一)</title><link>https://Jiangmmh.github.io/posts/leetecode-tree01/</link><pubDate>Wed, 14 Oct 2026 22:02:01 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/leetecode-tree01/</guid><description>&lt;p>题目来自灵神的题单：&lt;a href="https://leetcode.cn/discuss/post/3142882/fen-xiang-gun-ti-dan-lian-biao-er-cha-sh-6srp/">二叉树题单&lt;/a>。&lt;/p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Leetecode on Minghan的博客</title><link>https://Jiangmmh.github.io/categories/leetecode/</link><description>Recent content in Leetecode on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Fri, 16 Oct 2026 11:20:25 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/categories/leetecode/index.xml" rel="self" type="application/rss+xml"/><item><title>Leetecode 二叉树(二)</title><link>https://Jiangmmh.github.io/posts/leetecode-tree02/</link><pubDate>Fri, 16 Oct 2026 11:20:25 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/leetecode-tree02/</guid><description>&lt;h1 id="一自底向上-dfs后序遍历">一、&lt;strong>自底向上 DFS（后序遍历）&lt;/strong>&lt;/h1>
+&lt;p>在二叉树系列的前一篇博客中其实已经提到过了自顶向下和自底向上的区别了，这里再啰嗦一遍。&lt;/p>
+&lt;ul>
+&lt;li>自顶向下，指从根节点往叶子节点 &lt;strong>“递”的过程中&lt;/strong> 更新结果&lt;/li>
+&lt;li>自底向上，指先递归处理叶子节点，在 &lt;strong>“归“的过程中&lt;/strong> 更新结果&lt;/li>
+&lt;/ul>
+&lt;h2 id="21-二叉树的最大深度">21. &lt;strong>二叉树的最大深度&lt;/strong>&lt;/h2>
+&lt;p>&lt;strong>自底向上的解法：&lt;/strong>&lt;/p>
+&lt;p>先递归得到左右子树各自的最大深度，然后取大者+1作为结果返回。&lt;/p>
+&lt;p>时间复杂度：O(n)，空间复杂度：O(n)&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-cpp" data-lang="cpp">&lt;span class="line">&lt;span class="cl">&lt;span class="k">class&lt;/span> &lt;span class="nc">Solution&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">public&lt;/span>&lt;span class="o">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kt">int&lt;/span> &lt;span class="n">maxDepth&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">TreeNode&lt;/span>&lt;span class="o">*&lt;/span> &lt;span class="n">root&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1">// base case
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="k">if&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="o">!&lt;/span>&lt;span class="n">root&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="k">return&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1">// 递归求解左右子树的最大深度
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="kt">int&lt;/span> &lt;span class="n">l&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">maxDepth&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">root&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">left&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kt">int&lt;/span> &lt;span class="n">r&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">maxDepth&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">root&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">right&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="nf">max&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">l&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">r&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="mi">1&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">};&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="22-二叉树的最小深度">22. &lt;strong>二叉树的最小深度&lt;/strong>&lt;/h2>
+&lt;blockquote>
+&lt;p>注意：最小深度必须从根到叶子，即当一个节点只有一个孩子时，不能直接返回，而是要继续递归直至叶子节点。&lt;/p>&lt;/blockquote>
+&lt;p>&lt;strong>自底向上的解法&lt;/strong>&lt;/p>
+&lt;p>有这么几种情况：&lt;/p>
+&lt;ul>
+&lt;li>当前节点为空，直接返回0&lt;/li>
+&lt;li>&lt;strong>左子树为空，右子树不为空&lt;/strong>，返回minDepth(root-&amp;gt;right) + 1&lt;/li>
+&lt;li>&lt;strong>右子树为空，左子树不为空&lt;/strong>，返回minDepth(root-&amp;gt;left) + 1&lt;/li>
+&lt;li>左右子树均不为空，返回min(min_l, min_r)+1&lt;/li>
+&lt;/ul>
+&lt;p>时间复杂度：O(n)，空间复杂度：O(n)&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-cpp" data-lang="cpp">&lt;span class="line">&lt;span class="cl">&lt;span class="k">class&lt;/span> &lt;span class="nc">Solution&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">public&lt;/span>&lt;span class="o">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kt">int&lt;/span> &lt;span class="n">minDepth&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">TreeNode&lt;/span>&lt;span class="o">*&lt;/span> &lt;span class="n">root&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="o">!&lt;/span>&lt;span class="n">root&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="k">return&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="o">!&lt;/span>&lt;span class="n">root&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">left&lt;/span> &lt;span class="o">&amp;amp;&amp;amp;&lt;/span> &lt;span class="n">root&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">right&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="k">return&lt;/span> &lt;span class="n">minDepth&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">root&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">right&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="mi">1&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="o">!&lt;/span>&lt;span class="n">root&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">right&lt;/span> &lt;span class="o">&amp;amp;&amp;amp;&lt;/span> &lt;span class="n">root&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">left&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="k">return&lt;/span> &lt;span class="n">minDepth&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">root&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">left&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="mi">1&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kt">int&lt;/span> &lt;span class="n">min_l&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">minDepth&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">root&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">left&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kt">int&lt;/span> &lt;span class="n">min_r&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">minDepth&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">root&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">right&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="nf">min&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">min_l&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">min_r&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="o">+&lt;/span>&lt;span class="mi">1&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">};&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="23-单值二叉树">23. &lt;strong>单值二叉树&lt;/strong>&lt;/h2>
+&lt;p>题目要求判断树中各节点的值是否均相同，我的思路：&lt;/p>
+&lt;ul>
+&lt;li>使用变量rootval记录根节点的值（题目保证树非空）&lt;/li>
+&lt;li>准备一个初值为true的bool变量ans记录答案&lt;/li>
+&lt;li>遍历整棵二叉树，如果发现存在节点值不等于rootval，则将ans置为false&lt;/li>
+&lt;li>最后返回ans即可&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-cpp" data-lang="cpp">&lt;span class="line">&lt;span class="cl">&lt;span class="k">class&lt;/span> &lt;span class="nc">Solution&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">public&lt;/span>&lt;span class="o">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kt">bool&lt;/span> &lt;span class="n">isUnivalTree&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">TreeNode&lt;/span>&lt;span class="o">*&lt;/span> &lt;span class="n">root&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1">// 树非空
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="kt">int&lt;/span> &lt;span class="n">rootval&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">root&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">val&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kt">bool&lt;/span> &lt;span class="n">ans&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nb">true&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">auto&lt;/span> &lt;span class="n">dfs&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="p">[&lt;/span>&lt;span class="o">&amp;amp;&lt;/span>&lt;span class="p">](&lt;/span>&lt;span class="k">auto&lt;/span>&lt;span class="o">&amp;amp;&amp;amp;&lt;/span> &lt;span class="n">self&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">TreeNode&lt;/span>&lt;span class="o">*&lt;/span> &lt;span class="n">node&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="o">!&lt;/span>&lt;span class="n">node&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="k">return&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">node&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">val&lt;/span> &lt;span class="o">!=&lt;/span> &lt;span class="n">rootval&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">ans&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nb">false&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">self&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">self&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">node&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">left&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">self&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">self&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">node&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">right&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">};&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">dfs&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">dfs&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">root&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">ans&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">};&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="24-相同的树">24. &lt;strong>相同的树&lt;/strong>&lt;/h2>
+&lt;p>题目要求：判断两棵树上对应节点的值是否完全相同&lt;/p></description></item><item><title>Leetecode 二叉树(一)</title><link>https://Jiangmmh.github.io/posts/leetecode-tree01/</link><pubDate>Wed, 14 Oct 2026 22:02:01 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/leetecode-tree01/</guid><description>&lt;p>题目来自灵神的题单：&lt;a href="https://leetcode.cn/discuss/post/3142882/fen-xiang-gun-ti-dan-lian-biao-er-cha-sh-6srp/">二叉树题单&lt;/a>。&lt;/p>
 &lt;p>&lt;strong>在做时带着问题去做下面的题目：&lt;/strong>&lt;/p>
 &lt;ul>
 &lt;li>一般来说，DFS 的递归边界是空节点。&lt;/li>
