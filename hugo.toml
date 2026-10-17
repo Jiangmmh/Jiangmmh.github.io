@@ -59,16 +59,16 @@ theme = "PaperMod"
   weight = 30
 
   [[menu.main]]
+  identifier = "moments"
+  name = "随记"
+  url = "/moments/"
+  weight = 50
+
+  [[menu.main]]
   identifier = "tags"
   name = "标签"
   url = "/tags/"
   weight = 40
-
-  [[menu.main]]
-  identifier = "moments"
-  name = "随记"
-  url = "/moments/"
-  weight = 30
 
   [[menu.main]]
   name = "照片墙"

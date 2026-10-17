@@ -1,5 +1,5 @@
 ---
-title: "UCLA Computer Architecture Lec2"
+title: "UCLA Computer Architecture Lec2&Lec3"
 date: '2026-10-15T20:55:46+08:00'
 draft: false
 tags: ["UCLA-CA", "RISC-V"]
