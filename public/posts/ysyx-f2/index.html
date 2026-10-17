@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>一生一芯-F2阶段笔记 | Minghan的博客</title>
+<meta name="keywords" content="处理器, RISC-V">
+<meta name="description" content="Logisim简介
+Logisim是一款图形化的数字电路设计软件, 用户可以通过拖动相应的电路组件来设计数字电路并仿真运行. 后续我们使用的是Logisim-evolution, 它是Logisim的升级版, 提供了更丰富的组件. 但为了描述简便, 下文我们还是使用Logisim来指代这个升级版.
+Logisim是一个Java程序, 可以运行在任何支持Java运行环境的操作系统上. 虽然它支持在Windows, Mac OS, Linux等各种主流系统上运行, 但目前我们不要求大家使用Linux操作系统. 如果你有一些Linux操作系统的使用经验, 可以自己解决环境配置相关的问题, 也可以使用Linux版本.
+Ligisim的下载
+通过Github的Release页面可以下载最新的Logisim-evolution。https://github.com/logisim-evolution/logisim-evolution/releases。
+我的设备是MacM4，所以选择ARM版本的dmg文件：
+
+安装后启动：
+
+设计一个简单的电路
+这是一个简单的选择器，其根据输入信号S来选择输出A还是B，测试结果如下：
+">
+<meta name="author" content="">
+<link rel="canonical" href="http://localhost:1313/posts/ysyx-f2/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.f9490c4bd2e7d3fd9e21909b0bc528878329710db51c69d38b7057b37e889c1d.css" integrity="sha256-&#43;UkMS9Ln0/2eIZCbC8Uoh4MpcQ21HGnTi3BXs36InB0=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/ysyx-f2/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="http://localhost:1313/posts/ysyx-f2/">
+  <meta property="og:site_name" content="Minghan的博客">
+  <meta property="og:title" content="一生一芯-F2阶段笔记">
+  <meta property="og:description" content="Logisim简介 Logisim是一款图形化的数字电路设计软件, 用户可以通过拖动相应的电路组件来设计数字电路并仿真运行. 后续我们使用的是Logisim-evolution, 它是Logisim的升级版, 提供了更丰富的组件. 但为了描述简便, 下文我们还是使用Logisim来指代这个升级版.
+Logisim是一个Java程序, 可以运行在任何支持Java运行环境的操作系统上. 虽然它支持在Windows, Mac OS, Linux等各种主流系统上运行, 但目前我们不要求大家使用Linux操作系统. 如果你有一些Linux操作系统的使用经验, 可以自己解决环境配置相关的问题, 也可以使用Linux版本.
+Ligisim的下载 通过Github的Release页面可以下载最新的Logisim-evolution。https://github.com/logisim-evolution/logisim-evolution/releases。
+我的设备是MacM4，所以选择ARM版本的dmg文件：
+安装后启动：
+设计一个简单的电路 这是一个简单的选择器，其根据输入信号S来选择输出A还是B，测试结果如下：">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-10-17T13:14:43+08:00">
+    <meta property="article:modified_time" content="2026-10-17T13:14:43+08:00">
+    <meta property="article:tag" content="处理器">
+    <meta property="article:tag" content="RISC-V">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="一生一芯-F2阶段笔记">
+  <meta name="twitter:description" content="Logisim简介 Logisim是一款图形化的数字电路设计软件, 用户可以通过拖动相应的电路组件来设计数字电路并仿真运行. 后续我们使用的是Logisim-evolution, 它是Logisim的升级版, 提供了更丰富的组件. 但为了描述简便, 下文我们还是使用Logisim来指代这个升级版.
+Logisim是一个Java程序, 可以运行在任何支持Java运行环境的操作系统上. 虽然它支持在Windows, Mac OS, Linux等各种主流系统上运行, 但目前我们不要求大家使用Linux操作系统. 如果你有一些Linux操作系统的使用经验, 可以自己解决环境配置相关的问题, 也可以使用Linux版本.
+Ligisim的下载 通过Github的Release页面可以下载最新的Logisim-evolution。https://github.com/logisim-evolution/logisim-evolution/releases。
+我的设备是MacM4，所以选择ARM版本的dmg文件：
+安装后启动：
+设计一个简单的电路 这是一个简单的选择器，其根据输入信号S来选择输出A还是B，测试结果如下：">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "http://localhost:1313/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "一生一芯-F2阶段笔记",
+      "item": "http://localhost:1313/posts/ysyx-f2/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "一生一芯-F2阶段笔记",
+  "name": "一生一芯-F2阶段笔记",
+  "description": "Logisim简介 Logisim是一款图形化的数字电路设计软件, 用户可以通过拖动相应的电路组件来设计数字电路并仿真运行. 后续我们使用的是Logisim-evolution, 它是Logisim的升级版, 提供了更丰富的组件. 但为了描述简便, 下文我们还是使用Logisim来指代这个升级版.\nLogisim是一个Java程序, 可以运行在任何支持Java运行环境的操作系统上. 虽然它支持在Windows, Mac OS, Linux等各种主流系统上运行, 但目前我们不要求大家使用Linux操作系统. 如果你有一些Linux操作系统的使用经验, 可以自己解决环境配置相关的问题, 也可以使用Linux版本.\nLigisim的下载 通过Github的Release页面可以下载最新的Logisim-evolution。https://github.com/logisim-evolution/logisim-evolution/releases。\n我的设备是MacM4，所以选择ARM版本的dmg文件：\n安装后启动：\n设计一个简单的电路 这是一个简单的选择器，其根据输入信号S来选择输出A还是B，测试结果如下：\n",
+  "keywords": [
+    "处理器", "RISC-V"
+  ],
+  "articleBody": "Logisim简介 Logisim是一款图形化的数字电路设计软件, 用户可以通过拖动相应的电路组件来设计数字电路并仿真运行. 后续我们使用的是Logisim-evolution, 它是Logisim的升级版, 提供了更丰富的组件. 但为了描述简便, 下文我们还是使用Logisim来指代这个升级版.\nLogisim是一个Java程序, 可以运行在任何支持Java运行环境的操作系统上. 虽然它支持在Windows, Mac OS, Linux等各种主流系统上运行, 但目前我们不要求大家使用Linux操作系统. 如果你有一些Linux操作系统的使用经验, 可以自己解决环境配置相关的问题, 也可以使用Linux版本.\nLigisim的下载 通过Github的Release页面可以下载最新的Logisim-evolution。https://github.com/logisim-evolution/logisim-evolution/releases。\n我的设备是MacM4，所以选择ARM版本的dmg文件：\n安装后启动：\n设计一个简单的电路 这是一个简单的选择器，其根据输入信号S来选择输出A还是B，测试结果如下：\n",
+  "wordCount" : "24",
+  "inLanguage": "en",
+  "datePublished": "2026-10-17T13:14:43+08:00",
+  "dateModified": "2026-10-17T13:14:43+08:00",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "http://localhost:1313/posts/ysyx-f2/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Minghan的博客",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "http://localhost:1313/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="header-nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="Minghan的博客 (Alt + H)">Minghan的博客</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" class="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg class="sun" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu" class="menu">
+            <li>
+                <a href="http://localhost:1313/posts/" title="文章">
+                    <span>文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/archives/" title="归档">
+                    <span>归档</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/categories/" title="分类">
+                    <span>分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="标签">
+                    <span>标签</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/moments/" title="随记">
+                    <span>随记</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/photos/" title="照片墙">
+                    <span>照片墙</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/books/" title="阅读">
+                    <span>阅读</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/about/" title="关于">
+                    <span>关于</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <nav class="breadcrumbs" role="navigation" aria-label="Breadcrumb">
+            <a href="/">Home</a>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+            <a href="/posts/">Posts</a>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+        <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+</nav>
+    <h1 class="post-title entry-hint-parent">
+      一生一芯-F2阶段笔记
+    </h1>
+    <div class="post-meta">
+
+<span title='2026-10-17 13:14:43 +0800 CST'>October 17, 2026</span>&nbsp;·&nbsp;<span>1 min</span>&nbsp;·&nbsp;<span>24 words</span>
+
+</div>
+  </header> <details class="toc"  open>
+    <summary accesskey="c" title="(Alt + C)">
+        <span class="title">Table of Contents</span>
+    </summary>
+
+    <div class="inner"><ul>
+            <li>
+                <a href="#logisim%e7%ae%80%e4%bb%8b" aria-label="Logisim简介">Logisim简介</a></li>
+            <li>
+                <a href="#ligisim%e7%9a%84%e4%b8%8b%e8%bd%bd" aria-label="Ligisim的下载">Ligisim的下载</a></li>
+            <li>
+                <a href="#%e8%ae%be%e8%ae%a1%e4%b8%80%e4%b8%aa%e7%ae%80%e5%8d%95%e7%9a%84%e7%94%b5%e8%b7%af" aria-label="设计一个简单的电路">设计一个简单的电路</a>
+            </li>
+        </ul>
+    </div>
+</details>
+
+  <div class="post-content md-content"><h1 id="logisim简介">Logisim简介<a hidden class="anchor" aria-hidden="true" href="#logisim简介">#</a></h1>
+<p>Logisim是一款图形化的数字电路设计软件, 用户可以通过拖动相应的电路组件来设计数字电路并仿真运行. 后续我们使用的是Logisim-evolution, 它是Logisim的升级版, 提供了更丰富的组件. 但为了描述简便, 下文我们还是使用<code>Logisim</code>来指代这个升级版.</p>
+<p>Logisim是一个Java程序, 可以运行在任何支持Java运行环境的操作系统上. 虽然它支持在Windows, Mac OS, Linux等各种主流系统上运行, 但目前我们不要求大家使用Linux操作系统. 如果你有一些Linux操作系统的使用经验, 可以自己解决环境配置相关的问题, 也可以使用Linux版本.</p>
+<h1 id="ligisim的下载">Ligisim的下载<a hidden class="anchor" aria-hidden="true" href="#ligisim的下载">#</a></h1>
+<p>通过Github的Release页面可以下载最新的Logisim-evolution。https://github.com/logisim-evolution/logisim-evolution/releases。</p>
+<p>我的设备是MacM4，所以选择ARM版本的dmg文件：</p>
+<p><img loading="lazy" src="/images/posts/ysyx-f2/image.png"></p>
+<p>安装后启动：</p>
+<p><img loading="lazy" src="/images/posts/ysyx-f2/image%201.png"></p>
+<h1 id="设计一个简单的电路">设计一个简单的电路<a hidden class="anchor" aria-hidden="true" href="#设计一个简单的电路">#</a></h1>
+<p>这是一个简单的选择器，其根据输入信号S来选择输出A还是B，测试结果如下：</p>
+<p><img loading="lazy" src="/images/posts/ysyx-f2/image%202.png"></p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="http://localhost:1313/tags/%E5%A4%84%E7%90%86%E5%99%A8/">处理器</a></li>
+      <li><a href="http://localhost:1313/tags/risc-v/">RISC-V</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="next" href="http://localhost:1313/posts/ysyx-f1/">
+    <span class="title">Next »</span>
+    <span>一生一芯-F1阶段笔记</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="http://localhost:1313/">Minghan的博客</a></span> · 
+
+    
+    
+    <span>
+        Powered by
+        <a href="https://gohugo.io/?utm_source=papermod" rel="noopener" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" id="top-link" class="top-link hidden" aria-label="go to top" title="Go to Top (Alt + G)" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevrons-up">
+        <polyline points="17 11 12 6 7 11"></polyline>
+        <polyline points="17 18 12 13 7 18"></polyline>
+    </svg>
+</a><script src="/js/toc-scrollspy.js" defer></script>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var toplink = document.getElementById("top-link");
+    window.onscroll = function () {
+        const scrollThreshold = window.innerHeight;
+        if (document.body.scrollTop > scrollThreshold || document.documentElement.scrollTop > scrollThreshold) {
+            toplink.classList.remove("hidden");
+        } else {
+            toplink.classList.add("hidden");
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

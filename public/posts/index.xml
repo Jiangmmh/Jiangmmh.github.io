@@ -6,8 +6,26 @@
     <description>Recent content in Posts on Minghan的博客</description>
     <generator>Hugo</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Sat, 17 Oct 2026 11:22:27 +0800</lastBuildDate>
+    <lastBuildDate>Sat, 17 Oct 2026 13:14:43 +0800</lastBuildDate>
     <atom:link href="http://localhost:1313/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>一生一芯-F2阶段笔记</title>
+      <link>http://localhost:1313/posts/ysyx-f2/</link>
+      <pubDate>Sat, 17 Oct 2026 13:14:43 +0800</pubDate>
+      <guid>http://localhost:1313/posts/ysyx-f2/</guid>
+      <description>&lt;h1 id=&#34;logisim简介&#34;&gt;Logisim简介&lt;/h1&gt;
+&lt;p&gt;Logisim是一款图形化的数字电路设计软件, 用户可以通过拖动相应的电路组件来设计数字电路并仿真运行. 后续我们使用的是Logisim-evolution, 它是Logisim的升级版, 提供了更丰富的组件. 但为了描述简便, 下文我们还是使用&lt;code&gt;Logisim&lt;/code&gt;来指代这个升级版.&lt;/p&gt;
+&lt;p&gt;Logisim是一个Java程序, 可以运行在任何支持Java运行环境的操作系统上. 虽然它支持在Windows, Mac OS, Linux等各种主流系统上运行, 但目前我们不要求大家使用Linux操作系统. 如果你有一些Linux操作系统的使用经验, 可以自己解决环境配置相关的问题, 也可以使用Linux版本.&lt;/p&gt;
+&lt;h1 id=&#34;ligisim的下载&#34;&gt;Ligisim的下载&lt;/h1&gt;
+&lt;p&gt;通过Github的Release页面可以下载最新的Logisim-evolution。https://github.com/logisim-evolution/logisim-evolution/releases。&lt;/p&gt;
+&lt;p&gt;我的设备是MacM4，所以选择ARM版本的dmg文件：&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f2/image.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;安装后启动：&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f2/image%201.png&#34;&gt;&lt;/p&gt;
+&lt;h1 id=&#34;设计一个简单的电路&#34;&gt;设计一个简单的电路&lt;/h1&gt;
+&lt;p&gt;这是一个简单的选择器，其根据输入信号S来选择输出A还是B，测试结果如下：&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f2/image%202.png&#34;&gt;&lt;/p&gt;</description>
+    </item>
     <item>
       <title>一生一芯-F1阶段笔记</title>
       <link>http://localhost:1313/posts/ysyx-f1/</link>
@@ -530,6 +548,25 @@
 &lt;p&gt;“一生一芯”不是希望你把每一个细节都背下来，而是希望你逐渐形成一种习惯：&lt;strong&gt;当现象出现时，先观察能否稳定复现，再逐步定位问题；在定位过程中，逐步产生判断，找到证据；在找到答案后，尝试修复并验证，最后复盘总结。&lt;/strong&gt;&lt;/p&gt;
 &lt;h3 id=&#34;14-如何使用ai&#34;&gt;1.4 如何使用AI？&lt;/h3&gt;
 &lt;p&gt;真正的问题不是“能不能用 AI”，而是“怎样用 AI”。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title></title>
+      <link>http://localhost:1313/posts/f2-logisim%E7%9A%84%E5%AE%89%E8%A3%85%E5%92%8C%E4%BD%BF%E7%94%A8-3fcc4e9326148078b4a4ed10ce14957b/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/f2-logisim%E7%9A%84%E5%AE%89%E8%A3%85%E5%92%8C%E4%BD%BF%E7%94%A8-3fcc4e9326148078b4a4ed10ce14957b/</guid>
+      <description>&lt;h1 id=&#34;f2-logisim的安装和使用&#34;&gt;F2-Logisim的安装和使用&lt;/h1&gt;
+&lt;h1 id=&#34;logisim简介&#34;&gt;Logisim简介&lt;/h1&gt;
+&lt;p&gt;Logisim是一款图形化的数字电路设计软件, 用户可以通过拖动相应的电路组件来设计数字电路并仿真运行. 后续我们使用的是Logisim-evolution, 它是Logisim的升级版, 提供了更丰富的组件. 但为了描述简便, 下文我们还是使用&lt;code&gt;Logisim&lt;/code&gt;来指代这个升级版.&lt;/p&gt;
+&lt;p&gt;Logisim是一个Java程序, 可以运行在任何支持Java运行环境的操作系统上. 虽然它支持在Windows, Mac OS, Linux等各种主流系统上运行, 但目前我们不要求大家使用Linux操作系统. 如果你有一些Linux操作系统的使用经验, 可以自己解决环境配置相关的问题, 也可以使用Linux版本.&lt;/p&gt;
+&lt;h1 id=&#34;ligisim的下载&#34;&gt;Ligisim的下载&lt;/h1&gt;
+&lt;p&gt;通过Github的Release页面可以下载最新的Logisim-evolution。https://github.com/logisim-evolution/logisim-evolution/releases。&lt;/p&gt;
+&lt;p&gt;我的设备是MacM4，所以选择ARM版本的dmg文件：&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;F2-Logisim%E7%9A%84%E5%AE%89%E8%A3%85%E5%92%8C%E4%BD%BF%E7%94%A8/image.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;安装后启动：&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;F2-Logisim%E7%9A%84%E5%AE%89%E8%A3%85%E5%92%8C%E4%BD%BF%E7%94%A8/image%201.png&#34;&gt;&lt;/p&gt;
+&lt;h1 id=&#34;设计一个简单的电路&#34;&gt;设计一个简单的电路&lt;/h1&gt;
+&lt;p&gt;这是一个简单的选择器，其根据输入信号S来选择输出A还是B，测试结果如下：&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;F2-Logisim%E7%9A%84%E5%AE%89%E8%A3%85%E5%92%8C%E4%BD%BF%E7%94%A8/image%202.png&#34;&gt;&lt;/p&gt;</description>
     </item>
   </channel>
 </rss>

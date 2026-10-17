@@ -2,7 +2,7 @@
 title: "一生一芯-F1阶段笔记"
 date: '2026-10-17T11:22:27+08:00'
 draft: false
-tags: [处理器, RISC-V, ]
+tags: [处理器, RISC-V,]
 categories: [一生一芯]
 ---
 
