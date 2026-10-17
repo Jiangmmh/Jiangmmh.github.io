@@ -1,4 +1,15 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>处理器 on Minghan的博客</title><link>https://Jiangmmh.github.io/tags/%E5%A4%84%E7%90%86%E5%99%A8/</link><description>Recent content in 处理器 on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Sat, 17 Oct 2026 11:22:27 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/tags/%E5%A4%84%E7%90%86%E5%99%A8/index.xml" rel="self" type="application/rss+xml"/><item><title>一生一芯-F1阶段笔记</title><link>https://Jiangmmh.github.io/posts/ysyx-f1/</link><pubDate>Sat, 17 Oct 2026 11:22:27 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/ysyx-f1/</guid><description>&lt;h1 id="一生一芯概述">一生一芯概述&lt;/h1>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>处理器 on Minghan的博客</title><link>https://Jiangmmh.github.io/tags/%E5%A4%84%E7%90%86%E5%99%A8/</link><description>Recent content in 处理器 on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Sat, 17 Oct 2026 13:14:43 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/tags/%E5%A4%84%E7%90%86%E5%99%A8/index.xml" rel="self" type="application/rss+xml"/><item><title>一生一芯-F2阶段笔记</title><link>https://Jiangmmh.github.io/posts/ysyx-f2/</link><pubDate>Sat, 17 Oct 2026 13:14:43 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/ysyx-f2/</guid><description>&lt;h1 id="logisim简介">Logisim简介&lt;/h1>
+&lt;p>Logisim是一款图形化的数字电路设计软件, 用户可以通过拖动相应的电路组件来设计数字电路并仿真运行. 后续我们使用的是Logisim-evolution, 它是Logisim的升级版, 提供了更丰富的组件. 但为了描述简便, 下文我们还是使用&lt;code>Logisim&lt;/code>来指代这个升级版.&lt;/p>
+&lt;p>Logisim是一个Java程序, 可以运行在任何支持Java运行环境的操作系统上. 虽然它支持在Windows, Mac OS, Linux等各种主流系统上运行, 但目前我们不要求大家使用Linux操作系统. 如果你有一些Linux操作系统的使用经验, 可以自己解决环境配置相关的问题, 也可以使用Linux版本.&lt;/p>
+&lt;h1 id="ligisim的下载">Ligisim的下载&lt;/h1>
+&lt;p>通过Github的Release页面可以下载最新的Logisim-evolution。https://github.com/logisim-evolution/logisim-evolution/releases。&lt;/p>
+&lt;p>我的设备是MacM4，所以选择ARM版本的dmg文件：&lt;/p>
+&lt;p>&lt;img loading="lazy" src="https://Jiangmmh.github.io/images/posts/ysyx-f2/image.png">&lt;/p>
+&lt;p>安装后启动：&lt;/p>
+&lt;p>&lt;img loading="lazy" src="https://Jiangmmh.github.io/images/posts/ysyx-f2/image%201.png">&lt;/p>
+&lt;h1 id="设计一个简单的电路">设计一个简单的电路&lt;/h1>
+&lt;p>这是一个简单的选择器，其根据输入信号S来选择输出A还是B，测试结果如下：&lt;/p>
+&lt;p>&lt;img loading="lazy" src="https://Jiangmmh.github.io/images/posts/ysyx-f2/image%202.png">&lt;/p></description></item><item><title>一生一芯-F1阶段笔记</title><link>https://Jiangmmh.github.io/posts/ysyx-f1/</link><pubDate>Sat, 17 Oct 2026 11:22:27 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/ysyx-f1/</guid><description>&lt;h1 id="一生一芯概述">一生一芯概述&lt;/h1>
 &lt;p>“一生一芯”是由中国科学院大学于2019年发起的一项&lt;strong>大规模、公益性芯片人才培养计划&lt;/strong>，核心目标是让参与的学生亲手设计并流片（试生产）自己的处理器芯片，带着实体芯片毕业。&lt;/p>
 &lt;p>该计划由中国科学院计算技术研究所副所长包云岗研究员推动。传统芯片人才培养周期长，学生往往缺乏从设计到流片的完整工程实践。包云岗提出“让本科生也能做处理器芯片”，旨在通过“做中学”的方式，缩短人才从校园到产业一线的距离，弥补我国处理器芯片设计人才的缺口。&lt;/p>
 &lt;p>项目主页：&lt;a href="https://ysyx.oscc.cc/">https://ysyx.oscc.cc/&lt;/a>&lt;/p>
