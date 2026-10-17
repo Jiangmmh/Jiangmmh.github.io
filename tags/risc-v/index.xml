@@ -1,4 +1,42 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>RISC-V on Minghan的博客</title><link>https://Jiangmmh.github.io/tags/risc-v/</link><description>Recent content in RISC-V on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Thu, 15 Oct 2026 20:55:46 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/tags/risc-v/index.xml" rel="self" type="application/rss+xml"/><item><title>UCLA Computer Architecture Lec2</title><link>https://Jiangmmh.github.io/posts/ucla-ca-02/</link><pubDate>Thu, 15 Oct 2026 20:55:46 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/ucla-ca-02/</guid><description>&lt;h1 id="1-main-objective-of-architecting-a-computer">1. Main objective of architecting a computer&lt;/h1>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>RISC-V on Minghan的博客</title><link>https://Jiangmmh.github.io/tags/risc-v/</link><description>Recent content in RISC-V on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Sat, 17 Oct 2026 11:22:27 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/tags/risc-v/index.xml" rel="self" type="application/rss+xml"/><item><title>一生一芯-F1阶段笔记</title><link>https://Jiangmmh.github.io/posts/ysyx-f1/</link><pubDate>Sat, 17 Oct 2026 11:22:27 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/ysyx-f1/</guid><description>&lt;h1 id="一生一芯概述">一生一芯概述&lt;/h1>
+&lt;p>“一生一芯”是由中国科学院大学于2019年发起的一项&lt;strong>大规模、公益性芯片人才培养计划&lt;/strong>，核心目标是让参与的学生亲手设计并流片（试生产）自己的处理器芯片，带着实体芯片毕业。&lt;/p>
+&lt;p>该计划由中国科学院计算技术研究所副所长包云岗研究员推动。传统芯片人才培养周期长，学生往往缺乏从设计到流片的完整工程实践。包云岗提出“让本科生也能做处理器芯片”，旨在通过“做中学”的方式，缩短人才从校园到产业一线的距离，弥补我国处理器芯片设计人才的缺口。&lt;/p>
+&lt;p>项目主页：&lt;a href="https://ysyx.oscc.cc/">https://ysyx.oscc.cc/&lt;/a>&lt;/p>
+&lt;p>项目特点：&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>完整全链条实践&lt;/strong>：学员需要经历从处理器设计、验证，到基于开源工具链进行物理设计，最终流片并运行操作系统的全过程，而非仅停留在理论或仿真阶段。&lt;/li>
+&lt;li>&lt;strong>开放与公益性&lt;/strong>：报名&lt;strong>不限学校、专业、年级，零基础亦可参与&lt;/strong>，且全程免费。对于符合条件的国内在校生，项目还提供&lt;strong>免费流片机会&lt;/strong>，极大降低了芯片设计的门槛。&lt;/li>
+&lt;li>&lt;strong>依托开源生态&lt;/strong>：教学与实践主要基于 &lt;strong>RISC-V 开源指令集&lt;/strong>以及开源 EDA 工具，避免了商业授权限制，便于学生学习和创新。&lt;/li>
+&lt;/ul>
+&lt;p>一生一芯有多个版本的讲义，我选择的是26.07版本的讲义。&lt;/p>
+&lt;h1 id="讲义笔记">讲义笔记&lt;/h1>
+&lt;h2 id="1-给-ai-时代的一生一芯初学者的一封信">1. 给 AI 时代的“一生一芯”初学者的一封信&lt;/h2>
+&lt;p>文章链接：&lt;a href="https://fa45epzd9c7.feishu.cn/wiki/AOXwwtY0EiCXZykBPTtcIVfWn6f?from=from_copylink">https://fa45epzd9c7.feishu.cn/wiki/AOXwwtY0EiCXZykBPTtcIVfWn6f?from=from_copylink&lt;/a>&lt;/p>
+&lt;!-- raw HTML omitted -->
+&lt;p>&lt;strong>关键问题：既然 AI 已经这么强了，我们为什么还要亲手写代码、看波形、查手册、改 bug，去完成这样一个需要大量手动训练和反复调试的项目？&lt;/strong>&lt;/p>
+&lt;!-- raw HTML omitted -->
+&lt;p>回答：AI 的出现没有降低基础训练的价值，反而&lt;strong>让基础训练变得更加重要&lt;/strong>。未来更重要的能力，不是和 AI 比谁写得更快，而是知道如何提出问题、判断答案、验证结论，并把工具真正变成自己的能力。&lt;strong>在 AI 时代，拥有更强的，驾驭 AI 的能力，是我们希望你得到的。&lt;/strong>&lt;/p>
+&lt;h3 id="11-ai-很强但它不能替你完成成长">1.1 AI 很强，但它不能替你完成成长&lt;/h3>
+&lt;p>如果只是得到一个能运行的结果，AI 也许可以帮你很快走到终点；但如果你不知道这个结果&lt;strong>为什么&lt;/strong>对，不知道哪里可能错，不知道出了问题该如何缩小范围、如何设计实验、如何确认结论，那么这个终点&lt;strong>并没有真正变成你的能力&lt;/strong>。&lt;/p>
+&lt;p>“一生一芯”的讲义之所以有价值，不只是因为它提供了很多资料和步骤，更因为它把学习过程设计成了一条需要你主动思考、动手实践、不断遇到问题并解决问题的路径。&lt;/p>
+&lt;p>你在其中经历的很多细节：&lt;strong>一次看不懂的报错，一段反复读不明白的手册，一条异常的波形，一个改了很久才定位到的 bug，这些，是训练真正进行的地方&lt;/strong>。&lt;/p>
+&lt;p>正是这种直面各种问题的煎熬，让你开始建立工程师最重要的能力：&lt;strong>面对复杂系统时，稳定不慌张，愿意一点点定位、验证、修正、重新理解，直到解决问题&lt;/strong>。&lt;/p>
+&lt;h3 id="12-一生一芯训练的是驾驭复杂系统的能力">1.2 “一生一芯”训练的，是驾驭复杂系统的能力&lt;/h3>
+&lt;p>一生一芯训练的是一种系统性的工程能力，你会不断遇到这样的时刻：&lt;/p>
+&lt;ul>
+&lt;li>现象和预期不一致，需要你判断问题出在代码、环境、理解，还是测试方式上。&lt;/li>
+&lt;li>一个小 bug 牵出一串背景知识，需要你回到原理层面重新确认。&lt;/li>
+&lt;li>别人给了一个答案，但你仍然要判断它是否适用于自己的场景。&lt;/li>
+&lt;li>一个功能终于跑通了，但你还需要解释它为什么能跑通。&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>因为 AI 会让“得到一个答案”变得越来越容易，但也会&lt;strong>让“判断一个答案是否可靠”变得越来越重要&lt;/strong>。&lt;/p>&lt;/blockquote>
+&lt;h3 id="13-细节不是负担而是深入理解系统的开始">1.3 细节不是负担，而是深入理解系统的开始&lt;/h3>
+&lt;p>&lt;strong>在短期里，跳过细节似乎能更快完成任务。但在长期里，细节往往决定你是否真的理解了系统。&lt;/strong>&lt;/p>
+&lt;p>处理器、编译、操作系统、仿真环境、调试工具，这些内容彼此连接。一个看似微小的现象，背后可能牵着接口约定、时序关系、状态更新、指令语义或工具链行为。你愿意停下来追问一个细节，常常就会打开一整片新的理解。&lt;/p>
+&lt;p>“一生一芯”不是希望你把每一个细节都背下来，而是希望你逐渐形成一种习惯：&lt;strong>当现象出现时，先观察能否稳定复现，再逐步定位问题；在定位过程中，逐步产生判断，找到证据；在找到答案后，尝试修复并验证，最后复盘总结。&lt;/strong>&lt;/p>
+&lt;h3 id="14-如何使用ai">1.4 如何使用AI？&lt;/h3>
+&lt;p>真正的问题不是“能不能用 AI”，而是“怎样用 AI”。&lt;/p></description></item><item><title>UCLA Computer Architecture Lec2&amp;Lec3</title><link>https://Jiangmmh.github.io/posts/ucla-ca-02/</link><pubDate>Thu, 15 Oct 2026 20:55:46 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/ucla-ca-02/</guid><description>&lt;h1 id="1-main-objective-of-architecting-a-computer">1. Main objective of architecting a computer&lt;/h1>
 &lt;blockquote>
 &lt;p>&lt;strong>关键目标：Make efficient computer.&lt;/strong>&lt;/p>&lt;/blockquote>
 &lt;p>&lt;strong>何谓高效？&lt;/strong>&lt;/p>
