@@ -14,7 +14,7 @@ Logisim是一个Java程序, 可以运行在任何支持Java运行环境的操作
 
 # Ligisim的下载
 
-通过Github的Release页面可以下载最新的Logisim-evolution。https://github.com/logisim-evolution/logisim-evolution/releases。
+通过Github的[Release页面](https://github.com/logisim-evolution/logisim-evolution/releases)可以下载最新的Logisim-evolution。
 
 我的设备是MacM4，所以选择ARM版本的dmg文件：
 
