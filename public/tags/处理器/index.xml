@@ -6,8 +6,66 @@
     <description>Recent content in 处理器 on Minghan的博客</description>
     <generator>Hugo</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Sat, 17 Oct 2026 15:42:02 +0800</lastBuildDate>
+    <lastBuildDate>Sun, 18 Oct 2026 23:26:02 +0800</lastBuildDate>
     <atom:link href="http://localhost:1313/tags/%E5%A4%84%E7%90%86%E5%99%A8/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>一生一芯-F4阶段笔记</title>
+      <link>http://localhost:1313/posts/ysyx-f4/</link>
+      <pubDate>Sun, 18 Oct 2026 23:26:02 +0800</pubDate>
+      <guid>http://localhost:1313/posts/ysyx-f4/</guid>
+      <description>&lt;h1 id=&#34;课程笔记&#34;&gt;课程笔记&lt;/h1&gt;
+&lt;p&gt;本阶段课程的大纲如下：&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image.png&#34;&gt;&lt;/p&gt;
+&lt;h2 id=&#34;1-cpu的基本组成和工作原理&#34;&gt;1. CPU的基本组成和工作原理&lt;/h2&gt;
+&lt;p&gt;&amp;gt; &lt;strong&gt;**通过指令的组合实现需求, 就是编程。**&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&amp;gt; &lt;/p&gt;
+&lt;p&gt;- CPU是一种通用的芯片，其提供了&lt;strong&gt;**一组数量有限的指令集合**&lt;/strong&gt;；但CPU的用户可以&lt;strong&gt;**按需求组合指令集中的指令**&lt;/strong&gt;，实现自定义的功能。&lt;/p&gt;
+&lt;p&gt;- 指令分为&lt;strong&gt;**操作码**&lt;/strong&gt;和&lt;strong&gt;**操作数**&lt;/strong&gt;，前者指定处理数据的方式，后者指定要处理的数据。&lt;/p&gt;
+&lt;p&gt;- CPU中提供一组通用寄存器存放临时值，指令需要操作数字段指出所使用的寄存器。&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%201.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;下面是一个简单的ISA——sCPU，其包括4个寄存器和3条指令。&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%202.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%203.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%204.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%205.png&#34;&gt;&lt;/p&gt;
+&lt;h2 id=&#34;2-指令集架构&#34;&gt;2. 指令集架构&lt;/h2&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%206.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;可以将计算机视为一个有限状态机（FSM），其状态由内存和寄存器中的值决定，指令作为激励事件实现状态机的状态转移。&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%207.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%208.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;**sISA**&lt;/strong&gt;作为一个状态机：&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%209.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%2010.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%2011.png&#34;&gt;&lt;/p&gt;
+&lt;h2 id=&#34;3-c语言程序的状态机模型&#34;&gt;3. C语言程序的状态机模型&lt;/h2&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%2012.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%2013.png&#34;&gt;&lt;/p&gt;
+&lt;h2 id=&#34;4-数字电路的状态机模型&#34;&gt;4. 数字电路的状态机模型&lt;/h2&gt;
+&lt;p&gt;深刻理解下面这个模型：&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%2014.png&#34;&gt;&lt;/p&gt;
+&lt;h2 id=&#34;5-各状态机模型之间的转换&#34;&gt;5. 各状态机模型之间的转换&lt;/h2&gt;
+&lt;p&gt;计算机程序的各个层次都可以被视为等价的状态机：&lt;/p&gt;
+&lt;p&gt;- C语言程序是一个状态机&lt;/p&gt;
+&lt;p&gt;- 汇编语言程序是一个状态机&lt;/p&gt;
+&lt;p&gt;- 处理器电路也是一个状态机&lt;/p&gt;
+&lt;p&gt;    - 状态（PC、GPR和内存）使用时序逻辑电路表示&lt;/p&gt;
+&lt;p&gt;    - 指令（ISA定义的指令集）使用组合逻辑电路执行&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%2015.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%2016.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%2017.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%2018.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%2019.png&#34;&gt;&lt;/p&gt;
+&lt;h2 id=&#34;6-最后的话&#34;&gt;6. 最后的话&lt;/h2&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%2020.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%2021.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%2022.png&#34;&gt;&lt;/p&gt;
+&lt;h1 id=&#34;讲义笔记&#34;&gt;讲义笔记&lt;/h1&gt;
+&lt;h2 id=&#34;1-sisa和状态机&#34;&gt;1. sISA和状态机&lt;/h2&gt;
+&lt;p&gt;计算机是一个机械地进行数据处理的设备，这里的“机械”是指其原理非常死板，毫无神秘可言。&lt;/p&gt;
+&lt;p&gt;计算机的ISA（指令集架构）定义了一组硬件规范（PC、GPR和内存）和一组有限的指令。&lt;/p&gt;
+&lt;p&gt;- 在ISA之上，我们利用ISA提供的指令来构建操作系统、编译器等系统软件。&lt;/p&gt;
+&lt;p&gt;- 在ISA之下，我们根据ISA的定义来设计数字电路，在物理上实现ISA的功能。&lt;/p&gt;</description>
+    </item>
     <item>
       <title>一生一芯-F3阶段笔记</title>
       <link>http://localhost:1313/posts/ysyx-f3/</link>
@@ -16,7 +74,7 @@
       <description>&lt;blockquote&gt;
 &lt;p&gt;&lt;strong&gt;处理器芯片本质上是数字电路&lt;/strong&gt;。数字电路是用来处理&lt;strong&gt;数字信号&lt;/strong&gt;的电路, 而&lt;strong&gt;数字信号简单来说是指&lt;code&gt;0&lt;/code&gt;和&lt;code&gt;1&lt;/code&gt;这两种离散的信号&lt;/strong&gt;. 这里的&lt;code&gt;0&lt;/code&gt;和&lt;code&gt;1&lt;/code&gt;并不是数学意义上的自然数, 它是指&lt;strong&gt;信号的两种不同状态&lt;/strong&gt;, 为了简单叙述, 就分别称它们为&lt;code&gt;0&lt;/code&gt;和&lt;code&gt;1&lt;/code&gt;. 为了和数学上的&lt;code&gt;0&lt;/code&gt;和&lt;code&gt;1&lt;/code&gt;区分开来, 有时候也将上面两种状态称为&lt;code&gt;逻辑0&lt;/code&gt;和&lt;code&gt;逻辑1&lt;/code&gt;。&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;因此, 处理器芯片本质上也是处理&lt;code&gt;0&lt;/code&gt;和&lt;code&gt;1&lt;/code&gt;这两种信号的芯片. 要学习处理器芯片设计, 数字电路的知识是基础. 而要学习数字电路, 就是需要学习信息在数字电路中是如何表示, 处理和存储的. 具体地, 你将会了解:&lt;/p&gt;
+&lt;p&gt;因此, 处理器芯片本质上也是处理&lt;code&gt;0&lt;/code&gt;和&lt;code&gt;1&lt;/code&gt;这两种信号的芯片. 要学习处理器芯片设计, 数字电路的知识是基础. 而要学习数字电路, 就是需要学习信息在数字电路中是如何表示, 处理和存储的。具体地, 你将会了解:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;如何表示 - 数字信号&lt;code&gt;0&lt;/code&gt;和&lt;code&gt;1&lt;/code&gt;在数字电路中的物理含义&lt;/li&gt;
 &lt;li&gt;如何处理 - 门电路和组合逻辑电路的工作原理&lt;/li&gt;
@@ -25,9 +83,12 @@
 &lt;h1 id=&#34;课程笔记&#34;&gt;课程笔记&lt;/h1&gt;
 &lt;h2 id=&#34;1-如何表示0和1&#34;&gt;1. 如何表示0和1？&lt;/h2&gt;
 &lt;blockquote&gt;
-&lt;p&gt;&lt;strong&gt;关键问题：数字电路如何表示0和1（物理含义）？&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;关键问题：数字电路如何表示0和1（物理含义），以及如何处理它们？&lt;/strong&gt;&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;使用晶体管！一个晶体管包含三个极（Source、Drain和Gate），其作用类似于一个开关，通过在Gate端加入不同电压可以控制Souce和Drain的导通与断开。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;数字电路用物理量的两个离散区间表示 0 和 1&lt;/strong&gt;：最常见的是低电平=0、高电平=1，并用阈值区间和噪声容限保证在真实电路中可靠区分，而不是依赖精确的单一电压值。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;使用晶体管处理数字信号&lt;/strong&gt;：一个晶体管包含三个极（Source、Drain和Gate），其作用类似于一个开关，通过在Gate端加入不同电压可以控制Source和Drain的导通与断开。&lt;/li&gt;
+&lt;/ul&gt;
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f3/image.png&#34;&gt;&lt;/p&gt;
 &lt;h2 id=&#34;2-cmos&#34;&gt;2. CMOS&lt;/h2&gt;
 &lt;p&gt;在实际的硬件设计中，通常使用一个nMOS和一个pMOS构造CMOS来实现0和1。&lt;/p&gt;
@@ -43,11 +104,10 @@
 &lt;li&gt;CMOS的互补结构使高低电平的噪声容限对称、较大。&lt;/li&gt;
 &lt;li&gt;CMOS 工艺中 NMOS 和 PMOS 可以成对制造，版图规整、易于自动布局布线，也便于用标准单元库大规模综合。单管方案往往需要电阻、特殊器件，难以标准化和缩放。&lt;/li&gt;
 &lt;/ul&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f3/image1.png&#34;&gt;&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;虽然一个晶体管也能&amp;quot;通断&amp;quot;，但只有 nMOS + pMOS 互补配对，才能同时做到：完整传递 0 和 1、主动驱动、静态几乎不耗电、电平可恢复、易于大规模集成。&lt;/strong&gt; CMOS 不是&amp;quot;两个管子干一个管子的活&amp;quot;的浪费，而是用互补换来了功耗、电平、可靠性、可扩展性的全面胜利。&lt;/p&gt;
 &lt;h2 id=&#34;3-使用cmos构建逻辑门电路&#34;&gt;3. 使用CMOS构建逻辑门电路&lt;/h2&gt;
-&lt;p&gt;对于输入Y&lt;/p&gt;
-&lt;p&gt;与非门：&lt;/p&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f3/image%202.png&#34;&gt;&lt;/p&gt;</description>
+&lt;p&gt;与非门：&lt;/p&gt;</description>
     </item>
     <item>
       <title>一生一芯-F2阶段笔记</title>

@@ -5,6 +5,9 @@ draft: false
 tags: [二叉树, 自底向上DFS]
 categories: [Leetecode]
 ---
+题目来自灵神的题单：[二叉树题单](https://leetcode.cn/discuss/post/3142882/fen-xiang-gun-ti-dan-lian-biao-er-cha-sh-6srp/)。
+
+在[上一篇文章](https://jiangmmh.github.io/posts/leetecode-tree01/)中已经介绍了**简单遍历**和**自顶向下DFS**的思路，这篇文章主要介绍自底向上DFS的思路。
 # 一、**自底向上 DFS（后序遍历）**
 
 在二叉树系列的前一篇博客中其实已经提到过了自顶向下和自底向上的区别了，这里再啰嗦一遍。

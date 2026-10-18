@@ -205,26 +205,57 @@
 
 <article class="post-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">一生一芯-F4阶段笔记
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>课程笔记 本阶段课程的大纲如下：
+1. CPU的基本组成和工作原理 &gt; **通过指令的组合实现需求, 就是编程。**
+&gt; - CPU是一种通用的芯片，其提供了**一组数量有限的指令集合**；但CPU的用户可以**按需求组合指令集中的指令**，实现自定义的功能。
+- 指令分为**操作码**和**操作数**，前者指定处理数据的方式，后者指定要处理的数据。
+- CPU中提供一组通用寄存器存放临时值，指令需要操作数字段指出所使用的寄存器。
+下面是一个简单的ISA——sCPU，其包括4个寄存器和3条指令。
+2. 指令集架构 可以将计算机视为一个有限状态机（FSM），其状态由内存和寄存器中的值决定，指令作为激励事件实现状态机的状态转移。
+**sISA**作为一个状态机：
+3. C语言程序的状态机模型 4. 数字电路的状态机模型 深刻理解下面这个模型：
+5. 各状态机模型之间的转换 计算机程序的各个层次都可以被视为等价的状态机：
+- C语言程序是一个状态机
+- 汇编语言程序是一个状态机
+- 处理器电路也是一个状态机
+- 状态（PC、GPR和内存）使用时序逻辑电路表示
+- 指令（ISA定义的指令集）使用组合逻辑电路执行
+6. 最后的话 讲义笔记 1. sISA和状态机 计算机是一个机械地进行数据处理的设备，这里的“机械”是指其原理非常死板，毫无神秘可言。
+计算机的ISA（指令集架构）定义了一组硬件规范（PC、GPR和内存）和一组有限的指令。
+- 在ISA之上，我们利用ISA提供的指令来构建操作系统、编译器等系统软件。
+- 在ISA之下，我们根据ISA的定义来设计数字电路，在物理上实现ISA的功能。
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-18 23:26:02 +0800 CST'>October 18, 2026</span>&nbsp;·&nbsp;<span>5 min</span>&nbsp;·&nbsp;<span>903 words</span></footer>
+  <a class="entry-link" aria-label="post link to 一生一芯-F4阶段笔记" href="http://localhost:1313/posts/ysyx-f4/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">一生一芯-F3阶段笔记
     </h2>
   </header>
   <div class="entry-content">
     <p> 处理器芯片本质上是数字电路。数字电路是用来处理数字信号的电路, 而数字信号简单来说是指0和1这两种离散的信号. 这里的0和1并不是数学意义上的自然数, 它是指信号的两种不同状态, 为了简单叙述, 就分别称它们为0和1. 为了和数学上的0和1区分开来, 有时候也将上面两种状态称为逻辑0和逻辑1。
-因此, 处理器芯片本质上也是处理0和1这两种信号的芯片. 要学习处理器芯片设计, 数字电路的知识是基础. 而要学习数字电路, 就是需要学习信息在数字电路中是如何表示, 处理和存储的. 具体地, 你将会了解:
-如何表示 - 数字信号0和1在数字电路中的物理含义 如何处理 - 门电路和组合逻辑电路的工作原理 如何存储 - 时序逻辑电路的工作原理 课程笔记 1. 如何表示0和1？ 关键问题：数字电路如何表示0和1（物理含义）？
-使用晶体管！一个晶体管包含三个极（Source、Drain和Gate），其作用类似于一个开关，通过在Gate端加入不同电压可以控制Souce和Drain的导通与断开。
-2. CMOS 在实际的硬件设计中，通常使用一个nMOS和一个pMOS构造CMOS来实现0和1。
+因此, 处理器芯片本质上也是处理0和1这两种信号的芯片. 要学习处理器芯片设计, 数字电路的知识是基础. 而要学习数字电路, 就是需要学习信息在数字电路中是如何表示, 处理和存储的。具体地, 你将会了解:
+如何表示 - 数字信号0和1在数字电路中的物理含义 如何处理 - 门电路和组合逻辑电路的工作原理 如何存储 - 时序逻辑电路的工作原理 课程笔记 1. 如何表示0和1？ 关键问题：数字电路如何表示0和1（物理含义），以及如何处理它们？
+数字电路用物理量的两个离散区间表示 0 和 1：最常见的是低电平=0、高电平=1，并用阈值区间和噪声容限保证在真实电路中可靠区分，而不是依赖精确的单一电压值。 使用晶体管处理数字信号：一个晶体管包含三个极（Source、Drain和Gate），其作用类似于一个开关，通过在Gate端加入不同电压可以控制Source和Drain的导通与断开。 2. CMOS 在实际的硬件设计中，通常使用一个nMOS和一个pMOS构造CMOS来实现0和1。
 下面这个CMOS本身其实是一个反相器，即输入A为0，输出Y为1；输入A为1，输出Y为0。
 关键问题：一个晶体管就能作为开关，为什么要用两个晶体管构成CMOS？
 单看逻辑功能，一个 nMOS 确实就能当开关用——栅极给高电平导通、给低电平截止。那为什么几乎所有的现代数字电路都用 CMOS（互补金属氧化物半导体，即 nMOS &#43; pMOS 配对）而不是单管方案？
 nMOS擅长传递低电平，pMOS擅长传递高电平，反过来会导致信号衰减。 CMOS的静态功耗低。 CMOS的互补结构使高低电平的噪声容限对称、较大。 CMOS 工艺中 NMOS 和 PMOS 可以成对制造，版图规整、易于自动布局布线，也便于用标准单元库大规模综合。单管方案往往需要电阻、特殊器件，难以标准化和缩放。 虽然一个晶体管也能&#34;通断&#34;，但只有 nMOS &#43; pMOS 互补配对，才能同时做到：完整传递 0 和 1、主动驱动、静态几乎不耗电、电平可恢复、易于大规模集成。 CMOS 不是&#34;两个管子干一个管子的活&#34;的浪费，而是用互补换来了功耗、电平、可靠性、可扩展性的全面胜利。
-3. 使用CMOS构建逻辑门电路 对于输入Y
-与非门：
+3. 使用CMOS构建逻辑门电路 与非门：
 ...</p>
   </div>
   <footer class="entry-footer">
 
-<span title='2026-10-17 15:42:02 +0800 CST'>October 17, 2026</span>&nbsp;·&nbsp;<span>2 min</span>&nbsp;·&nbsp;<span>271 words</span></footer>
+<span title='2026-10-17 15:42:02 +0800 CST'>October 17, 2026</span>&nbsp;·&nbsp;<span>2 min</span>&nbsp;·&nbsp;<span>273 words</span></footer>
   <a class="entry-link" aria-label="post link to 一生一芯-F3阶段笔记" href="http://localhost:1313/posts/ysyx-f3/"></a>
 </article>
 
@@ -286,7 +317,9 @@ Ligisim的下载 通过Github的Release页面可以下载最新的Logisim-evolut
     </h2>
   </header>
   <div class="entry-content">
-    <p>一、自底向上 DFS（后序遍历） 在二叉树系列的前一篇博客中其实已经提到过了自顶向下和自底向上的区别了，这里再啰嗦一遍。
+    <p>题目来自灵神的题单：二叉树题单。
+在上一篇文章中已经介绍了简单遍历和自顶向下DFS的思路，这篇文章主要介绍自底向上DFS的思路。
+一、自底向上 DFS（后序遍历） 在二叉树系列的前一篇博客中其实已经提到过了自顶向下和自底向上的区别了，这里再啰嗦一遍。
 自顶向下，指从根节点往叶子节点 “递”的过程中 更新结果 自底向上，指先递归处理叶子节点，在 “归“的过程中 更新结果 21. 二叉树的最大深度 自底向上的解法：
 先递归得到左右子树各自的最大深度，然后取大者&#43;1作为结果返回。
 时间复杂度：O(n)，空间复杂度：O(n)
@@ -300,7 +333,7 @@ class Solution { public: int minDepth(TreeNode* root) { if (!root) return 0; if 
   </div>
   <footer class="entry-footer">
 
-<span title='2026-10-16 11:20:25 +0800 CST'>October 16, 2026</span>&nbsp;·&nbsp;<span>9 min</span>&nbsp;·&nbsp;<span>1827 words</span></footer>
+<span title='2026-10-16 11:20:25 +0800 CST'>October 16, 2026</span>&nbsp;·&nbsp;<span>9 min</span>&nbsp;·&nbsp;<span>1829 words</span></footer>
   <a class="entry-link" aria-label="post link to Leetecode 二叉树(二)" href="http://localhost:1313/posts/leetecode-tree02/"></a>
 </article>
 
@@ -435,6 +468,12 @@ class Solution { vector&lt;int&gt; findLocalMinMax(ListNode *head) { vector&lt;i
 <span title='2026-10-14 11:44:43 +0800 CST'>October 14, 2026</span>&nbsp;·&nbsp;<span>6 min</span>&nbsp;·&nbsp;<span>1268 words</span></footer>
   <a class="entry-link" aria-label="post link to 如何快速构建一个静态博客?" href="http://localhost:1313/posts/hello-world/"></a>
 </article>
+<footer class="page-footer">
+  <nav class="pagination">
+    <a class="next" href="http://localhost:1313/posts/page/2/">Next&nbsp;&nbsp;»
+    </a>
+  </nav>
+</footer>
     </main>
     
 <footer class="footer">

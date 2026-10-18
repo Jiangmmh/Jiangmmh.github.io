@@ -13,7 +13,9 @@
       <link>http://localhost:1313/posts/leetecode-tree02/</link>
       <pubDate>Fri, 16 Oct 2026 11:20:25 +0800</pubDate>
       <guid>http://localhost:1313/posts/leetecode-tree02/</guid>
-      <description>&lt;h1 id=&#34;一自底向上-dfs后序遍历&#34;&gt;一、&lt;strong&gt;自底向上 DFS（后序遍历）&lt;/strong&gt;&lt;/h1&gt;
+      <description>&lt;p&gt;题目来自灵神的题单：&lt;a href=&#34;https://leetcode.cn/discuss/post/3142882/fen-xiang-gun-ti-dan-lian-biao-er-cha-sh-6srp/&#34;&gt;二叉树题单&lt;/a&gt;。&lt;/p&gt;
+&lt;p&gt;在&lt;a href=&#34;https://jiangmmh.github.io/posts/leetecode-tree01/&#34;&gt;上一篇文章&lt;/a&gt;中已经介绍了&lt;strong&gt;简单遍历&lt;/strong&gt;和&lt;strong&gt;自顶向下DFS&lt;/strong&gt;的思路，这篇文章主要介绍自底向上DFS的思路。&lt;/p&gt;
+&lt;h1 id=&#34;一自底向上-dfs后序遍历&#34;&gt;一、&lt;strong&gt;自底向上 DFS（后序遍历）&lt;/strong&gt;&lt;/h1&gt;
 &lt;p&gt;在二叉树系列的前一篇博客中其实已经提到过了自顶向下和自底向上的区别了，这里再啰嗦一遍。&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;自顶向下，指从根节点往叶子节点 &lt;strong&gt;“递”的过程中&lt;/strong&gt; 更新结果&lt;/li&gt;

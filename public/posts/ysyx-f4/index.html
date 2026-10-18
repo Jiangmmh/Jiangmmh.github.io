@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>一生一芯-F4阶段笔记 | Minghan的博客</title>
+<meta name="keywords" content="处理器, RISC-V">
+<meta name="description" content="课程笔记
+本阶段课程的大纲如下：
+
+1. CPU的基本组成和工作原理
+
+通过指令的组合实现需求, 就是编程。
+
+
+ 
+
+
+
+CPU是一种通用的芯片，其提供了一组数量有限的指令集合；但CPU的用户可以按需求组合指令集中的指令，实现自定义的功能。
+
+
+指令分为操作码和操作数，前者指定处理数据的方式，后者指定要处理的数据。
+
+
+CPU中提供一组通用寄存器存放临时值，指令需要操作数字段指出所使用的寄存器。
+
+
+
+下面是一个简单的ISA——sCPU，其包括4个寄存器和3条指令。
+
+
+
+
+2. 指令集架构
+
+可以将计算机视为一个有限状态机（FSM），其状态由内存和寄存器中的值决定，指令作为激励事件实现状态机的状态转移。
+
+
+sISA作为一个状态机：
+
+
+
+3. C语言程序的状态机模型
+
+
+4. 数字电路的状态机模型
+深刻理解下面这个模型：
+
+5. 各状态机模型之间的转换
+计算机程序的各个层次都可以被视为等价的状态机：
+
+C语言程序是一个状态机
+汇编语言程序是一个状态机
+处理器电路也是一个状态机
+
+状态（PC、GPR和内存）使用时序逻辑电路表示
+指令（ISA定义的指令集）使用组合逻辑电路执行
+
+
+
+
+
+
+
+
+6. 最后的话
+
+
+
+讲义笔记
+1. sISA和状态机
+计算机是一个机械地进行数据处理的设备，这里的“机械”是指其原理非常死板，毫无神秘可言。
+计算机的ISA（指令集架构）定义了一组硬件规范（PC、GPR和内存）和一组有限的指令。
+
+
+在ISA之上，我们利用ISA提供的指令来构建操作系统、编译器等系统软件。
+
+
+在ISA之下，我们根据ISA的定义来设计数字电路，在物理上实现ISA的功能。
+
+
+指令主要包括两部分内容：
+
+
+操作码：标识指令的功能
+
+
+操作数：标识指令要处理的数据
+
+
+下面是一个简单的指令集架构——sISA所支持的指令：
+
+下面是使用sISA指令实现的数列求和程序：
+
+0: li r0, 10         # r0表示执行10次循环
+
+1: li r1, 0          # r1表示循环变量i
+
+2: li r2, 0          # r2表示和
+
+3: li r3, 1          # r3表示i每次递增的步长
+
+4: add r1, r1, r3
+
+5: add r2, r2, r1
+
+6: bner0 r1, 4
+
+7: bner0 r3, 7
+该程序的状态机模型如下：">
+<meta name="author" content="">
+<link rel="canonical" href="http://localhost:1313/posts/ysyx-f4/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.f9490c4bd2e7d3fd9e21909b0bc528878329710db51c69d38b7057b37e889c1d.css" integrity="sha256-&#43;UkMS9Ln0/2eIZCbC8Uoh4MpcQ21HGnTi3BXs36InB0=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/ysyx-f4/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css"
+>
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/contrib/auto-render.min.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    if (typeof renderMathInElement !== "function") {
+      console.error("KaTeX auto-render 加载失败");
+      return;
+    }
+
+    document.querySelectorAll(".post-content, .book-content").forEach(function (element) {
+      renderMathInElement(element, {
+        delimiters: [
+          { left: "$$", right: "$$", display: true },
+          { left: "\\[", right: "\\]", display: true },
+          { left: "\\(", right: "\\)", display: false }
+        ],
+        throwOnError: false
+      });
+    });
+  });
+</script>
+<meta property="og:url" content="http://localhost:1313/posts/ysyx-f4/">
+  <meta property="og:site_name" content="Minghan的博客">
+  <meta property="og:title" content="一生一芯-F4阶段笔记">
+  <meta property="og:description" content="课程笔记 本阶段课程的大纲如下：
+1. CPU的基本组成和工作原理 通过指令的组合实现需求, 就是编程。
+CPU是一种通用的芯片，其提供了一组数量有限的指令集合；但CPU的用户可以按需求组合指令集中的指令，实现自定义的功能。
+指令分为操作码和操作数，前者指定处理数据的方式，后者指定要处理的数据。
+CPU中提供一组通用寄存器存放临时值，指令需要操作数字段指出所使用的寄存器。
+下面是一个简单的ISA——sCPU，其包括4个寄存器和3条指令。
+2. 指令集架构 可以将计算机视为一个有限状态机（FSM），其状态由内存和寄存器中的值决定，指令作为激励事件实现状态机的状态转移。
+sISA作为一个状态机：
+3. C语言程序的状态机模型 4. 数字电路的状态机模型 深刻理解下面这个模型：
+5. 各状态机模型之间的转换 计算机程序的各个层次都可以被视为等价的状态机：
+C语言程序是一个状态机 汇编语言程序是一个状态机 处理器电路也是一个状态机 状态（PC、GPR和内存）使用时序逻辑电路表示 指令（ISA定义的指令集）使用组合逻辑电路执行 6. 最后的话 讲义笔记 1. sISA和状态机 计算机是一个机械地进行数据处理的设备，这里的“机械”是指其原理非常死板，毫无神秘可言。 计算机的ISA（指令集架构）定义了一组硬件规范（PC、GPR和内存）和一组有限的指令。
+在ISA之上，我们利用ISA提供的指令来构建操作系统、编译器等系统软件。
+在ISA之下，我们根据ISA的定义来设计数字电路，在物理上实现ISA的功能。
+指令主要包括两部分内容：
+操作码：标识指令的功能
+操作数：标识指令要处理的数据
+下面是一个简单的指令集架构——sISA所支持的指令：
+下面是使用sISA指令实现的数列求和程序：
+0: li r0, 10 # r0表示执行10次循环 1: li r1, 0 # r1表示循环变量i 2: li r2, 0 # r2表示和 3: li r3, 1 # r3表示i每次递增的步长 4: add r1, r1, r3 5: add r2, r2, r1 6: bner0 r1, 4 7: bner0 r3, 7 该程序的状态机模型如下：">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-10-18T23:26:02+08:00">
+    <meta property="article:modified_time" content="2026-10-18T23:26:02+08:00">
+    <meta property="article:tag" content="处理器">
+    <meta property="article:tag" content="RISC-V">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="一生一芯-F4阶段笔记">
+  <meta name="twitter:description" content="课程笔记 本阶段课程的大纲如下：
+1. CPU的基本组成和工作原理 通过指令的组合实现需求, 就是编程。
+CPU是一种通用的芯片，其提供了一组数量有限的指令集合；但CPU的用户可以按需求组合指令集中的指令，实现自定义的功能。
+指令分为操作码和操作数，前者指定处理数据的方式，后者指定要处理的数据。
+CPU中提供一组通用寄存器存放临时值，指令需要操作数字段指出所使用的寄存器。
+下面是一个简单的ISA——sCPU，其包括4个寄存器和3条指令。
+2. 指令集架构 可以将计算机视为一个有限状态机（FSM），其状态由内存和寄存器中的值决定，指令作为激励事件实现状态机的状态转移。
+sISA作为一个状态机：
+3. C语言程序的状态机模型 4. 数字电路的状态机模型 深刻理解下面这个模型：
+5. 各状态机模型之间的转换 计算机程序的各个层次都可以被视为等价的状态机：
+C语言程序是一个状态机 汇编语言程序是一个状态机 处理器电路也是一个状态机 状态（PC、GPR和内存）使用时序逻辑电路表示 指令（ISA定义的指令集）使用组合逻辑电路执行 6. 最后的话 讲义笔记 1. sISA和状态机 计算机是一个机械地进行数据处理的设备，这里的“机械”是指其原理非常死板，毫无神秘可言。 计算机的ISA（指令集架构）定义了一组硬件规范（PC、GPR和内存）和一组有限的指令。
+在ISA之上，我们利用ISA提供的指令来构建操作系统、编译器等系统软件。
+在ISA之下，我们根据ISA的定义来设计数字电路，在物理上实现ISA的功能。
+指令主要包括两部分内容：
+操作码：标识指令的功能
+操作数：标识指令要处理的数据
+下面是一个简单的指令集架构——sISA所支持的指令：
+下面是使用sISA指令实现的数列求和程序：
+0: li r0, 10 # r0表示执行10次循环 1: li r1, 0 # r1表示循环变量i 2: li r2, 0 # r2表示和 3: li r3, 1 # r3表示i每次递增的步长 4: add r1, r1, r3 5: add r2, r2, r1 6: bner0 r1, 4 7: bner0 r3, 7 该程序的状态机模型如下：">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "http://localhost:1313/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "一生一芯-F4阶段笔记",
+      "item": "http://localhost:1313/posts/ysyx-f4/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "一生一芯-F4阶段笔记",
+  "name": "一生一芯-F4阶段笔记",
+  "description": "课程笔记 本阶段课程的大纲如下：\n1. CPU的基本组成和工作原理 通过指令的组合实现需求, 就是编程。\nCPU是一种通用的芯片，其提供了一组数量有限的指令集合；但CPU的用户可以按需求组合指令集中的指令，实现自定义的功能。\n指令分为操作码和操作数，前者指定处理数据的方式，后者指定要处理的数据。\nCPU中提供一组通用寄存器存放临时值，指令需要操作数字段指出所使用的寄存器。\n下面是一个简单的ISA——sCPU，其包括4个寄存器和3条指令。\n2. 指令集架构 可以将计算机视为一个有限状态机（FSM），其状态由内存和寄存器中的值决定，指令作为激励事件实现状态机的状态转移。\nsISA作为一个状态机：\n3. C语言程序的状态机模型 4. 数字电路的状态机模型 深刻理解下面这个模型：\n5. 各状态机模型之间的转换 计算机程序的各个层次都可以被视为等价的状态机：\nC语言程序是一个状态机 汇编语言程序是一个状态机 处理器电路也是一个状态机 状态（PC、GPR和内存）使用时序逻辑电路表示 指令（ISA定义的指令集）使用组合逻辑电路执行 6. 最后的话 讲义笔记 1. sISA和状态机 计算机是一个机械地进行数据处理的设备，这里的“机械”是指其原理非常死板，毫无神秘可言。 计算机的ISA（指令集架构）定义了一组硬件规范（PC、GPR和内存）和一组有限的指令。\n在ISA之上，我们利用ISA提供的指令来构建操作系统、编译器等系统软件。\n在ISA之下，我们根据ISA的定义来设计数字电路，在物理上实现ISA的功能。\n指令主要包括两部分内容：\n操作码：标识指令的功能\n操作数：标识指令要处理的数据\n下面是一个简单的指令集架构——sISA所支持的指令：\n下面是使用sISA指令实现的数列求和程序：\n0: li r0, 10 # r0表示执行10次循环 1: li r1, 0 # r1表示循环变量i 2: li r2, 0 # r2表示和 3: li r3, 1 # r3表示i每次递增的步长 4: add r1, r1, r3 5: add r2, r2, r1 6: bner0 r1, 4 7: bner0 r3, 7 该程序的状态机模型如下：\n",
+  "keywords": [
+    "处理器", "RISC-V"
+  ],
+  "articleBody": "课程笔记 本阶段课程的大纲如下：\n1. CPU的基本组成和工作原理 通过指令的组合实现需求, 就是编程。\nCPU是一种通用的芯片，其提供了一组数量有限的指令集合；但CPU的用户可以按需求组合指令集中的指令，实现自定义的功能。\n指令分为操作码和操作数，前者指定处理数据的方式，后者指定要处理的数据。\nCPU中提供一组通用寄存器存放临时值，指令需要操作数字段指出所使用的寄存器。\n下面是一个简单的ISA——sCPU，其包括4个寄存器和3条指令。\n2. 指令集架构 可以将计算机视为一个有限状态机（FSM），其状态由内存和寄存器中的值决定，指令作为激励事件实现状态机的状态转移。\nsISA作为一个状态机：\n3. C语言程序的状态机模型 4. 数字电路的状态机模型 深刻理解下面这个模型：\n5. 各状态机模型之间的转换 计算机程序的各个层次都可以被视为等价的状态机：\nC语言程序是一个状态机 汇编语言程序是一个状态机 处理器电路也是一个状态机 状态（PC、GPR和内存）使用时序逻辑电路表示 指令（ISA定义的指令集）使用组合逻辑电路执行 6. 最后的话 讲义笔记 1. sISA和状态机 计算机是一个机械地进行数据处理的设备，这里的“机械”是指其原理非常死板，毫无神秘可言。 计算机的ISA（指令集架构）定义了一组硬件规范（PC、GPR和内存）和一组有限的指令。\n在ISA之上，我们利用ISA提供的指令来构建操作系统、编译器等系统软件。\n在ISA之下，我们根据ISA的定义来设计数字电路，在物理上实现ISA的功能。\n指令主要包括两部分内容：\n操作码：标识指令的功能\n操作数：标识指令要处理的数据\n下面是一个简单的指令集架构——sISA所支持的指令：\n下面是使用sISA指令实现的数列求和程序：\n0: li r0, 10 # r0表示执行10次循环 1: li r1, 0 # r1表示循环变量i 2: li r2, 0 # r2表示和 3: li r3, 1 # r3表示i每次递增的步长 4: add r1, r1, r3 5: add r2, r2, r1 6: bner0 r1, 4 7: bner0 r3, 7 该程序的状态机模型如下：\nPC r0 r1 r2 r3 (0, 0, 0, 0, 0) # 初始状态 (1, 10, 0, 0, 0) # 执行PC为0的指令后, r0更新为10, PC更新为下一条指令的位置 (2, 10, 0, 0, 0) # 执行PC为1的指令后, r1更新为0, PC更新为下一条指令的位置 (3, 10, 0, 0, 0) # 执行PC为2的指令后, r2更新为0, PC更新为下一条指令的位置 (4, 10, 0, 0, 1) # 执行PC为3的指令后, r3更新为1, PC更新为下一条指令的位置 (5, 10, 1, 0, 1) # 执行PC为4的指令后, r1更新为r1+r3, PC更新为下一条指令的位置 (6, 10, 1, 1, 1) # 执行PC为5的指令后, r2更新为r2+r1, PC更新为下一条指令的位置 (4, 10, 1, 1, 1) # 执行PC为6的指令后, 因r1不等于r0, 故PC更新为4 (5, 10, 2, 1, 1) # 执行PC为4的指令后, r1更新为r1+r3, PC更新为下一条指令的位置 反复执行指令4, 5, 6，直至寄存器 r1 的值等于10时，继续向后执行指令 7。其中r0 存储数值10，寄存器 r1 用作计数器，求和的结果55会存储在寄存器 r2 中。\n所谓编程, 实际上是利用给定功能（ISA中定义的指令）的组合来完成复杂任务的过程。\n仿照前面的程序，重新设置循环上界和步长，构造出如下程序：\n0: li r0, 11 \u0026#x20; 1: li r1, 1 2: li r2, 0 3: li r3, 2 4: add r2, r2, r1 5: add r1, r1, r3 6: bner0 r1, 4 7: bner0 r3, 7 计算机自从诞生以来, 其工作过程就是一个数学游戏, 状态机模型只不过是这个数学游戏的规则。x86, ARM, RISC-V这些商业级别的真实ISA, 它们的GPR数量更多, 指令数量更多, 指令行为也更复杂。 但其本质原理和上述只有3条指令的sISA并没有本质区别, 因此, 如果你将来需要理解它们, 你只需要阅读相应的手册, 了解更多指令的细节即可\nISA除了指令的语义之外, ISA还包括输入输出, 系统状态, 中断异常, 虚存管理, 内存模型。随着学习进度的深入, 我们会依次向你介绍这些概念, 你也有机会将这些概念实现到自己设计的处理器中, 让处理器变得更强大。\n2. C程序与状态机 #include /* This is \u0026#x20; an example. */ int main() { \u0026#x20; int x = 1; \u0026#x20; int y = 2; \u0026#x20; int z = x + y; \u0026#x20; printf(\"z = %dn\", z); \u0026#x20; return 0; } 使用C语言实现数列求和，计算 1+2+…+10 ：\n#include /* 1 */ int main() { /* 2 */ int sum = 0; /* 3 */ int i = 1; /* 4 */ do { /* 5 */ sum = sum + i; /* 6 */ i = i + 1; /* 7 */ } while (i \u003c= 10); /* 8 */ printf(\"sum = %dn\", sum); /* 9 */ return 0; /* 10*/ } 该C程序的状态机运行过程：\nPC sum i (2, ?, ?) # 初始状态 (3, 0, ?) # 执行PC为2的语句后, sum更新为0, PC更新为下一条语句的位置 (5, 0, 1) # 执行PC为3的语句后, i更新为1, PC更新为下一条语句的位置(第4行无有效操作, 跳过) (6, 1, 1) # 执行PC为5的语句后, sum更新为sum + i, PC更新为下一条语句的位置 (7, 1, 2) # 执行PC为6的语句后, i更新为i + 1, PC更新为下一条语句的位置 (5, 1, 2) # 执行PC为7的语句后, 由于循环条件i \u003c= 10成立, 因此重新进入循环体 继续上述C程序的状态机执行，结果如下：\nPC sum i (2, ?, ?) # 初始状态 (3, 0, ?) # 执行PC为2的语句后, sum更新为0, PC更新为下一条语句的位置 (5, 0, 1) # 执行PC为3的语句后, i更新为1, PC更新为下一条语句的位置(第4行无有效操作, 跳过) (6, 1, 1) # 执行PC为5的语句后, sum更新为sum + i, PC更新为下一条语句的位置 (7, 1, 2) # 执行PC为6的语句后, i更新为i + 1, PC更新为下一条语句的位置 (5, 1, 2) # 执行PC为7的语句后, 由于循环条件i \u003c= 10成立, 因此重新进入循环体 (6, 3, 2) # 执行PC为5的语句后, sum更新为sum + i, PC更新为下一条语句的位置 (7, 3, 3) # 执行PC为6的语句后, i更新为i + 1, PC更新为下一条语句的位置 (5, 3, 3) # 执行PC为7的语句后, 由于循环条件i \u003c= 10成立, 因此重新进入循环体 (6, 6, 3) # 执行PC为5的语句后, sum更新为sum + i, PC更新为下一条语句的位置 (7, 6, 4) # 执行PC为6的语句后, i更新为i + 1, PC更新为下一条语句的位置 (5, 6, 4) # 执行PC为7的语句后, 由于循环条件i \u003c= 10成立, 因此重新进入循环体 (6, 10, 4) # 执行PC为5的语句后, sum更新为sum + i, PC更新为下一条语句的位置 (7, 10, 5) # 执行PC为6的语句后, i更新为i + 1, PC更新为下一条语句的位置 (5, 10, 5) # 执行PC为7的语句后, 由于循环条件i \u003c= 10成立, 因此重新进入循环体 (6, 15, 5) # 执行PC为5的语句后, sum更新为sum + i, PC更新为下一条语句的位置 (7, 15, 6) # 执行PC为6的语句后, i更新为i + 1, PC更新为下一条语句的位置 (5, 15, 6) # 执行PC为7的语句后, 由于循环条件i \u003c= 10成立, 因此重新进入循环体 (6, 21, 6) # 执行PC为5的语句后, sum更新为sum + i, PC更新为下一条语句的位置 (7, 21, 7) # 执行PC为6的语句后, i更新为i + 1, PC更新为下一条语句的位置 (5, 21, 7) # 执行PC为7的语句后, 由于循环条件i \u003c= 10成立, 因此重新进入循环体 (6, 28, 7) # 执行PC为5的语句后, sum更新为sum + i, PC更新为下一条语句的位置 (7, 28, 8) # 执行PC为6的语句后, i更新为i + 1, PC更新为下一条语句的位置 (5, 28, 8) # 执行PC为7的语句后, 由于循环条件i \u003c= 10成立, 因此重新进入循环体 (6, 36, 8) # 执行PC为5的语句后, sum更新为sum + i, PC更新为下一条语句的位置 (7, 36, 9) # 执行PC为6的语句后, i更新为i + 1, PC更新为下一条语句的位置 (5, 36, 9) # 执行PC为7的语句后, 由于循环条件i \u003c= 10成立, 因此重新进入循环体 (6, 45, 9) # 执行PC为5的语句后, sum更新为sum + i, PC更新为下一条语句的位置 (7, 45, 10) # 执行PC为6的语句后, i更新为i + 1, PC更新为下一条语句的位置 (5, 45, 10) # 执行PC为7的语句后, 由于循环条件i \u003c= 10成立, 因此重新进入循环体 (6, 55, 10) # 执行PC为5的语句后, sum更新为sum + i, PC更新为下一条语句的位置 (7, 55, 11) # 执行PC为6的语句后, i更新为i + 1, PC更新为下一条语句的位置 程序结束时状态为 (10, 55, 11)。\n4. 数字电路的状态机模型 其中的状态包括Counter电路中的计数和寄存器中存储的值，表示为 (counter, reg_sum)。\n(counter, reg_sum) (0, 0) # 起始时将计数器和寄存器均清零 (1, 0) # 计数器 + 1 (1, 1) # 寄存器值 + 计数器值 (2, 1) # 计数器 + 1 (2, 3) # 寄存器值 + 计数器值 (3, 3) # 计数器 + 1 (3, 6) # 寄存器值 + 计数器值 (4, 6) # 计数器 + 1 (4, 10) # 寄存器值 + 计数器值 (5, 10) # 计数器 + 1 (5, 15) # 寄存器值 + 计数器值 (6, 15) # 计数器 + 1 (6, 21) # 寄存器值 + 计数器值 (7, 21) # 计数器 + 1 (7, 28) # 寄存器值 + 计数器值 (8, 28) # 计数器 + 1 (8, 36) # 寄存器值 + 计数器值 (9, 36) # 计数器 + 1 (9, 45) # 寄存器值 + 计数器值 (10, 45) # 计数器 + 1 (10, 55) # 寄存器值 + 计数器值 (11, 55) # 停在此处 C语言程序和机器指令程序可以理解为两个不同抽象层次下的状态机。这两个状态机的状态和状态转换函数不尽相同，但是它们所表达的内容是等价的。编译器的作用就在于将我们在较高抽象层次下构造的C程序状态机翻译为数字电路处理器能够直接执行的机器指令状态机。\n关键思想：CPU设计 = 根据ISA设计数字电路\n5. 从一到无穷大 通过补码表示，计算机可以借助同一套加法器硬件来实现算术上的加法和减法。\n通过跳转指令实现循环，重复执行加法，可以实现乘法功能。\n重复执行减法，可以实现除法操作。\n通过整数的四则运算实现小数及其四则运算。\n然后进一步实现基本初等函数, 包括常函数, 幂函数, 指数函数, 对数函数, 三角函数, 反三角函数。\n实现了基本初等函数的计算后, 就可以通过基本初等函数之间的有限次有理运算和复合操作, 来计算所有初等函数了。\n对函数进行求导和积分根据导数的定义, 我们只需要代入一个很小的, 就能近似计算出函数在某一点的导数。\n将计算扩展到复数域其实也不难. 具体地, 我们只需要对实数分量和虚数分量分别进行计算, 另外再应用相关的规则处理虚数单位 i 即可。\n支持复数域的求导和积分后, 我们就可以在程序中实现各种物理引擎, 对真实世界中的各种物理规律进行模拟。\n虽然上述功能都可以通过组织加减法指令和分支指令实现，但为了让计算过程更高效, 现代ISA还提供了更多的指令, 包括乘除指令, 逻辑运算指令(计算与, 或, 非等), 浮点指令, 原子指令等。\n例如x86等CISC处理器期望通过提供功能更加强大的指令来提高程序性能，而RISC-V和MIPS等RISC处理器则保持克制，仅提供部分必要的指令，以保持指令格式的规整，通过流水线等技术加速程序执行的性能，而较为复杂的功能则如前面所介绍的那样，以软件的形式实现。\n",
+  "wordCount" : "864",
+  "inLanguage": "en",
+  "datePublished": "2026-10-18T23:26:02+08:00",
+  "dateModified": "2026-10-18T23:26:02+08:00",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "http://localhost:1313/posts/ysyx-f4/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Minghan的博客",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "http://localhost:1313/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="header-nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="Minghan的博客 (Alt + H)">Minghan的博客</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" class="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg class="sun" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu" class="menu">
+            <li>
+                <a href="http://localhost:1313/posts/" title="文章">
+                    <span>文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/archives/" title="归档">
+                    <span>归档</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/categories/" title="分类">
+                    <span>分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="标签">
+                    <span>标签</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/moments/" title="随记">
+                    <span>随记</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/photos/" title="照片墙">
+                    <span>照片墙</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/books/" title="阅读">
+                    <span>阅读</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/about/" title="关于">
+                    <span>关于</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <nav class="breadcrumbs" role="navigation" aria-label="Breadcrumb">
+            <a href="/">Home</a>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+            <a href="/posts/">Posts</a>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+        <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+</nav>
+    <h1 class="post-title entry-hint-parent">
+      一生一芯-F4阶段笔记
+    </h1>
+    <div class="post-meta">
+
+<span title='2026-10-18 23:26:02 +0800 CST'>October 18, 2026</span>&nbsp;·&nbsp;<span>5 min</span>&nbsp;·&nbsp;<span>864 words</span>
+
+</div>
+  </header> <details class="toc"  open>
+    <summary accesskey="c" title="(Alt + C)">
+        <span class="title">Table of Contents</span>
+    </summary>
+
+    <div class="inner"><ul>
+            <li>
+                <a href="#%e8%af%be%e7%a8%8b%e7%ac%94%e8%ae%b0" aria-label="课程笔记">课程笔记</a><ul>
+                    
+            <li>
+                <a href="#1-cpu%e7%9a%84%e5%9f%ba%e6%9c%ac%e7%bb%84%e6%88%90%e5%92%8c%e5%b7%a5%e4%bd%9c%e5%8e%9f%e7%90%86" aria-label="1. CPU的基本组成和工作原理">1. CPU的基本组成和工作原理</a></li>
+            <li>
+                <a href="#2-%e6%8c%87%e4%bb%a4%e9%9b%86%e6%9e%b6%e6%9e%84" aria-label="2. 指令集架构">2. 指令集架构</a></li>
+            <li>
+                <a href="#3-c%e8%af%ad%e8%a8%80%e7%a8%8b%e5%ba%8f%e7%9a%84%e7%8a%b6%e6%80%81%e6%9c%ba%e6%a8%a1%e5%9e%8b" aria-label="3. C语言程序的状态机模型">3. C语言程序的状态机模型</a></li>
+            <li>
+                <a href="#4-%e6%95%b0%e5%ad%97%e7%94%b5%e8%b7%af%e7%9a%84%e7%8a%b6%e6%80%81%e6%9c%ba%e6%a8%a1%e5%9e%8b" aria-label="4. 数字电路的状态机模型">4. 数字电路的状态机模型</a></li>
+            <li>
+                <a href="#5-%e5%90%84%e7%8a%b6%e6%80%81%e6%9c%ba%e6%a8%a1%e5%9e%8b%e4%b9%8b%e9%97%b4%e7%9a%84%e8%bd%ac%e6%8d%a2" aria-label="5. 各状态机模型之间的转换">5. 各状态机模型之间的转换</a></li>
+            <li>
+                <a href="#6-%e6%9c%80%e5%90%8e%e7%9a%84%e8%af%9d" aria-label="6. 最后的话">6. 最后的话</a></li></ul>
+            </li>
+            <li>
+                <a href="#%e8%ae%b2%e4%b9%89%e7%ac%94%e8%ae%b0" aria-label="讲义笔记">讲义笔记</a><ul>
+                    
+            <li>
+                <a href="#1-sisa%e5%92%8c%e7%8a%b6%e6%80%81%e6%9c%ba" aria-label="1. sISA和状态机">1. sISA和状态机</a></li>
+            <li>
+                <a href="#2-c%e7%a8%8b%e5%ba%8f%e4%b8%8e%e7%8a%b6%e6%80%81%e6%9c%ba" aria-label="2. C程序与状态机">2. C程序与状态机</a></li>
+            <li>
+                <a href="#4-%e6%95%b0%e5%ad%97%e7%94%b5%e8%b7%af%e7%9a%84%e7%8a%b6%e6%80%81%e6%9c%ba%e6%a8%a1%e5%9e%8b-1" aria-label="4. 数字电路的状态机模型">4. 数字电路的状态机模型</a></li>
+            <li>
+                <a href="#5-%e4%bb%8e%e4%b8%80%e5%88%b0%e6%97%a0%e7%a9%b7%e5%a4%a7" aria-label="5. 从一到无穷大">5. 从一到无穷大</a>
+            </li>
+        </ul>
+        </li>
+        </ul>
+    </div>
+</details>
+
+  <div class="post-content md-content"><h1 id="课程笔记">课程笔记<a hidden class="anchor" aria-hidden="true" href="#课程笔记">#</a></h1>
+<p>本阶段课程的大纲如下：</p>
+<p><img loading="lazy" src="/images/posts/ysyx-f4/image.png"></p>
+<h2 id="1-cpu的基本组成和工作原理">1. CPU的基本组成和工作原理<a hidden class="anchor" aria-hidden="true" href="#1-cpu的基本组成和工作原理">#</a></h2>
+<blockquote>
+<p><strong><strong>通过指令的组合实现需求, 就是编程。</strong></strong></p>
+</blockquote>
+<blockquote>
+<p> </p>
+</blockquote>
+<ul>
+<li>
+<p>CPU是一种通用的芯片，其提供了<strong><strong>一组数量有限的指令集合</strong></strong>；但CPU的用户可以<strong><strong>按需求组合指令集中的指令</strong></strong>，实现自定义的功能。</p>
+</li>
+<li>
+<p>指令分为<strong><strong>操作码</strong></strong>和<strong><strong>操作数</strong></strong>，前者指定处理数据的方式，后者指定要处理的数据。</p>
+</li>
+<li>
+<p>CPU中提供一组通用寄存器存放临时值，指令需要操作数字段指出所使用的寄存器。</p>
+</li>
+</ul>
+<p><img loading="lazy" src="/images/posts/ysyx-f4/image%201.png"></p>
+<p>下面是一个简单的ISA——sCPU，其包括4个寄存器和3条指令。</p>
+<p><img loading="lazy" src="/images/posts/ysyx-f4/image%202.png"></p>
+<p><img loading="lazy" src="/images/posts/ysyx-f4/image%203.png"></p>
+<p><img loading="lazy" src="/images/posts/ysyx-f4/image%204.png"></p>
+<p><img loading="lazy" src="/images/posts/ysyx-f4/image%205.png"></p>
+<h2 id="2-指令集架构">2. 指令集架构<a hidden class="anchor" aria-hidden="true" href="#2-指令集架构">#</a></h2>
+<p><img loading="lazy" src="/images/posts/ysyx-f4/image%206.png"></p>
+<p>可以将计算机视为一个有限状态机（FSM），其状态由内存和寄存器中的值决定，指令作为激励事件实现状态机的状态转移。</p>
+<p><img loading="lazy" src="/images/posts/ysyx-f4/image%207.png"></p>
+<p><img loading="lazy" src="/images/posts/ysyx-f4/image%208.png"></p>
+<p><strong><strong>sISA</strong></strong>作为一个状态机：</p>
+<p><img loading="lazy" src="/images/posts/ysyx-f4/image%209.png"></p>
+<p><img loading="lazy" src="/images/posts/ysyx-f4/image%2010.png"></p>
+<p><img loading="lazy" src="/images/posts/ysyx-f4/image%2011.png"></p>
+<h2 id="3-c语言程序的状态机模型">3. C语言程序的状态机模型<a hidden class="anchor" aria-hidden="true" href="#3-c语言程序的状态机模型">#</a></h2>
+<p><img loading="lazy" src="/images/posts/ysyx-f4/image%2012.png"></p>
+<p><img loading="lazy" src="/images/posts/ysyx-f4/image%2013.png"></p>
+<h2 id="4-数字电路的状态机模型">4. 数字电路的状态机模型<a hidden class="anchor" aria-hidden="true" href="#4-数字电路的状态机模型">#</a></h2>
+<p>深刻理解下面这个模型：</p>
+<p><img loading="lazy" src="/images/posts/ysyx-f4/image%2014.png"></p>
+<h2 id="5-各状态机模型之间的转换">5. 各状态机模型之间的转换<a hidden class="anchor" aria-hidden="true" href="#5-各状态机模型之间的转换">#</a></h2>
+<p>计算机程序的各个层次都可以被视为等价的状态机：</p>
+<ul>
+<li>C语言程序是一个状态机</li>
+<li>汇编语言程序是一个状态机</li>
+<li>处理器电路也是一个状态机
+<ul>
+<li>状态（PC、GPR和内存）使用时序逻辑电路表示</li>
+<li>指令（ISA定义的指令集）使用组合逻辑电路执行</li>
+</ul>
+</li>
+</ul>
+<p><img loading="lazy" src="/images/posts/ysyx-f4/image%2015.png"></p>
+<p><img loading="lazy" src="/images/posts/ysyx-f4/image%2016.png"></p>
+<p><img loading="lazy" src="/images/posts/ysyx-f4/image%2017.png"></p>
+<p><img loading="lazy" src="/images/posts/ysyx-f4/image%2018.png"></p>
+<p><img loading="lazy" src="/images/posts/ysyx-f4/image%2019.png"></p>
+<h2 id="6-最后的话">6. 最后的话<a hidden class="anchor" aria-hidden="true" href="#6-最后的话">#</a></h2>
+<p><img loading="lazy" src="/images/posts/ysyx-f4/image%2020.png"></p>
+<p><img loading="lazy" src="/images/posts/ysyx-f4/image%2021.png"></p>
+<p><img loading="lazy" src="/images/posts/ysyx-f4/image%2022.png"></p>
+<h1 id="讲义笔记">讲义笔记<a hidden class="anchor" aria-hidden="true" href="#讲义笔记">#</a></h1>
+<h2 id="1-sisa和状态机">1. sISA和状态机<a hidden class="anchor" aria-hidden="true" href="#1-sisa和状态机">#</a></h2>
+<p>计算机是一个机械地进行数据处理的设备，这里的“机械”是指其原理非常死板，毫无神秘可言。
+计算机的ISA（指令集架构）定义了一组硬件规范（PC、GPR和内存）和一组有限的指令。</p>
+<ul>
+<li>
+<p>在ISA之上，我们利用ISA提供的指令来构建操作系统、编译器等系统软件。</p>
+</li>
+<li>
+<p>在ISA之下，我们根据ISA的定义来设计数字电路，在物理上实现ISA的功能。</p>
+</li>
+</ul>
+<p>指令主要包括两部分内容：</p>
+<ul>
+<li>
+<p>操作码：标识指令的功能</p>
+</li>
+<li>
+<p>操作数：标识指令要处理的数据</p>
+</li>
+</ul>
+<p>下面是一个简单的指令集架构——sISA所支持的指令：</p>
+<p><img loading="lazy" src="/images/posts/ysyx-f4/image%2023.png"></p>
+<p>下面是使用sISA指令实现的数列求和程序：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-nasm" data-lang="nasm"><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="err">0:</span> <span class="nf">li</span> <span class="nv">r0</span><span class="p">,</span> <span class="mi">10</span>         <span class="err">#</span> <span class="nv">r0表示执行10次循环</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="err">1:</span> <span class="nf">li</span> <span class="nv">r1</span><span class="p">,</span> <span class="mi">0</span>          <span class="err">#</span> <span class="nv">r1表示循环变量i</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="err">2:</span> <span class="nf">li</span> <span class="nv">r2</span><span class="p">,</span> <span class="mi">0</span>          <span class="err">#</span> <span class="nv">r2表示和</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="err">3:</span> <span class="nf">li</span> <span class="nv">r3</span><span class="p">,</span> <span class="mi">1</span>          <span class="err">#</span> <span class="nv">r3表示i每次递增的步长</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="err">4:</span> <span class="nf">add</span> <span class="nv">r1</span><span class="p">,</span> <span class="nv">r1</span><span class="p">,</span> <span class="nv">r3</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="err">5:</span> <span class="nf">add</span> <span class="nv">r2</span><span class="p">,</span> <span class="nv">r2</span><span class="p">,</span> <span class="nv">r1</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="err">6:</span> <span class="nf">bner0</span> <span class="nv">r1</span><span class="p">,</span> <span class="mi">4</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="err">7:</span> <span class="nf">bner0</span> <span class="nv">r3</span><span class="p">,</span> <span class="mi">7</span>
+</span></span></code></pre></div><p>该程序的状态机模型如下：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">PC</span> <span class="n">r0</span> <span class="n">r1</span> <span class="n">r2</span> <span class="n">r3</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>   <span class="err">#</span> <span class="err">初始状态</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>  <span class="err">#</span> <span class="err">执行</span><span class="n">PC为0的指令后</span><span class="p">,</span> <span class="n">r0更新为10</span><span class="p">,</span> <span class="n">PC更新为下一条指令的位置</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>  <span class="err">#</span> <span class="err">执行</span><span class="n">PC为1的指令后</span><span class="p">,</span> <span class="n">r1更新为0</span><span class="p">,</span> <span class="n">PC更新为下一条指令的位置</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>  <span class="err">#</span> <span class="err">执行</span><span class="n">PC为2的指令后</span><span class="p">,</span> <span class="n">r2更新为0</span><span class="p">,</span> <span class="n">PC更新为下一条指令的位置</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  <span class="err">#</span> <span class="err">执行</span><span class="n">PC为3的指令后</span><span class="p">,</span> <span class="n">r3更新为1</span><span class="p">,</span> <span class="n">PC更新为下一条指令的位置</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  <span class="err">#</span> <span class="err">执行</span><span class="n">PC为4的指令后</span><span class="p">,</span> <span class="n">r1更新为r1</span><span class="o">+</span><span class="n">r3</span><span class="p">,</span> <span class="n">PC更新为下一条指令的位置</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  <span class="err">#</span> <span class="err">执行</span><span class="n">PC为5的指令后</span><span class="p">,</span> <span class="n">r2更新为r2</span><span class="o">+</span><span class="n">r1</span><span class="p">,</span> <span class="n">PC更新为下一条指令的位置</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  <span class="err">#</span> <span class="err">执行</span><span class="n">PC为6的指令后</span><span class="p">,</span> <span class="err">因</span><span class="n">r1不等于r0</span><span class="p">,</span> <span class="err">故</span><span class="n">PC更新为4</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  <span class="err">#</span> <span class="err">执行</span><span class="n">PC为4的指令后</span><span class="p">,</span> <span class="n">r1更新为r1</span><span class="o">+</span><span class="n">r3</span><span class="p">,</span> <span class="n">PC更新为下一条指令的位置</span>
+</span></span></code></pre></div><p><img loading="lazy" src="/images/posts/ysyx-f4/image%2024.png"></p>
+<p>反复执行指令4, 5, 6，直至寄存器 r1 的值等于10时，继续向后执行指令 7。其中r0 存储数值10，寄存器 r1 用作计数器，求和的结果55会存储在寄存器 r2 中。</p>
+<hr>
+<blockquote>
+<p>所谓编程, 实际上是利用给定功能（ISA中定义的指令）的组合来完成复杂任务的过程。</p>
+</blockquote>
+<blockquote>
+<p> </p>
+</blockquote>
+<p><img loading="lazy" src="/images/posts/ysyx-f4/image%2025.png"></p>
+<p>仿照前面的程序，重新设置循环上界和步长，构造出如下程序：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-nasm" data-lang="nasm"><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="err">0:</span> <span class="nf">li</span> <span class="nv">r0</span><span class="p">,</span> <span class="mi">11</span>        <span class="o">&amp;</span><span class="err">#</span><span class="nv">x20</span><span class="c1">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="err">1:</span> <span class="nf">li</span> <span class="nv">r1</span><span class="p">,</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="err">2:</span> <span class="nf">li</span> <span class="nv">r2</span><span class="p">,</span> <span class="mi">0</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="err">3:</span> <span class="nf">li</span> <span class="nv">r3</span><span class="p">,</span> <span class="mi">2</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="err">4:</span> <span class="nf">add</span> <span class="nv">r2</span><span class="p">,</span> <span class="nv">r2</span><span class="p">,</span> <span class="nv">r1</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="err">5:</span> <span class="nf">add</span> <span class="nv">r1</span><span class="p">,</span> <span class="nv">r1</span><span class="p">,</span> <span class="nv">r3</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="err">6:</span> <span class="nf">bner0</span> <span class="nv">r1</span><span class="p">,</span> <span class="mi">4</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="err">7:</span> <span class="nf">bner0</span> <span class="nv">r3</span><span class="p">,</span> <span class="mi">7</span>
+</span></span></code></pre></div><blockquote>
+<p>计算机自从诞生以来, 其工作过程就是一个数学游戏, 状态机模型只不过是这个数学游戏的规则。x86, ARM, RISC-V这些商业级别的真实ISA, 它们的<strong><strong>GPR数量更多</strong></strong>, <strong><strong>指令数量更多</strong></strong>, <strong><strong>指令行为也更复杂</strong></strong>。 <strong><strong>但其本质原理和上述只有3条指令的sISA并没有本质区别</strong></strong>, 因此, 如果你将来需要理解它们, 你只需要阅读相应的手册, 了解更多指令的细节即可</p>
+</blockquote>
+<blockquote>
+<p> </p>
+</blockquote>
+<blockquote>
+<p>ISA除了指令的语义之外, ISA还包括<strong><strong>输入输出</strong></strong>, <strong><strong>系统状态</strong></strong>, <strong><strong>中断异常</strong></strong>, <strong><strong>虚存管理</strong></strong>, <strong><strong>内存模型</strong></strong>。随着学习进度的深入, 我们会依次向你介绍这些概念, 你也有机会将这些概念实现到自己设计的处理器中, 让处理器变得更强大。</p>
+</blockquote>
+<blockquote>
+<p> </p>
+</blockquote>
+<h2 id="2-c程序与状态机">2. C程序与状态机<a hidden class="anchor" aria-hidden="true" href="#2-c程序与状态机">#</a></h2>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* This is
+</span></span></span><span class="line"><span class="cl"><span class="cm">
+</span></span></span><span class="line"><span class="cl"><span class="cm">&amp;#x20;  an example. */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">&amp;</span><span class="err">#</span><span class="n">x20</span><span class="p">;</span> <span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">&amp;</span><span class="err">#</span><span class="n">x20</span><span class="p">;</span> <span class="kt">int</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">&amp;</span><span class="err">#</span><span class="n">x20</span><span class="p">;</span> <span class="kt">int</span> <span class="n">z</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">&amp;</span><span class="err">#</span><span class="n">x20</span><span class="p">;</span> <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;z = %dn&#34;</span><span class="p">,</span> <span class="n">z</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">&amp;</span><span class="err">#</span><span class="n">x20</span><span class="p">;</span> <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p><img loading="lazy" src="/images/posts/ysyx-f4/image%2026.png"></p>
+<p><img loading="lazy" src="/images/posts/ysyx-f4/image%2027.png"></p>
+<p>使用C语言实现数列求和，计算 <strong><strong>1+2+&hellip;+10</strong></strong> ：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 1 */</span> <span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 2 */</span>   <span class="kt">int</span> <span class="n">sum</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 3 */</span>   <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 4 */</span>   <span class="k">do</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 5 */</span>     <span class="n">sum</span> <span class="o">=</span> <span class="n">sum</span> <span class="o">+</span> <span class="n">i</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 6 */</span>     <span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 7 */</span>   <span class="p">}</span> <span class="k">while</span> <span class="p">(</span><span class="n">i</span> <span class="o">&lt;=</span> <span class="mi">10</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 8 */</span>   <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;sum = %dn&#34;</span><span class="p">,</span> <span class="n">sum</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 9 */</span>   <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 10*/</span> <span class="p">}</span>
+</span></span></code></pre></div><p>该C程序的状态机运行过程：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">PC sum i
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>2, ?, ?<span class="o">)</span>    <span class="c1"># 初始状态</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>3, 0, ?<span class="o">)</span>    <span class="c1"># 执行PC为2的语句后, sum更新为0, PC更新为下一条语句的位置</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>5, 0, 1<span class="o">)</span>    <span class="c1"># 执行PC为3的语句后, i更新为1, PC更新为下一条语句的位置(第4行无有效操作, 跳过)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>6, 1, 1<span class="o">)</span>    <span class="c1"># 执行PC为5的语句后, sum更新为sum + i, PC更新为下一条语句的位置</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>7, 1, 2<span class="o">)</span>    <span class="c1"># 执行PC为6的语句后, i更新为i + 1, PC更新为下一条语句的位置</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>5, 1, 2<span class="o">)</span>    <span class="c1"># 执行PC为7的语句后, 由于循环条件i &lt;= 10成立, 因此重新进入循环体</span>
+</span></span></code></pre></div><p><img loading="lazy" src="/images/posts/ysyx-f4/image%2028.png"></p>
+<p>继续上述C程序的状态机执行，结果如下：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">PC sum i
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>2, ?, ?<span class="o">)</span>    <span class="c1"># 初始状态</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>3, 0, ?<span class="o">)</span>    <span class="c1"># 执行PC为2的语句后, sum更新为0, PC更新为下一条语句的位置</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>5, 0, 1<span class="o">)</span>    <span class="c1"># 执行PC为3的语句后, i更新为1, PC更新为下一条语句的位置(第4行无有效操作, 跳过)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>6, 1, 1<span class="o">)</span>    <span class="c1"># 执行PC为5的语句后, sum更新为sum + i, PC更新为下一条语句的位置</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>7, 1, 2<span class="o">)</span>    <span class="c1"># 执行PC为6的语句后, i更新为i + 1, PC更新为下一条语句的位置</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>5, 1, 2<span class="o">)</span>    <span class="c1"># 执行PC为7的语句后, 由于循环条件i &lt;= 10成立, 因此重新进入循环体</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>6, 3, 2<span class="o">)</span>    <span class="c1"># 执行PC为5的语句后, sum更新为sum + i, PC更新为下一条语句的位置</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>7, 3, 3<span class="o">)</span>    <span class="c1"># 执行PC为6的语句后, i更新为i + 1, PC更新为下一条语句的位置</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>5, 3, 3<span class="o">)</span>    <span class="c1"># 执行PC为7的语句后, 由于循环条件i &lt;= 10成立, 因此重新进入循环体</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>6, 6, 3<span class="o">)</span>    <span class="c1"># 执行PC为5的语句后, sum更新为sum + i, PC更新为下一条语句的位置</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>7, 6, 4<span class="o">)</span>    <span class="c1"># 执行PC为6的语句后, i更新为i + 1, PC更新为下一条语句的位置</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>5, 6, 4<span class="o">)</span>    <span class="c1"># 执行PC为7的语句后, 由于循环条件i &lt;= 10成立, 因此重新进入循环体</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>6, 10, 4<span class="o">)</span>    <span class="c1"># 执行PC为5的语句后, sum更新为sum + i, PC更新为下一条语句的位置</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>7, 10, 5<span class="o">)</span>    <span class="c1"># 执行PC为6的语句后, i更新为i + 1, PC更新为下一条语句的位置</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>5, 10, 5<span class="o">)</span>    <span class="c1"># 执行PC为7的语句后, 由于循环条件i &lt;= 10成立, 因此重新进入循环体</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>6, 15, 5<span class="o">)</span>    <span class="c1"># 执行PC为5的语句后, sum更新为sum + i, PC更新为下一条语句的位置</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>7, 15, 6<span class="o">)</span>    <span class="c1"># 执行PC为6的语句后, i更新为i + 1, PC更新为下一条语句的位置</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>5, 15, 6<span class="o">)</span>    <span class="c1"># 执行PC为7的语句后, 由于循环条件i &lt;= 10成立, 因此重新进入循环体</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>6, 21, 6<span class="o">)</span>    <span class="c1"># 执行PC为5的语句后, sum更新为sum + i, PC更新为下一条语句的位置</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>7, 21, 7<span class="o">)</span>    <span class="c1"># 执行PC为6的语句后, i更新为i + 1, PC更新为下一条语句的位置</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>5, 21, 7<span class="o">)</span>    <span class="c1"># 执行PC为7的语句后, 由于循环条件i &lt;= 10成立, 因此重新进入循环体</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>6, 28, 7<span class="o">)</span>    <span class="c1"># 执行PC为5的语句后, sum更新为sum + i, PC更新为下一条语句的位置</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>7, 28, 8<span class="o">)</span>    <span class="c1"># 执行PC为6的语句后, i更新为i + 1, PC更新为下一条语句的位置</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>5, 28, 8<span class="o">)</span>    <span class="c1"># 执行PC为7的语句后, 由于循环条件i &lt;= 10成立, 因此重新进入循环体</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>6, 36, 8<span class="o">)</span>    <span class="c1"># 执行PC为5的语句后, sum更新为sum + i, PC更新为下一条语句的位置</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>7, 36, 9<span class="o">)</span>    <span class="c1"># 执行PC为6的语句后, i更新为i + 1, PC更新为下一条语句的位置</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>5, 36, 9<span class="o">)</span>    <span class="c1"># 执行PC为7的语句后, 由于循环条件i &lt;= 10成立, 因此重新进入循环体</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>6, 45, 9<span class="o">)</span>    <span class="c1"># 执行PC为5的语句后, sum更新为sum + i, PC更新为下一条语句的位置</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>7, 45, 10<span class="o">)</span>    <span class="c1"># 执行PC为6的语句后, i更新为i + 1, PC更新为下一条语句的位置</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>5, 45, 10<span class="o">)</span>    <span class="c1"># 执行PC为7的语句后, 由于循环条件i &lt;= 10成立, 因此重新进入循环体</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>6, 55, 10<span class="o">)</span>    <span class="c1"># 执行PC为5的语句后, sum更新为sum + i, PC更新为下一条语句的位置</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>7, 55, 11<span class="o">)</span>    <span class="c1"># 执行PC为6的语句后, i更新为i + 1, PC更新为下一条语句的位置</span>
+</span></span></code></pre></div><p>程序结束时状态为 <strong><strong>(10, 55, 11)</strong></strong>。</p>
+<h2 id="4-数字电路的状态机模型-1">4. 数字电路的状态机模型<a hidden class="anchor" aria-hidden="true" href="#4-数字电路的状态机模型-1">#</a></h2>
+<p><img loading="lazy" src="/images/posts/ysyx-f4/image%2029.png"></p>
+<p><img loading="lazy" src="/images/posts/ysyx-f4/image%2030.png"></p>
+<p>其中的状态包括Counter电路中的计数和寄存器中存储的值，表示为 <strong>(counter, reg_sum)</strong>。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>counter, reg_sum<span class="o">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>0, 0<span class="o">)</span>                 <span class="c1"># 起始时将计数器和寄存器均清零</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>1, 0<span class="o">)</span>                 <span class="c1"># 计数器 + 1</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>1, 1<span class="o">)</span>                 <span class="c1"># 寄存器值 + 计数器值</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>2, 1<span class="o">)</span>                 <span class="c1"># 计数器 + 1</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>2, 3<span class="o">)</span>                 <span class="c1"># 寄存器值 + 计数器值</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>3, 3<span class="o">)</span>                 <span class="c1"># 计数器 + 1</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>3, 6<span class="o">)</span>                 <span class="c1"># 寄存器值 + 计数器值</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>4, 6<span class="o">)</span>                 <span class="c1"># 计数器 + 1</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>4, 10<span class="o">)</span>                 <span class="c1"># 寄存器值 + 计数器值</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>5, 10<span class="o">)</span>                 <span class="c1"># 计数器 + 1</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>5, 15<span class="o">)</span>                 <span class="c1"># 寄存器值 + 计数器值</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>6, 15<span class="o">)</span>                 <span class="c1"># 计数器 + 1</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>6, 21<span class="o">)</span>                 <span class="c1"># 寄存器值 + 计数器值</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>7, 21<span class="o">)</span>                 <span class="c1"># 计数器 + 1</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>7, 28<span class="o">)</span>                 <span class="c1"># 寄存器值 + 计数器值</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>8, 28<span class="o">)</span>                 <span class="c1"># 计数器 + 1</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>8, 36<span class="o">)</span>                 <span class="c1"># 寄存器值 + 计数器值</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>9, 36<span class="o">)</span>                 <span class="c1"># 计数器 + 1</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>9, 45<span class="o">)</span>                 <span class="c1"># 寄存器值 + 计数器值</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>10, 45<span class="o">)</span>                 <span class="c1"># 计数器 + 1</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>10, 55<span class="o">)</span>                 <span class="c1"># 寄存器值 + 计数器值</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>11, 55<span class="o">)</span>                 <span class="c1"># 停在此处</span>
+</span></span></code></pre></div><p><img loading="lazy" src="/images/posts/ysyx-f4/image%2031.png"></p>
+<p><img loading="lazy" src="/images/posts/ysyx-f4/image%2032.png"></p>
+<p><strong><strong>C语言程序和机器指令程序可以理解为两个不同抽象层次下的状态机</strong></strong>。这两个状态机的状态和状态转换函数不尽相同，但是它们所表达的内容是等价的。编译器的作用就在于将我们在较高抽象层次下构造的C程序状态机翻译为数字电路处理器能够直接执行的机器指令状态机。</p>
+<blockquote>
+<p><strong><strong>关键思想：CPU设计 = 根据ISA设计数字电路</strong></strong></p>
+</blockquote>
+<blockquote>
+<p> </p>
+</blockquote>
+<h2 id="5-从一到无穷大">5. 从一到无穷大<a hidden class="anchor" aria-hidden="true" href="#5-从一到无穷大">#</a></h2>
+<p>通过补码表示，计算机可以借助同一套加法器硬件来实现算术上的加法和减法。</p>
+<ul>
+<li>
+<p>通过跳转指令实现循环，重复执行加法，可以实现乘法功能。</p>
+</li>
+<li>
+<p>重复执行减法，可以实现除法操作。</p>
+</li>
+<li>
+<p>通过整数的四则运算实现小数及其四则运算。</p>
+</li>
+<li>
+<p>然后进一步实现基本初等函数, 包括常函数, 幂函数, 指数函数, 对数函数, 三角函数, 反三角函数。</p>
+</li>
+<li>
+<p>实现了基本初等函数的计算后, 就可以通过基本初等函数之间的有限次有理运算和复合操作, 来计算所有初等函数了。</p>
+</li>
+<li>
+<p>对函数进行求导和积分根据导数的定义, 我们只需要代入一个很小的, 就能近似计算出函数在某一点的导数。</p>
+</li>
+<li>
+<p>将计算扩展到复数域其实也不难. 具体地, 我们只需要对实数分量和虚数分量分别进行计算, 另外再应用相关的规则处理虚数单位 i 即可。</p>
+</li>
+<li>
+<p>支持复数域的求导和积分后, 我们就可以在程序中实现各种物理引擎, 对真实世界中的各种物理规律进行模拟。</p>
+</li>
+</ul>
+<p>虽然上述功能都可以通过组织加减法指令和分支指令实现，但为了让计算过程更高效, 现代ISA还提供了更多的指令, 包括乘除指令, 逻辑运算指令(计算与, 或, 非等), 浮点指令, 原子指令等。</p>
+<p>例如x86等CISC处理器期望通过<strong>提供功能更加强大的指令来提高程序性能</strong>，而RISC-V和MIPS等RISC处理器则保持克制，仅提供部分必要的指令，以保持指令格式的规整，<strong>通过流水线等技术加速程序执行的性能</strong>，而较为复杂的功能则如前面所介绍的那样，以软件的形式实现。</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="http://localhost:1313/tags/%E5%A4%84%E7%90%86%E5%99%A8/">处理器</a></li>
+      <li><a href="http://localhost:1313/tags/risc-v/">RISC-V</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="next" href="http://localhost:1313/posts/ysyx-f3/">
+    <span class="title">Next »</span>
+    <span>一生一芯-F3阶段笔记</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="http://localhost:1313/">Minghan的博客</a></span> · 
+
+    
+    
+    <span>
+        Powered by
+        <a href="https://gohugo.io/?utm_source=papermod" rel="noopener" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" id="top-link" class="top-link hidden" aria-label="go to top" title="Go to Top (Alt + G)" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevrons-up">
+        <polyline points="17 11 12 6 7 11"></polyline>
+        <polyline points="17 18 12 13 7 18"></polyline>
+    </svg>
+</a><script src="/js/toc-scrollspy.js" defer></script>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var toplink = document.getElementById("top-link");
+    window.onscroll = function () {
+        const scrollThreshold = window.innerHeight;
+        if (document.body.scrollTop > scrollThreshold || document.documentElement.scrollTop > scrollThreshold) {
+            toplink.classList.remove("hidden");
+        } else {
+            toplink.classList.add("hidden");
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

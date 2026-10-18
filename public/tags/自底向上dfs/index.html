@@ -199,7 +199,9 @@
     </h2>
   </header>
   <div class="entry-content">
-    <p>一、自底向上 DFS（后序遍历） 在二叉树系列的前一篇博客中其实已经提到过了自顶向下和自底向上的区别了，这里再啰嗦一遍。
+    <p>题目来自灵神的题单：二叉树题单。
+在上一篇文章中已经介绍了简单遍历和自顶向下DFS的思路，这篇文章主要介绍自底向上DFS的思路。
+一、自底向上 DFS（后序遍历） 在二叉树系列的前一篇博客中其实已经提到过了自顶向下和自底向上的区别了，这里再啰嗦一遍。
 自顶向下，指从根节点往叶子节点 “递”的过程中 更新结果 自底向上，指先递归处理叶子节点，在 “归“的过程中 更新结果 21. 二叉树的最大深度 自底向上的解法：
 先递归得到左右子树各自的最大深度，然后取大者&#43;1作为结果返回。
 时间复杂度：O(n)，空间复杂度：O(n)
@@ -213,7 +215,7 @@ class Solution { public: int minDepth(TreeNode* root) { if (!root) return 0; if 
   </div>
   <footer class="entry-footer">
 
-<span title='2026-10-16 11:20:25 +0800 CST'>October 16, 2026</span>&nbsp;·&nbsp;<span>9 min</span>&nbsp;·&nbsp;<span>1827 words</span></footer>
+<span title='2026-10-16 11:20:25 +0800 CST'>October 16, 2026</span>&nbsp;·&nbsp;<span>9 min</span>&nbsp;·&nbsp;<span>1829 words</span></footer>
   <a class="entry-link" aria-label="post link to Leetecode 二叉树(二)" href="http://localhost:1313/posts/leetecode-tree02/"></a>
 </article>
     </main>
