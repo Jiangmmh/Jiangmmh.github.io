@@ -64,7 +64,35 @@
         document.querySelector("html").dataset.theme = 'light';
     }
 
-</script><meta property="og:url" content="http://localhost:1313/books/300year/">
+</script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css"
+>
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/contrib/auto-render.min.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    if (typeof renderMathInElement !== "function") {
+      console.error("KaTeX auto-render 加载失败");
+      return;
+    }
+
+    document.querySelectorAll(".post-content, .book-content").forEach(function (element) {
+      renderMathInElement(element, {
+        delimiters: [
+          { left: "$$", right: "$$", display: true },
+          { left: "\\[", right: "\\]", display: true },
+          { left: "\\(", right: "\\)", display: false }
+        ],
+        throwOnError: false
+      });
+    });
+  });
+</script>
+<meta property="og:url" content="http://localhost:1313/books/300year/">
   <meta property="og:site_name" content="Minghan的博客">
   <meta property="og:title" content="激荡三百年">
   <meta property="og:description" content="两晋南北朝是秦汉帝国崩溃后的大乱世，其间充斥着无尽的杀戮与流离，这是任何个体都不愿亲历的悲剧时代。但这个时代英雄与豪杰层出不穷，刘渊、石勒、苻坚、王导、谢安等人搅动着历史的风云；嵇康、陶渊明、王羲之、谢灵运、陆机等人则为这个乱世增添了精神的灵动。">

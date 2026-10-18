@@ -65,7 +65,35 @@
         document.querySelector("html").dataset.theme = 'light';
     }
 
-</script><meta property="og:url" content="http://localhost:1313/tags/">
+</script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css"
+>
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/contrib/auto-render.min.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    if (typeof renderMathInElement !== "function") {
+      console.error("KaTeX auto-render 加载失败");
+      return;
+    }
+
+    document.querySelectorAll(".post-content, .book-content").forEach(function (element) {
+      renderMathInElement(element, {
+        delimiters: [
+          { left: "$$", right: "$$", display: true },
+          { left: "\\[", right: "\\]", display: true },
+          { left: "\\(", right: "\\)", display: false }
+        ],
+        throwOnError: false
+      });
+    });
+  });
+</script>
+<meta property="og:url" content="http://localhost:1313/tags/">
   <meta property="og:site_name" content="Minghan的博客">
   <meta property="og:title" content="Tags">
   <meta property="og:locale" content="zh_CN">
@@ -157,7 +185,7 @@
                 <a href="http://localhost:1313/tags/dfs%E8%87%AA%E9%A1%B6%E5%90%91%E4%B8%8B/">DFS自顶向下 <sup><strong><sup>1</sup></strong></sup> </a>
             </li>
             <li>
-                <a href="http://localhost:1313/tags/risc-v/">RISC-V <sup><strong><sup>3</sup></strong></sup> </a>
+                <a href="http://localhost:1313/tags/risc-v/">RISC-V <sup><strong><sup>5</sup></strong></sup> </a>
             </li>
             <li>
                 <a href="http://localhost:1313/tags/ucla-ca/">UCLA-CA <sup><strong><sup>2</sup></strong></sup> </a>
@@ -169,7 +197,7 @@
                 <a href="http://localhost:1313/tags/%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA/">博客搭建 <sup><strong><sup>1</sup></strong></sup> </a>
             </li>
             <li>
-                <a href="http://localhost:1313/tags/%E5%A4%84%E7%90%86%E5%99%A8/">处理器 <sup><strong><sup>1</sup></strong></sup> </a>
+                <a href="http://localhost:1313/tags/%E5%A4%84%E7%90%86%E5%99%A8/">处理器 <sup><strong><sup>3</sup></strong></sup> </a>
             </li>
             <li>
                 <a href="http://localhost:1313/tags/%E6%97%A5%E5%B8%B8/">日常 <sup><strong><sup>2</sup></strong></sup> </a>

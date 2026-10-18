@@ -65,7 +65,35 @@
         document.querySelector("html").dataset.theme = 'light';
     }
 
-</script><meta property="og:url" content="http://localhost:1313/categories/">
+</script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css"
+>
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/contrib/auto-render.min.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    if (typeof renderMathInElement !== "function") {
+      console.error("KaTeX auto-render 加载失败");
+      return;
+    }
+
+    document.querySelectorAll(".post-content, .book-content").forEach(function (element) {
+      renderMathInElement(element, {
+        delimiters: [
+          { left: "$$", right: "$$", display: true },
+          { left: "\\[", right: "\\]", display: true },
+          { left: "\\(", right: "\\)", display: false }
+        ],
+        throwOnError: false
+      });
+    });
+  });
+</script>
+<meta property="og:url" content="http://localhost:1313/categories/">
   <meta property="og:site_name" content="Minghan的博客">
   <meta property="og:title" content="Categories">
   <meta property="og:locale" content="zh_CN">
@@ -160,7 +188,7 @@
                 <a href="http://localhost:1313/categories/leetecode/">Leetecode <sup><strong><sup>3</sup></strong></sup> </a>
             </li>
             <li>
-                <a href="http://localhost:1313/categories/%E4%B8%80%E7%94%9F%E4%B8%80%E8%8A%AF/">一生一芯 <sup><strong><sup>1</sup></strong></sup> </a>
+                <a href="http://localhost:1313/categories/%E4%B8%80%E7%94%9F%E4%B8%80%E8%8A%AF/">一生一芯 <sup><strong><sup>3</sup></strong></sup> </a>
             </li>
             <li>
                 <a href="http://localhost:1313/categories/%E5%8D%9A%E5%AE%A2/">博客 <sup><strong><sup>1</sup></strong></sup> </a>

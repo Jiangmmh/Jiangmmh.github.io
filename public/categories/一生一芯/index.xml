@@ -6,8 +6,67 @@
     <description>Recent content in 一生一芯 on Minghan的博客</description>
     <generator>Hugo</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Sat, 17 Oct 2026 11:22:27 +0800</lastBuildDate>
+    <lastBuildDate>Sat, 17 Oct 2026 15:42:02 +0800</lastBuildDate>
     <atom:link href="http://localhost:1313/categories/%E4%B8%80%E7%94%9F%E4%B8%80%E8%8A%AF/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>一生一芯-F3阶段笔记</title>
+      <link>http://localhost:1313/posts/ysyx-f3/</link>
+      <pubDate>Sat, 17 Oct 2026 15:42:02 +0800</pubDate>
+      <guid>http://localhost:1313/posts/ysyx-f3/</guid>
+      <description>&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;处理器芯片本质上是数字电路&lt;/strong&gt;。数字电路是用来处理&lt;strong&gt;数字信号&lt;/strong&gt;的电路, 而&lt;strong&gt;数字信号简单来说是指&lt;code&gt;0&lt;/code&gt;和&lt;code&gt;1&lt;/code&gt;这两种离散的信号&lt;/strong&gt;. 这里的&lt;code&gt;0&lt;/code&gt;和&lt;code&gt;1&lt;/code&gt;并不是数学意义上的自然数, 它是指&lt;strong&gt;信号的两种不同状态&lt;/strong&gt;, 为了简单叙述, 就分别称它们为&lt;code&gt;0&lt;/code&gt;和&lt;code&gt;1&lt;/code&gt;. 为了和数学上的&lt;code&gt;0&lt;/code&gt;和&lt;code&gt;1&lt;/code&gt;区分开来, 有时候也将上面两种状态称为&lt;code&gt;逻辑0&lt;/code&gt;和&lt;code&gt;逻辑1&lt;/code&gt;。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;因此, 处理器芯片本质上也是处理&lt;code&gt;0&lt;/code&gt;和&lt;code&gt;1&lt;/code&gt;这两种信号的芯片. 要学习处理器芯片设计, 数字电路的知识是基础. 而要学习数字电路, 就是需要学习信息在数字电路中是如何表示, 处理和存储的. 具体地, 你将会了解:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;如何表示 - 数字信号&lt;code&gt;0&lt;/code&gt;和&lt;code&gt;1&lt;/code&gt;在数字电路中的物理含义&lt;/li&gt;
+&lt;li&gt;如何处理 - 门电路和组合逻辑电路的工作原理&lt;/li&gt;
+&lt;li&gt;如何存储 - 时序逻辑电路的工作原理&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;课程笔记&#34;&gt;课程笔记&lt;/h1&gt;
+&lt;h2 id=&#34;1-如何表示0和1&#34;&gt;1. 如何表示0和1？&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;关键问题：数字电路如何表示0和1（物理含义）？&lt;/strong&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;使用晶体管！一个晶体管包含三个极（Source、Drain和Gate），其作用类似于一个开关，通过在Gate端加入不同电压可以控制Souce和Drain的导通与断开。&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f3/image.png&#34;&gt;&lt;/p&gt;
+&lt;h2 id=&#34;2-cmos&#34;&gt;2. CMOS&lt;/h2&gt;
+&lt;p&gt;在实际的硬件设计中，通常使用一个nMOS和一个pMOS构造CMOS来实现0和1。&lt;/p&gt;
+&lt;p&gt;下面这个CMOS本身其实是一个反相器，即输入A为0，输出Y为1；输入A为1，输出Y为0。&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f3/image%201.png&#34;&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;关键问题：一个晶体管就能作为开关，为什么要用两个晶体管构成CMOS？&lt;/strong&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;单看逻辑功能，一个 nMOS 确实就能当开关用——栅极给高电平导通、给低电平截止。那为什么几乎所有的现代数字电路都用 CMOS（互补金属氧化物半导体，即 nMOS + pMOS 配对）而不是单管方案？&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;nMOS擅长传递低电平，pMOS擅长传递高电平，反过来会导致信号衰减。&lt;/li&gt;
+&lt;li&gt;CMOS的静态功耗低。&lt;/li&gt;
+&lt;li&gt;CMOS的互补结构使高低电平的噪声容限对称、较大。&lt;/li&gt;
+&lt;li&gt;CMOS 工艺中 NMOS 和 PMOS 可以成对制造，版图规整、易于自动布局布线，也便于用标准单元库大规模综合。单管方案往往需要电阻、特殊器件，难以标准化和缩放。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;虽然一个晶体管也能&amp;quot;通断&amp;quot;，但只有 nMOS + pMOS 互补配对，才能同时做到：完整传递 0 和 1、主动驱动、静态几乎不耗电、电平可恢复、易于大规模集成。&lt;/strong&gt; CMOS 不是&amp;quot;两个管子干一个管子的活&amp;quot;的浪费，而是用互补换来了功耗、电平、可靠性、可扩展性的全面胜利。&lt;/p&gt;
+&lt;h2 id=&#34;3-使用cmos构建逻辑门电路&#34;&gt;3. 使用CMOS构建逻辑门电路&lt;/h2&gt;
+&lt;p&gt;对于输入Y&lt;/p&gt;
+&lt;p&gt;与非门：&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f3/image%202.png&#34;&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>一生一芯-F2阶段笔记</title>
+      <link>http://localhost:1313/posts/ysyx-f2/</link>
+      <pubDate>Sat, 17 Oct 2026 13:14:43 +0800</pubDate>
+      <guid>http://localhost:1313/posts/ysyx-f2/</guid>
+      <description>&lt;h1 id=&#34;logisim简介&#34;&gt;Logisim简介&lt;/h1&gt;
+&lt;p&gt;Logisim是一款图形化的数字电路设计软件, 用户可以通过拖动相应的电路组件来设计数字电路并仿真运行。后续我们使用的是Logisim-evolution, 它是Logisim的升级版, 提供了更丰富的组件. 但为了描述简便, 下文我们还是使用&lt;code&gt;Logisim&lt;/code&gt;来指代这个升级版.&lt;/p&gt;
+&lt;p&gt;Logisim是一个Java程序, 可以运行在任何支持Java运行环境的操作系统上. 虽然它支持在Windows, Mac OS, Linux等各种主流系统上运行, 但目前我们不要求大家使用Linux操作系统. 如果你有一些Linux操作系统的使用经验, 可以自己解决环境配置相关的问题, 也可以使用Linux版本.&lt;/p&gt;
+&lt;h1 id=&#34;ligisim的下载&#34;&gt;Ligisim的下载&lt;/h1&gt;
+&lt;p&gt;通过Github的&lt;a href=&#34;https://github.com/logisim-evolution/logisim-evolution/releases&#34;&gt;Release页面&lt;/a&gt;可以下载最新的Logisim-evolution。&lt;/p&gt;
+&lt;p&gt;我的设备是MacM4，所以选择ARM版本的dmg文件：&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f2/image.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;安装后启动：&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f2/image%201.png&#34;&gt;&lt;/p&gt;
+&lt;h1 id=&#34;设计一个简单的电路&#34;&gt;设计一个简单的电路&lt;/h1&gt;
+&lt;p&gt;这是一个简单的选择器，其根据输入信号S来选择输出A还是B，测试结果如下：&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f2/image%202.png&#34;&gt;&lt;/p&gt;</description>
+    </item>
     <item>
       <title>一生一芯-F1阶段笔记</title>
       <link>http://localhost:1313/posts/ysyx-f1/</link>

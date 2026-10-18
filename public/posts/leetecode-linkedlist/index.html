@@ -134,7 +134,35 @@ public:
         document.querySelector("html").dataset.theme = 'light';
     }
 
-</script><meta property="og:url" content="http://localhost:1313/posts/leetecode-linkedlist/">
+</script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css"
+>
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/contrib/auto-render.min.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    if (typeof renderMathInElement !== "function") {
+      console.error("KaTeX auto-render 加载失败");
+      return;
+    }
+
+    document.querySelectorAll(".post-content, .book-content").forEach(function (element) {
+      renderMathInElement(element, {
+        delimiters: [
+          { left: "$$", right: "$$", display: true },
+          { left: "\\[", right: "\\]", display: true },
+          { left: "\\(", right: "\\)", display: false }
+        ],
+        throwOnError: false
+      });
+    });
+  });
+</script>
+<meta property="og:url" content="http://localhost:1313/posts/leetecode-linkedlist/">
   <meta property="og:site_name" content="Minghan的博客">
   <meta property="og:title" content="Leetecode 链表">
   <meta property="og:description" content="这篇文章记录了链表相关的重点算法题 （共51道），使用C&#43;&#43;实现。

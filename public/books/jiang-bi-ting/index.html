@@ -64,7 +64,35 @@
         document.querySelector("html").dataset.theme = 'light';
     }
 
-</script><meta property="og:url" content="http://localhost:1313/books/jiang-bi-ting/">
+</script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css"
+>
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/contrib/auto-render.min.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    if (typeof renderMathInElement !== "function") {
+      console.error("KaTeX auto-render 加载失败");
+      return;
+    }
+
+    document.querySelectorAll(".post-content, .book-content").forEach(function (element) {
+      renderMathInElement(element, {
+        delimiters: [
+          { left: "$$", right: "$$", display: true },
+          { left: "\\[", right: "\\]", display: true },
+          { left: "\\(", right: "\\)", display: false }
+        ],
+        throwOnError: false
+      });
+    });
+  });
+</script>
+<meta property="og:url" content="http://localhost:1313/books/jiang-bi-ting/">
   <meta property="og:site_name" content="Minghan的博客">
   <meta property="og:title" content="蒋廷黻回忆录">
   <meta property="og:description" content="蒋廷黻（1895—1965）湖南宝庆人。1911年由教会资助赴美求学，就读于派克学院、哥伦比亚大学研究院，攻读历史获哲学博士学位。1923年回国先后任南开大学、清华大学教授，清华大学文学院院长、历史系主任。他主张兼重中外历史，在研究中国近代外交史过程中，形成了一套对近代中外关系变化如何影响中国历史发展的看法。1935年以非国民党员的学者身份参加国民政府，任行政院政务处长，从此离开清华大学从事外交事务，1945年被任命为中国驻联合国常任代表。1961年改任中國驻美大使。">

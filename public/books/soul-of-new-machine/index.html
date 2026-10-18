@@ -10,7 +10,7 @@
 <meta name="description" content="记录一支工程团队开发新型计算机的经历，展现技术、工程实践与组织文化。">
 <meta name="author" content="Tracy Kidder">
 <link rel="canonical" href="http://localhost:1313/books/soul-of-new-machine/">
-<link crossorigin="anonymous" href="/assets/css/stylesheet.89107e215ff7f31fe3f4ff401e6f969cea4b18fd31d49fa8cf933e8b1b42982a.css" integrity="sha256-iRB&#43;IV/38x/j9P9AHm&#43;WnOpLGP0x1J&#43;oz5M&#43;ixtCmCo=" rel="preload stylesheet" as="style">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.f9490c4bd2e7d3fd9e21909b0bc528878329710db51c69d38b7057b37e889c1d.css" integrity="sha256-&#43;UkMS9Ln0/2eIZCbC8Uoh4MpcQ21HGnTi3BXs36InB0=" rel="preload stylesheet" as="style">
 <link rel="icon" href="http://localhost:1313/favicon.ico">
 <link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
@@ -64,7 +64,35 @@
         document.querySelector("html").dataset.theme = 'light';
     }
 
-</script><meta property="og:url" content="http://localhost:1313/books/soul-of-new-machine/">
+</script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css"
+>
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/contrib/auto-render.min.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    if (typeof renderMathInElement !== "function") {
+      console.error("KaTeX auto-render 加载失败");
+      return;
+    }
+
+    document.querySelectorAll(".post-content, .book-content").forEach(function (element) {
+      renderMathInElement(element, {
+        delimiters: [
+          { left: "$$", right: "$$", display: true },
+          { left: "\\[", right: "\\]", display: true },
+          { left: "\\(", right: "\\)", display: false }
+        ],
+        throwOnError: false
+      });
+    });
+  });
+</script>
+<meta property="og:url" content="http://localhost:1313/books/soul-of-new-machine/">
   <meta property="og:site_name" content="Minghan的博客">
   <meta property="og:title" content="The Soul of a New Machine">
   <meta property="og:description" content="记录一支工程团队开发新型计算机的经历，展现技术、工程实践与组织文化。">
@@ -180,13 +208,13 @@
                 </a>
             </li>
             <li>
-                <a href="http://localhost:1313/moments/" title="随记">
-                    <span>随记</span>
+                <a href="http://localhost:1313/tags/" title="标签">
+                    <span>标签</span>
                 </a>
             </li>
             <li>
-                <a href="http://localhost:1313/tags/" title="标签">
-                    <span>标签</span>
+                <a href="http://localhost:1313/moments/" title="随记">
+                    <span>随记</span>
                 </a>
             </li>
             <li>
@@ -236,12 +264,14 @@
       
 
       
+
+      
         <p>记录一支工程团队开发新型计算机的经历，展现技术、工程实践与组织文化。</p>
       
     </div>
   </div>
 
-  <div class="post-content">
+  <div class="book-content">
     <h2 id="内容简介">内容简介</h2>
 <p>本书记录 Data General 工程团队开发新型计算机的过程，
 讲述工程师如何在时间压力、技术挑战和组织竞争中完成项目。</p>

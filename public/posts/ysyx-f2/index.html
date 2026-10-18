@@ -8,10 +8,10 @@
 <title>一生一芯-F2阶段笔记 | Minghan的博客</title>
 <meta name="keywords" content="处理器, RISC-V">
 <meta name="description" content="Logisim简介
-Logisim是一款图形化的数字电路设计软件, 用户可以通过拖动相应的电路组件来设计数字电路并仿真运行. 后续我们使用的是Logisim-evolution, 它是Logisim的升级版, 提供了更丰富的组件. 但为了描述简便, 下文我们还是使用Logisim来指代这个升级版.
+Logisim是一款图形化的数字电路设计软件, 用户可以通过拖动相应的电路组件来设计数字电路并仿真运行。后续我们使用的是Logisim-evolution, 它是Logisim的升级版, 提供了更丰富的组件. 但为了描述简便, 下文我们还是使用Logisim来指代这个升级版.
 Logisim是一个Java程序, 可以运行在任何支持Java运行环境的操作系统上. 虽然它支持在Windows, Mac OS, Linux等各种主流系统上运行, 但目前我们不要求大家使用Linux操作系统. 如果你有一些Linux操作系统的使用经验, 可以自己解决环境配置相关的问题, 也可以使用Linux版本.
 Ligisim的下载
-通过Github的Release页面可以下载最新的Logisim-evolution。https://github.com/logisim-evolution/logisim-evolution/releases。
+通过Github的Release页面可以下载最新的Logisim-evolution。
 我的设备是MacM4，所以选择ARM版本的dmg文件：
 
 安装后启动：
@@ -75,12 +75,40 @@ Ligisim的下载
         document.querySelector("html").dataset.theme = 'light';
     }
 
-</script><meta property="og:url" content="http://localhost:1313/posts/ysyx-f2/">
+</script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css"
+>
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/contrib/auto-render.min.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    if (typeof renderMathInElement !== "function") {
+      console.error("KaTeX auto-render 加载失败");
+      return;
+    }
+
+    document.querySelectorAll(".post-content, .book-content").forEach(function (element) {
+      renderMathInElement(element, {
+        delimiters: [
+          { left: "$$", right: "$$", display: true },
+          { left: "\\[", right: "\\]", display: true },
+          { left: "\\(", right: "\\)", display: false }
+        ],
+        throwOnError: false
+      });
+    });
+  });
+</script>
+<meta property="og:url" content="http://localhost:1313/posts/ysyx-f2/">
   <meta property="og:site_name" content="Minghan的博客">
   <meta property="og:title" content="一生一芯-F2阶段笔记">
-  <meta property="og:description" content="Logisim简介 Logisim是一款图形化的数字电路设计软件, 用户可以通过拖动相应的电路组件来设计数字电路并仿真运行. 后续我们使用的是Logisim-evolution, 它是Logisim的升级版, 提供了更丰富的组件. 但为了描述简便, 下文我们还是使用Logisim来指代这个升级版.
+  <meta property="og:description" content="Logisim简介 Logisim是一款图形化的数字电路设计软件, 用户可以通过拖动相应的电路组件来设计数字电路并仿真运行。后续我们使用的是Logisim-evolution, 它是Logisim的升级版, 提供了更丰富的组件. 但为了描述简便, 下文我们还是使用Logisim来指代这个升级版.
 Logisim是一个Java程序, 可以运行在任何支持Java运行环境的操作系统上. 虽然它支持在Windows, Mac OS, Linux等各种主流系统上运行, 但目前我们不要求大家使用Linux操作系统. 如果你有一些Linux操作系统的使用经验, 可以自己解决环境配置相关的问题, 也可以使用Linux版本.
-Ligisim的下载 通过Github的Release页面可以下载最新的Logisim-evolution。https://github.com/logisim-evolution/logisim-evolution/releases。
+Ligisim的下载 通过Github的Release页面可以下载最新的Logisim-evolution。
 我的设备是MacM4，所以选择ARM版本的dmg文件：
 安装后启动：
 设计一个简单的电路 这是一个简单的选择器，其根据输入信号S来选择输出A还是B，测试结果如下：">
@@ -94,9 +122,9 @@ Ligisim的下载 通过Github的Release页面可以下载最新的Logisim-evolut
 
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="一生一芯-F2阶段笔记">
-  <meta name="twitter:description" content="Logisim简介 Logisim是一款图形化的数字电路设计软件, 用户可以通过拖动相应的电路组件来设计数字电路并仿真运行. 后续我们使用的是Logisim-evolution, 它是Logisim的升级版, 提供了更丰富的组件. 但为了描述简便, 下文我们还是使用Logisim来指代这个升级版.
+  <meta name="twitter:description" content="Logisim简介 Logisim是一款图形化的数字电路设计软件, 用户可以通过拖动相应的电路组件来设计数字电路并仿真运行。后续我们使用的是Logisim-evolution, 它是Logisim的升级版, 提供了更丰富的组件. 但为了描述简便, 下文我们还是使用Logisim来指代这个升级版.
 Logisim是一个Java程序, 可以运行在任何支持Java运行环境的操作系统上. 虽然它支持在Windows, Mac OS, Linux等各种主流系统上运行, 但目前我们不要求大家使用Linux操作系统. 如果你有一些Linux操作系统的使用经验, 可以自己解决环境配置相关的问题, 也可以使用Linux版本.
-Ligisim的下载 通过Github的Release页面可以下载最新的Logisim-evolution。https://github.com/logisim-evolution/logisim-evolution/releases。
+Ligisim的下载 通过Github的Release页面可以下载最新的Logisim-evolution。
 我的设备是MacM4，所以选择ARM版本的dmg文件：
 安装后启动：
 设计一个简单的电路 这是一个简单的选择器，其根据输入信号S来选择输出A还是B，测试结果如下：">
@@ -128,12 +156,12 @@ Ligisim的下载 通过Github的Release页面可以下载最新的Logisim-evolut
   "@type": "BlogPosting",
   "headline": "一生一芯-F2阶段笔记",
   "name": "一生一芯-F2阶段笔记",
-  "description": "Logisim简介 Logisim是一款图形化的数字电路设计软件, 用户可以通过拖动相应的电路组件来设计数字电路并仿真运行. 后续我们使用的是Logisim-evolution, 它是Logisim的升级版, 提供了更丰富的组件. 但为了描述简便, 下文我们还是使用Logisim来指代这个升级版.\nLogisim是一个Java程序, 可以运行在任何支持Java运行环境的操作系统上. 虽然它支持在Windows, Mac OS, Linux等各种主流系统上运行, 但目前我们不要求大家使用Linux操作系统. 如果你有一些Linux操作系统的使用经验, 可以自己解决环境配置相关的问题, 也可以使用Linux版本.\nLigisim的下载 通过Github的Release页面可以下载最新的Logisim-evolution。https://github.com/logisim-evolution/logisim-evolution/releases。\n我的设备是MacM4，所以选择ARM版本的dmg文件：\n安装后启动：\n设计一个简单的电路 这是一个简单的选择器，其根据输入信号S来选择输出A还是B，测试结果如下：\n",
+  "description": "Logisim简介 Logisim是一款图形化的数字电路设计软件, 用户可以通过拖动相应的电路组件来设计数字电路并仿真运行。后续我们使用的是Logisim-evolution, 它是Logisim的升级版, 提供了更丰富的组件. 但为了描述简便, 下文我们还是使用Logisim来指代这个升级版.\nLogisim是一个Java程序, 可以运行在任何支持Java运行环境的操作系统上. 虽然它支持在Windows, Mac OS, Linux等各种主流系统上运行, 但目前我们不要求大家使用Linux操作系统. 如果你有一些Linux操作系统的使用经验, 可以自己解决环境配置相关的问题, 也可以使用Linux版本.\nLigisim的下载 通过Github的Release页面可以下载最新的Logisim-evolution。\n我的设备是MacM4，所以选择ARM版本的dmg文件：\n安装后启动：\n设计一个简单的电路 这是一个简单的选择器，其根据输入信号S来选择输出A还是B，测试结果如下：\n",
   "keywords": [
     "处理器", "RISC-V"
   ],
-  "articleBody": "Logisim简介 Logisim是一款图形化的数字电路设计软件, 用户可以通过拖动相应的电路组件来设计数字电路并仿真运行. 后续我们使用的是Logisim-evolution, 它是Logisim的升级版, 提供了更丰富的组件. 但为了描述简便, 下文我们还是使用Logisim来指代这个升级版.\nLogisim是一个Java程序, 可以运行在任何支持Java运行环境的操作系统上. 虽然它支持在Windows, Mac OS, Linux等各种主流系统上运行, 但目前我们不要求大家使用Linux操作系统. 如果你有一些Linux操作系统的使用经验, 可以自己解决环境配置相关的问题, 也可以使用Linux版本.\nLigisim的下载 通过Github的Release页面可以下载最新的Logisim-evolution。https://github.com/logisim-evolution/logisim-evolution/releases。\n我的设备是MacM4，所以选择ARM版本的dmg文件：\n安装后启动：\n设计一个简单的电路 这是一个简单的选择器，其根据输入信号S来选择输出A还是B，测试结果如下：\n",
-  "wordCount" : "24",
+  "articleBody": "Logisim简介 Logisim是一款图形化的数字电路设计软件, 用户可以通过拖动相应的电路组件来设计数字电路并仿真运行。后续我们使用的是Logisim-evolution, 它是Logisim的升级版, 提供了更丰富的组件. 但为了描述简便, 下文我们还是使用Logisim来指代这个升级版.\nLogisim是一个Java程序, 可以运行在任何支持Java运行环境的操作系统上. 虽然它支持在Windows, Mac OS, Linux等各种主流系统上运行, 但目前我们不要求大家使用Linux操作系统. 如果你有一些Linux操作系统的使用经验, 可以自己解决环境配置相关的问题, 也可以使用Linux版本.\nLigisim的下载 通过Github的Release页面可以下载最新的Logisim-evolution。\n我的设备是MacM4，所以选择ARM版本的dmg文件：\n安装后启动：\n设计一个简单的电路 这是一个简单的选择器，其根据输入信号S来选择输出A还是B，测试结果如下：\n",
+  "wordCount" : "23",
   "inLanguage": "en",
   "datePublished": "2026-10-17T13:14:43+08:00",
   "dateModified": "2026-10-17T13:14:43+08:00",
@@ -245,7 +273,7 @@ Ligisim的下载 通过Github的Release页面可以下载最新的Logisim-evolut
     </h1>
     <div class="post-meta">
 
-<span title='2026-10-17 13:14:43 +0800 CST'>October 17, 2026</span>&nbsp;·&nbsp;<span>1 min</span>&nbsp;·&nbsp;<span>24 words</span>
+<span title='2026-10-17 13:14:43 +0800 CST'>October 17, 2026</span>&nbsp;·&nbsp;<span>1 min</span>&nbsp;·&nbsp;<span>23 words</span>
 
 </div>
   </header> <details class="toc"  open>
@@ -266,10 +294,10 @@ Ligisim的下载 通过Github的Release页面可以下载最新的Logisim-evolut
 </details>
 
   <div class="post-content md-content"><h1 id="logisim简介">Logisim简介<a hidden class="anchor" aria-hidden="true" href="#logisim简介">#</a></h1>
-<p>Logisim是一款图形化的数字电路设计软件, 用户可以通过拖动相应的电路组件来设计数字电路并仿真运行. 后续我们使用的是Logisim-evolution, 它是Logisim的升级版, 提供了更丰富的组件. 但为了描述简便, 下文我们还是使用<code>Logisim</code>来指代这个升级版.</p>
+<p>Logisim是一款图形化的数字电路设计软件, 用户可以通过拖动相应的电路组件来设计数字电路并仿真运行。后续我们使用的是Logisim-evolution, 它是Logisim的升级版, 提供了更丰富的组件. 但为了描述简便, 下文我们还是使用<code>Logisim</code>来指代这个升级版.</p>
 <p>Logisim是一个Java程序, 可以运行在任何支持Java运行环境的操作系统上. 虽然它支持在Windows, Mac OS, Linux等各种主流系统上运行, 但目前我们不要求大家使用Linux操作系统. 如果你有一些Linux操作系统的使用经验, 可以自己解决环境配置相关的问题, 也可以使用Linux版本.</p>
 <h1 id="ligisim的下载">Ligisim的下载<a hidden class="anchor" aria-hidden="true" href="#ligisim的下载">#</a></h1>
-<p>通过Github的Release页面可以下载最新的Logisim-evolution。https://github.com/logisim-evolution/logisim-evolution/releases。</p>
+<p>通过Github的<a href="https://github.com/logisim-evolution/logisim-evolution/releases">Release页面</a>可以下载最新的Logisim-evolution。</p>
 <p>我的设备是MacM4，所以选择ARM版本的dmg文件：</p>
 <p><img loading="lazy" src="/images/posts/ysyx-f2/image.png"></p>
 <p>安装后启动：</p>
@@ -287,6 +315,10 @@ Ligisim的下载 通过Github的Release页面可以下载最新的Logisim-evolut
       <li><a href="http://localhost:1313/tags/risc-v/">RISC-V</a></li>
     </ul>
 <nav class="paginav">
+  <a class="prev" href="http://localhost:1313/posts/ysyx-f3/">
+    <span class="title">« Prev</span>
+    <span>一生一芯-F3阶段笔记</span>
+  </a>
   <a class="next" href="http://localhost:1313/posts/ysyx-f1/">
     <span class="title">Next »</span>
     <span>一生一芯-F1阶段笔记</span>

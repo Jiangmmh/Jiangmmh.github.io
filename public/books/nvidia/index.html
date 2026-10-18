@@ -64,7 +64,35 @@
         document.querySelector("html").dataset.theme = 'light';
     }
 
-</script><meta property="og:url" content="http://localhost:1313/books/nvidia/">
+</script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css"
+>
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/contrib/auto-render.min.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    if (typeof renderMathInElement !== "function") {
+      console.error("KaTeX auto-render 加载失败");
+      return;
+    }
+
+    document.querySelectorAll(".post-content, .book-content").forEach(function (element) {
+      renderMathInElement(element, {
+        delimiters: [
+          { left: "$$", right: "$$", display: true },
+          { left: "\\[", right: "\\]", display: true },
+          { left: "\\(", right: "\\)", display: false }
+        ],
+        throwOnError: false
+      });
+    });
+  });
+</script>
+<meta property="og:url" content="http://localhost:1313/books/nvidia/">
   <meta property="og:site_name" content="Minghan的博客">
   <meta property="og:title" content="黄仁勋:英伟达之芯">
   <meta property="og:description" content="本书不仅是一部科技企业家的传记，更是一部关于如何在全球科技舞台上取得成功的范本。跨越30年的科技发展历程，我们可以看到人工智能技术是如何发展的，人工智能将会如何影响到我们每一个人，技术发展的速度和进展是怎么样的。在这场技术的发展过程中，英伟达是一个缩影。通过对技术发展历程的洞察，我们将更清晰的看到未来，企业家可以了解到科技行业的复杂性，以及如何在快速变化的市场中保持领先。这本书适合所有对科技、创新和企业家精神感兴趣的读者，无论你是相关行业的专业人士，还是对其充满好奇的普通读者，都能从黄仁勋的故事中获得启发和动力。">
