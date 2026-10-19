@@ -193,6 +193,35 @@
 
 <article class="post-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">UCLA Computer Architecture Lec1
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>最近在尝试自己实现一个RISC-V处理器，在实现的过程中遇到了一些问题，不得其解。
+遂找到了这门UCLA的计算机体系结构课，该课程正好是以RISC-V作为目标来讲解的，并且包含完整的Lectures、Slides、Homework和Programming Assignment。
+1. 课程介绍 课程网址：Computer Systems Architecture Fall 2025
+课程介绍：
+本课程旨在学习现代微处理器的基础知识及其与其他单元的交互，例如存储层次结构、GPU和I/O。在高层面上，计算机体系结构是选择和互连硬件组件以创建满足功能、性能和成本目标的计算机的科学与工程。更具体地说，在本课程中，你将学习架构计算机的基本原理和技术，包括设计指令集体系结构（ISA）、流水线和指令级并行。 你将通过使用C/C&#43;&#43;为一个简单的RISC ISA设计和实现一个多级流水线超标量处理器，来更详细地学习这些主题。此外，你将学习现代处理器设计中使用的各种体系结构技术，包括超标量设计、乱序执行、GPU体系结构和缓存层次结构。
+2. Why this course？ 两点重要原因:
+所有计算机科学家和工程师都需要知道：软件与底层硬件是如何交互的？ 系统设计非常非常非常重要！ 思考下面这两个问题？
+为什么机器学习的能力越来越强？ 为什么20年无法发明GPT？ 这张图中的三个要素解释了这一点:
+算力：并行计算硬件的发展为机器学习计算提供了“动力” 大数据：移动互联网/物联网的发展带来了海量数据 算法：深度学习算法的创新和发展 其中，正是计算硬件的性能提高，使得海量数据与算法创新能够真正地落地。
+Neural Scaling Law：Larger the model → better the performance.
+这条定律表达的是模型越大，能力越强。
+那么大模型的主要需求是什么？
+更快的算力 更大的内存 关键问题：How did we make hardware better?
+更多晶体管：往芯片中塞入更多的 transistor（晶体管） 支持更多的特性：包括流水线、乱序执行、缓存等 硬件专门化：为常用任务设计专门等硬件，例如矩阵运算 3. Course Workload 这门课将关注RISC-V ISA，包括RISC-V标准、微架构（实现）、实现策略（流水线、预测、并行）、存储的设计（缓存和主存）、多核设计（一致性）。 课程材料包括：
+Lectures，视频&#43;slides Homewokrs，5个书面作业 Projects，3个编程作业 CA1：使用C/C&#43;&#43;实现一个模拟器，模拟支持13条指令的单周期RISC-V处理器 CA2：设计一个branch predictor CA3：设计并实现一个模拟器，模拟支持out-of-order (OoO) 的超标量处理器 4. 软件工程已死？ 大模型和Agent的发展，使得软件开发的工作岗位正在逐渐减少。
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-15 15:53:21 +0800 CST'>October 15, 2026</span>&nbsp;·&nbsp;<span>1 min</span>&nbsp;·&nbsp;<span>84 words</span></footer>
+  <a class="entry-link" aria-label="post link to UCLA Computer Architecture Lec1" href="http://localhost:1313/posts/ucla-ca-01/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">Leetecode 二叉树(一)
     </h2>
   </header>
@@ -258,54 +287,6 @@ class Solution { vector&lt;int&gt; findLocalMinMax(ListNode *head) { vector&lt;i
 
 <span title='2026-10-14 11:44:43 +0800 CST'>October 14, 2026</span>&nbsp;·&nbsp;<span>6 min</span>&nbsp;·&nbsp;<span>1268 words</span></footer>
   <a class="entry-link" aria-label="post link to 如何快速构建一个静态博客?" href="http://localhost:1313/posts/hello-world/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>E1 硬件描述语言 在F阶段我们了解了数字电路的原理（数字信号的表示、存储和处理）和状态机模型，使用Ligisim实现了一个简单的sCPU，并在其上运行了数列求和程序。但是，Logisim的方案难以满足现代处理器设计的需求，因此在E1阶段中我将学习使用HDL（硬件描述语言）实现处理器。
-我的学习路线是：先过了一遍verilog的基本语法，然后刷HDLBits中的题目。
-verilog语法简介：https://vlab.ustc.edu.cn/guide/doc_verilog.html HDLBits 网址：https://hdlbits.01xz.net/wiki/Main_Page HDLBits提供了大量的Verilog的练习题，由浅入深，非常适合verilog的初学者。
-这篇文章的内容主要是我刷HDLBits题目的笔记，请根据需要阅读。
-这两天基本上把HDLBits中的题目全部刷了一遍，大部份题目已经吃透，少部份未能完全理解，后续有时间再复习吧。
-Getting Started Step one Hardware Description Language（硬件描述语言）使用代码来描述数字硬件。
-下面是一个最简单的示例：
-module top_module( output one ); assign one = 1; endmodule 该代码定义了一个名为top_module的module，没有输入，只有一个输出名为one，其中使用assign语句将输出端one置为1。
-Zero 同上，不过这里将输出端置为0。
-module top_module( output zero );// Module body starts after semicolon assign zero = 0; endmodule Verilog Language Basics Wire Create a module with one input and one output that behaves like a wire.
-和物理的连线（wire）不同，verilog中的连线是有方向的。
-我们可以使用assign语句连接输入和输出。
-module top_module( input in, output out ); assign out = in; endmodule Wire4 Create a module with 3 inputs and 4 outputs that behaves like wires that makes these connections:
-...</p>
-  </div>
-  <footer class="entry-footer">
-
-<span>44 min</span>&nbsp;·&nbsp;<span>9262 words</span></footer>
-  <a class="entry-link" aria-label="post link to " href="http://localhost:1313/posts/e1-%E7%A1%AC%E4%BB%B6%E6%8F%8F%E8%BF%B0%E8%AF%AD%E8%A8%80-3c6c4e93261480febacffcbddddc30fa/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>F6-简单的IO 这篇文章的内容：
-改进前面所设计的sISA，新增一条io指令，用于与外部设备进行IO。 对 li 和 bne0这两条指令进行增强，并使用LED条和16进制数码管检查新sISA的实现。 讲义笔记 1. sISA的局限性 在前面的我们成功地根据sISA设计出了简单处理器sCPU，并在其上运行了数列求和程序。但是sISA提供的指令有着局限性：
-li指令中的立即数用4bits表示，仅能装入立即数0～15到寄存器。 bner0指令按绝对地址跳转，地址字段也是4bits，因此跳转目标范围也只有0～15。 当前的sISA不支持IO指令，要检查程序运行的结果只能手动查看寄存器的值，不方便。 2. 增强li和bner0 对li指令和bner0指令进行改进：
-3. 添加io指令 4. 迈向现代化的处理器设计 讲义笔记 1. 改进后的sISA 首先增强 li 和 bner0 指令。然后再添加一条新的指令 io，用于寄存器与外部设备的I/O，得到的新sISA：
-add指令的行为和之前相同 io指令根据方向位i/o进行输入或输出: 当i/o=0时, 表示输入操作, 从编号为idx的设备中读出8位数据, 输入到R[rd]中 当i/o=1时, 表示输出操作, 将R[rd]中的8位数据, 输出到编号为idx的设备中 li指令和之前相比有所不同, 它通过s和imm的组合来表示一个更大的立即数. 上文的&lt;&lt;表示左移运算符, 如果你不太熟悉这个运算符, 可以从另一个角度来理解li指令的行为: s表示将2位的imm放置在8位数据中的哪一段位置。 2. 增强li和bner0 修改立即数生成器，使其能获取更新后的sISA所需的立即数：
-修改ALU中将立即数计算的部分，引入移位运算：
-在PC逻辑中添加PC相对寻址的电路：PC = PC &#43; sign_ext(offset)
-...</p>
-  </div>
-  <footer class="entry-footer">
-
-<span>2 min</span>&nbsp;·&nbsp;<span>423 words</span></footer>
-  <a class="entry-link" aria-label="post link to " href="http://localhost:1313/posts/f6-%E7%AE%80%E5%8D%95%E7%9A%84io-3b7c4e93261480759986e4d966aca898/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">
