@@ -1,4 +1,15 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>RISC-V on Minghan的博客</title><link>https://Jiangmmh.github.io/tags/risc-v/</link><description>Recent content in RISC-V on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Mon, 19 Oct 2026 16:11:46 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/tags/risc-v/index.xml" rel="self" type="application/rss+xml"/><item><title>一生一芯-E1阶段笔记</title><link>https://Jiangmmh.github.io/posts/ysyx-e1/</link><pubDate>Mon, 19 Oct 2026 16:11:46 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/ysyx-e1/</guid><description>&lt;p>在F阶段我们了解了数字电路的原理（数字信号的表示、存储和处理）和状态机模型，使用Ligisim实现了一个简单的sCPU，并在其上运行了数列求和程序。但是，Logisim的方案难以满足现代处理器设计的需求，因此在E1阶段中我将学习使用HDL（硬件描述语言）实现处理器。&lt;/p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>RISC-V on Minghan的博客</title><link>https://Jiangmmh.github.io/tags/risc-v/</link><description>Recent content in RISC-V on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Mon, 19 Oct 2026 23:09:45 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/tags/risc-v/index.xml" rel="self" type="application/rss+xml"/><item><title>[转载]从硅片到智能：Jim Keller谈AI算力的未来</title><link>https://Jiangmmh.github.io/posts/jim-keller-future-ai-compute/</link><pubDate>Mon, 19 Oct 2026 23:09:45 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/jim-keller-future-ai-compute/</guid><description>&lt;blockquote>
+&lt;p>本文是对 Harvard Data Science Review 访谈文章 &lt;em>From Silicon to Intelligence: The Future of AI Compute&lt;/em> 的中文阅读笔记与主题整理，并非逐字翻译。访谈嘉宾为芯片架构师、Tenstorrent CEO Jim Keller，访谈者为 Francesca Dominici 和 Harry Archerman。&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>原文：&lt;/strong> &lt;a href="https://hdsr.mitpress.mit.edu/pub/n7la10vt/release/4">From Silicon to Intelligence: The Future of AI Compute&lt;/a>&lt;/li>
+&lt;li>&lt;strong>作者：&lt;/strong> Jim Keller、Francesca Dominici、Harry Archerman&lt;/li>
+&lt;li>&lt;strong>刊物：&lt;/strong> Harvard Data Science Review，Issue 8.2，Spring 2026&lt;/li>
+&lt;li>&lt;strong>发表日期：&lt;/strong> 2026 年 7 月 9 日&lt;/li>
+&lt;li>&lt;strong>许可：&lt;/strong> Creative Commons Attribution 4.0 International（CC BY 4.0）&lt;/li>
+&lt;/ul>
+&lt;p>本文为基于原文的归纳与改编，原文著作权及许可信息以原文页面为准。&lt;/p>&lt;/blockquote>
+&lt;h2 id="一为什么值得读这篇访谈">一、为什么值得读这篇访谈？&lt;/h2>
+&lt;p>Jim Keller 是现代处理器设计领域具有代表性的工程师之一。他的职业经历横跨多个计算范式：从 DEC 的计算机系统，到 Apple 的移动处理器、AMD 的 Zen 架构、Tesla 的自动驾驶芯片，再到 Tenstorrent 的 AI 计算与 RISC-V 处理器。&lt;/p></description></item><item><title>一生一芯-E1阶段笔记</title><link>https://Jiangmmh.github.io/posts/ysyx-e1/</link><pubDate>Mon, 19 Oct 2026 16:11:46 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/ysyx-e1/</guid><description>&lt;p>在F阶段我们了解了数字电路的原理（数字信号的表示、存储和处理）和状态机模型，使用Ligisim实现了一个简单的sCPU，并在其上运行了数列求和程序。但是，Logisim的方案难以满足现代处理器设计的需求，因此在E1阶段中我将学习使用HDL（硬件描述语言）实现处理器。&lt;/p>
 &lt;p>我的学习路线是：先过了一遍verilog的基本语法，然后刷HDLBits中的题目。&lt;/p>
 &lt;ul>
 &lt;li>verilog语法简介：&lt;a href="https://vlab.ustc.edu.cn/guide/doc_verilog.html">https://vlab.ustc.edu.cn/guide/doc_verilog.html&lt;/a>&lt;/li>
