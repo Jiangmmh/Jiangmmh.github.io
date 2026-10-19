@@ -6,53 +6,26 @@
     <description>Recent content in 芯片设计 on Minghan的博客</description>
     <generator>Hugo</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Sat, 17 Oct 2026 11:22:27 +0800</lastBuildDate>
+    <lastBuildDate>Mon, 19 Oct 2026 23:09:45 +0800</lastBuildDate>
     <atom:link href="http://localhost:1313/tags/%E8%8A%AF%E7%89%87%E8%AE%BE%E8%AE%A1/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>一生一芯-F1阶段笔记</title>
-      <link>http://localhost:1313/posts/ysyx-f1/</link>
-      <pubDate>Sat, 17 Oct 2026 11:22:27 +0800</pubDate>
-      <guid>http://localhost:1313/posts/ysyx-f1/</guid>
-      <description>&lt;h1 id=&#34;一生一芯概述&#34;&gt;一生一芯概述&lt;/h1&gt;
-&lt;p&gt;“一生一芯”是由中国科学院大学于2019年发起的一项&lt;strong&gt;大规模、公益性芯片人才培养计划&lt;/strong&gt;，核心目标是让参与的学生亲手设计并流片（试生产）自己的处理器芯片，带着实体芯片毕业。&lt;/p&gt;
-&lt;p&gt;该计划由中国科学院计算技术研究所副所长包云岗研究员推动。传统芯片人才培养周期长，学生往往缺乏从设计到流片的完整工程实践。包云岗提出“让本科生也能做处理器芯片”，旨在通过“做中学”的方式，缩短人才从校园到产业一线的距离，弥补我国处理器芯片设计人才的缺口。&lt;/p&gt;
-&lt;p&gt;项目主页：&lt;a href=&#34;https://ysyx.oscc.cc/&#34;&gt;https://ysyx.oscc.cc/&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;项目特点：&lt;/p&gt;
+      <title>[转载]从硅片到智能：Jim Keller谈AI算力的未来</title>
+      <link>http://localhost:1313/posts/jim-keller-future-ai-compute/</link>
+      <pubDate>Mon, 19 Oct 2026 23:09:45 +0800</pubDate>
+      <guid>http://localhost:1313/posts/jim-keller-future-ai-compute/</guid>
+      <description>&lt;blockquote&gt;
+&lt;p&gt;本文是对 Harvard Data Science Review 访谈文章 &lt;em&gt;From Silicon to Intelligence: The Future of AI Compute&lt;/em&gt; 的中文阅读笔记与主题整理，并非逐字翻译。访谈嘉宾为芯片架构师、Tenstorrent CEO Jim Keller，访谈者为 Francesca Dominici 和 Harry Archerman。&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;完整全链条实践&lt;/strong&gt;：学员需要经历从处理器设计、验证，到基于开源工具链进行物理设计，最终流片并运行操作系统的全过程，而非仅停留在理论或仿真阶段。&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;开放与公益性&lt;/strong&gt;：报名&lt;strong&gt;不限学校、专业、年级，零基础亦可参与&lt;/strong&gt;，且全程免费。对于符合条件的国内在校生，项目还提供&lt;strong&gt;免费流片机会&lt;/strong&gt;，极大降低了芯片设计的门槛。&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;依托开源生态&lt;/strong&gt;：教学与实践主要基于 &lt;strong&gt;RISC-V 开源指令集&lt;/strong&gt;以及开源 EDA 工具，避免了商业授权限制，便于学生学习和创新。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;原文：&lt;/strong&gt; &lt;a href=&#34;https://hdsr.mitpress.mit.edu/pub/n7la10vt/release/4&#34;&gt;From Silicon to Intelligence: The Future of AI Compute&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;作者：&lt;/strong&gt; Jim Keller、Francesca Dominici、Harry Archerman&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;刊物：&lt;/strong&gt; Harvard Data Science Review，Issue 8.2，Spring 2026&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;发表日期：&lt;/strong&gt; 2026 年 7 月 9 日&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;许可：&lt;/strong&gt; Creative Commons Attribution 4.0 International（CC BY 4.0）&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;一生一芯有多个版本的讲义，我选择的是26.07版本的讲义。&lt;/p&gt;
-&lt;h1 id=&#34;讲义笔记&#34;&gt;讲义笔记&lt;/h1&gt;
-&lt;h2 id=&#34;1-给-ai-时代的一生一芯初学者的一封信&#34;&gt;1. 给 AI 时代的“一生一芯”初学者的一封信&lt;/h2&gt;
-&lt;p&gt;文章链接：&lt;a href=&#34;https://fa45epzd9c7.feishu.cn/wiki/AOXwwtY0EiCXZykBPTtcIVfWn6f?from=from_copylink&#34;&gt;https://fa45epzd9c7.feishu.cn/wiki/AOXwwtY0EiCXZykBPTtcIVfWn6f?from=from_copylink&lt;/a&gt;&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
-&lt;p&gt;&lt;strong&gt;关键问题：既然 AI 已经这么强了，我们为什么还要亲手写代码、看波形、查手册、改 bug，去完成这样一个需要大量手动训练和反复调试的项目？&lt;/strong&gt;&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
-&lt;p&gt;回答：AI 的出现没有降低基础训练的价值，反而&lt;strong&gt;让基础训练变得更加重要&lt;/strong&gt;。未来更重要的能力，不是和 AI 比谁写得更快，而是知道如何提出问题、判断答案、验证结论，并把工具真正变成自己的能力。&lt;strong&gt;在 AI 时代，拥有更强的，驾驭 AI 的能力，是我们希望你得到的。&lt;/strong&gt;&lt;/p&gt;
-&lt;h3 id=&#34;11-ai-很强但它不能替你完成成长&#34;&gt;1.1 AI 很强，但它不能替你完成成长&lt;/h3&gt;
-&lt;p&gt;如果只是得到一个能运行的结果，AI 也许可以帮你很快走到终点；但如果你不知道这个结果&lt;strong&gt;为什么&lt;/strong&gt;对，不知道哪里可能错，不知道出了问题该如何缩小范围、如何设计实验、如何确认结论，那么这个终点&lt;strong&gt;并没有真正变成你的能力&lt;/strong&gt;。&lt;/p&gt;
-&lt;p&gt;“一生一芯”的讲义之所以有价值，不只是因为它提供了很多资料和步骤，更因为它把学习过程设计成了一条需要你主动思考、动手实践、不断遇到问题并解决问题的路径。&lt;/p&gt;
-&lt;p&gt;你在其中经历的很多细节：&lt;strong&gt;一次看不懂的报错，一段反复读不明白的手册，一条异常的波形，一个改了很久才定位到的 bug，这些，是训练真正进行的地方&lt;/strong&gt;。&lt;/p&gt;
-&lt;p&gt;正是这种直面各种问题的煎熬，让你开始建立工程师最重要的能力：&lt;strong&gt;面对复杂系统时，稳定不慌张，愿意一点点定位、验证、修正、重新理解，直到解决问题&lt;/strong&gt;。&lt;/p&gt;
-&lt;h3 id=&#34;12-一生一芯训练的是驾驭复杂系统的能力&#34;&gt;1.2 “一生一芯”训练的，是驾驭复杂系统的能力&lt;/h3&gt;
-&lt;p&gt;一生一芯训练的是一种系统性的工程能力，你会不断遇到这样的时刻：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;现象和预期不一致，需要你判断问题出在代码、环境、理解，还是测试方式上。&lt;/li&gt;
-&lt;li&gt;一个小 bug 牵出一串背景知识，需要你回到原理层面重新确认。&lt;/li&gt;
-&lt;li&gt;别人给了一个答案，但你仍然要判断它是否适用于自己的场景。&lt;/li&gt;
-&lt;li&gt;一个功能终于跑通了，但你还需要解释它为什么能跑通。&lt;/li&gt;
-&lt;/ul&gt;
-&lt;blockquote&gt;
-&lt;p&gt;因为 AI 会让“得到一个答案”变得越来越容易，但也会&lt;strong&gt;让“判断一个答案是否可靠”变得越来越重要&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;本文为基于原文的归纳与改编，原文著作权及许可信息以原文页面为准。&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;h3 id=&#34;13-细节不是负担而是深入理解系统的开始&#34;&gt;1.3 细节不是负担，而是深入理解系统的开始&lt;/h3&gt;
-&lt;p&gt;&lt;strong&gt;在短期里，跳过细节似乎能更快完成任务。但在长期里，细节往往决定你是否真的理解了系统。&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;处理器、编译、操作系统、仿真环境、调试工具，这些内容彼此连接。一个看似微小的现象，背后可能牵着接口约定、时序关系、状态更新、指令语义或工具链行为。你愿意停下来追问一个细节，常常就会打开一整片新的理解。&lt;/p&gt;
-&lt;p&gt;“一生一芯”不是希望你把每一个细节都背下来，而是希望你逐渐形成一种习惯：&lt;strong&gt;当现象出现时，先观察能否稳定复现，再逐步定位问题；在定位过程中，逐步产生判断，找到证据；在找到答案后，尝试修复并验证，最后复盘总结。&lt;/strong&gt;&lt;/p&gt;
-&lt;h3 id=&#34;14-如何使用ai&#34;&gt;1.4 如何使用AI？&lt;/h3&gt;
-&lt;p&gt;真正的问题不是“能不能用 AI”，而是“怎样用 AI”。&lt;/p&gt;</description>
+&lt;h2 id=&#34;一为什么值得读这篇访谈&#34;&gt;一、为什么值得读这篇访谈？&lt;/h2&gt;
+&lt;p&gt;Jim Keller 是现代处理器设计领域具有代表性的工程师之一。他的职业经历横跨多个计算范式：从 DEC 的计算机系统，到 Apple 的移动处理器、AMD 的 Zen 架构、Tesla 的自动驾驶芯片，再到 Tenstorrent 的 AI 计算与 RISC-V 处理器。&lt;/p&gt;</description>
     </item>
   </channel>
 </rss>
