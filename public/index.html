@@ -227,6 +227,33 @@
 
 <article class="post-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">一生一芯-E1阶段笔记
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>在F阶段我们了解了数字电路的原理（数字信号的表示、存储和处理）和状态机模型，使用Ligisim实现了一个简单的sCPU，并在其上运行了数列求和程序。但是，Logisim的方案难以满足现代处理器设计的需求，因此在E1阶段中我将学习使用HDL（硬件描述语言）实现处理器。
+我的学习路线是：先过了一遍verilog的基本语法，然后刷HDLBits中的题目。
+verilog语法简介：https://vlab.ustc.edu.cn/guide/doc_verilog.html HDLBits 网址：https://hdlbits.01xz.net/wiki/Main_Page HDLBits提供了大量的Verilog的练习题，由浅入深，非常适合verilog的初学者。
+这篇文章的内容主要是我刷HDLBits题目的笔记，请根据需要阅读。
+这两天基本上把HDLBits中的题目全部刷了一遍，大部份题目已经吃透，少部份未能完全理解，后续有时间再复习吧。
+Getting Started Step one Hardware Description Language（硬件描述语言）使用代码来描述数字硬件。
+下面是一个最简单的示例：
+module top_module( output one ); assign one = 1; endmodule 该代码定义了一个名为top_module的module，没有输入，只有一个输出名为one，其中使用assign语句将输出端one置为1。
+Zero 同上，不过这里将输出端置为0。
+module top_module( output zero );// Module body starts after semicolon assign zero = 0; endmodule Verilog Language Basics Wire Create a module with one input and one output that behaves like a wire.
+和物理的连线（wire）不同，verilog中的连线是有方向的。
+我们可以使用assign语句连接输入和输出。
+module top_module( input in, output out ); assign out = in; endmodule Wire4 Create a module with 3 inputs and 4 outputs that behaves like wires that makes these connections:
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-19 16:11:46 +0800 CST'>October 19, 2026</span>&nbsp;·&nbsp;<span>44 min</span>&nbsp;·&nbsp;<span>9260 words</span></footer>
+  <a class="entry-link" aria-label="post link to 一生一芯-E1阶段笔记" href="http://localhost:1313/posts/ysyx-e1/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">一生一芯-F6阶段笔记
     </h2>
   </header>
@@ -472,30 +499,6 @@ Lectures，视频&#43;slides Homewokrs，5个书面作业 Projects，3个编程�
 
 <span title='2026-10-15 15:53:21 +0800 CST'>October 15, 2026</span>&nbsp;·&nbsp;<span>1 min</span>&nbsp;·&nbsp;<span>84 words</span></footer>
   <a class="entry-link" aria-label="post link to UCLA Computer Architecture Lec1" href="http://localhost:1313/posts/ucla-ca-01/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">Leetecode 二叉树(一)
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>题目来自灵神的题单：二叉树题单。
-在做时带着问题去做下面的题目：
-一般来说，DFS 的递归边界是空节点。 在什么情况下，要额外把叶子节点作为递归边界？ 在什么情况下，DFS 需要有返回值？什么情况下不需要有返回值？ 在什么情况下，题目更适合用自顶向下的方法解决？ 什么情况下更适合用自底向上的方法解决？ C&#43;&#43;不同标准下，支持递归的Lambda表达式写法：
-C&#43;&#43;11标准起支持 #include &lt;functional&gt; std::function&lt;void(TreeNode*, string)&gt; dfs = [&amp;](TreeNode* node, string s) { if (!node) return; // ... dfs(node-&gt;left, s); // 直接用 dfs，因为 dfs 已经声明了 dfs(node-&gt;right, s); }; dfs(root, &#34;&#34;); C&#43;&#43;14标准支持 auto dfs = [&amp;](auto&amp;&amp; self, TreeNode* node, string s) -&gt; void { if (!node) return; // ... self(self, node-&gt;left, s); // 把自己作为参数传进去 self(self, node-&gt;right, s); }; dfs(dfs, root, &#34;&#34;); // 调用时也要把自己传进去 在我的解法实现中采用的是C&#43;&#43;14标准的写法。
-一、遍历二叉树 因为树本身就是递归定义的，即树的子树本身就是一棵树，所以树的算法大多通过递归来实现。
-1. 二叉树的前序遍历 法一：DFS 树的先序遍历的顺序是：根-左-右
-在遍历过程中:
-如果当前节点为空，直接返回； 如果当前节点非空，先访问当前节点，然后依次递归访问左右子树； class Solution { vector&lt;int&gt; ans; void dfs(TreeNode* root) { if (root) { ans.push_back(root-&gt;val); dfs(root-&gt;left); dfs(root-&gt;right); } } public: vector&lt;int&gt; preorderTraversal(TreeNode* root) { dfs(root); return ans; } }; 法二：非递归法
-使用一个栈来实现，对于每个节点先处理当前节点（中），然后依次压入右子树和左子树，根据栈的特点，得到的顺序是先左后右。
-class Solution { public: vector&lt;int&gt; preorderTraversal(TreeNode* root) { vector&lt;int&gt; ans; if (!root) return ans; stack&lt;TreeNode*&gt; st; st.push(root); while (!st.empty()) { auto node = st.top(); st.pop(); if (node) { ans.push_back(node-&gt;val); if (node-&gt;right) st.push(node-&gt;right); if (node-&gt;left) st.push(node-&gt;left); } } return ans; } }; 2. 二叉树的中序遍历 法一：DFS
-...</p>
-  </div>
-  <footer class="entry-footer">
-
-<span title='2026-10-14 22:02:01 +0800 CST'>October 14, 2026</span>&nbsp;·&nbsp;<span>8 min</span>&nbsp;·&nbsp;<span>1582 words</span></footer>
-  <a class="entry-link" aria-label="post link to Leetecode 二叉树(一)" href="http://localhost:1313/posts/leetecode-tree01/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">

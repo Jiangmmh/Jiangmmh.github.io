@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Verilog on Minghan的博客</title>
+    <link>http://localhost:1313/tags/verilog/</link>
+    <description>Recent content in Verilog on Minghan的博客</description>
+    <generator>Hugo</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Mon, 19 Oct 2026 16:11:46 +0800</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/verilog/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>一生一芯-E1阶段笔记</title>
+      <link>http://localhost:1313/posts/ysyx-e1/</link>
+      <pubDate>Mon, 19 Oct 2026 16:11:46 +0800</pubDate>
+      <guid>http://localhost:1313/posts/ysyx-e1/</guid>
+      <description>&lt;p&gt;在F阶段我们了解了数字电路的原理（数字信号的表示、存储和处理）和状态机模型，使用Ligisim实现了一个简单的sCPU，并在其上运行了数列求和程序。但是，Logisim的方案难以满足现代处理器设计的需求，因此在E1阶段中我将学习使用HDL（硬件描述语言）实现处理器。&lt;/p&gt;
+&lt;p&gt;我的学习路线是：先过了一遍verilog的基本语法，然后刷HDLBits中的题目。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;verilog语法简介：&lt;a href=&#34;https://vlab.ustc.edu.cn/guide/doc_verilog.html&#34;&gt;https://vlab.ustc.edu.cn/guide/doc_verilog.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;HDLBits&lt;/strong&gt; 网址：&lt;a href=&#34;https://hdlbits.01xz.net/wiki/Main_Page&#34;&gt;https://hdlbits.01xz.net/wiki/Main_Page&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;HDLBits提供了大量的Verilog的练习题，由浅入深，非常适合verilog的初学者。&lt;/p&gt;
+&lt;p&gt;这篇文章的内容主要是我刷HDLBits题目的笔记，请根据需要阅读。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;这两天基本上把HDLBits中的题目全部刷了一遍，大部份题目已经吃透，少部份未能完全理解，后续有时间再复习吧。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h1 id=&#34;getting-started&#34;&gt;Getting Started&lt;/h1&gt;
+&lt;h2 id=&#34;step-one&#34;&gt;&lt;strong&gt;Step one&lt;/strong&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;H&lt;/strong&gt;ardware &lt;strong&gt;D&lt;/strong&gt;escription &lt;strong&gt;L&lt;/strong&gt;anguage（硬件描述语言）使用代码来描述数字硬件。&lt;/p&gt;
+&lt;p&gt;下面是一个最简单的示例：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-verilog&#34; data-lang=&#34;verilog&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;module&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;top_module&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;output&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;one&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;assign&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;one&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;mh&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;endmodule&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;该代码定义了一个名为top_module的module，没有输入，只有一个输出名为one，其中使用assign语句将输出端one置为1。&lt;/p&gt;
+&lt;h2 id=&#34;zero&#34;&gt;&lt;strong&gt;Zero&lt;/strong&gt;&lt;/h2&gt;
+&lt;p&gt;同上，不过这里将输出端置为0。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-verilog&#34; data-lang=&#34;verilog&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;module&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;top_module&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;output&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;zero&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;// Module body starts after semicolon
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;	&lt;span class=&#34;k&#34;&gt;assign&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;zero&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;mh&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;endmodule&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h1 id=&#34;verilog-language&#34;&gt;Verilog Language&lt;/h1&gt;
+&lt;h2 id=&#34;basics&#34;&gt;Basics&lt;/h2&gt;
+&lt;h3 id=&#34;wire&#34;&gt;Wire&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Create a module with one input and one output that behaves like a wire.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;和物理的连线（wire）不同，verilog中的连线是有方向的。&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-e1/image.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;我们可以使用assign语句连接输入和输出。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-verilog&#34; data-lang=&#34;verilog&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;module&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;top_module&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;input&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;in&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;output&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;out&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;	&lt;span class=&#34;k&#34;&gt;assign&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;out&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;in&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;endmodule&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;wire4&#34;&gt;&lt;strong&gt;Wire4&lt;/strong&gt;&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Create a module with 3 inputs and 4 outputs that behaves like wires that makes these connections:&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

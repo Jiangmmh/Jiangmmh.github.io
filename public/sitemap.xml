@@ -3,27 +3,36 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>http://localhost:1313/categories/</loc>
-    <lastmod>2026-10-19T16:00:30+08:00</lastmod>
+    <lastmod>2026-10-19T16:11:46+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/hdl/</loc>
+    <lastmod>2026-10-19T16:11:46+08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/</loc>
-    <lastmod>2026-10-19T16:00:30+08:00</lastmod>
+    <lastmod>2026-10-19T16:11:46+08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/posts/</loc>
-    <lastmod>2026-10-19T16:00:30+08:00</lastmod>
+    <lastmod>2026-10-19T16:11:46+08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/tags/risc-v/</loc>
-    <lastmod>2026-10-19T16:00:30+08:00</lastmod>
+    <lastmod>2026-10-19T16:11:46+08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/tags/</loc>
-    <lastmod>2026-10-19T16:00:30+08:00</lastmod>
+    <lastmod>2026-10-19T16:11:46+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/verilog/</loc>
+    <lastmod>2026-10-19T16:11:46+08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/categories/%E4%B8%80%E7%94%9F%E4%B8%80%E8%8A%AF/</loc>
-    <lastmod>2026-10-19T16:00:30+08:00</lastmod>
+    <lastmod>2026-10-19T16:11:46+08:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/posts/ysyx-f6/</loc>
-    <lastmod>2026-10-19T16:00:30+08:00</lastmod>
+    <loc>http://localhost:1313/posts/ysyx-e1/</loc>
+    <lastmod>2026-10-19T16:11:46+08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/tags/%E5%A4%84%E7%90%86%E5%99%A8/</loc>
+    <lastmod>2026-10-19T16:11:46+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/posts/ysyx-f6/</loc>
     <lastmod>2026-10-19T16:00:30+08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/posts/ysyx-f5/</loc>
@@ -121,6 +130,8 @@
   </url><url>
     <loc>http://localhost:1313/books/nvidia/</loc>
     <lastmod>2026-09-11T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/posts/e1-%E7%A1%AC%E4%BB%B6%E6%8F%8F%E8%BF%B0%E8%AF%AD%E8%A8%80-3c6c4e93261480febacffcbddddc30fa/</loc>
   </url><url>
     <loc>http://localhost:1313/posts/f6-%E7%AE%80%E5%8D%95%E7%9A%84io-3b7c4e93261480759986e4d966aca898/</loc>
   </url><url>
