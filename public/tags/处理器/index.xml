@@ -6,8 +6,76 @@
     <description>Recent content in 处理器 on Minghan的博客</description>
     <generator>Hugo</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Sun, 18 Oct 2026 23:26:02 +0800</lastBuildDate>
+    <lastBuildDate>Mon, 19 Oct 2026 15:15:35 +0800</lastBuildDate>
     <atom:link href="http://localhost:1313/tags/%E5%A4%84%E7%90%86%E5%99%A8/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>一生一芯-F5阶段笔记</title>
+      <link>http://localhost:1313/posts/ysyx-f5/</link>
+      <pubDate>Mon, 19 Oct 2026 15:15:35 +0800</pubDate>
+      <guid>http://localhost:1313/posts/ysyx-f5/</guid>
+      <description>&lt;h1 id=&#34;f5-支持数列求和的简单处理器&#34;&gt;F5-支持数列求和的简单处理器&lt;/h1&gt;
+&lt;p&gt;这篇文章的内容如下：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;解释在ISA层面，指令的执行过程，包括取指、译码、执行和更新PC四步。&lt;/li&gt;
+&lt;li&gt;然后介绍了一个只有3条指令的指令集架构 sISA。&lt;/li&gt;
+&lt;li&gt;使用Logisim实现sISA处理器，并用其执行数列求和程序。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;课程笔记&#34;&gt;课程笔记&lt;/h1&gt;
+&lt;p&gt;前面我们学习了数字电路的基础知识（晶体管、组合逻辑电路和时序逻辑电路）、处理器的基本原理和状态机模型。这节课介绍了一个简单处理器的实现。&lt;/p&gt;
+&lt;h2 id=&#34;只有一条指令的cpu&#34;&gt;只有一条指令的CPU&lt;/h2&gt;
+&lt;p&gt;暂时让sISA仅支持一条指令 &lt;strong&gt;li&lt;/strong&gt; ，该指令的作用是将立即数加载到目标寄存器中。&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f5/image.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;下面介绍处理器是如何执行指令的：&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f5/image%201.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;在处理器中存在一个寄存器PC，用于存储下一条待执行指令的地址。&lt;/p&gt;
+&lt;p&gt;例如，该地址可以用于索引存储在ROM中的指令：&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f5/image%202.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;在取得指令后，便需要对指令进行解析，这个过程被称为译码，译码包括：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;理解指令所表示的操作，产生执行该操作必须的控制信号&lt;/li&gt;
+&lt;li&gt;识别指令中的操作数，输出相应字段&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f5/image%203.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f5/image%204.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;通过对指令译码我们知道了**该指令要做什么？处理的数据是什么？**然后便是驱动具体的功能电路执行指令：&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f5/image%205.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;指令的执行可能会访问内存（RAM）：&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f5/image%206.png&#34;&gt;&lt;/p&gt;
+&lt;h2 id=&#34;实现更多指令&#34;&gt;实现更多指令&lt;/h2&gt;
+&lt;p&gt;因为sISA一共包含3条指令，因此使用2bits的opcode来标识指令的类型。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;add&lt;/strong&gt; 指令用于对两个源寄存器求和并将结果存入目的寄存器，其需要同时读取两个寄存器的值，因此寄存器文件应当支持两个读端口。&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f5/image%207.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f5/image%208.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;继续添加&lt;strong&gt;bner0&lt;/strong&gt;指令（&lt;strong&gt;branch not equal register 0&lt;/strong&gt;）：&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f5/image%209.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f5/image%2010.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;综上所述，我们可以得出为ISA添加指令的基本思路：&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f5/image%2011.png&#34;&gt;&lt;/p&gt;
+&lt;h1 id=&#34;讲义笔记&#34;&gt;讲义笔记&lt;/h1&gt;
+&lt;h2 id=&#34;实现sisa&#34;&gt;实现sISA&lt;/h2&gt;
+&lt;p&gt;关于sISA的细节：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;支持如下三条指令：&lt;strong&gt;add&lt;/strong&gt;, &lt;strong&gt;li&lt;/strong&gt;, &lt;strong&gt;bner0&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;支持包含&lt;strong&gt;4个&lt;/strong&gt;寄存器的寄存文件，因此寄存器索引的长度为&lt;strong&gt;2位&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;支持&lt;strong&gt;4位&lt;/strong&gt;的立即数，数值范围[0, 15]&lt;/li&gt;
+&lt;li&gt;一条指令长度为&lt;strong&gt;8位&lt;/strong&gt;：&lt;strong&gt;2位&lt;/strong&gt;用于opcode&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f5/image%2012.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f5/image%2013.png&#34;&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-nasm&#34; data-lang=&#34;nasm&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;err&#34;&gt;10001010&lt;/span&gt;    &lt;span class=&#34;err&#34;&gt;#&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;0:&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;li&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;r0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;10&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;err&#34;&gt;10010000&lt;/span&gt;    &lt;span class=&#34;err&#34;&gt;#&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;1:&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;li&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;r1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;err&#34;&gt;10100000&lt;/span&gt;    &lt;span class=&#34;err&#34;&gt;#&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;2:&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;li&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;r2&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;err&#34;&gt;10110001&lt;/span&gt;    &lt;span class=&#34;err&#34;&gt;#&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;3:&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;li&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;r3&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;err&#34;&gt;00010111&lt;/span&gt;    &lt;span class=&#34;err&#34;&gt;#&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;4:&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;add&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;r1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;r1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;r3&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;err&#34;&gt;00101001&lt;/span&gt;    &lt;span class=&#34;err&#34;&gt;#&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;5:&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;add&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;r2&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;r2&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;r1&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;err&#34;&gt;11010001&lt;/span&gt;    &lt;span class=&#34;err&#34;&gt;#&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;6:&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;bner0&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;r1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;4&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;err&#34;&gt;11011111&lt;/span&gt;    &lt;span class=&#34;err&#34;&gt;#&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;7:&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;bner0&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;r3&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;7&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;先来确定一下ROM的规格：GPR寄存器长度为&lt;strong&gt;8位&lt;/strong&gt;，因此我们将PC寄存器的长度也设置为&lt;strong&gt;8位&lt;/strong&gt;，因此ROM总共能存储&lt;strong&gt;2^8 = 256&lt;/strong&gt;条长度为8位的指令。&lt;/p&gt;
+&lt;p&gt;但是这里为了实现方便，暂时仅实现支持存放8条指令的ROM，指令的内容实用常量来表示。&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f5/image%2014.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f5/image%2015.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;sISA支持4个8位GPR，因此该RAM的规格为 &lt;strong&gt;4 * 8 bits&lt;/strong&gt;，为了支持add这类寄存器指令，需要能同时读两个寄存器，写一个寄存器。&lt;/p&gt;</description>
+    </item>
     <item>
       <title>一生一芯-F4阶段笔记</title>
       <link>http://localhost:1313/posts/ysyx-f4/</link>

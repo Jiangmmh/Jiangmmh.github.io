@@ -205,39 +205,23 @@
 
 <article class="post-entry"> 
   <header class="entry-header">
-    <h2 class="entry-hint-parent">
+    <h2 class="entry-hint-parent">如何快速构建一个静态博客?
     </h2>
   </header>
   <div class="entry-content">
-    <p># F4-计算机系统的状态机模型
-# 课程笔记
-本阶段课程的大纲如下：
-## 1. CPU的基本组成和工作原理
-&gt; **通过指令的组合实现需求, 就是编程。**
-&gt; - CPU是一种通用的芯片，其提供了**一组数量有限的指令集合**；但CPU的用户可以**按需求组合指令集中的指令**，实现自定义的功能。
-- 指令分为**操作码**和**操作数**，前者指定处理数据的方式，后者指定要处理的数据。
-- CPU中提供一组通用寄存器存放临时值，指令需要操作数字段指出所使用的寄存器。
-下面是一个简单的ISA——sCPU，其包括4个寄存器和3条指令。
-## 2. 指令集架构
-可以将计算机视为一个有限状态机（FSM），其状态由内存和寄存器中的值决定，指令作为激励事件实现状态机的状态转移。
-**sISA**作为一个状态机：
-## 3. C语言程序的状态机模型
-## 4. 数字电路的状态机模型
-深刻理解下面这个模型：
-## 5. 各状态机模型之间的转换
-计算机程序的各个层次都可以被视为等价的状态机：
-- C语言程序是一个状态机
-- 汇编语言程序是一个状态机
-- 处理器电路也是一个状态机
-- 状态（PC、GPR和内存）使用时序逻辑电路表示
-- 指令（ISA定义的指令集）使用组合逻辑电路执行
-## 6. 最后的话
+    <p> 关键问题：如何快速、省心地搭建一个静态博客？
+1. 为什么写博客？ 写技术博客最重要的意义，不只是记录自己学过什么，而是将知识转化为能够被验证、复用和分享的成果。
+检验理解程度。 能够把一个技术问题讲清楚，往往意味着自己已经建立了较为完整的知识体系。 建立个人知识库。 将零散的学习笔记整理成结构化、可持续积累的技术资料。 推动实践。 通过总结项目中的问题与解决方案，促使自己真正动手实现，而不是停留在理论层面。 促进知识共享。 让自己的思考和实践成果能够被他人阅读、检验和复用。 展示技术能力。 一篇有深度的技术文章，往往比简单罗列技术栈更能体现一个人的理解与实践能力。 2. 快速搭建一个静态博客 2.1 方案选择 搭建静态博客有很多种方案。本文介绍的是 Hugo &#43; GitHub Pages，它们分别负责网站生成和静态页面托管。
+这套方案具有以下特点：
+轻量易维护： 不需要数据库、后端服务或复杂的运行环境。 写作体验简单： 使用 Markdown 编写文章，无须手动编写 HTML。 构建速度快： Hugo 可以将 Markdown、主题模板和配置文件生成静态 HTML 页面。 部署成本低： GitHub Pages 可以免费托管符合条件的公开静态网站。 便于版本管理： 文章、配置和代码都可以通过 Git 管理。 整体工作流如下：
+编写 Markdown ↓ Hugo 构建静态网站 ↓ GitHub Actions 自动部署 ↓ GitHub Pages 发布网站 完成初始化后，日常写作只需要编辑 Markdown 文件并推送到 GitHub，剩余的构建与部署工作就可以交给 GitHub Actions 自动完成。
+2.2 创建博客 第一步：安装 Hugo Hugo 是一个使用 Go 编写的静态网站生成器。本文以 macOS 为例，使用 Homebrew 安装：
 ...</p>
   </div>
   <footer class="entry-footer">
 
-<span>5 min</span>&nbsp;·&nbsp;<span>917 words</span></footer>
-  <a class="entry-link" aria-label="post link to " href="http://localhost:1313/posts/f4-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E7%9A%84%E7%8A%B6%E6%80%81%E6%9C%BA%E6%A8%A1%E5%9E%8B/"></a>
+<span title='2026-10-14 11:44:43 +0800 CST'>October 14, 2026</span>&nbsp;·&nbsp;<span>6 min</span>&nbsp;·&nbsp;<span>1268 words</span></footer>
+  <a class="entry-link" aria-label="post link to 如何快速构建一个静态博客?" href="http://localhost:1313/posts/hello-world/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">
