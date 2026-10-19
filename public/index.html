@@ -232,29 +232,29 @@
   </header>
   <div class="entry-content">
     <p>课程笔记 本阶段课程的大纲如下：
-1. CPU的基本组成和工作原理 &gt; **通过指令的组合实现需求, 就是编程。**
-&gt; - CPU是一种通用的芯片，其提供了**一组数量有限的指令集合**；但CPU的用户可以**按需求组合指令集中的指令**，实现自定义的功能。
-- 指令分为**操作码**和**操作数**，前者指定处理数据的方式，后者指定要处理的数据。
-- CPU中提供一组通用寄存器存放临时值，指令需要操作数字段指出所使用的寄存器。
+1. CPU的基本组成和工作原理 通过指令的组合实现需求, 就是编程。
+CPU是一种通用的芯片，其提供了一组数量有限的指令集合；但CPU的用户可以按需求组合指令集中的指令，实现自定义的功能。
+指令分为操作码和操作数，前者指定处理数据的方式，后者指定要处理的数据。
+CPU中提供一组通用寄存器存放临时值，指令需要操作数字段指出所使用的寄存器。
 下面是一个简单的ISA——sCPU，其包括4个寄存器和3条指令。
 2. 指令集架构 可以将计算机视为一个有限状态机（FSM），其状态由内存和寄存器中的值决定，指令作为激励事件实现状态机的状态转移。
-**sISA**作为一个状态机：
+sISA作为一个状态机：
 3. C语言程序的状态机模型 4. 数字电路的状态机模型 深刻理解下面这个模型：
 5. 各状态机模型之间的转换 计算机程序的各个层次都可以被视为等价的状态机：
-- C语言程序是一个状态机
-- 汇编语言程序是一个状态机
-- 处理器电路也是一个状态机
-- 状态（PC、GPR和内存）使用时序逻辑电路表示
-- 指令（ISA定义的指令集）使用组合逻辑电路执行
-6. 最后的话 讲义笔记 1. sISA和状态机 计算机是一个机械地进行数据处理的设备，这里的“机械”是指其原理非常死板，毫无神秘可言。
-计算机的ISA（指令集架构）定义了一组硬件规范（PC、GPR和内存）和一组有限的指令。
-- 在ISA之上，我们利用ISA提供的指令来构建操作系统、编译器等系统软件。
-- 在ISA之下，我们根据ISA的定义来设计数字电路，在物理上实现ISA的功能。
+C语言程序是一个状态机 汇编语言程序是一个状态机 处理器电路也是一个状态机 状态（PC、GPR和内存）使用时序逻辑电路表示 指令（ISA定义的指令集）使用组合逻辑电路执行 6. 最后的话 讲义笔记 1. sISA和状态机 计算机是一个机械地进行数据处理的设备，这里的“机械”是指其原理非常死板，毫无神秘可言。 计算机的ISA（指令集架构）定义了一组硬件规范（PC、GPR和内存）和一组有限的指令。
+在ISA之上，我们利用ISA提供的指令来构建操作系统、编译器等系统软件。
+在ISA之下，我们根据ISA的定义来设计数字电路，在物理上实现ISA的功能。
+指令主要包括两部分内容：
+操作码：标识指令的功能
+操作数：标识指令要处理的数据
+下面是一个简单的指令集架构——sISA所支持的指令：
+下面是使用sISA指令实现的数列求和程序：
+0: li r0, 10 # r0表示执行10次循环 1: li r1, 0 # r1表示循环变量i 2: li r2, 0 # r2表示和 3: li r3, 1 # r3表示i每次递增的步长 4: add r1, r1, r3 5: add r2, r2, r1 6: bner0 r1, 4 7: bner0 r3, 7 该程序的状态机模型如下：
 ...</p>
   </div>
   <footer class="entry-footer">
 
-<span title='2026-10-18 23:26:02 +0800 CST'>October 18, 2026</span>&nbsp;·&nbsp;<span>5 min</span>&nbsp;·&nbsp;<span>903 words</span></footer>
+<span title='2026-10-18 23:26:02 +0800 CST'>October 18, 2026</span>&nbsp;·&nbsp;<span>5 min</span>&nbsp;·&nbsp;<span>864 words</span></footer>
   <a class="entry-link" aria-label="post link to 一生一芯-F4阶段笔记" href="http://localhost:1313/posts/ysyx-f4/"></a>
 </article>
 
@@ -490,12 +490,6 @@ class Solution { vector&lt;int&gt; findLocalMinMax(ListNode *head) { vector&lt;i
 <span title='2026-10-14 11:44:43 +0800 CST'>October 14, 2026</span>&nbsp;·&nbsp;<span>6 min</span>&nbsp;·&nbsp;<span>1268 words</span></footer>
   <a class="entry-link" aria-label="post link to 如何快速构建一个静态博客?" href="http://localhost:1313/posts/hello-world/"></a>
 </article>
-<footer class="page-footer">
-  <nav class="pagination">
-    <a class="next" href="http://localhost:1313/page/2/">Next&nbsp;&nbsp;»
-    </a>
-  </nav>
-</footer>
     </main>
     
 <footer class="footer">

@@ -17,11 +17,23 @@
 &lt;p&gt;本阶段课程的大纲如下：&lt;/p&gt;
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image.png&#34;&gt;&lt;/p&gt;
 &lt;h2 id=&#34;1-cpu的基本组成和工作原理&#34;&gt;1. CPU的基本组成和工作原理&lt;/h2&gt;
-&lt;p&gt;&amp;gt; &lt;strong&gt;**通过指令的组合实现需求, 就是编程。**&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;&amp;gt; &lt;/p&gt;
-&lt;p&gt;- CPU是一种通用的芯片，其提供了&lt;strong&gt;**一组数量有限的指令集合**&lt;/strong&gt;；但CPU的用户可以&lt;strong&gt;**按需求组合指令集中的指令**&lt;/strong&gt;，实现自定义的功能。&lt;/p&gt;
-&lt;p&gt;- 指令分为&lt;strong&gt;**操作码**&lt;/strong&gt;和&lt;strong&gt;**操作数**&lt;/strong&gt;，前者指定处理数据的方式，后者指定要处理的数据。&lt;/p&gt;
-&lt;p&gt;- CPU中提供一组通用寄存器存放临时值，指令需要操作数字段指出所使用的寄存器。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;&lt;strong&gt;通过指令的组合实现需求, 就是编程。&lt;/strong&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;blockquote&gt;
+&lt;p&gt; &lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;CPU是一种通用的芯片，其提供了&lt;strong&gt;&lt;strong&gt;一组数量有限的指令集合&lt;/strong&gt;&lt;/strong&gt;；但CPU的用户可以&lt;strong&gt;&lt;strong&gt;按需求组合指令集中的指令&lt;/strong&gt;&lt;/strong&gt;，实现自定义的功能。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;指令分为&lt;strong&gt;&lt;strong&gt;操作码&lt;/strong&gt;&lt;/strong&gt;和&lt;strong&gt;&lt;strong&gt;操作数&lt;/strong&gt;&lt;/strong&gt;，前者指定处理数据的方式，后者指定要处理的数据。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;CPU中提供一组通用寄存器存放临时值，指令需要操作数字段指出所使用的寄存器。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%201.png&#34;&gt;&lt;/p&gt;
 &lt;p&gt;下面是一个简单的ISA——sCPU，其包括4个寄存器和3条指令。&lt;/p&gt;
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%202.png&#34;&gt;&lt;/p&gt;
@@ -33,7 +45,7 @@
 &lt;p&gt;可以将计算机视为一个有限状态机（FSM），其状态由内存和寄存器中的值决定，指令作为激励事件实现状态机的状态转移。&lt;/p&gt;
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%207.png&#34;&gt;&lt;/p&gt;
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%208.png&#34;&gt;&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;**sISA**&lt;/strong&gt;作为一个状态机：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&lt;strong&gt;sISA&lt;/strong&gt;&lt;/strong&gt;作为一个状态机：&lt;/p&gt;
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%209.png&#34;&gt;&lt;/p&gt;
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%2010.png&#34;&gt;&lt;/p&gt;
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%2011.png&#34;&gt;&lt;/p&gt;
@@ -45,11 +57,16 @@
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%2014.png&#34;&gt;&lt;/p&gt;
 &lt;h2 id=&#34;5-各状态机模型之间的转换&#34;&gt;5. 各状态机模型之间的转换&lt;/h2&gt;
 &lt;p&gt;计算机程序的各个层次都可以被视为等价的状态机：&lt;/p&gt;
-&lt;p&gt;- C语言程序是一个状态机&lt;/p&gt;
-&lt;p&gt;- 汇编语言程序是一个状态机&lt;/p&gt;
-&lt;p&gt;- 处理器电路也是一个状态机&lt;/p&gt;
-&lt;p&gt;    - 状态（PC、GPR和内存）使用时序逻辑电路表示&lt;/p&gt;
-&lt;p&gt;    - 指令（ISA定义的指令集）使用组合逻辑电路执行&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;C语言程序是一个状态机&lt;/li&gt;
+&lt;li&gt;汇编语言程序是一个状态机&lt;/li&gt;
+&lt;li&gt;处理器电路也是一个状态机
+&lt;ul&gt;
+&lt;li&gt;状态（PC、GPR和内存）使用时序逻辑电路表示&lt;/li&gt;
+&lt;li&gt;指令（ISA定义的指令集）使用组合逻辑电路执行&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%2015.png&#34;&gt;&lt;/p&gt;
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%2016.png&#34;&gt;&lt;/p&gt;
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%2017.png&#34;&gt;&lt;/p&gt;
@@ -61,10 +78,45 @@
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%2022.png&#34;&gt;&lt;/p&gt;
 &lt;h1 id=&#34;讲义笔记&#34;&gt;讲义笔记&lt;/h1&gt;
 &lt;h2 id=&#34;1-sisa和状态机&#34;&gt;1. sISA和状态机&lt;/h2&gt;
-&lt;p&gt;计算机是一个机械地进行数据处理的设备，这里的“机械”是指其原理非常死板，毫无神秘可言。&lt;/p&gt;
-&lt;p&gt;计算机的ISA（指令集架构）定义了一组硬件规范（PC、GPR和内存）和一组有限的指令。&lt;/p&gt;
-&lt;p&gt;- 在ISA之上，我们利用ISA提供的指令来构建操作系统、编译器等系统软件。&lt;/p&gt;
-&lt;p&gt;- 在ISA之下，我们根据ISA的定义来设计数字电路，在物理上实现ISA的功能。&lt;/p&gt;</description>
+&lt;p&gt;计算机是一个机械地进行数据处理的设备，这里的“机械”是指其原理非常死板，毫无神秘可言。
+计算机的ISA（指令集架构）定义了一组硬件规范（PC、GPR和内存）和一组有限的指令。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;在ISA之上，我们利用ISA提供的指令来构建操作系统、编译器等系统软件。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;在ISA之下，我们根据ISA的定义来设计数字电路，在物理上实现ISA的功能。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;指令主要包括两部分内容：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;操作码：标识指令的功能&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;操作数：标识指令要处理的数据&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;下面是一个简单的指令集架构——sISA所支持的指令：&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%2023.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;下面是使用sISA指令实现的数列求和程序：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-nasm&#34; data-lang=&#34;nasm&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;err&#34;&gt;0:&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;li&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;r0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;10&lt;/span&gt;         &lt;span class=&#34;err&#34;&gt;#&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;r0表示执行10次循环&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;err&#34;&gt;1:&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;li&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;r1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;          &lt;span class=&#34;err&#34;&gt;#&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;r1表示循环变量i&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;err&#34;&gt;2:&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;li&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;r2&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;          &lt;span class=&#34;err&#34;&gt;#&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;r2表示和&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;err&#34;&gt;3:&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;li&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;r3&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;          &lt;span class=&#34;err&#34;&gt;#&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;r3表示i每次递增的步长&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;err&#34;&gt;4:&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;add&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;r1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;r1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;r3&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;err&#34;&gt;5:&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;add&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;r2&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;r2&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;r1&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;err&#34;&gt;6:&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;bner0&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;r1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;4&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;err&#34;&gt;7:&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;bner0&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;r3&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;7&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;该程序的状态机模型如下：&lt;/p&gt;</description>
     </item>
     <item>
       <title>一生一芯-F3阶段笔记</title>
@@ -605,58 +657,6 @@
 &lt;h3 id=&#34;22-创建博客&#34;&gt;2.2 创建博客&lt;/h3&gt;
 &lt;h4 id=&#34;第一步安装-hugo&#34;&gt;第一步：安装 Hugo&lt;/h4&gt;
 &lt;p&gt;Hugo 是一个使用 Go 编写的静态网站生成器。本文以 macOS 为例，使用 Homebrew 安装：&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title></title>
-      <link>http://localhost:1313/posts/f4-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E7%9A%84%E7%8A%B6%E6%80%81%E6%9C%BA%E6%A8%A1%E5%9E%8B/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/f4-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E7%9A%84%E7%8A%B6%E6%80%81%E6%9C%BA%E6%A8%A1%E5%9E%8B/</guid>
-      <description>&lt;p&gt;# F4-计算机系统的状态机模型&lt;/p&gt;
-&lt;p&gt;# 课程笔记&lt;/p&gt;
-&lt;p&gt;本阶段课程的大纲如下：&lt;/p&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image.png&#34;&gt;&lt;/p&gt;
-&lt;p&gt;## 1. CPU的基本组成和工作原理&lt;/p&gt;
-&lt;p&gt;&amp;gt; &lt;strong&gt;**通过指令的组合实现需求, 就是编程。**&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;&amp;gt; &lt;/p&gt;
-&lt;p&gt;- CPU是一种通用的芯片，其提供了&lt;strong&gt;**一组数量有限的指令集合**&lt;/strong&gt;；但CPU的用户可以&lt;strong&gt;**按需求组合指令集中的指令**&lt;/strong&gt;，实现自定义的功能。&lt;/p&gt;
-&lt;p&gt;- 指令分为&lt;strong&gt;**操作码**&lt;/strong&gt;和&lt;strong&gt;**操作数**&lt;/strong&gt;，前者指定处理数据的方式，后者指定要处理的数据。&lt;/p&gt;
-&lt;p&gt;- CPU中提供一组通用寄存器存放临时值，指令需要操作数字段指出所使用的寄存器。&lt;/p&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%201.png&#34;&gt;&lt;/p&gt;
-&lt;p&gt;下面是一个简单的ISA——sCPU，其包括4个寄存器和3条指令。&lt;/p&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%202.png&#34;&gt;&lt;/p&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%203.png&#34;&gt;&lt;/p&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%204.png&#34;&gt;&lt;/p&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%205.png&#34;&gt;&lt;/p&gt;
-&lt;p&gt;## 2. 指令集架构&lt;/p&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%206.png&#34;&gt;&lt;/p&gt;
-&lt;p&gt;可以将计算机视为一个有限状态机（FSM），其状态由内存和寄存器中的值决定，指令作为激励事件实现状态机的状态转移。&lt;/p&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%207.png&#34;&gt;&lt;/p&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%208.png&#34;&gt;&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;**sISA**&lt;/strong&gt;作为一个状态机：&lt;/p&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%209.png&#34;&gt;&lt;/p&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%2010.png&#34;&gt;&lt;/p&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%2011.png&#34;&gt;&lt;/p&gt;
-&lt;p&gt;## 3. C语言程序的状态机模型&lt;/p&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%2012.png&#34;&gt;&lt;/p&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%2013.png&#34;&gt;&lt;/p&gt;
-&lt;p&gt;## 4. 数字电路的状态机模型&lt;/p&gt;
-&lt;p&gt;深刻理解下面这个模型：&lt;/p&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%2014.png&#34;&gt;&lt;/p&gt;
-&lt;p&gt;## 5. 各状态机模型之间的转换&lt;/p&gt;
-&lt;p&gt;计算机程序的各个层次都可以被视为等价的状态机：&lt;/p&gt;
-&lt;p&gt;- C语言程序是一个状态机&lt;/p&gt;
-&lt;p&gt;- 汇编语言程序是一个状态机&lt;/p&gt;
-&lt;p&gt;- 处理器电路也是一个状态机&lt;/p&gt;
-&lt;p&gt;    - 状态（PC、GPR和内存）使用时序逻辑电路表示&lt;/p&gt;
-&lt;p&gt;    - 指令（ISA定义的指令集）使用组合逻辑电路执行&lt;/p&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%2015.png&#34;&gt;&lt;/p&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%2016.png&#34;&gt;&lt;/p&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%2017.png&#34;&gt;&lt;/p&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%2018.png&#34;&gt;&lt;/p&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%2019.png&#34;&gt;&lt;/p&gt;
-&lt;p&gt;## 6. 最后的话&lt;/p&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%2020.png&#34;&gt;&lt;/p&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-f4/image%2021.png&#34;&gt;&lt;/p&gt;</description>
     </item>
   </channel>
 </rss>
