@@ -1,4 +1,53 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Posts on Minghan的博客</title><link>https://Jiangmmh.github.io/posts/</link><description>Recent content in Posts on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Mon, 19 Oct 2026 15:15:35 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>一生一芯-F5阶段笔记</title><link>https://Jiangmmh.github.io/posts/ysyx-f5/</link><pubDate>Mon, 19 Oct 2026 15:15:35 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/ysyx-f5/</guid><description>&lt;p>这篇文章的内容如下：&lt;/p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Posts on Minghan的博客</title><link>https://Jiangmmh.github.io/posts/</link><description>Recent content in Posts on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Mon, 19 Oct 2026 16:00:30 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>一生一芯-F6阶段笔记</title><link>https://Jiangmmh.github.io/posts/ysyx-f6/</link><pubDate>Mon, 19 Oct 2026 16:00:30 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/ysyx-f6/</guid><description>&lt;p>这篇文章的内容：&lt;/p>
+&lt;ul>
+&lt;li>改进前面所设计的sISA，新增一条io指令，用于与外部设备进行IO。&lt;/li>
+&lt;li>对 li 和 bne0这两条指令进行增强，并使用LED条和16进制数码管检查新sISA的实现。&lt;/li>
+&lt;/ul>
+&lt;h1 id="讲义笔记">讲义笔记&lt;/h1>
+&lt;h2 id="1-sisa的局限性">1. sISA的局限性&lt;/h2>
+&lt;p>在前面的我们成功地根据sISA设计出了简单处理器sCPU，并在其上运行了数列求和程序。但是sISA提供的指令有着局限性：&lt;/p>
+&lt;ul>
+&lt;li>li指令中的立即数用4bits表示，仅能装入立即数0～15到寄存器。&lt;/li>
+&lt;li>bner0指令按绝对地址跳转，地址字段也是4bits，因此跳转目标范围也只有0～15。&lt;/li>
+&lt;li>当前的sISA不支持IO指令，要检查程序运行的结果只能手动查看寄存器的值，不方便。&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="https://Jiangmmh.github.io/images/posts/ysyx-f6/image.png">&lt;/p>
+&lt;h2 id="2-增强li和bner0">2. 增强li和bner0&lt;/h2>
+&lt;p>对li指令和bner0指令进行改进：&lt;/p>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="https://Jiangmmh.github.io/images/posts/ysyx-f6/image%201.png">&lt;/p>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="https://Jiangmmh.github.io/images/posts/ysyx-f6/image%202.png">&lt;/p>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="https://Jiangmmh.github.io/images/posts/ysyx-f6/image%203.png">&lt;/p>
+&lt;h2 id="3-添加io指令">3. 添加io指令&lt;/h2>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="https://Jiangmmh.github.io/images/posts/ysyx-f6/image%204.png">&lt;/p>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="https://Jiangmmh.github.io/images/posts/ysyx-f6/image%205.png">&lt;/p>
+&lt;h2 id="4-迈向现代化的处理器设计">4. 迈向现代化的处理器设计&lt;/h2>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="https://Jiangmmh.github.io/images/posts/ysyx-f6/image%206.png">&lt;/p>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="https://Jiangmmh.github.io/images/posts/ysyx-f6/image%207.png">&lt;/p>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="https://Jiangmmh.github.io/images/posts/ysyx-f6/image%208.png">&lt;/p>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="https://Jiangmmh.github.io/images/posts/ysyx-f6/image%209.png">&lt;/p>
+&lt;h1 id="讲义笔记-1">讲义笔记&lt;/h1>
+&lt;h2 id="1-改进后的sisa">1. 改进后的sISA&lt;/h2>
+&lt;p>首先增强 &lt;strong>li&lt;/strong> 和 &lt;strong>bner0&lt;/strong> 指令。然后再添加一条新的指令 &lt;strong>io&lt;/strong>，用于寄存器与外部设备的I/O，得到的新sISA：&lt;/p>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="https://Jiangmmh.github.io/images/posts/ysyx-f6/image%2010.png">&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>add&lt;/code>指令的行为和之前相同&lt;/li>
+&lt;li>&lt;code>io&lt;/code>指令根据方向位&lt;code>i/o&lt;/code>进行输入或输出:
+&lt;ul>
+&lt;li>当&lt;code>i/o=0&lt;/code>时, 表示输入操作, 从编号为&lt;code>idx&lt;/code>的设备中读出8位数据, 输入到&lt;code>R[rd]&lt;/code>中&lt;/li>
+&lt;li>当&lt;code>i/o=1&lt;/code>时, 表示输出操作, 将&lt;code>R[rd]&lt;/code>中的8位数据, 输出到编号为&lt;code>idx&lt;/code>的设备中&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>&lt;code>li&lt;/code>指令和之前相比有所不同, 它通过&lt;code>s&lt;/code>和&lt;code>imm&lt;/code>的组合来表示一个更大的立即数. 上文的&lt;code>&amp;lt;&amp;lt;&lt;/code>表示左移运算符, 如果你不太熟悉这个运算符, 可以从另一个角度来理解&lt;code>li&lt;/code>指令的行为: &lt;code>s&lt;/code>表示将2位的&lt;code>imm&lt;/code>放置在8位数据中的哪一段位置。&lt;/li>
+&lt;/ul>
+&lt;h2 id="2-增强li和bner0-1">2. 增强li和bner0&lt;/h2>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="https://Jiangmmh.github.io/images/posts/ysyx-f6/image%2011.png">&lt;/p>
+&lt;p>修改立即数生成器，使其能获取更新后的sISA所需的立即数：&lt;/p>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="https://Jiangmmh.github.io/images/posts/ysyx-f6/image%2012.png">&lt;/p>
+&lt;p>修改ALU中将立即数计算的部分，引入移位运算：&lt;/p>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="https://Jiangmmh.github.io/images/posts/ysyx-f6/image%2013.png">&lt;/p>
+&lt;p>在PC逻辑中添加PC相对寻址的电路：&lt;strong>PC = PC + sign_ext(offset)&lt;/strong>&lt;/p>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="https://Jiangmmh.github.io/images/posts/ysyx-f6/image%2014.png">&lt;/p>
+&lt;p>重新编写数列求和程序：&lt;/p></description></item><item><title>一生一芯-F5阶段笔记</title><link>https://Jiangmmh.github.io/posts/ysyx-f5/</link><pubDate>Mon, 19 Oct 2026 15:15:35 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/ysyx-f5/</guid><description>&lt;p>这篇文章的内容如下：&lt;/p>
 &lt;ul>
 &lt;li>解释在ISA层面，指令的执行过程，包括取指、译码、执行和更新PC四步。&lt;/li>
 &lt;li>然后介绍了一个只有3条指令的指令集架构 sISA。&lt;/li>
@@ -607,4 +656,53 @@
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">GitHub Actions 自动部署
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> ↓
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">GitHub Pages 发布网站
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>完成初始化后，日常写作只需要编辑 Markdown 文件并推送到 GitHub，剩余的构建与部署工作就可以交给 GitHub Actions 自动完成。&lt;/p></description></item></channel></rss>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>完成初始化后，日常写作只需要编辑 Markdown 文件并推送到 GitHub，剩余的构建与部署工作就可以交给 GitHub Actions 自动完成。&lt;/p></description></item><item><title/><link>https://Jiangmmh.github.io/posts/f6-%E7%AE%80%E5%8D%95%E7%9A%84io-3b7c4e93261480759986e4d966aca898/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://Jiangmmh.github.io/posts/f6-%E7%AE%80%E5%8D%95%E7%9A%84io-3b7c4e93261480759986e4d966aca898/</guid><description>&lt;h1 id="f6-简单的io">F6-简单的IO&lt;/h1>
+&lt;p>这篇文章的内容：&lt;/p>
+&lt;ul>
+&lt;li>改进前面所设计的sISA，新增一条io指令，用于与外部设备进行IO。&lt;/li>
+&lt;li>对 li 和 bne0这两条指令进行增强，并使用LED条和16进制数码管检查新sISA的实现。&lt;/li>
+&lt;/ul>
+&lt;h1 id="讲义笔记">讲义笔记&lt;/h1>
+&lt;h2 id="1-sisa的局限性">1. sISA的局限性&lt;/h2>
+&lt;p>在前面的我们成功地根据sISA设计出了简单处理器sCPU，并在其上运行了数列求和程序。但是sISA提供的指令有着局限性：&lt;/p>
+&lt;ul>
+&lt;li>li指令中的立即数用4bits表示，仅能装入立即数0～15到寄存器。&lt;/li>
+&lt;li>bner0指令按绝对地址跳转，地址字段也是4bits，因此跳转目标范围也只有0～15。&lt;/li>
+&lt;li>当前的sISA不支持IO指令，要检查程序运行的结果只能手动查看寄存器的值，不方便。&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="F6-%E7%AE%80%E5%8D%95%E7%9A%84IO/image.png">&lt;/p>
+&lt;h2 id="2-增强li和bner0">2. 增强li和bner0&lt;/h2>
+&lt;p>对li指令和bner0指令进行改进：&lt;/p>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="F6-%E7%AE%80%E5%8D%95%E7%9A%84IO/image%201.png">&lt;/p>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="F6-%E7%AE%80%E5%8D%95%E7%9A%84IO/image%202.png">&lt;/p>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="F6-%E7%AE%80%E5%8D%95%E7%9A%84IO/image%203.png">&lt;/p>
+&lt;h2 id="3-添加io指令">3. 添加io指令&lt;/h2>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="F6-%E7%AE%80%E5%8D%95%E7%9A%84IO/image%204.png">&lt;/p>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="F6-%E7%AE%80%E5%8D%95%E7%9A%84IO/image%205.png">&lt;/p>
+&lt;h2 id="4-迈向现代化的处理器设计">4. 迈向现代化的处理器设计&lt;/h2>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="F6-%E7%AE%80%E5%8D%95%E7%9A%84IO/image%206.png">&lt;/p>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="F6-%E7%AE%80%E5%8D%95%E7%9A%84IO/image%207.png">&lt;/p>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="F6-%E7%AE%80%E5%8D%95%E7%9A%84IO/image%208.png">&lt;/p>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="F6-%E7%AE%80%E5%8D%95%E7%9A%84IO/image%209.png">&lt;/p>
+&lt;h1 id="讲义笔记-1">讲义笔记&lt;/h1>
+&lt;h2 id="1-改进后的sisa">1. 改进后的sISA&lt;/h2>
+&lt;p>首先增强 &lt;strong>li&lt;/strong> 和 &lt;strong>bner0&lt;/strong> 指令。然后再添加一条新的指令 &lt;strong>io&lt;/strong>，用于寄存器与外部设备的I/O，得到的新sISA：&lt;/p>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="F6-%E7%AE%80%E5%8D%95%E7%9A%84IO/image%2010.png">&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>add&lt;/code>指令的行为和之前相同&lt;/li>
+&lt;li>&lt;code>io&lt;/code>指令根据方向位&lt;code>i/o&lt;/code>进行输入或输出:
+&lt;ul>
+&lt;li>当&lt;code>i/o=0&lt;/code>时, 表示输入操作, 从编号为&lt;code>idx&lt;/code>的设备中读出8位数据, 输入到&lt;code>R[rd]&lt;/code>中&lt;/li>
+&lt;li>当&lt;code>i/o=1&lt;/code>时, 表示输出操作, 将&lt;code>R[rd]&lt;/code>中的8位数据, 输出到编号为&lt;code>idx&lt;/code>的设备中&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>&lt;code>li&lt;/code>指令和之前相比有所不同, 它通过&lt;code>s&lt;/code>和&lt;code>imm&lt;/code>的组合来表示一个更大的立即数. 上文的&lt;code>&amp;lt;&amp;lt;&lt;/code>表示左移运算符, 如果你不太熟悉这个运算符, 可以从另一个角度来理解&lt;code>li&lt;/code>指令的行为: &lt;code>s&lt;/code>表示将2位的&lt;code>imm&lt;/code>放置在8位数据中的哪一段位置。&lt;/li>
+&lt;/ul>
+&lt;h2 id="2-增强li和bner0-1">2. 增强li和bner0&lt;/h2>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="F6-%E7%AE%80%E5%8D%95%E7%9A%84IO/image%2011.png">&lt;/p>
+&lt;p>修改立即数生成器，使其能获取更新后的sISA所需的立即数：&lt;/p>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="F6-%E7%AE%80%E5%8D%95%E7%9A%84IO/image%2012.png">&lt;/p>
+&lt;p>修改ALU中将立即数计算的部分，引入移位运算：&lt;/p>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="F6-%E7%AE%80%E5%8D%95%E7%9A%84IO/image%2013.png">&lt;/p>
+&lt;p>在PC逻辑中添加PC相对寻址的电路：&lt;strong>PC = PC + sign_ext(offset)&lt;/strong>&lt;/p>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="F6-%E7%AE%80%E5%8D%95%E7%9A%84IO/image%2014.png">&lt;/p></description></item></channel></rss>
