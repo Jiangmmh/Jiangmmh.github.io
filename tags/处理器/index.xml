@@ -1,4 +1,63 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>处理器 on Minghan的博客</title><link>https://Jiangmmh.github.io/tags/%E5%A4%84%E7%90%86%E5%99%A8/</link><description>Recent content in 处理器 on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Sun, 18 Oct 2026 23:26:02 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/tags/%E5%A4%84%E7%90%86%E5%99%A8/index.xml" rel="self" type="application/rss+xml"/><item><title>一生一芯-F4阶段笔记</title><link>https://Jiangmmh.github.io/posts/ysyx-f4/</link><pubDate>Sun, 18 Oct 2026 23:26:02 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/ysyx-f4/</guid><description>&lt;h1 id="课程笔记">课程笔记&lt;/h1>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>处理器 on Minghan的博客</title><link>https://Jiangmmh.github.io/tags/%E5%A4%84%E7%90%86%E5%99%A8/</link><description>Recent content in 处理器 on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Mon, 19 Oct 2026 15:15:35 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/tags/%E5%A4%84%E7%90%86%E5%99%A8/index.xml" rel="self" type="application/rss+xml"/><item><title>一生一芯-F5阶段笔记</title><link>https://Jiangmmh.github.io/posts/ysyx-f5/</link><pubDate>Mon, 19 Oct 2026 15:15:35 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/ysyx-f5/</guid><description>&lt;p>这篇文章的内容如下：&lt;/p>
+&lt;ul>
+&lt;li>解释在ISA层面，指令的执行过程，包括取指、译码、执行和更新PC四步。&lt;/li>
+&lt;li>然后介绍了一个只有3条指令的指令集架构 sISA。&lt;/li>
+&lt;li>使用Logisim实现sISA处理器，并用其执行数列求和程序。&lt;/li>
+&lt;/ul>
+&lt;h1 id="课程笔记">课程笔记&lt;/h1>
+&lt;p>前面我们学习了数字电路的基础知识（晶体管、组合逻辑电路和时序逻辑电路）、处理器的基本原理和状态机模型。这节课介绍了一个简单处理器的实现。&lt;/p>
+&lt;h2 id="1-只有一条指令的cpu">1. 只有一条指令的CPU&lt;/h2>
+&lt;p>暂时让sISA仅支持一条指令 &lt;strong>li&lt;/strong> ，该指令的作用是将立即数加载到目标寄存器中。&lt;/p>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="https://Jiangmmh.github.io/images/posts/ysyx-f5/image.png">&lt;/p>
+&lt;p>下面介绍处理器是如何执行指令的：&lt;/p>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="https://Jiangmmh.github.io/images/posts/ysyx-f5/image%201.png">&lt;/p>
+&lt;p>在处理器中存在一个寄存器PC，用于存储下一条待执行指令的地址。&lt;/p>
+&lt;p>例如，该地址可以用于索引存储在ROM中的指令：&lt;/p>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="https://Jiangmmh.github.io/images/posts/ysyx-f5/image%202.png">&lt;/p>
+&lt;p>在取得指令后，便需要对指令进行解析，这个过程被称为译码，译码包括：&lt;/p>
+&lt;ul>
+&lt;li>理解指令所表示的操作，产生执行该操作必须的控制信号&lt;/li>
+&lt;li>识别指令中的操作数，输出相应字段&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="https://Jiangmmh.github.io/images/posts/ysyx-f5/image%203.png">&lt;/p>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="https://Jiangmmh.github.io/images/posts/ysyx-f5/image%204.png">&lt;/p>
+&lt;p>通过对指令译码我们知道了**该指令要做什么？处理的数据是什么？**然后便是驱动具体的功能电路执行指令：&lt;/p>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="https://Jiangmmh.github.io/images/posts/ysyx-f5/image%205.png">&lt;/p>
+&lt;p>指令的执行可能会访问内存（RAM）：&lt;/p>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="https://Jiangmmh.github.io/images/posts/ysyx-f5/image%206.png">&lt;/p>
+&lt;h2 id="2-实现更多指令">2. 实现更多指令&lt;/h2>
+&lt;p>因为sISA一共包含3条指令，因此使用2bits的opcode来标识指令的类型。&lt;/p>
+&lt;p>&lt;strong>add&lt;/strong> 指令用于对两个源寄存器求和并将结果存入目的寄存器，其需要同时读取两个寄存器的值，因此寄存器文件应当支持两个读端口。&lt;/p>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="https://Jiangmmh.github.io/images/posts/ysyx-f5/image%207.png">&lt;/p>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="https://Jiangmmh.github.io/images/posts/ysyx-f5/image%208.png">&lt;/p>
+&lt;p>继续添加&lt;strong>bner0&lt;/strong>指令（&lt;strong>branch not equal register 0&lt;/strong>）：&lt;/p>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="https://Jiangmmh.github.io/images/posts/ysyx-f5/image%209.png">&lt;/p>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="https://Jiangmmh.github.io/images/posts/ysyx-f5/image%2010.png">&lt;/p>
+&lt;p>综上所述，我们可以得出为ISA添加指令的基本思路：&lt;/p>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="https://Jiangmmh.github.io/images/posts/ysyx-f5/image%2011.png">&lt;/p>
+&lt;h1 id="讲义笔记">讲义笔记&lt;/h1>
+&lt;p>关于sISA的细节：&lt;/p>
+&lt;ul>
+&lt;li>支持如下三条指令：&lt;strong>add&lt;/strong>, &lt;strong>li&lt;/strong>, &lt;strong>bner0&lt;/strong>&lt;/li>
+&lt;li>支持包含&lt;strong>4个&lt;/strong>寄存器的寄存文件，因此寄存器索引的长度为&lt;strong>2位&lt;/strong>&lt;/li>
+&lt;li>支持&lt;strong>4位&lt;/strong>的立即数，数值范围[0, 15]&lt;/li>
+&lt;li>一条指令长度为&lt;strong>8位&lt;/strong>：&lt;strong>2位&lt;/strong>用于opcode&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="https://Jiangmmh.github.io/images/posts/ysyx-f5/image%2012.png">&lt;/p>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="https://Jiangmmh.github.io/images/posts/ysyx-f5/image%2013.png">&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-nasm" data-lang="nasm">&lt;span class="line">&lt;span class="cl">&lt;span class="err">10001010&lt;/span> &lt;span class="err">#&lt;/span> &lt;span class="err">0:&lt;/span> &lt;span class="nf">li&lt;/span> &lt;span class="nv">r0&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">10&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="err">10010000&lt;/span> &lt;span class="err">#&lt;/span> &lt;span class="err">1:&lt;/span> &lt;span class="nf">li&lt;/span> &lt;span class="nv">r1&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">0&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="err">10100000&lt;/span> &lt;span class="err">#&lt;/span> &lt;span class="err">2:&lt;/span> &lt;span class="nf">li&lt;/span> &lt;span class="nv">r2&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">0&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="err">10110001&lt;/span> &lt;span class="err">#&lt;/span> &lt;span class="err">3:&lt;/span> &lt;span class="nf">li&lt;/span> &lt;span class="nv">r3&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">1&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="err">00010111&lt;/span> &lt;span class="err">#&lt;/span> &lt;span class="err">4:&lt;/span> &lt;span class="nf">add&lt;/span> &lt;span class="nv">r1&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nv">r1&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nv">r3&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="err">00101001&lt;/span> &lt;span class="err">#&lt;/span> &lt;span class="err">5:&lt;/span> &lt;span class="nf">add&lt;/span> &lt;span class="nv">r2&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nv">r2&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nv">r1&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="err">11010001&lt;/span> &lt;span class="err">#&lt;/span> &lt;span class="err">6:&lt;/span> &lt;span class="nf">bner0&lt;/span> &lt;span class="nv">r1&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">4&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="err">11011111&lt;/span> &lt;span class="err">#&lt;/span> &lt;span class="err">7:&lt;/span> &lt;span class="nf">bner0&lt;/span> &lt;span class="nv">r3&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">7&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="1-实现rom">1. 实现ROM&lt;/h2>
+&lt;p>先来确定一下ROM的规格：GPR寄存器长度为&lt;strong>8位&lt;/strong>，因此我们将PC寄存器的长度也设置为&lt;strong>8位&lt;/strong>，因此ROM总共能存储&lt;strong>2^8 = 256&lt;/strong>条长度为8位的指令。&lt;/p>
+&lt;p>但是这里为了实现方便，暂时仅实现支持存放8条指令的ROM，指令的内容实用常量来表示。&lt;/p>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="https://Jiangmmh.github.io/images/posts/ysyx-f5/image%2014.png">&lt;/p>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="https://Jiangmmh.github.io/images/posts/ysyx-f5/image%2015.png">&lt;/p></description></item><item><title>一生一芯-F4阶段笔记</title><link>https://Jiangmmh.github.io/posts/ysyx-f4/</link><pubDate>Sun, 18 Oct 2026 23:26:02 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/ysyx-f4/</guid><description>&lt;h1 id="课程笔记">课程笔记&lt;/h1>
 &lt;p>本阶段课程的大纲如下：&lt;/p>
 &lt;p>&lt;img loading="lazy" src="https://Jiangmmh.github.io/images/posts/ysyx-f4/image.png">&lt;/p>
 &lt;h2 id="1-cpu的基本组成和工作原理">1. CPU的基本组成和工作原理&lt;/h2>
