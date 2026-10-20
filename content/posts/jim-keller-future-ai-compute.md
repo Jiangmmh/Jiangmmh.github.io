@@ -3,7 +3,7 @@ title: "[转载]从硅片到智能：Jim Keller谈AI算力的未来"
 date: '2026-10-19T23:09:45+08:00'
 draft: false
 tags: ["Jim Keller", "AI", "计算机体系结构", "芯片设计", "RISC-V", "Tenstorrent"]
-categories: ["计算机体系结构"]
+categories: ["Computer Architecture"]
 ---
 
 > 本文是对 Harvard Data Science Review 访谈文章 *From Silicon to Intelligence: The Future of AI Compute* 的中文阅读笔记与主题整理，并非逐字翻译。访谈嘉宾为芯片架构师、Tenstorrent CEO Jim Keller，访谈者为 Francesca Dominici 和 Harry Archerman。

@@ -6,26 +6,6 @@
     <description>Recent content in 计算机体系结构 on Minghan的博客</description>
     <generator>Hugo</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Mon, 19 Oct 2026 23:09:45 +0800</lastBuildDate>
     <atom:link href="http://localhost:1313/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>[转载]从硅片到智能：Jim Keller谈AI算力的未来</title>
-      <link>http://localhost:1313/posts/jim-keller-future-ai-compute/</link>
-      <pubDate>Mon, 19 Oct 2026 23:09:45 +0800</pubDate>
-      <guid>http://localhost:1313/posts/jim-keller-future-ai-compute/</guid>
-      <description>&lt;blockquote&gt;
-&lt;p&gt;本文是对 Harvard Data Science Review 访谈文章 &lt;em&gt;From Silicon to Intelligence: The Future of AI Compute&lt;/em&gt; 的中文阅读笔记与主题整理，并非逐字翻译。访谈嘉宾为芯片架构师、Tenstorrent CEO Jim Keller，访谈者为 Francesca Dominici 和 Harry Archerman。&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;原文：&lt;/strong&gt; &lt;a href=&#34;https://hdsr.mitpress.mit.edu/pub/n7la10vt/release/4&#34;&gt;From Silicon to Intelligence: The Future of AI Compute&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;作者：&lt;/strong&gt; Jim Keller、Francesca Dominici、Harry Archerman&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;刊物：&lt;/strong&gt; Harvard Data Science Review，Issue 8.2，Spring 2026&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;发表日期：&lt;/strong&gt; 2026 年 7 月 9 日&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;许可：&lt;/strong&gt; Creative Commons Attribution 4.0 International（CC BY 4.0）&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;本文为基于原文的归纳与改编，原文著作权及许可信息以原文页面为准。&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;h2 id=&#34;一为什么值得读这篇访谈&#34;&gt;一、为什么值得读这篇访谈？&lt;/h2&gt;
-&lt;p&gt;Jim Keller 是现代处理器设计领域具有代表性的工程师之一。他的职业经历横跨多个计算范式：从 DEC 的计算机系统，到 Apple 的移动处理器、AMD 的 Zen 架构、Tesla 的自动驾驶芯片，再到 Tenstorrent 的 AI 计算与 RISC-V 处理器。&lt;/p&gt;</description>
-    </item>
   </channel>
 </rss>

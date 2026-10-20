@@ -6,8 +6,92 @@
     <description>Recent content in Posts on Minghan的博客</description>
     <generator>Hugo</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Mon, 19 Oct 2026 23:09:45 +0800</lastBuildDate>
+    <lastBuildDate>Tue, 20 Oct 2026 10:34:06 +0800</lastBuildDate>
     <atom:link href="http://localhost:1313/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>CS161 Computer Security Lec1</title>
+      <link>http://localhost:1313/posts/cs161-lec1/</link>
+      <pubDate>Tue, 20 Oct 2026 10:34:06 +0800</pubDate>
+      <guid>http://localhost:1313/posts/cs161-lec1/</guid>
+      <description>&lt;p&gt;我的学习结合了&lt;a href=&#34;https://sp26.cs161.org/&#34;&gt;26sping&lt;/a&gt;和&lt;a href=&#34;https://fa26.cs161.org/&#34;&gt;26fall&lt;/a&gt;的材料，即slides看26sp，课程视频看26fa。&lt;/p&gt;
+&lt;h1 id=&#34;教材阅读笔记&#34;&gt;教材阅读笔记&lt;/h1&gt;
+&lt;p&gt;这是&lt;a href=&#34;https://textbook.cs161.org/&#34;&gt;教材&lt;/a&gt;第一章内容的笔记，主要介绍了13个安全原则。&lt;/p&gt;
+&lt;h2 id=&#34;1-了解你的威胁模型&#34;&gt;1. &lt;strong&gt;了解你的威胁模型&lt;/strong&gt;&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;威胁模型（threat model）&lt;/strong&gt; 是对攻击者身份及其所拥有资源的描述。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;攻击者攻击系统的原因多种多样，可能是金钱、政治、娱乐等等。有些攻击者毫无逻辑可言——他们只是想看世界毁灭。以你自身的人身安全为例。了解你的威胁模型，就意味着了解谁会以及为什么会攻击你&lt;/p&gt;
+&lt;p&gt;我们通常会对攻击者给出如下常见的假设：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;攻击者可以在无人察觉的情况下与您的系统进行交互，这意味着您可能无法总能在攻击者发动攻击之前检测到他们篡改您的系统。&lt;/li&gt;
+&lt;li&gt;攻击者掌握了一些关于您系统的基本信息，例如操作系统、任何潜在的软件漏洞等等。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;攻击者坚持不懈，而且运气不错（不要有侥幸心理）&lt;/strong&gt;；例如，如果一次攻击成功的概率是百万分之一，那么攻击者就会尝试一百万次。&lt;/li&gt;
+&lt;li&gt;攻击者愿意投入时间和资源进行攻击。&lt;/li&gt;
+&lt;li&gt;攻击者可以协调跨多个系统的复杂攻击。攻击者不仅限于攻击单个设备，还可以同时攻击整个网络，或将多个攻击串联起来。&lt;/li&gt;
+&lt;li&gt;任何系统都可能成为攻击目标。例如，一家赌场曾遭到黑客攻击，原因是其网络中的一个鱼缸温度计被入侵。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id=&#34;2-考虑人为因素&#34;&gt;2. &lt;strong&gt;考虑人为因素&lt;/strong&gt;&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;安全系统必须方便普通用户使用，因此在设计时必须考虑到人为因素。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;如果一个安全系统不好用、不人性化，无论它多么安全，最终都会无人问津。&lt;/p&gt;
+&lt;p&gt;如果某种方法能让用户的更方便使用，那他们总会找到办法来规避安全系统。&lt;/p&gt;
+&lt;h2 id=&#34;3-安全即经济学&#34;&gt;3. &lt;strong&gt;安全即经济学&lt;/strong&gt;&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;经济学是一门研究&lt;strong&gt;人们如何在资源有限的情况下做出选择&lt;/strong&gt;的社会科学。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;安全其实与经济学类似。没有任何系统能够完全抵御所有攻击，更高级别的安全通常需要投入更多资金，因此防御措施的预期收益应该与攻击的预期成本成正比。&lt;/p&gt;
+&lt;p&gt;这条原则的推论是：&lt;strong&gt;你应该集中精力加固最薄弱的环节&lt;/strong&gt;。安全就像一条链条：&lt;strong&gt;一个系统的安全性取决于它最薄弱的环节&lt;/strong&gt;。攻击者会选择阻力最小的路径，他们会攻击系统最薄弱的地方。在纱门上安装昂贵的高档防盗锁毫无意义；攻击者不会费力去撬锁，他们可以直接拆掉纱门走进去。&lt;/p&gt;
+&lt;h2 id=&#34;4-如果无法预防请进行检测&#34;&gt;4. &lt;strong&gt;如果无法预防，请进行检测&lt;/strong&gt;&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;预防&lt;/strong&gt;是指阻止攻击发生，&lt;strong&gt;检测&lt;/strong&gt;是指获悉攻击已经发生，而&lt;strong&gt;响应&lt;/strong&gt;是指对攻击采取应对措施。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;如果无法阻止攻击发生，至少应该能够知道攻击已经发生。一旦知道攻击已经发生，就应该找到应对方法，因为没有响应的检测毫无意义。&lt;/p&gt;
+&lt;h2 id=&#34;5-纵深防御&#34;&gt;5. &lt;strong&gt;纵深防御&lt;/strong&gt;&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;纵深防御&lt;/strong&gt;的关键思想是&lt;strong&gt;将多种类型的防御措施分层叠加&lt;/strong&gt;，这样攻击者就必须突破所有防御才能成功攻击系统。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;纵深防御的一个例子是通过探测器的组合。假设你有两个探测器，D1和D2这两个探测器都有一定的误报率（并非实际安全漏洞的警报）和漏报率（未触发任何警报的安全漏洞）。一种使用方法是将这两个探测器并联，即任何一个探测器发出警报都会触发响应。这样可以提高误报率，降低漏报率。另一种方法是将探测器串联，即两个探测器都必须发出警报才能触发响应。在这种情况下，误报率会降低，而漏报率会升高。&lt;/p&gt;
+&lt;h2 id=&#34;6-最小权限原则&#34;&gt;6. &lt;strong&gt;最小权限原则&lt;/strong&gt;&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;为了确保最佳安全，任何一方都应仅拥有履行其职责所需的最小权限。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;程序拥有的权限越少，即使将来遭受缓冲区溢出攻击，造成的损害也越小。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Unix 在最小权限原则方面做得如何？答案是：非常糟糕。每个程序都会获得调用它的用户的所有权限。&lt;/li&gt;
+&lt;li&gt;Windows表现如何？答案：同样糟糕。&lt;/li&gt;
+&lt;li&gt;移动设备在这方面做得更好。每个应用程序都运行在沙盒环境中，通常无法访问其他应用程序的数据。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;7-责任分离&#34;&gt;7. &lt;strong&gt;责任分离&lt;/strong&gt;&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;分散权限，避免任何个人或程序拥有绝对权力。要求在授予访问权限前必须获得多方批准。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;如果你需要保护一项高度敏感的行动，就应该要求多方合作来执行该行动，因为单方恶意行事的可能性比所有参与方都恶意行事并相互勾结的可能性要大得多。&lt;/p&gt;
+&lt;h2 id=&#34;8-确保完全中介ensure-complete-mediation&#34;&gt;8. 确保完全中介（Ensure Complete Mediation）&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;每一次对受保护资源的访问，都必须经过权限检查。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;执行访问控制策略时，必须检查对每一个对象的每一次访问。&lt;/p&gt;
+&lt;p&gt;这里有两个关键词：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Every access&lt;/strong&gt;（每一次访问）：不能只在登录时检查，也不能只检查第一次访问。读取、修改、删除等操作，都必须受到适当的访问控制。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Every object&lt;/strong&gt;（每一个对象）：不能只保护部分资源。文件、数据库记录、账户、API 资源等，都要纳入相应的权限控制范围。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;9-香农定律&#34;&gt;9. &lt;strong&gt;香农定律&lt;/strong&gt;&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;香农格言指出，攻击者了解他们正在攻击的系统。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;“隐蔽式安全”指的是依靠系统设计、算法或源代码的保密性来保障安全的系统。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;我们不应该依赖隐蔽性来保障安全，要始终假设攻击者了解你所使用系统的每一个细节。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;与此密切相关的原则是柯克霍夫原则，该原则指出，即使攻击者掌握了系统的所有内部细节，密码系统也应该保持安全。&lt;/p&gt;
+&lt;h2 id=&#34;10-使用故障安全默认值&#34;&gt;10. &lt;strong&gt;使用故障安全默认值&lt;/strong&gt;&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;选择具有“故障安全”功能的默认设置，在系统宕机时兼顾安全性和可用性。&lt;strong&gt;确保即使安全机制失效或崩溃，系统仍会默认采用安全行为，而不是不安全行为&lt;/strong&gt;。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;11-从一开始就将安全性融入设计&#34;&gt;11. &lt;strong&gt;从一开始就将安全性融入设计&lt;/strong&gt;&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;在设计系统的开始就将安全性考虑到设计中。&lt;/p&gt;</description>
+    </item>
     <item>
       <title>[转载]从硅片到智能：Jim Keller谈AI算力的未来</title>
       <link>http://localhost:1313/posts/jim-keller-future-ai-compute/</link>
