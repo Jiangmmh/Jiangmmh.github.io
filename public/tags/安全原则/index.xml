@@ -13,7 +13,7 @@
       <link>http://localhost:1313/posts/cs161-lec1/</link>
       <pubDate>Tue, 20 Oct 2026 10:34:06 +0800</pubDate>
       <guid>http://localhost:1313/posts/cs161-lec1/</guid>
-      <description>&lt;h1 id=&#34;lecture1&#34;&gt;Lecture1&lt;/h1&gt;
+      <description>&lt;p&gt;我的学习结合了&lt;a href=&#34;https://sp26.cs161.org/&#34;&gt;26sping&lt;/a&gt;和&lt;a href=&#34;https://fa26.cs161.org/&#34;&gt;26fall&lt;/a&gt;的材料，即slides看26sp，课程视频看26fa。&lt;/p&gt;
 &lt;h1 id=&#34;教材阅读笔记&#34;&gt;教材阅读笔记&lt;/h1&gt;
 &lt;p&gt;这是&lt;a href=&#34;https://textbook.cs161.org/&#34;&gt;教材&lt;/a&gt;第一章内容的笔记，主要介绍了13个安全原则。&lt;/p&gt;
 &lt;h2 id=&#34;1-了解你的威胁模型&#34;&gt;1. &lt;strong&gt;了解你的威胁模型&lt;/strong&gt;&lt;/h2&gt;

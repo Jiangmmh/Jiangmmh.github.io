@@ -3,7 +3,25 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>http://localhost:1313/categories/</loc>
-    <lastmod>2026-10-20T10:34:06+08:00</lastmod>
+    <lastmod>2026-10-20T18:23:11+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/c%E8%AF%AD%E8%A8%80/</loc>
+    <lastmod>2026-10-20T18:23:11+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/</loc>
+    <lastmod>2026-10-20T18:23:11+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/posts/</loc>
+    <lastmod>2026-10-20T18:23:11+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/</loc>
+    <lastmod>2026-10-20T18:23:11+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/categories/%E4%B8%80%E7%94%9F%E4%B8%80%E8%8A%AF/</loc>
+    <lastmod>2026-10-20T18:23:11+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/posts/ysyx-e2/</loc>
+    <lastmod>2026-10-20T18:23:11+08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/categories/computer-security/</loc>
     <lastmod>2026-10-20T10:34:06+08:00</lastmod>
@@ -11,16 +29,7 @@
     <loc>http://localhost:1313/posts/cs161-lec1/</loc>
     <lastmod>2026-10-20T10:34:06+08:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/</loc>
-    <lastmod>2026-10-20T10:34:06+08:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/posts/</loc>
-    <lastmod>2026-10-20T10:34:06+08:00</lastmod>
-  </url><url>
     <loc>http://localhost:1313/tags/security/</loc>
-    <lastmod>2026-10-20T10:34:06+08:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/tags/</loc>
     <lastmod>2026-10-20T10:34:06+08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/tags/ucb-cs161/</loc>
@@ -56,9 +65,6 @@
     <loc>http://localhost:1313/posts/linux-style/</loc>
     <lastmod>2026-10-19T21:44:39+08:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/c%E8%AF%AD%E8%A8%80/</loc>
-    <lastmod>2026-10-19T21:44:39+08:00</lastmod>
-  </url><url>
     <loc>http://localhost:1313/tags/linux/</loc>
     <lastmod>2026-10-19T21:44:39+08:00</lastmod>
   </url><url>
@@ -75,9 +81,6 @@
     <lastmod>2026-10-19T16:11:46+08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/tags/verilog/</loc>
-    <lastmod>2026-10-19T16:11:46+08:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/categories/%E4%B8%80%E7%94%9F%E4%B8%80%E8%8A%AF/</loc>
     <lastmod>2026-10-19T16:11:46+08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/posts/ysyx-e1/</loc>
@@ -182,7 +185,7 @@
     <loc>http://localhost:1313/books/nvidia/</loc>
     <lastmod>2026-09-11T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/posts/lecture1-3fec4e9326148018b3bbfc34db82a771/</loc>
+    <loc>http://localhost:1313/posts/e2-c%E8%AF%AD%E8%A8%80%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1-3e1c4e932614807091c5e094fbc36f01/</loc>
   </url><url>
     <loc>http://localhost:1313/archives/</loc>
   </url>
