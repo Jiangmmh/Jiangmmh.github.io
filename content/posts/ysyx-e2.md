@@ -13,8 +13,6 @@ categories: [一生一芯]
 - 学习教材：[《Linux C 编程一站式学习》](https://akaedu.github.io/book/index.html)
 
 
-
-
 本书包括三大部分：
 
 - C语言入门。介绍基本的C语法，帮助没有任何编程经验的读者理解什么是程序，怎么写程序，培养程序员的思维习惯，找到编程的感觉。前半部分改编自[[ThinkCpp]](https://akaedu.github.io/book/bi01.html#bibli.thinkcpp)。

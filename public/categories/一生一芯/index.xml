@@ -13,10 +13,15 @@
       <link>http://localhost:1313/posts/ysyx-e2/</link>
       <pubDate>Tue, 20 Oct 2026 18:23:11 +0800</pubDate>
       <guid>http://localhost:1313/posts/ysyx-e2/</guid>
-      <description>&lt;p&gt;这一阶段的目的是让我们学会使用C语言编程。
-在线运行C语言的网站：&lt;a href=&#34;https://godbolt.org/&#34;&gt;godbolt&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;学习教材：&lt;a href=&#34;https://akaedu.github.io/book/index.html&#34;&gt;《Linux C 编程一站式学习》&lt;/a&gt;
-因为我已经有丰富的C语言编程经验，所以学习材料中我比较熟悉的内容就一笔带过甚至不记录，仅记录对我来说有价值的内容。&lt;/p&gt;
+      <description>&lt;p&gt;这一阶段的目的是让我们学会使用C语言编程。因为我已经有丰富的C语言编程经验，所以学习材料中我比较熟悉的内容就一笔带过甚至不记录，仅记录对我来说有价值的内容。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;在线运行C语言的网站：&lt;a href=&#34;https://godbolt.org/&#34;&gt;godbolt&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;学习教材：&lt;a href=&#34;https://akaedu.github.io/book/index.html&#34;&gt;《Linux C 编程一站式学习》&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
 &lt;p&gt;本书包括三大部分：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;C语言入门。介绍基本的C语法，帮助没有任何编程经验的读者理解什么是程序，怎么写程序，培养程序员的思维习惯，找到编程的感觉。前半部分改编自&lt;a href=&#34;https://akaedu.github.io/book/bi01.html#bibli.thinkcpp&#34;&gt;[ThinkCpp]&lt;/a&gt;。&lt;/li&gt;
