@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Linux环境 on Minghan的博客</title><link>https://Jiangmmh.github.io/tags/linux%E7%8E%AF%E5%A2%83/</link><description>Recent content in Linux环境 on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Tue, 20 Oct 2026 22:46:13 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/tags/linux%E7%8E%AF%E5%A2%83/index.xml" rel="self" type="application/rss+xml"/><item><title>一生一芯-E3阶段笔记</title><link>https://Jiangmmh.github.io/posts/ysyx-e3/</link><pubDate>Tue, 20 Oct 2026 22:46:13 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/ysyx-e3/</guid><description>&lt;p>&lt;a href="https://www.bilibili.com/video/BV1Q9hb6mEQS">课程&lt;/a>主要介绍了Linux的使用和一些实用工具的展示，就不过多叙述了。&lt;/p>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="https://Jiangmmh.github.io/images/posts/ysyx-e3/image.png">&lt;/p>
+&lt;h1 id="讲义笔记">讲义笔记&lt;/h1>
+&lt;h2 id="1-环境配置">1. 环境配置&lt;/h2>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="https://Jiangmmh.github.io/images/posts/ysyx-e3/image%201.png">&lt;/p>
+&lt;p>PA0网址：&lt;a href="https://ysyx.oscc.cc/docs/ics-pa/PA0.html">https://ysyx.oscc.cc/docs/ics-pa/PA0.html&lt;/a>&lt;/p>
+&lt;p>&lt;del>我的开发机器为MacBook Pro M4，使用Docker运行x86版本的Ubuntu2404（Rosetta2进行指令翻译）&lt;/del>。我的开发机器为WSL上的Ubuntu2404，在其中安装所需的软件：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">apt-get update
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">apt-get install build-essential &lt;span class="c1"># build-essential packages, include binary utilities, gcc, make, and so on&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">apt-get install man &lt;span class="c1"># on-line reference manual&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">apt-get install gcc-doc &lt;span class="c1"># on-line reference manual for gcc&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">apt-get install gdb &lt;span class="c1"># GNU debugger&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">apt-get install git &lt;span class="c1"># revision control system&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">apt-get install libreadline-dev &lt;span class="c1"># a library used later&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">apt-get install libsdl2-dev &lt;span class="c1"># a library used later&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;img alt="image.png" loading="lazy" src="https://Jiangmmh.github.io/images/posts/ysyx-e3/image%202.png">&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 生成sshkey&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">$ ssh-keygen -t ed25519 -C &lt;span class="s2">&amp;#34;your_email@example.com&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 获取公钥&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">$ cat ~/.ssh/id_ed25519.pub
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 在github中添加公钥&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 测试连接&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">$ ssh -T git@github.com
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">Hi xxxxxx! You&lt;span class="err">&amp;#39;&lt;/span>ve successfully authenticated, but GitHub does not provide shell access.
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;img alt="image.png" loading="lazy" src="https://Jiangmmh.github.io/images/posts/ysyx-e3/image%203.png">&lt;/p></description></item></channel></rss>
