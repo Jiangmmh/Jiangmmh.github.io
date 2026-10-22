@@ -227,19 +227,42 @@
 
 <article class="post-entry"> 
   <header class="entry-header">
-    <h2 class="entry-hint-parent">
+    <h2 class="entry-hint-parent">[翻译]BSD Socket编程入门
     </h2>
   </header>
   <div class="entry-content">
-    <p>E3 Linux系统安装和基本使用 课程主要介绍了Linux的使用和一些实用工具的展示，就不过多叙述了。
+    <p> 本文是一篇基于 BSD Socket 基本概念整理的原创中文教程，参考了 Jim Frost 的 BSD Sockets: A Quick And Dirty Primer，并结合现代 POSIX/Linux 编程实践重新组织内容。
+原文：BSD Sockets: A Quick And Dirty Primer
+原文版权信息：Jim Frost，Copyright © 1988, 1994，All Rights Reserved。本文不构成原文的逐字翻译或全文转载。
+一、什么是 Socket？ Socket（套接字）是操作系统提供的一种通信接口，允许两个进程交换数据。
+两个进程可以运行在同一台机器上，也可以运行在通过网络连接的不同机器上。应用程序通过 Socket API 与操作系统交互，由操作系统负责底层的网络通信。
+可以把 Socket 理解为通信的端点：
+应用程序通过 Socket 发送和接收数据。 操作系统负责协议处理、数据传输和连接管理。 TCP、UDP 等传输协议决定数据传输的语义。 在 Linux 中，Socket 通常由一个文件描述符表示，因此可以使用 read()、write() 和 close() 等文件 I/O 接口操作它。
+不过，Socket 并不完全等同于普通文件：网络通信存在连接建立、数据分段、传输失败、对端关闭和超时等特殊问题。
+1.1 两种常见的 Socket 类型 最常见的两种 Internet Socket 是 TCP Socket 和 UDP Socket。
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-22 15:27:57 +0800 CST'>October 22, 2026</span>&nbsp;·&nbsp;<span>4 min</span>&nbsp;·&nbsp;<span>737 words</span></footer>
+  <a class="entry-link" aria-label="post link to [翻译]BSD Socket编程入门" href="http://localhost:1313/posts/unix-socket/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">一生一芯-E3阶段笔记
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>课程主要介绍了Linux的使用和一些实用工具的展示，就不过多叙述了。
 讲义笔记 1. 环境配置 PA0网址：https://ysyx.oscc.cc/docs/ics-pa/PA0.html
 我的开发机器为MacBook Pro M4，使用Docker运行x86版本的Ubuntu2404（Rosetta2进行指令翻译）。我的开发机器为WSL上的Ubuntu2404，在其中安装所需的软件：
 apt-get update apt-get install build-essential # build-essential packages, include binary utilities, gcc, make, and so on apt-get install man # on-line reference manual apt-get install gcc-doc # on-line reference manual for gcc apt-get install gdb # GNU debugger apt-get install git # revision control system apt-get install libreadline-dev # a library used later apt-get install libsdl2-dev # a library used later # 生成sshkey $ ssh-keygen -t ed25519 -C &#34;your_email@example.com&#34; # 获取公钥 $ cat ~/.ssh/id_ed25519.pub # 在github中添加公钥 # 测试连接 $ ssh -T git@github.com Hi xxxxxx! You&#39;ve successfully authenticated, but GitHub does not provide shell access. ...</p>
   </div>
   <footer class="entry-footer">
 
-<span title='2026-10-20 22:46:13 +0800 CST'>October 20, 2026</span>&nbsp;·&nbsp;<span>4 min</span>&nbsp;·&nbsp;<span>685 words</span></footer>
-  <a class="entry-link" aria-label="post link to " href="http://localhost:1313/posts/ysyx-e3/"></a>
+<span title='2026-10-20 22:46:13 +0800 CST'>October 20, 2026</span>&nbsp;·&nbsp;<span>4 min</span>&nbsp;·&nbsp;<span>683 words</span></footer>
+  <a class="entry-link" aria-label="post link to 一生一芯-E3阶段笔记" href="http://localhost:1313/posts/ysyx-e3/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -476,29 +499,6 @@ C语言程序是一个状态机 汇编语言程序是一个状态机 处理器�
 
 <span title='2026-10-18 23:26:02 +0800 CST'>October 18, 2026</span>&nbsp;·&nbsp;<span>5 min</span>&nbsp;·&nbsp;<span>864 words</span></footer>
   <a class="entry-link" aria-label="post link to 一生一芯-F4阶段笔记" href="http://localhost:1313/posts/ysyx-f4/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">一生一芯-F3阶段笔记
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p> 处理器芯片本质上是数字电路。数字电路是用来处理数字信号的电路, 而数字信号简单来说是指0和1这两种离散的信号. 这里的0和1并不是数学意义上的自然数, 它是指信号的两种不同状态, 为了简单叙述, 就分别称它们为0和1. 为了和数学上的0和1区分开来, 有时候也将上面两种状态称为逻辑0和逻辑1。
-因此, 处理器芯片本质上也是处理0和1这两种信号的芯片. 要学习处理器芯片设计, 数字电路的知识是基础. 而要学习数字电路, 就是需要学习信息在数字电路中是如何表示, 处理和存储的。具体地, 你将会了解:
-如何表示 - 数字信号0和1在数字电路中的物理含义 如何处理 - 门电路和组合逻辑电路的工作原理 如何存储 - 时序逻辑电路的工作原理 课程笔记 1. 如何表示0和1？ 关键问题：数字电路如何表示0和1（物理含义），以及如何处理它们？
-数字电路用物理量的两个离散区间表示 0 和 1：最常见的是低电平=0、高电平=1，并用阈值区间和噪声容限保证在真实电路中可靠区分，而不是依赖精确的单一电压值。 使用晶体管处理数字信号：一个晶体管包含三个极（Source、Drain和Gate），其作用类似于一个开关，通过在Gate端加入不同电压可以控制Source和Drain的导通与断开。 2. CMOS 在实际的硬件设计中，通常使用一个nMOS和一个pMOS构造CMOS来实现0和1。
-下面这个CMOS本身其实是一个反相器，即输入A为0，输出Y为1；输入A为1，输出Y为0。
-关键问题：一个晶体管就能作为开关，为什么要用两个晶体管构成CMOS？
-单看逻辑功能，一个 nMOS 确实就能当开关用——栅极给高电平导通、给低电平截止。那为什么几乎所有的现代数字电路都用 CMOS（互补金属氧化物半导体，即 nMOS &#43; pMOS 配对）而不是单管方案？
-nMOS擅长传递低电平，pMOS擅长传递高电平，反过来会导致信号衰减。 CMOS的静态功耗低。 CMOS的互补结构使高低电平的噪声容限对称、较大。 CMOS 工艺中 NMOS 和 PMOS 可以成对制造，版图规整、易于自动布局布线，也便于用标准单元库大规模综合。单管方案往往需要电阻、特殊器件，难以标准化和缩放。 虽然一个晶体管也能&#34;通断&#34;，但只有 nMOS &#43; pMOS 互补配对，才能同时做到：完整传递 0 和 1、主动驱动、静态几乎不耗电、电平可恢复、易于大规模集成。 CMOS 不是&#34;两个管子干一个管子的活&#34;的浪费，而是用互补换来了功耗、电平、可靠性、可扩展性的全面胜利。
-3. 使用CMOS构建逻辑门电路 与非门：
-...</p>
-  </div>
-  <footer class="entry-footer">
-
-<span title='2026-10-17 15:42:02 +0800 CST'>October 17, 2026</span>&nbsp;·&nbsp;<span>2 min</span>&nbsp;·&nbsp;<span>273 words</span></footer>
-  <a class="entry-link" aria-label="post link to 一生一芯-F3阶段笔记" href="http://localhost:1313/posts/ysyx-f3/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">

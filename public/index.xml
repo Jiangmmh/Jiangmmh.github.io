@@ -6,15 +6,34 @@
     <description>Recent content on Minghan的博客</description>
     <generator>Hugo</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Tue, 20 Oct 2026 22:46:13 +0800</lastBuildDate>
+    <lastBuildDate>Thu, 22 Oct 2026 15:27:57 +0800</lastBuildDate>
     <atom:link href="http://localhost:1313/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title></title>
+      <title>[翻译]BSD Socket编程入门</title>
+      <link>http://localhost:1313/posts/unix-socket/</link>
+      <pubDate>Thu, 22 Oct 2026 15:27:57 +0800</pubDate>
+      <guid>http://localhost:1313/posts/unix-socket/</guid>
+      <description>从零理解 BSD Socket API，掌握 TCP 客户端与服务端的工作流程、数据读写、连接关闭和网络字节序。</description>
+    </item>
+    <item>
+      <title>何为学习？</title>
+      <link>http://localhost:1313/moments/2026-10-22/</link>
+      <pubDate>Thu, 22 Oct 2026 15:20:00 +0800</pubDate>
+      <guid>http://localhost:1313/moments/2026-10-22/</guid>
+      <description>&lt;p&gt;今天看到一句话，觉得很有道理：学习不是知识的堆积，而是问题的解决。&lt;/p&gt;
+&lt;p&gt;其指明了几个点：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;该不该学？有问题，但无法独立解决。&lt;/li&gt;
+&lt;li&gt;学什么？学习能够独立解决这个问题所需的知识和技能。&lt;/li&gt;
+&lt;li&gt;如何检验？能否独立解决该问题。&lt;/li&gt;
+&lt;/ul&gt;</description>
+    </item>
+    <item>
+      <title>一生一芯-E3阶段笔记</title>
       <link>http://localhost:1313/posts/ysyx-e3/</link>
       <pubDate>Tue, 20 Oct 2026 22:46:13 +0800</pubDate>
       <guid>http://localhost:1313/posts/ysyx-e3/</guid>
-      <description>&lt;h1 id=&#34;e3-linux系统安装和基本使用&#34;&gt;E3 Linux系统安装和基本使用&lt;/h1&gt;
-&lt;p&gt;&lt;a href=&#34;https://www.bilibili.com/video/BV1Q9hb6mEQS&#34;&gt;课程&lt;/a&gt;主要介绍了Linux的使用和一些实用工具的展示，就不过多叙述了。&lt;/p&gt;
+      <description>&lt;p&gt;&lt;a href=&#34;https://www.bilibili.com/video/BV1Q9hb6mEQS&#34;&gt;课程&lt;/a&gt;主要介绍了Linux的使用和一些实用工具的展示，就不过多叙述了。&lt;/p&gt;
 &lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-e3/image.png&#34;&gt;&lt;/p&gt;
 &lt;h1 id=&#34;讲义笔记&#34;&gt;讲义笔记&lt;/h1&gt;
 &lt;h2 id=&#34;1-环境配置&#34;&gt;1. 环境配置&lt;/h2&gt;
@@ -1203,40 +1222,6 @@
       <pubDate>Fri, 11 Sep 2026 00:00:00 +0000</pubDate>
       <guid>http://localhost:1313/books/nvidia/</guid>
       <description>本书不仅是一部科技企业家的传记，更是一部关于如何在全球科技舞台上取得成功的范本。跨越30年的科技发展历程，我们可以看到人工智能技术是如何发展的，人工智能将会如何影响到我们每一个人，技术发展的速度和进展是怎么样的。在这场技术的发展过程中，英伟达是一个缩影。通过对技术发展历程的洞察，我们将更清晰的看到未来，企业家可以了解到科技行业的复杂性，以及如何在快速变化的市场中保持领先。这本书适合所有对科技、创新和企业家精神感兴趣的读者，无论你是相关行业的专业人士，还是对其充满好奇的普通读者，都能从黄仁勋的故事中获得启发和动力。</description>
-    </item>
-    <item>
-      <title></title>
-      <link>http://localhost:1313/posts/e3-linux%E7%B3%BB%E7%BB%9F%E5%AE%89%E8%A3%85%E5%92%8C%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8-3d6c4e9326148055a5d9df228c4893e6/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/e3-linux%E7%B3%BB%E7%BB%9F%E5%AE%89%E8%A3%85%E5%92%8C%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8-3d6c4e9326148055a5d9df228c4893e6/</guid>
-      <description>&lt;h1 id=&#34;e3-linux系统安装和基本使用&#34;&gt;E3 Linux系统安装和基本使用&lt;/h1&gt;
-&lt;p&gt;&lt;a href=&#34;https://www.bilibili.com/video/BV1Q9hb6mEQS&#34;&gt;课程&lt;/a&gt;主要介绍了Linux的使用和一些实用工具的展示，就不过多叙述了。&lt;/p&gt;
-&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;E3%20Linux%E7%B3%BB%E7%BB%9F%E5%AE%89%E8%A3%85%E5%92%8C%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/image.png&#34;&gt;&lt;/p&gt;
-&lt;h1 id=&#34;讲义笔记&#34;&gt;讲义笔记&lt;/h1&gt;
-&lt;h2 id=&#34;1-环境配置&#34;&gt;1. 环境配置&lt;/h2&gt;
-&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;E3%20Linux%E7%B3%BB%E7%BB%9F%E5%AE%89%E8%A3%85%E5%92%8C%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/image%201.png&#34;&gt;&lt;/p&gt;
-&lt;p&gt;PA0网址：&lt;a href=&#34;https://ysyx.oscc.cc/docs/ics-pa/PA0.html&#34;&gt;https://ysyx.oscc.cc/docs/ics-pa/PA0.html&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;&lt;del&gt;我的开发机器为MacBook Pro M4，使用Docker运行x86版本的Ubuntu2404（Rosetta2进行指令翻译）&lt;/del&gt;。我的开发机器为WSL上的Ubuntu2404，在其中安装所需的软件：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;apt-get update
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;apt-get install build-essential    &lt;span class=&#34;c1&#34;&gt;# build-essential packages, include binary utilities, gcc, make, and so on&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;apt-get install man                &lt;span class=&#34;c1&#34;&gt;# on-line reference manual&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;apt-get install gcc-doc            &lt;span class=&#34;c1&#34;&gt;# on-line reference manual for gcc&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;apt-get install gdb                &lt;span class=&#34;c1&#34;&gt;# GNU debugger&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;apt-get install git                &lt;span class=&#34;c1&#34;&gt;# revision control system&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;apt-get install libreadline-dev    &lt;span class=&#34;c1&#34;&gt;# a library used later&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;apt-get install libsdl2-dev        &lt;span class=&#34;c1&#34;&gt;# a library used later&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;E3%20Linux%E7%B3%BB%E7%BB%9F%E5%AE%89%E8%A3%85%E5%92%8C%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/image%202.png&#34;&gt;&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# 生成sshkey&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ ssh-keygen -t ed25519 -C &lt;span class=&#34;s2&#34;&gt;&amp;#34;your_email@example.com&amp;#34;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# 获取公钥&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ cat ~/.ssh/id_ed25519.pub
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# 在github中添加公钥&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# 测试连接&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ ssh -T git@github.com
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Hi xxxxxx! You&lt;span class=&#34;err&#34;&gt;&amp;#39;&lt;/span&gt;ve successfully authenticated, but GitHub does not provide shell access.
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;E3%20Linux%E7%B3%BB%E7%BB%9F%E5%AE%89%E8%A3%85%E5%92%8C%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/image%203.png&#34;&gt;&lt;/p&gt;</description>
     </item>
   </channel>
 </rss>

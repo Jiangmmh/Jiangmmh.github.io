@@ -6,13 +6,62 @@
     <description>Recent content in Tags on Minghan的博客</description>
     <generator>Hugo</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Tue, 20 Oct 2026 18:23:11 +0800</lastBuildDate>
+    <lastBuildDate>Thu, 22 Oct 2026 15:27:57 +0800</lastBuildDate>
     <atom:link href="http://localhost:1313/tags/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>C语言</title>
       <link>http://localhost:1313/tags/c%E8%AF%AD%E8%A8%80/</link>
-      <pubDate>Tue, 20 Oct 2026 18:23:11 +0800</pubDate>
+      <pubDate>Thu, 22 Oct 2026 15:27:57 +0800</pubDate>
       <guid>http://localhost:1313/tags/c%E8%AF%AD%E8%A8%80/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Linux</title>
+      <link>http://localhost:1313/tags/linux/</link>
+      <pubDate>Thu, 22 Oct 2026 15:27:57 +0800</pubDate>
+      <guid>http://localhost:1313/tags/linux/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Socket</title>
+      <link>http://localhost:1313/tags/socket/</link>
+      <pubDate>Thu, 22 Oct 2026 15:27:57 +0800</pubDate>
+      <guid>http://localhost:1313/tags/socket/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>TCP</title>
+      <link>http://localhost:1313/tags/tcp/</link>
+      <pubDate>Thu, 22 Oct 2026 15:27:57 +0800</pubDate>
+      <guid>http://localhost:1313/tags/tcp/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>网络编程</title>
+      <link>http://localhost:1313/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/</link>
+      <pubDate>Thu, 22 Oct 2026 15:27:57 +0800</pubDate>
+      <guid>http://localhost:1313/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>日常</title>
+      <link>http://localhost:1313/tags/%E6%97%A5%E5%B8%B8/</link>
+      <pubDate>Thu, 22 Oct 2026 15:20:00 +0800</pubDate>
+      <guid>http://localhost:1313/tags/%E6%97%A5%E5%B8%B8/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Linux环境</title>
+      <link>http://localhost:1313/tags/linux%E7%8E%AF%E5%A2%83/</link>
+      <pubDate>Tue, 20 Oct 2026 22:46:13 +0800</pubDate>
+      <guid>http://localhost:1313/tags/linux%E7%8E%AF%E5%A2%83/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>NEMU</title>
+      <link>http://localhost:1313/tags/nemu/</link>
+      <pubDate>Tue, 20 Oct 2026 22:46:13 +0800</pubDate>
+      <guid>http://localhost:1313/tags/nemu/</guid>
       <description></description>
     </item>
     <item>
@@ -79,13 +128,6 @@
       <description></description>
     </item>
     <item>
-      <title>Linux</title>
-      <link>http://localhost:1313/tags/linux/</link>
-      <pubDate>Mon, 19 Oct 2026 21:44:39 +0800</pubDate>
-      <guid>http://localhost:1313/tags/linux/</guid>
-      <description></description>
-    </item>
-    <item>
       <title>代码规范</title>
       <link>http://localhost:1313/tags/%E4%BB%A3%E7%A0%81%E8%A7%84%E8%8C%83/</link>
       <pubDate>Mon, 19 Oct 2026 21:44:39 +0800</pubDate>
@@ -118,13 +160,6 @@
       <link>http://localhost:1313/tags/%E5%A4%84%E7%90%86%E5%99%A8/</link>
       <pubDate>Mon, 19 Oct 2026 16:11:46 +0800</pubDate>
       <guid>http://localhost:1313/tags/%E5%A4%84%E7%90%86%E5%99%A8/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>日常</title>
-      <link>http://localhost:1313/tags/%E6%97%A5%E5%B8%B8/</link>
-      <pubDate>Sun, 18 Oct 2026 23:47:00 +0800</pubDate>
-      <guid>http://localhost:1313/tags/%E6%97%A5%E5%B8%B8/</guid>
       <description></description>
     </item>
     <item>

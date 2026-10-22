@@ -6,8 +6,15 @@
     <description>Recent content in Linux on Minghan的博客</description>
     <generator>Hugo</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Mon, 19 Oct 2026 21:44:39 +0800</lastBuildDate>
+    <lastBuildDate>Thu, 22 Oct 2026 15:27:57 +0800</lastBuildDate>
     <atom:link href="http://localhost:1313/tags/linux/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>[转载]BSD Socket编程入门</title>
+      <link>http://localhost:1313/posts/unix-socket/</link>
+      <pubDate>Thu, 22 Oct 2026 15:27:57 +0800</pubDate>
+      <guid>http://localhost:1313/posts/unix-socket/</guid>
+      <description>从零理解 BSD Socket API，掌握 TCP 客户端与服务端的工作流程、数据读写、连接关闭和网络字节序。</description>
+    </item>
     <item>
       <title>[转载]Linux内核代码风格：官方规范与实践指南</title>
       <link>http://localhost:1313/posts/linux-style/</link>

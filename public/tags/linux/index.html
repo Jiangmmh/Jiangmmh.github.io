@@ -195,6 +195,29 @@
 
 <article class="post-entry tag-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">[转载]BSD Socket编程入门
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p> 本文是一篇基于 BSD Socket 基本概念整理的原创中文教程，参考了 Jim Frost 的 BSD Sockets: A Quick And Dirty Primer，并结合现代 POSIX/Linux 编程实践重新组织内容。
+原文：BSD Sockets: A Quick And Dirty Primer
+原文版权信息：Jim Frost，Copyright © 1988, 1994，All Rights Reserved。本文不构成原文的逐字翻译或全文转载。
+一、什么是 Socket？ Socket（套接字）是操作系统提供的一种通信接口，允许两个进程交换数据。
+两个进程可以运行在同一台机器上，也可以运行在通过网络连接的不同机器上。应用程序通过 Socket API 与操作系统交互，由操作系统负责底层的网络通信。
+可以把 Socket 理解为通信的端点：
+应用程序通过 Socket 发送和接收数据。 操作系统负责协议处理、数据传输和连接管理。 TCP、UDP 等传输协议决定数据传输的语义。 在 Linux 中，Socket 通常由一个文件描述符表示，因此可以使用 read()、write() 和 close() 等文件 I/O 接口操作它。
+不过，Socket 并不完全等同于普通文件：网络通信存在连接建立、数据分段、传输失败、对端关闭和超时等特殊问题。
+1.1 两种常见的 Socket 类型 最常见的两种 Internet Socket 是 TCP Socket 和 UDP Socket。
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-22 15:27:57 +0800 CST'>October 22, 2026</span>&nbsp;·&nbsp;<span>4 min</span>&nbsp;·&nbsp;<span>737 words</span></footer>
+  <a class="entry-link" aria-label="post link to [转载]BSD Socket编程入门" href="http://localhost:1313/posts/unix-socket/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">[转载]Linux内核代码风格：官方规范与实践指南
     </h2>
   </header>
