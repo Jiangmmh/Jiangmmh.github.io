@@ -6,8 +6,15 @@
     <description>Recent content in Categories on Minghan的博客</description>
     <generator>Hugo</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Thu, 22 Oct 2026 15:33:34 +0800</lastBuildDate>
+    <lastBuildDate>Thu, 22 Oct 2026 16:17:04 +0800</lastBuildDate>
     <atom:link href="http://localhost:1313/categories/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Leetecode</title>
+      <link>http://localhost:1313/categories/leetecode/</link>
+      <pubDate>Thu, 22 Oct 2026 16:17:04 +0800</pubDate>
+      <guid>http://localhost:1313/categories/leetecode/</guid>
+      <description></description>
+    </item>
     <item>
       <title>操作系统</title>
       <link>http://localhost:1313/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/</link>
@@ -48,13 +55,6 @@
       <link>http://localhost:1313/categories/linux%E5%86%85%E6%A0%B8/</link>
       <pubDate>Mon, 19 Oct 2026 21:44:39 +0800</pubDate>
       <guid>http://localhost:1313/categories/linux%E5%86%85%E6%A0%B8/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>Leetecode</title>
-      <link>http://localhost:1313/categories/leetecode/</link>
-      <pubDate>Fri, 16 Oct 2026 11:20:25 +0800</pubDate>
-      <guid>http://localhost:1313/categories/leetecode/</guid>
       <description></description>
     </item>
     <item>

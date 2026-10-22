@@ -195,6 +195,27 @@
 
 <article class="post-entry tag-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">Leetecode 二叉树(三)
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>一、有递有归 49. 把二叉搜索树转换为累加树 这道题目要求将BST右侧的节点之和加到当前节点。
+使用一个全局变量s记录当前和，按右-中-左的顺序遍历BST，将s加到当前节点中。
+class Solution { public: TreeNode* convertBST(TreeNode* root) { int s = 0; // 返回子树之和 auto dfs = [&amp;](auto&amp;&amp; self, TreeNode* node) { if (!node) return ; self(self, node-&gt;right); s &#43;= node-&gt;val; node-&gt;val = s; self(self, node-&gt;left); }; dfs(dfs, root); return root; } }; 50. 具有所有最深节点的最小子树 二叉树深度和高度的区别：深度指从根节点到某个节点的路径长度（边数），或节点层数（根为第1层时）。高度指从某个节点到其最远叶子节点的路径长度（边数）。
+这道题目的题目描述有点stupid，翻译一下：找最深节点的最近公共祖先（LCA）。
+我们可以使用DFS递归实现，在递的过程中记录当前层次的深度，并通过全局变量max_depth记录最大深度，在归的过程中如果发现左右子树的深度相同且等于全局最大深度，当前节点就是满足条件的子树。
+class Solution { public: TreeNode* subtreeWithAllDeepest(TreeNode* root) { // 在递的过程中计算最大深度，在归的过程中找最深叶子的LCA int max_depth = -1; TreeNode* ans; // 返回左右子树中叶子的最大 auto dfs = [&amp;](auto&amp;&amp; self, TreeNode* node, int depth) -&gt; int { if (!node) { // max_depth会记录全部叶子中的最大深度 max_depth = max(max_depth, depth); return depth; } int l = self(self, node-&gt;left, depth&#43;1); int r = self(self, node-&gt;right, depth&#43;1); if (l == r &amp;&amp; l == max_depth) ans = node; return max(l, r); }; dfs(dfs, root, 0); return ans; } }; 51. 根到叶路径上的不足节点 思路：“递”计算路径和，“归”判断不足节点并删除
+在“递”的过程中：不断用limit减去当前节点的值（等价于计算从根到叶子的路径和）。 在“归”的过程中： 当遇到叶子时判断limit是否大于0，如果是表示当前路径和小于limit，是需要被删除的不足节点，返回nullptr；否则不需要被删除，返回当前节点。 对于非叶子节点，如果只有其左右子树均被删除时才选择将其删除 class Solution { public: TreeNode* sufficientSubset(TreeNode* root, int limit) { if (!root) return nullptr; limit -= root-&gt;val; if (!root-&gt;left &amp;&amp; !root-&gt;right) { return limit &gt; 0 ? nullptr : root; } root-&gt;left = sufficientSubset(root-&gt;left, limit); root-&gt;right = sufficientSubset(root-&gt;right, limit); // 只有左右子树均是不足节点才删除 return root-&gt;left || root-&gt;right ? root : nullptr; } }; 二、二叉树的直径 52. 二叉树的直径 思路：自底向上DFS遍历二叉树，先求出左右子树的最大高度，用两者之和（直径）更新ans，最后返回当前子树的最大高度，即左右子树高度较大者 &#43; 1。
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-22 16:17:04 +0800 CST'>October 22, 2026</span>&nbsp;·&nbsp;<span>10 min</span>&nbsp;·&nbsp;<span>2127 words</span></footer>
+  <a class="entry-link" aria-label="post link to Leetecode 二叉树(三)" href="http://localhost:1313/posts/leetecode-tree03/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">Leetecode 二叉树(二)
     </h2>
   </header>

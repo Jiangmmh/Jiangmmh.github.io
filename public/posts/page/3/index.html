@@ -223,26 +223,6 @@
 <span title='2026-10-14 11:44:43 +0800 CST'>October 14, 2026</span>&nbsp;·&nbsp;<span>6 min</span>&nbsp;·&nbsp;<span>1268 words</span></footer>
   <a class="entry-link" aria-label="post link to 如何快速构建一个静态博客?" href="http://localhost:1313/posts/hello-world/"></a>
 </article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>LeeteCode-树 十、创建二叉树 14. 最大二叉树 根据题目给出的构建方法，递归构建即可：
-遍历nums当前范围，找到最大值，以其作为根节点 然后递归构建左右子树 class Solution { TreeNode* buildMaxTree(vector&lt;int&gt;&amp; nums, int l, int r) { if (l &gt; r) return nullptr; if (l == r) return new TreeNode(nums[l]); int max_idx = l; for (int i = l&#43;1; i &lt;= r; i&#43;&#43;) { if (nums[max_idx] &lt; nums[i]) { max_idx = i; } } auto root = new TreeNode(nums[max_idx]); root-&gt;left = buildMaxTree(nums, l, max_idx-1); root-&gt;right = buildMaxTree(nums, max_idx&#43;1, r); return root; } public: TreeNode* constructMaximumBinaryTree(vector&lt;int&gt;&amp; nums) { return buildMaxTree(nums, 0, nums.size()-1); } }; 15. 最大二叉树 II 与上一题不同，这题给出的是由某个数组a，按上题的方法构建的最大二叉树root，以及一个值val，现在假设将val添加到数组a的末尾，得到新数组b，要求输出由数组b构建出来的最大树。
-思路：由于val存放于数组的尾部，所以在新的最大树中，val节点要么是根节点的父节点，要么在右子树中。
-时间复杂度：O(n)
-class Solution { public: TreeNode* insertIntoMaxTree(TreeNode* root, int val) { // 保存父节点，方便插入val节点 TreeNode* parent = nullptr; TreeNode* cur = root; while (cur) { if (val &gt; cur-&gt;val) { if (!parent) { return new TreeNode(val, root, nullptr); } TreeNode* node = new TreeNode(val, cur, nullptr); parent-&gt;right = node; return root; } else { parent = cur; cur = cur-&gt;right; } } parent-&gt;right = new TreeNode(val); return root; } }; 16. 前序遍历构造二叉搜索树 先序序列的特点，序列的第一个元素为根节点的值，之后先是左子树序列，然后是右子树序列。因为该树为BST树，所以从第二个元素开始向后遍历，第一个遇到的比根节点值大的节点，就是右子树的根节点，利用这一特性，我们可以划分出左子树序列和右子树序列，递归构建左右子树即可。
-class Solution { TreeNode* buildBST(vector&lt;int&gt;&amp; nums, int l, int r) { if (l &gt; r) return nullptr; auto root = new TreeNode(nums[l]); int i = l &#43; 1; while (i &lt; r &#43; 1 &amp;&amp; nums[i] &lt;= nums[l]) i&#43;&#43;; root-&gt;left = buildBST(nums, l&#43;1, i-1); root-&gt;right = buildBST(nums, i, r); return root; } public: TreeNode* bstFromPreorder(vector&lt;int&gt;&amp; preorder) { return buildBST(preorder, 0, preorder.size()-1); } }; 优化：使用二分法搜索右子树根节点
-...</p>
-  </div>
-  <footer class="entry-footer">
-
-<span>18 min</span>&nbsp;·&nbsp;<span>3661 words</span></footer>
-  <a class="entry-link" aria-label="post link to " href="http://localhost:1313/posts/leetecode-%E6%A0%91-3f5c4e932614801ba73dcedc691b8c8e/"></a>
-</article>
 <footer class="page-footer">
   <nav class="pagination">
     <a class="prev" href="http://localhost:1313/posts/page/2/">
