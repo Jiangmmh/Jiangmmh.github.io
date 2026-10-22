@@ -6,10 +6,17 @@
     <description>Recent content in Linux on Minghan的博客</description>
     <generator>Hugo</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Thu, 22 Oct 2026 15:27:57 +0800</lastBuildDate>
+    <lastBuildDate>Thu, 22 Oct 2026 15:33:34 +0800</lastBuildDate>
     <atom:link href="http://localhost:1313/tags/linux/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>[转载]BSD Socket编程入门</title>
+      <title>Unix/Linux 进程间通信详解：从管道、Socket Pair 到 TCP/UDP</title>
+      <link>http://localhost:1313/posts/unix-linux-ipc/</link>
+      <pubDate>Thu, 22 Oct 2026 15:33:34 +0800</pubDate>
+      <guid>http://localhost:1313/posts/unix-linux-ipc/</guid>
+      <description>深入理解 Unix/Linux 进程间通信机制，涵盖文件描述符、fork、管道、socketpair、Unix Domain Socket、TCP/UDP Socket、数据传输语义、错误处理与实战示例。</description>
+    </item>
+    <item>
+      <title>[翻译]BSD Socket编程入门</title>
       <link>http://localhost:1313/posts/unix-socket/</link>
       <pubDate>Thu, 22 Oct 2026 15:27:57 +0800</pubDate>
       <guid>http://localhost:1313/posts/unix-socket/</guid>
