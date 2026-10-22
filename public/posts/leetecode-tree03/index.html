@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Leetecode 二叉树(三) | Minghan的博客</title>
+<meta name="keywords" content="二搜索叉树, 中序遍历, 二叉树的直径, 回溯">
+<meta name="description" content="一、有递有归
+49. 把二叉搜索树转换为累加树
+这道题目要求将BST右侧的节点之和加到当前节点。
+使用一个全局变量s记录当前和，按右-中-左的顺序遍历BST，将s加到当前节点中。
+class Solution {
+public:
+    TreeNode* convertBST(TreeNode* root) {
+        int s = 0;
+        // 返回子树之和
+        auto dfs = [&amp;](auto&amp;&amp; self, TreeNode* node) {
+            if (!node) return ;
+
+            self(self, node-&gt;right);
+            s &#43;= node-&gt;val;
+            node-&gt;val = s;
+            self(self, node-&gt;left);
+        };
+
+        dfs(dfs, root);
+        return root;
+    }
+};
+50. 具有所有最深节点的最小子树
+
+二叉树深度和高度的区别：深度指从根节点到某个节点的路径长度（边数），或节点层数（根为第1层时）。高度指从某个节点到其最远叶子节点的路径长度（边数）。
+
+这道题目的题目描述有点stupid，翻译一下：找最深节点的最近公共祖先（LCA）。
+我们可以使用DFS递归实现，在递的过程中记录当前层次的深度，并通过全局变量max_depth记录最大深度，在归的过程中如果发现左右子树的深度相同且等于全局最大深度，当前节点就是满足条件的子树。
+class Solution {
+public:
+    TreeNode* subtreeWithAllDeepest(TreeNode* root) {
+        // 在递的过程中计算最大深度，在归的过程中找最深叶子的LCA
+        int max_depth = -1;
+        TreeNode* ans;
+        
+        // 返回左右子树中叶子的最大
+        auto dfs = [&amp;](auto&amp;&amp; self, TreeNode* node, int depth) -&gt; int {
+            if (!node) {
+                // max_depth会记录全部叶子中的最大深度
+                max_depth = max(max_depth, depth);
+                return depth;
+            }
+
+            int l = self(self, node-&gt;left, depth&#43;1);
+            int r = self(self, node-&gt;right, depth&#43;1);
+
+            if (l == r &amp;&amp; l == max_depth) ans = node;
+            return max(l, r);
+        };
+
+        dfs(dfs, root, 0);
+        return ans;
+    }
+};
+51. 根到叶路径上的不足节点
+思路：“递”计算路径和，“归”判断不足节点并删除
+
+在“递”的过程中：不断用limit减去当前节点的值（等价于计算从根到叶子的路径和）。
+在“归”的过程中：
+
+当遇到叶子时判断limit是否大于0，如果是表示当前路径和小于limit，是需要被删除的不足节点，返回nullptr；否则不需要被删除，返回当前节点。
+对于非叶子节点，如果只有其左右子树均被删除时才选择将其删除
+
+
+
+class Solution {
+public:
+    TreeNode* sufficientSubset(TreeNode* root, int limit) {
+        if (!root) return nullptr;
+
+        limit -= root-&gt;val;
+        if (!root-&gt;left &amp;&amp; !root-&gt;right) {
+            return limit &gt; 0 ? nullptr : root;
+        }
+				
+        root-&gt;left = sufficientSubset(root-&gt;left, limit);
+        root-&gt;right = sufficientSubset(root-&gt;right, limit);
+				
+				// 只有左右子树均是不足节点才删除
+        return root-&gt;left || root-&gt;right ? root : nullptr;
+    }
+};
+二、二叉树的直径
+52. 二叉树的直径
+思路：自底向上DFS遍历二叉树，先求出左右子树的最大高度，用两者之和（直径）更新ans，最后返回当前子树的最大高度，即左右子树高度较大者 &#43; 1。">
+<meta name="author" content="">
+<link rel="canonical" href="http://localhost:1313/posts/leetecode-tree03/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.f9490c4bd2e7d3fd9e21909b0bc528878329710db51c69d38b7057b37e889c1d.css" integrity="sha256-&#43;UkMS9Ln0/2eIZCbC8Uoh4MpcQ21HGnTi3BXs36InB0=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/leetecode-tree03/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css"
+>
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/contrib/auto-render.min.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    if (typeof renderMathInElement !== "function") {
+      console.error("KaTeX auto-render 加载失败");
+      return;
+    }
+
+    document.querySelectorAll(".post-content, .book-content").forEach(function (element) {
+      renderMathInElement(element, {
+        delimiters: [
+          { left: "$$", right: "$$", display: true },
+          { left: "\\[", right: "\\]", display: true },
+          { left: "\\(", right: "\\)", display: false }
+        ],
+        throwOnError: false
+      });
+    });
+  });
+</script>
+<meta property="og:url" content="http://localhost:1313/posts/leetecode-tree03/">
+  <meta property="og:site_name" content="Minghan的博客">
+  <meta property="og:title" content="Leetecode 二叉树(三)">
+  <meta property="og:description" content="一、有递有归 49. 把二叉搜索树转换为累加树 这道题目要求将BST右侧的节点之和加到当前节点。
+使用一个全局变量s记录当前和，按右-中-左的顺序遍历BST，将s加到当前节点中。
+class Solution { public: TreeNode* convertBST(TreeNode* root) { int s = 0; // 返回子树之和 auto dfs = [&amp;](auto&amp;&amp; self, TreeNode* node) { if (!node) return ; self(self, node-&gt;right); s &#43;= node-&gt;val; node-&gt;val = s; self(self, node-&gt;left); }; dfs(dfs, root); return root; } }; 50. 具有所有最深节点的最小子树 二叉树深度和高度的区别：深度指从根节点到某个节点的路径长度（边数），或节点层数（根为第1层时）。高度指从某个节点到其最远叶子节点的路径长度（边数）。
+这道题目的题目描述有点stupid，翻译一下：找最深节点的最近公共祖先（LCA）。
+我们可以使用DFS递归实现，在递的过程中记录当前层次的深度，并通过全局变量max_depth记录最大深度，在归的过程中如果发现左右子树的深度相同且等于全局最大深度，当前节点就是满足条件的子树。
+class Solution { public: TreeNode* subtreeWithAllDeepest(TreeNode* root) { // 在递的过程中计算最大深度，在归的过程中找最深叶子的LCA int max_depth = -1; TreeNode* ans; // 返回左右子树中叶子的最大 auto dfs = [&amp;](auto&amp;&amp; self, TreeNode* node, int depth) -&gt; int { if (!node) { // max_depth会记录全部叶子中的最大深度 max_depth = max(max_depth, depth); return depth; } int l = self(self, node-&gt;left, depth&#43;1); int r = self(self, node-&gt;right, depth&#43;1); if (l == r &amp;&amp; l == max_depth) ans = node; return max(l, r); }; dfs(dfs, root, 0); return ans; } }; 51. 根到叶路径上的不足节点 思路：“递”计算路径和，“归”判断不足节点并删除
+在“递”的过程中：不断用limit减去当前节点的值（等价于计算从根到叶子的路径和）。 在“归”的过程中： 当遇到叶子时判断limit是否大于0，如果是表示当前路径和小于limit，是需要被删除的不足节点，返回nullptr；否则不需要被删除，返回当前节点。 对于非叶子节点，如果只有其左右子树均被删除时才选择将其删除 class Solution { public: TreeNode* sufficientSubset(TreeNode* root, int limit) { if (!root) return nullptr; limit -= root-&gt;val; if (!root-&gt;left &amp;&amp; !root-&gt;right) { return limit &gt; 0 ? nullptr : root; } root-&gt;left = sufficientSubset(root-&gt;left, limit); root-&gt;right = sufficientSubset(root-&gt;right, limit); // 只有左右子树均是不足节点才删除 return root-&gt;left || root-&gt;right ? root : nullptr; } }; 二、二叉树的直径 52. 二叉树的直径 思路：自底向上DFS遍历二叉树，先求出左右子树的最大高度，用两者之和（直径）更新ans，最后返回当前子树的最大高度，即左右子树高度较大者 &#43; 1。">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-10-22T16:17:04+08:00">
+    <meta property="article:modified_time" content="2026-10-22T16:17:04+08:00">
+    <meta property="article:tag" content="二搜索叉树">
+    <meta property="article:tag" content="中序遍历">
+    <meta property="article:tag" content="二叉树的直径">
+    <meta property="article:tag" content="回溯">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Leetecode 二叉树(三)">
+  <meta name="twitter:description" content="一、有递有归 49. 把二叉搜索树转换为累加树 这道题目要求将BST右侧的节点之和加到当前节点。
+使用一个全局变量s记录当前和，按右-中-左的顺序遍历BST，将s加到当前节点中。
+class Solution { public: TreeNode* convertBST(TreeNode* root) { int s = 0; // 返回子树之和 auto dfs = [&amp;](auto&amp;&amp; self, TreeNode* node) { if (!node) return ; self(self, node-&gt;right); s &#43;= node-&gt;val; node-&gt;val = s; self(self, node-&gt;left); }; dfs(dfs, root); return root; } }; 50. 具有所有最深节点的最小子树 二叉树深度和高度的区别：深度指从根节点到某个节点的路径长度（边数），或节点层数（根为第1层时）。高度指从某个节点到其最远叶子节点的路径长度（边数）。
+这道题目的题目描述有点stupid，翻译一下：找最深节点的最近公共祖先（LCA）。
+我们可以使用DFS递归实现，在递的过程中记录当前层次的深度，并通过全局变量max_depth记录最大深度，在归的过程中如果发现左右子树的深度相同且等于全局最大深度，当前节点就是满足条件的子树。
+class Solution { public: TreeNode* subtreeWithAllDeepest(TreeNode* root) { // 在递的过程中计算最大深度，在归的过程中找最深叶子的LCA int max_depth = -1; TreeNode* ans; // 返回左右子树中叶子的最大 auto dfs = [&amp;](auto&amp;&amp; self, TreeNode* node, int depth) -&gt; int { if (!node) { // max_depth会记录全部叶子中的最大深度 max_depth = max(max_depth, depth); return depth; } int l = self(self, node-&gt;left, depth&#43;1); int r = self(self, node-&gt;right, depth&#43;1); if (l == r &amp;&amp; l == max_depth) ans = node; return max(l, r); }; dfs(dfs, root, 0); return ans; } }; 51. 根到叶路径上的不足节点 思路：“递”计算路径和，“归”判断不足节点并删除
+在“递”的过程中：不断用limit减去当前节点的值（等价于计算从根到叶子的路径和）。 在“归”的过程中： 当遇到叶子时判断limit是否大于0，如果是表示当前路径和小于limit，是需要被删除的不足节点，返回nullptr；否则不需要被删除，返回当前节点。 对于非叶子节点，如果只有其左右子树均被删除时才选择将其删除 class Solution { public: TreeNode* sufficientSubset(TreeNode* root, int limit) { if (!root) return nullptr; limit -= root-&gt;val; if (!root-&gt;left &amp;&amp; !root-&gt;right) { return limit &gt; 0 ? nullptr : root; } root-&gt;left = sufficientSubset(root-&gt;left, limit); root-&gt;right = sufficientSubset(root-&gt;right, limit); // 只有左右子树均是不足节点才删除 return root-&gt;left || root-&gt;right ? root : nullptr; } }; 二、二叉树的直径 52. 二叉树的直径 思路：自底向上DFS遍历二叉树，先求出左右子树的最大高度，用两者之和（直径）更新ans，最后返回当前子树的最大高度，即左右子树高度较大者 &#43; 1。">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "http://localhost:1313/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Leetecode 二叉树(三)",
+      "item": "http://localhost:1313/posts/leetecode-tree03/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Leetecode 二叉树(三)",
+  "name": "Leetecode 二叉树(三)",
+  "description": "一、有递有归 49. 把二叉搜索树转换为累加树 这道题目要求将BST右侧的节点之和加到当前节点。\n使用一个全局变量s记录当前和，按右-中-左的顺序遍历BST，将s加到当前节点中。\nclass Solution { public: TreeNode* convertBST(TreeNode* root) { int s = 0; // 返回子树之和 auto dfs = [\u0026amp;](auto\u0026amp;\u0026amp; self, TreeNode* node) { if (!node) return ; self(self, node-\u0026gt;right); s += node-\u0026gt;val; node-\u0026gt;val = s; self(self, node-\u0026gt;left); }; dfs(dfs, root); return root; } }; 50. 具有所有最深节点的最小子树 二叉树深度和高度的区别：深度指从根节点到某个节点的路径长度（边数），或节点层数（根为第1层时）。高度指从某个节点到其最远叶子节点的路径长度（边数）。\n这道题目的题目描述有点stupid，翻译一下：找最深节点的最近公共祖先（LCA）。\n我们可以使用DFS递归实现，在递的过程中记录当前层次的深度，并通过全局变量max_depth记录最大深度，在归的过程中如果发现左右子树的深度相同且等于全局最大深度，当前节点就是满足条件的子树。\nclass Solution { public: TreeNode* subtreeWithAllDeepest(TreeNode* root) { // 在递的过程中计算最大深度，在归的过程中找最深叶子的LCA int max_depth = -1; TreeNode* ans; // 返回左右子树中叶子的最大 auto dfs = [\u0026amp;](auto\u0026amp;\u0026amp; self, TreeNode* node, int depth) -\u0026gt; int { if (!node) { // max_depth会记录全部叶子中的最大深度 max_depth = max(max_depth, depth); return depth; } int l = self(self, node-\u0026gt;left, depth+1); int r = self(self, node-\u0026gt;right, depth+1); if (l == r \u0026amp;\u0026amp; l == max_depth) ans = node; return max(l, r); }; dfs(dfs, root, 0); return ans; } }; 51. 根到叶路径上的不足节点 思路：“递”计算路径和，“归”判断不足节点并删除\n在“递”的过程中：不断用limit减去当前节点的值（等价于计算从根到叶子的路径和）。 在“归”的过程中： 当遇到叶子时判断limit是否大于0，如果是表示当前路径和小于limit，是需要被删除的不足节点，返回nullptr；否则不需要被删除，返回当前节点。 对于非叶子节点，如果只有其左右子树均被删除时才选择将其删除 class Solution { public: TreeNode* sufficientSubset(TreeNode* root, int limit) { if (!root) return nullptr; limit -= root-\u0026gt;val; if (!root-\u0026gt;left \u0026amp;\u0026amp; !root-\u0026gt;right) { return limit \u0026gt; 0 ? nullptr : root; } root-\u0026gt;left = sufficientSubset(root-\u0026gt;left, limit); root-\u0026gt;right = sufficientSubset(root-\u0026gt;right, limit); // 只有左右子树均是不足节点才删除 return root-\u0026gt;left || root-\u0026gt;right ? root : nullptr; } }; 二、二叉树的直径 52. 二叉树的直径 思路：自底向上DFS遍历二叉树，先求出左右子树的最大高度，用两者之和（直径）更新ans，最后返回当前子树的最大高度，即左右子树高度较大者 + 1。\n",
+  "keywords": [
+    "二搜索叉树", "中序遍历", "二叉树的直径", "回溯"
+  ],
+  "articleBody": "一、有递有归 49. 把二叉搜索树转换为累加树 这道题目要求将BST右侧的节点之和加到当前节点。\n使用一个全局变量s记录当前和，按右-中-左的顺序遍历BST，将s加到当前节点中。\nclass Solution { public: TreeNode* convertBST(TreeNode* root) { int s = 0; // 返回子树之和 auto dfs = [\u0026](auto\u0026\u0026 self, TreeNode* node) { if (!node) return ; self(self, node-\u003eright); s += node-\u003eval; node-\u003eval = s; self(self, node-\u003eleft); }; dfs(dfs, root); return root; } }; 50. 具有所有最深节点的最小子树 二叉树深度和高度的区别：深度指从根节点到某个节点的路径长度（边数），或节点层数（根为第1层时）。高度指从某个节点到其最远叶子节点的路径长度（边数）。\n这道题目的题目描述有点stupid，翻译一下：找最深节点的最近公共祖先（LCA）。\n我们可以使用DFS递归实现，在递的过程中记录当前层次的深度，并通过全局变量max_depth记录最大深度，在归的过程中如果发现左右子树的深度相同且等于全局最大深度，当前节点就是满足条件的子树。\nclass Solution { public: TreeNode* subtreeWithAllDeepest(TreeNode* root) { // 在递的过程中计算最大深度，在归的过程中找最深叶子的LCA int max_depth = -1; TreeNode* ans; // 返回左右子树中叶子的最大 auto dfs = [\u0026](auto\u0026\u0026 self, TreeNode* node, int depth) -\u003e int { if (!node) { // max_depth会记录全部叶子中的最大深度 max_depth = max(max_depth, depth); return depth; } int l = self(self, node-\u003eleft, depth+1); int r = self(self, node-\u003eright, depth+1); if (l == r \u0026\u0026 l == max_depth) ans = node; return max(l, r); }; dfs(dfs, root, 0); return ans; } }; 51. 根到叶路径上的不足节点 思路：“递”计算路径和，“归”判断不足节点并删除\n在“递”的过程中：不断用limit减去当前节点的值（等价于计算从根到叶子的路径和）。 在“归”的过程中： 当遇到叶子时判断limit是否大于0，如果是表示当前路径和小于limit，是需要被删除的不足节点，返回nullptr；否则不需要被删除，返回当前节点。 对于非叶子节点，如果只有其左右子树均被删除时才选择将其删除 class Solution { public: TreeNode* sufficientSubset(TreeNode* root, int limit) { if (!root) return nullptr; limit -= root-\u003eval; if (!root-\u003eleft \u0026\u0026 !root-\u003eright) { return limit \u003e 0 ? nullptr : root; } root-\u003eleft = sufficientSubset(root-\u003eleft, limit); root-\u003eright = sufficientSubset(root-\u003eright, limit); // 只有左右子树均是不足节点才删除 return root-\u003eleft || root-\u003eright ? root : nullptr; } }; 二、二叉树的直径 52. 二叉树的直径 思路：自底向上DFS遍历二叉树，先求出左右子树的最大高度，用两者之和（直径）更新ans，最后返回当前子树的最大高度，即左右子树高度较大者 + 1。\nclass Solution { public: int diameterOfBinaryTree(TreeNode* root) { int ans = 0; // 返回子树node到最深叶子的边长 auto dfs = [\u0026](auto\u0026\u0026 self, TreeNode* node) -\u003e int { if (!node) return 0; int l = self(self, node-\u003eleft); int r = self(self, node-\u003eright); ans = max(ans, l + r); return max(l, r) + 1; }; dfs(dfs, root); return ans; } }; 53. 最长同值路径 自底向上DFS，在归的过程中计算最长同值路径：\n返回值表示子树node下方中与根节点值相同且连续的节点数（不包括node节点） l和r为左右子树递归结果+1，表示算上当前节点的最长路径 如果当前节点的值与左子树的值不同，左子树的最长同值路径设置为0 如果当前节点的值与右子树的值不同，右子树的最长同值路径设置为0 class Solution { public: int longestUnivaluePath(TreeNode* root) { int ans = 0; // dfs返回子树node下方中与根节点值相同且相连的连续节点数（不包括node节点） auto dfs = [\u0026](auto\u0026\u0026 self, TreeNode* node) -\u003e int { if (!node) return -1; // 表示算上当前节点 int l = self(self, node-\u003eleft) + 1; int r = self(self, node-\u003eright) + 1; if (l \u0026\u0026 node-\u003eleft-\u003eval != node-\u003eval) l = 0; if (r \u0026\u0026 node-\u003eright-\u003eval != node-\u003eval) r = 0; ans = max(ans, l + r); return max(l, r); }; dfs(dfs, root); return ans; } }; 54. 二叉树中的最大路径和 自底向上DFS，先分别递归计算左右子树的路径和，然后与当前节点值求和，并更新ans。\n注意：这里的路径不要求必须经过叶子节点，因此如果子树的路径和小于0，需要将其断开，即返回0。\nclass Solution { public: int maxPathSum(TreeNode* root) { int ans = INT_MIN; auto dfs = [\u0026](auto\u0026\u0026 self, TreeNode* node) -\u003e int { if (!node) return 0; int sum_left = self(self, node-\u003eleft); int sum_right = self(self, node-\u003eright); // 记录以当前节点为根节点的最大路径和 ans = max(ans, sum_left + sum_right + node-\u003eval); // dfs返回的是以当前节点为根节点的，最大直径和 return max(max(sum_left, sum_right) + node-\u003eval, 0); }; dfs(dfs, root); return ans; } }; 55. 感染二叉树需要的总时间 将问题转化一下：感染二叉树所需的总时间 = 从值为start的节点到其他任意节点的最大长度。\n归的过程中需要根据返回值确定start的位置。\n本题算法如下：\n递归时，除了返回当前子树的最大链长，还需要返回一个布尔值，表示当前子树是否包含 start。 如果当前节点是空节点，返回 0 和 false。 设左子树的返回的链长为 lLen，右子树返回的链长为 rLen。 如果当前节点值等于 start，初始化答案为 max(lLen,rLen)，即子树 start 的最大深度。然后返回 1 和 true。 如果左右子树都不包含 start，返回 max(lLen,rLen)+1。 如果左子树或右子树包含 start，像计算直径那样，用 lLen+rLen 更新答案的最大值。如果左子树包含 start，则返回 lLen 和 true，否则返回 rLen 和 true。这种返回方式可以保证 lLen+rLen 一定是端点为 start 的直径长度。 class Solution { public: int amountOfTime(TreeNode* root, int start) { int ans = 0; auto dfs = [\u0026](auto\u0026\u0026 self, TreeNode* node) -\u003e pair\u003cint, bool\u003e { if (!node) return {0, false}; auto [l_len, l_found] = self(self, node-\u003eleft); auto [r_len, r_found] = self(self, node-\u003eright); // 如果当前节点就是start节点，更新ans为最大高度，向上返回1 if (node-\u003eval == start) { ans = max(l_len, r_len); return {1, true}; } // 左右子树中存在start节点，更新结果，并返回从当前节点到start节点的高度 if (l_found || r_found) { ans = max(ans, l_len + r_len); return {(l_found ? l_len: r_len)+1, true}; } // 如果左右子树中均不存在start节点，直接返回高度 return {max(l_len, r_len) + 1, false}; }; dfs(dfs, root); return ans; } }; 三、回溯 56. 二叉树的所有路径 自顶向下DFS，使用参数path记录从根到叶子的路径，到达叶子时将其加入ans中。\nclass Solution { public: vector\u003cstring\u003e binaryTreePaths(TreeNode* root) { vector\u003cstring\u003e ans; auto dfs = [\u0026](auto\u0026\u0026 self, TreeNode* node, string path) { if (!node) return ; if (!node-\u003eleft \u0026\u0026 !node-\u003eright) { path += to_string(node-\u003eval); ans.push_back(path); return ; } path += to_string(node-\u003eval) + \"-\u003e\"; self(self, node-\u003eleft, path); self(self, node-\u003eright, path); }; dfs(dfs, root, \"\"); return ans; } }; 57. 路径总和 II 自顶向下DFS，使用一个vector变量path记录当前路径：\n若当前节点为空，直接返回；否则将节点值加入和sum，并将节点值加入path。 若当前节点为叶子，且路径总和为targetSum，将该路径加入ans中。 否则，向下递归左右子树。 最后在回溯的时候（即“归”的时候）将当前节点从path中剔除。 class Solution { public: vector\u003cvector\u003cint\u003e\u003e pathSum(TreeNode* root, int targetSum) { vector\u003cvector\u003cint\u003e\u003e ans; vector\u003cint\u003e path; auto dfs = [\u0026](auto\u0026\u0026 self, TreeNode* node, int sum) { if (!node) return ; // 在递的过程中记录路径到path，记录当前路径和到sum path.push_back(node-\u003eval); sum += node-\u003eval; if (!node-\u003eleft \u0026\u0026 !node-\u003eright \u0026\u0026 sum == targetSum) { // 到达叶子，路径和正好为targetSum，记录该path ans.push_back(path); } else { // 否则继续向后递归 self(self, node-\u003eleft, sum); self(self, node-\u003eright, sum); } // 从当前层退出时要回溯path path.pop_back(); }; dfs(dfs, root, 0); return ans; } }; 58. 二叉树中的伪回文路径 题目给出了一个前提：每个节点的值为 1 到 9 。\n因此可以创建一个长度为10的整形数组，记录路径中元素值[1, 9]出现的次数，这可以被优化为对1求异或。\n如果当前节点为叶子，检查数组之和是否小于2，如果是表示该路径为伪回文路径；否则当前叶子不是回文路径。 如果当前节点为分支节点，则递归找到左右子树中的回文路径数 class Solution { public: int pseudoPalindromicPaths(TreeNode* root) { int p[10]{}; auto dfs = [\u0026](auto\u0026\u0026 self, TreeNode* node) -\u003e int { if (node == nullptr) { return 0; } // 修改 node-\u003eval 出现次数的奇偶性 p[node-\u003eval] ^= 1; int res; if (node-\u003eleft == nullptr \u0026\u0026 node-\u003eright == nullptr) { // node 是叶子节点 res = reduce(p, p + 10) \u003c= 1; } else { res = self(self, node-\u003eleft) + self(self, node-\u003eright); } // 恢复到递归 node 之前的状态（不做这一步就把 node-\u003eval 算到其它路径中了） p[node-\u003eval] ^= 1; return res; }; return dfs(dfs, root); } }; 59. 路径总和 III 题目要求找到所有和为targetSum的从上到下的连续路径，如果把树视为一组由根到叶子的路径构成的数组，找这样的连续路径就相当于在数组中找区间和为targetSum的区间数量。\n考虑前缀和的思路，区间[l, r]的和为[0, r]的前缀和减去[0, l-1]的前缀和。在“递”的过程中将不同前缀和出现的次数记录在一个哈希表中，对于一个新节点，如果当前前缀和cur，ans += mp[cur - targetSum] 就记录了以当前节点为右端点且和为targetSum的的区间数量。\n注意在向下递归完毕后，要将当前前缀合从哈希表中剔除。\nclass Solution { public: int pathSum(TreeNode* root, int targetSum) { if (!root) return 0; int ans = 0; unordered_map\u003clong, int\u003e mp; mp[0] = 1; // 空前缀，处理\"从根开始的路径\" auto dfs = [\u0026](auto\u0026\u0026 self, TreeNode* node, long cur) { if (!node) return; cur += node-\u003eval; // 当前节点前缀和 ans += mp[cur - targetSum]; // 统计以 node 结尾的合法路径 mp[cur]++; // 加入当前前缀 self(self, node-\u003eleft, cur); self(self, node-\u003eright, cur); mp[cur]--; // 回溯 }; dfs(dfs, root, 0); return ans; } }; 60. 二叉搜索树的最近公共祖先 题目给出root为一颗二叉搜索树，因此可以通过root与p、q的大小关系来确定p和q所处的位置。\n如果p和q的值均小于root，向左递归 如果p和q的值均大于root，向右递归 否则，当前节点就是p和q的最近公共祖先 class Solution { public: TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) { int x = root-\u003eval; if (p-\u003eval \u003c x \u0026\u0026 q-\u003eval \u003c x) { // p和q均在根左侧 return lowestCommonAncestor(root-\u003eleft, p, q); } if (p-\u003eval \u003e x \u0026\u0026 q-\u003eval \u003e x) { // p和q均在根右侧 return lowestCommonAncestor(root-\u003eright, p, q); } // p和q在根的左右或者就是根本身这两种情况都直接返回根 return root; } }; 61. 二叉树的最近公共祖先 相比上一道题，这道题没有了BST有序的特性。\n当root为空或root值与p或q相同，直接返回root。 递归尝试从左子树中找p和q的最近公共祖先。 如果在左右子树分别找到了p和q，返回root。 否则，返回存在的那一边。 lowestCommonAncestor返回值是：如果在root中找到p或q就返回节点，没找到就返回nullptr。\nclass Solution { public: TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) { if (!root || p == root || q == root) return root; TreeNode* left = lowestCommonAncestor(root-\u003eleft, p, q); TreeNode* right = lowestCommonAncestor(root-\u003eright, p, q); if (left \u0026\u0026 right) return root; // 在左右子树分别找到p和q return left ? left : right ? right : nullptr; } }; 62. 最深叶节点的最近公共祖先 同50题。\nclass Solution { public: TreeNode* lcaDeepestLeaves(TreeNode* root) { int max_depth = -1; TreeNode* ans = nullptr; auto dfs = [\u0026](auto\u0026\u0026 self, TreeNode* node, int depth) -\u003e int { // 递的过程中记录最大深度 if (!node) { max_depth = max(max_depth, depth); return depth; } int l = self(self, node-\u003eleft, depth+1); int r = self(self, node-\u003eright, depth+1); // 归的过程中记录结果 if (l == max_depth \u0026\u0026 r == max_depth) ans = node; return max(l, r); }; dfs(dfs, root, 0); return ans; } }; 63. 从二叉树一个节点到另一个节点每一步的方向 较难，暂时掠过。\n四、二叉搜索树 二叉搜索树（BST）的特点是：中序遍历序列有序。\n64. 二叉搜索树中的搜索 根据BST的特性，可以快速搜索目标节点，思路类似二分查找。\nclass Solution { public: TreeNode* searchBST(TreeNode* root, int val) { if (!root) return nullptr; if (root-\u003eval == val) return root; if (val \u003c root-\u003eval) return searchBST(root-\u003eleft, val); return searchBST(root-\u003eright, val); } }; 65. 二叉搜索树的最小绝对差 题目要求找：树中任意两不同节点值之间的最小差值。\n最小差值一定来自于BST中序遍历序列中两个相邻原素之差，所以可以用中序遍历BST，使用一个变量prev记录前驱的值，每次让prev和当前节点的值求差，然后更新结果。\n注意：为了避免编译错误，prev的初值要设置为INT_MIN / 2，而不是INT_MIN。\nclass Solution { public: int getMinimumDifference(TreeNode* root) { int prev = INT_MIN / 2; // 节点值大于等于0 int ans = INT_MAX; auto dfs = [\u0026](auto\u0026\u0026 self, TreeNode* node) { if (!node) return ; // 中序遍历 self(self, node-\u003eleft); ans = min(ans, abs(node-\u003eval - prev)); prev = node-\u003eval; self(self, node-\u003eright); }; dfs(dfs, root); return ans; } }; 66. 二叉搜索树的范围和 中序遍历，仅记录值在[low, high]之间的节点，并且当节点值大于high时剪枝，避免无效访问。\nclass Solution { public: int rangeSumBST(TreeNode* root, int low, int high) { int ans = 0; auto dfs = [\u0026](auto\u0026\u0026 self, TreeNode* node) { if (!node) return ; self(self, node-\u003eleft); if (node-\u003eval \u003e high) return ; if (low \u003c= node-\u003eval \u0026\u0026 node-\u003eval \u003c= high) { ans += node-\u003eval; } self(self, node-\u003eright); }; dfs(dfs, root); return ans; } }; 67. 二叉搜索树中的众数 法一：哈希表 + 遍历二叉树\n使用一个哈希表记录树中每个值出现的次数，返回出现次数最多的值。\n法二：中序遍历\n使用一个指针prev记录中序遍历的前驱节点，在对中的处理中：\n如果prev为nullptr，说明当前节点为第一个节点，cnt置为1 class Solution { public: vector\u003cint\u003e findMode(TreeNode* root) { vector\u003cint\u003e ans; TreeNode* prev = nullptr; int max_cnt = 0; int cnt = 0; auto dfs = [\u0026](auto\u0026\u0026 self, TreeNode* node) { if (!node) return; self(self, node-\u003eleft); if (!prev) { // 根节点 cnt = 1; } else if (prev-\u003eval == node-\u003eval) { // 重复节点 cnt++; } else { // 遇到了前后不同的节点 cnt = 1; } prev = node; // 更新前驱节点 if (cnt == max_cnt) { ans.push_back(node-\u003eval); // 仅出现次数最多的节点 } else if (cnt \u003e max_cnt) { max_cnt = cnt; ans.clear(); ans.push_back(node-\u003eval); } self(self, node-\u003eright); }; dfs(dfs, root); return ans; } }; 68. 二叉搜索树中第 K 小的元素 所谓第 K 小的元素，就是中序遍历中第k个被访问的节点的值。\n我们可以在中序遍历过程中记录访问了的节点数，当遇到第k个节点时返回结果。\n此外，为了及时停止遍历，还需要使用一个布尔变量found来标识目标节点是否已经找到，如果在左子树中已经找到了目标，那么就不要继续递归搜索右子树。\nclass Solution { public: int kthSmallest(TreeNode* root, int k) { int ans; bool found = false; auto dfs = [\u0026](auto\u0026\u0026 self, TreeNode* node) { if (!node) return; self(self, node-\u003eleft); if (found) return ; if (--k == 0) { ans = node-\u003eval; found = true; return ; } self(self, node-\u003eright); }; dfs(dfs, root); return ans; } }; 69. 验证二叉搜索树 中序遍历的思路最符合逻辑：用变量记录中序遍历序列的前驱节点值（初始化为比最小节点值更小的值即可）。然后在中序遍历的过沉重不断判断前驱是否严格小于当前节点即可。\nclass Solution { long long prev = LLONG_MIN; public: bool isValidBST(TreeNode* root) { if (!root) return true; if (!isValidBST(root-\u003eleft)) return false; if (root-\u003eval \u003c= prev) return false; prev = root-\u003eval; return isValidBST(root-\u003eright); } }; 70. 两棵二叉搜索树中的所有元素 先中序遍历两颗BST，得到两个有序数组；然后合并这两个有序数组，得到结果。\nclass Solution { public: vector\u003cint\u003e getAllElements(TreeNode* root1, TreeNode* root2) { // 中序遍历得到两个有序序列 auto dfs = [\u0026](auto\u0026\u0026 self, TreeNode* node, vector\u003cint\u003e\u0026 nums) { if (!node) return; self(self, node-\u003eleft, nums); nums.push_back(node-\u003eval); self(self, node-\u003eright, nums); }; vector\u003cint\u003e nums1, nums2; dfs(dfs, root1, nums1); dfs(dfs, root2, nums2); vector\u003cint\u003e ans; // 合并两个有序数组 auto merge = [\u0026](auto\u0026\u0026 self, vector\u003cint\u003e\u0026 nums1, vector\u003cint\u003e\u0026 nums2) { int i = 0, j = 0; while (i \u003c nums1.size() \u0026\u0026 j \u003c nums2.size()) { if (nums1[i] \u003c nums2[j]) { ans.push_back(nums1[i]); i++; } else { ans.push_back(nums2[j]); j++; } } while (i \u003c nums1.size()) { ans.push_back(nums1[i]); i++; } while (j \u003c nums2.size()) { ans.push_back(nums2[j]); j++; } }; merge(merge, nums1, nums2); return ans; } }; 71. 恢复二叉搜索树（重点） 法一：普通中序遍历\n在中序遍历过程中找到互换节点。思路不难：使用a和b记录互换节点，然后使用prev记录中序遍历过程中的前驱节点。\n如果前驱节点存在，并且前驱的值大于当前节点的值，说明违反了顺序 如果a为nullptr，那么前驱节点就是互换节点之一，用a记录。 如果a不为nullptr，当前节点就是互换节点之一，用b记录。 遍历完成后交换a和b的值即可 这里的空间复杂度为O(h)，h为树的高度。\nclass Solution { public: void recoverTree(TreeNode* root) { // 获取中序遍历的序列 vector\u003cint\u003e nums; TreeNode* prev = nullptr; TreeNode* a = nullptr; TreeNode* b = nullptr; auto dfs = [\u0026](auto\u0026\u0026 self, TreeNode* node) { if (!node) return ; self(self, node-\u003eleft); if (prev) { if (prev-\u003eval \u003e node-\u003eval) { if (!a) { a = prev; b = node; } else { b = node; } } } prev = node; self(self, node-\u003eright); }; dfs(dfs, root); swap(a-\u003eval, b-\u003eval); }; }; 法二：Morris遍历\nMorris遍历可以消除DFS过程中的空间开销，将空间复杂度转换为O(1)。\n利用叶子节点右子树指针为空的特点，将其利用起来指向中序遍历的后继节点。\nclass Solution { public: void recoverTree(TreeNode* root) { TreeNode* a = nullptr; TreeNode* b = nullptr; TreeNode* prev = nullptr; while (root) { if (!root-\u003eleft) { // 左为空，就直接处理中间节点 if (prev \u0026\u0026 prev-\u003eval \u003e root-\u003eval) { if (!a) { a = prev; b = root; } else { b = root; } } prev = root; root = root-\u003eright; } else { TreeNode* t = root-\u003eleft; while (t-\u003eright \u0026\u0026 t-\u003eright != root) t = t-\u003eright; if (t-\u003eright == nullptr) { // 还未建立索引 t-\u003eright = root; // 建立索引 root = root-\u003eleft; } else { // 索引存在 t-\u003eright = nullptr; if (prev \u0026\u0026 prev-\u003eval \u003e root-\u003eval) { if (!a) { a = prev; b = root; } else { b = root; } } prev = root; root = root-\u003eright; } } } swap(a-\u003eval, b-\u003eval); }; }; 72. 递增顺序搜索树 引入dummy节点统一操作，在中序遍历的过程中改变节点的左右子树指针，构造递增顺序的搜索树。\nclass Solution { public: TreeNode* increasingBST(TreeNode* root) { TreeNode dummy; dummy.right = root; auto parent = \u0026dummy; auto dfs = [\u0026](auto\u0026\u0026 self, TreeNode* node) { if (!node) return; self(self, node-\u003eleft); // 改变节点的连接 parent-\u003eright = node; node-\u003eleft = nullptr; // 中序遍历，左侧已经访问了 parent = node; self(self, node-\u003eright); }; dfs(dfs, root); parent-\u003eright = nullptr; return dummy.right; } }; 73. 二叉搜索树最近节点查询 这道题考查两个点：BST中序遍历结果有序 和 二分法\n首先使用中序遍历取得BST上的有序序列nums 然后使用二分法在nums中搜索满足条件的元素 注意：\n经典的lower_bound函数写法不要忘记，用于查找大于等于target的第一个元素 其返回值的下标范围是[0, n]，返回0不代表找到目标，返回n表示一定没找到 使用lower_bound的返回值为i，如果 i \u003c n 就得到max的下标，否则记为-1 只有lower_bound的返回值在范围[1, n]时才表示找到了min，min的值为nums[i-1]，否则记为-1 class Solution { int lower_bound(vector\u003cint\u003e\u0026 nums, int target) { int l = 0, r = nums.size(); while (l \u003c r) { int mid = l + (r - l) / 2; if (nums[mid] \u003e= target) { r = mid; } else { l = mid + 1; } } return l; } public: vector\u003cvector\u003cint\u003e\u003e closestNodes(TreeNode* root, vector\u003cint\u003e\u0026 queries) { // 中序遍历得到有序序列 vector\u003cint\u003e nums; auto dfs = [\u0026](auto\u0026\u0026 self, TreeNode* node) { if (!node) return ; self(self, node-\u003eleft); nums.push_back(node-\u003eval); self(self, node-\u003eright); }; dfs(dfs, root); vector\u003cvector\u003cint\u003e\u003e ans; int n = nums.size(); for (int x : queries) { int i = lower_bound(nums, x); int second = i \u003c n ? nums[i] : -1; if (i == n || nums[i] != x) i--; int first = i \u003e= 0 ? nums[i] : -1; ans.push_back({first, second}); } return ans; } }; 74. 两数之和 IV - 输入二叉搜索树 法一：中序遍历BST构造有序数组 + 双指针\nclass Solution { public: bool findTarget(TreeNode* root, int k) { // 遍历BST，得到有序序列 vector\u003cint\u003e nums; auto dfs = [\u0026](auto\u0026\u0026 self, TreeNode* node) { if (!node) return ; self(self, node-\u003eleft); nums.push_back(node-\u003eval); self(self, node-\u003eright); }; dfs(dfs, root); // 双指针法解两数之和 int l = 0, r = nums.size() - 1; while (l \u003c r) { int sum = nums[l] + nums[r]; if (sum \u003c k) { l++; } else if (sum \u003e k) { r--; } else { return true; } } return false; } }; 法二：哈希表 + 中序遍历\n使用一个哈希表记录中序遍历中遇到过的所有元素值，在后续遍历过程中如果发现哈希表中存在值为 k - node→val 的元素，就返回true。\nclass Solution { public: bool findTarget(TreeNode* root, int k) { unordered_set\u003cint\u003e s; auto dfs = [\u0026](auto\u0026\u0026 self, TreeNode* node) -\u003e bool { if (!node) return false; bool ok = self(self, node-\u003eleft); if (ok) return true; if (s.contains(k - node-\u003eval)) return true; s.insert(node-\u003eval); return self(self, node-\u003eright); }; return dfs(dfs, root); } }; 76. 二叉搜索子树的最大键值和（Hard） 77. 合并多棵二叉搜索树（Hard） 两道hard，暂时不做。\n",
+  "wordCount" : "2126",
+  "inLanguage": "en",
+  "datePublished": "2026-10-22T16:17:04+08:00",
+  "dateModified": "2026-10-22T16:17:04+08:00",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "http://localhost:1313/posts/leetecode-tree03/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Minghan的博客",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "http://localhost:1313/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="header-nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="Minghan的博客 (Alt + H)">Minghan的博客</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" class="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg class="sun" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu" class="menu">
+            <li>
+                <a href="http://localhost:1313/posts/" title="文章">
+                    <span>文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/archives/" title="归档">
+                    <span>归档</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/categories/" title="分类">
+                    <span>分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="标签">
+                    <span>标签</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/moments/" title="随记">
+                    <span>随记</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/photos/" title="照片墙">
+                    <span>照片墙</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/books/" title="阅读">
+                    <span>阅读</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/about/" title="关于">
+                    <span>关于</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <nav class="breadcrumbs" role="navigation" aria-label="Breadcrumb">
+            <a href="/">Home</a>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+            <a href="/posts/">Posts</a>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+        <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+</nav>
+    <h1 class="post-title entry-hint-parent">
+      Leetecode 二叉树(三)
+    </h1>
+    <div class="post-meta">
+
+<span title='2026-10-22 16:17:04 +0800 CST'>October 22, 2026</span>&nbsp;·&nbsp;<span>10 min</span>&nbsp;·&nbsp;<span>2126 words</span>
+
+</div>
+  </header> <details class="toc"  open>
+    <summary accesskey="c" title="(Alt + C)">
+        <span class="title">Table of Contents</span>
+    </summary>
+
+    <div class="inner"><ul>
+            <li>
+                <a href="#%e4%b8%80%e6%9c%89%e9%80%92%e6%9c%89%e5%bd%92" aria-label="一、有递有归">一、有递有归</a><ul>
+                    
+            <li>
+                <a href="#49-%e6%8a%8a%e4%ba%8c%e5%8f%89%e6%90%9c%e7%b4%a2%e6%a0%91%e8%bd%ac%e6%8d%a2%e4%b8%ba%e7%b4%af%e5%8a%a0%e6%a0%91" aria-label="49. 把二叉搜索树转换为累加树">49. 把二叉搜索树转换为累加树</a></li>
+            <li>
+                <a href="#50-%e5%85%b7%e6%9c%89%e6%89%80%e6%9c%89%e6%9c%80%e6%b7%b1%e8%8a%82%e7%82%b9%e7%9a%84%e6%9c%80%e5%b0%8f%e5%ad%90%e6%a0%91" aria-label="50. 具有所有最深节点的最小子树">50. 具有所有最深节点的最小子树</a></li>
+            <li>
+                <a href="#51-%e6%a0%b9%e5%88%b0%e5%8f%b6%e8%b7%af%e5%be%84%e4%b8%8a%e7%9a%84%e4%b8%8d%e8%b6%b3%e8%8a%82%e7%82%b9" aria-label="51. 根到叶路径上的不足节点">51. 根到叶路径上的不足节点</a></li></ul>
+            </li>
+            <li>
+                <a href="#%e4%ba%8c%e4%ba%8c%e5%8f%89%e6%a0%91%e7%9a%84%e7%9b%b4%e5%be%84" aria-label="二、二叉树的直径">二、二叉树的直径</a><ul>
+                    
+            <li>
+                <a href="#52-%e4%ba%8c%e5%8f%89%e6%a0%91%e7%9a%84%e7%9b%b4%e5%be%84" aria-label="52. 二叉树的直径">52. 二叉树的直径</a></li>
+            <li>
+                <a href="#53-%e6%9c%80%e9%95%bf%e5%90%8c%e5%80%bc%e8%b7%af%e5%be%84" aria-label="53. 最长同值路径">53. 最长同值路径</a></li>
+            <li>
+                <a href="#54-%e4%ba%8c%e5%8f%89%e6%a0%91%e4%b8%ad%e7%9a%84%e6%9c%80%e5%a4%a7%e8%b7%af%e5%be%84%e5%92%8c" aria-label="54. 二叉树中的最大路径和">54. 二叉树中的最大路径和</a></li>
+            <li>
+                <a href="#55-%e6%84%9f%e6%9f%93%e4%ba%8c%e5%8f%89%e6%a0%91%e9%9c%80%e8%a6%81%e7%9a%84%e6%80%bb%e6%97%b6%e9%97%b4" aria-label="55. 感染二叉树需要的总时间">55. 感染二叉树需要的总时间</a></li></ul>
+            </li>
+            <li>
+                <a href="#%e4%b8%89%e5%9b%9e%e6%ba%af" aria-label="三、回溯">三、回溯</a><ul>
+                    
+            <li>
+                <a href="#56-%e4%ba%8c%e5%8f%89%e6%a0%91%e7%9a%84%e6%89%80%e6%9c%89%e8%b7%af%e5%be%84" aria-label="56. 二叉树的所有路径">56. 二叉树的所有路径</a></li>
+            <li>
+                <a href="#57-%e8%b7%af%e5%be%84%e6%80%bb%e5%92%8c-ii" aria-label="57. 路径总和 II">57. 路径总和 II</a></li>
+            <li>
+                <a href="#58-%e4%ba%8c%e5%8f%89%e6%a0%91%e4%b8%ad%e7%9a%84%e4%bc%aa%e5%9b%9e%e6%96%87%e8%b7%af%e5%be%84" aria-label="58. 二叉树中的伪回文路径">58. 二叉树中的伪回文路径</a></li>
+            <li>
+                <a href="#59-%e8%b7%af%e5%be%84%e6%80%bb%e5%92%8c-iii" aria-label="59. 路径总和 III">59. 路径总和 III</a></li>
+            <li>
+                <a href="#60-%e4%ba%8c%e5%8f%89%e6%90%9c%e7%b4%a2%e6%a0%91%e7%9a%84%e6%9c%80%e8%bf%91%e5%85%ac%e5%85%b1%e7%a5%96%e5%85%88" aria-label="60. 二叉搜索树的最近公共祖先">60. 二叉搜索树的最近公共祖先</a></li>
+            <li>
+                <a href="#61-%e4%ba%8c%e5%8f%89%e6%a0%91%e7%9a%84%e6%9c%80%e8%bf%91%e5%85%ac%e5%85%b1%e7%a5%96%e5%85%88" aria-label="61. 二叉树的最近公共祖先">61. 二叉树的最近公共祖先</a></li>
+            <li>
+                <a href="#62-%e6%9c%80%e6%b7%b1%e5%8f%b6%e8%8a%82%e7%82%b9%e7%9a%84%e6%9c%80%e8%bf%91%e5%85%ac%e5%85%b1%e7%a5%96%e5%85%88" aria-label="62. 最深叶节点的最近公共祖先">62. 最深叶节点的最近公共祖先</a></li>
+            <li>
+                <a href="#63-%e4%bb%8e%e4%ba%8c%e5%8f%89%e6%a0%91%e4%b8%80%e4%b8%aa%e8%8a%82%e7%82%b9%e5%88%b0%e5%8f%a6%e4%b8%80%e4%b8%aa%e8%8a%82%e7%82%b9%e6%af%8f%e4%b8%80%e6%ad%a5%e7%9a%84%e6%96%b9%e5%90%91" aria-label="63. 从二叉树一个节点到另一个节点每一步的方向">63. 从二叉树一个节点到另一个节点每一步的方向</a></li></ul>
+            </li>
+            <li>
+                <a href="#%e5%9b%9b%e4%ba%8c%e5%8f%89%e6%90%9c%e7%b4%a2%e6%a0%91" aria-label="四、二叉搜索树">四、二叉搜索树</a><ul>
+                    
+            <li>
+                <a href="#64-%e4%ba%8c%e5%8f%89%e6%90%9c%e7%b4%a2%e6%a0%91%e4%b8%ad%e7%9a%84%e6%90%9c%e7%b4%a2" aria-label="64. 二叉搜索树中的搜索">64. 二叉搜索树中的搜索</a></li>
+            <li>
+                <a href="#65-%e4%ba%8c%e5%8f%89%e6%90%9c%e7%b4%a2%e6%a0%91%e7%9a%84%e6%9c%80%e5%b0%8f%e7%bb%9d%e5%af%b9%e5%b7%ae" aria-label="65. 二叉搜索树的最小绝对差">65. 二叉搜索树的最小绝对差</a></li>
+            <li>
+                <a href="#66-%e4%ba%8c%e5%8f%89%e6%90%9c%e7%b4%a2%e6%a0%91%e7%9a%84%e8%8c%83%e5%9b%b4%e5%92%8c" aria-label="66. 二叉搜索树的范围和">66. 二叉搜索树的范围和</a></li>
+            <li>
+                <a href="#67-%e4%ba%8c%e5%8f%89%e6%90%9c%e7%b4%a2%e6%a0%91%e4%b8%ad%e7%9a%84%e4%bc%97%e6%95%b0" aria-label="67. 二叉搜索树中的众数">67. 二叉搜索树中的众数</a></li>
+            <li>
+                <a href="#68-%e4%ba%8c%e5%8f%89%e6%90%9c%e7%b4%a2%e6%a0%91%e4%b8%ad%e7%ac%ac-k-%e5%b0%8f%e7%9a%84%e5%85%83%e7%b4%a0" aria-label="68. 二叉搜索树中第 K 小的元素">68. 二叉搜索树中第 K 小的元素</a></li>
+            <li>
+                <a href="#69-%e9%aa%8c%e8%af%81%e4%ba%8c%e5%8f%89%e6%90%9c%e7%b4%a2%e6%a0%91" aria-label="69. 验证二叉搜索树">69. 验证二叉搜索树</a></li>
+            <li>
+                <a href="#70-%e4%b8%a4%e6%a3%b5%e4%ba%8c%e5%8f%89%e6%90%9c%e7%b4%a2%e6%a0%91%e4%b8%ad%e7%9a%84%e6%89%80%e6%9c%89%e5%85%83%e7%b4%a0" aria-label="70. 两棵二叉搜索树中的所有元素">70. 两棵二叉搜索树中的所有元素</a></li>
+            <li>
+                <a href="#71-%e6%81%a2%e5%a4%8d%e4%ba%8c%e5%8f%89%e6%90%9c%e7%b4%a2%e6%a0%91%e9%87%8d%e7%82%b9" aria-label="71. 恢复二叉搜索树（重点）">71. 恢复二叉搜索树（重点）</a></li>
+            <li>
+                <a href="#72-%e9%80%92%e5%a2%9e%e9%a1%ba%e5%ba%8f%e6%90%9c%e7%b4%a2%e6%a0%91" aria-label="72. 递增顺序搜索树">72. 递增顺序搜索树</a></li>
+            <li>
+                <a href="#73-%e4%ba%8c%e5%8f%89%e6%90%9c%e7%b4%a2%e6%a0%91%e6%9c%80%e8%bf%91%e8%8a%82%e7%82%b9%e6%9f%a5%e8%af%a2" aria-label="73. 二叉搜索树最近节点查询">73. 二叉搜索树最近节点查询</a></li>
+            <li>
+                <a href="#74-%e4%b8%a4%e6%95%b0%e4%b9%8b%e5%92%8c-iv---%e8%be%93%e5%85%a5%e4%ba%8c%e5%8f%89%e6%90%9c%e7%b4%a2%e6%a0%91" aria-label="74. 两数之和 IV - 输入二叉搜索树">74. 两数之和 IV - 输入二叉搜索树</a></li>
+            <li>
+                <a href="#76-%e4%ba%8c%e5%8f%89%e6%90%9c%e7%b4%a2%e5%ad%90%e6%a0%91%e7%9a%84%e6%9c%80%e5%a4%a7%e9%94%ae%e5%80%bc%e5%92%8chard" aria-label="76. 二叉搜索子树的最大键值和（Hard）">76. 二叉搜索子树的最大键值和（Hard）</a></li>
+            <li>
+                <a href="#77-%e5%90%88%e5%b9%b6%e5%a4%9a%e6%a3%b5%e4%ba%8c%e5%8f%89%e6%90%9c%e7%b4%a2%e6%a0%91hard" aria-label="77. 合并多棵二叉搜索树（Hard）">77. 合并多棵二叉搜索树（Hard）</a>
+            </li>
+        </ul>
+        </li>
+        </ul>
+    </div>
+</details>
+
+  <div class="post-content md-content"><h1 id="一有递有归"><strong>一、有递有归</strong><a hidden class="anchor" aria-hidden="true" href="#一有递有归">#</a></h1>
+<h2 id="49-把二叉搜索树转换为累加树">49. <strong>把二叉搜索树转换为累加树</strong><a hidden class="anchor" aria-hidden="true" href="#49-把二叉搜索树转换为累加树">#</a></h2>
+<p>这道题目要求将BST右侧的节点之和加到当前节点。</p>
+<p>使用一个全局变量s记录当前和，按右-中-左的顺序遍历BST，将s加到当前节点中。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Solution</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">TreeNode</span><span class="o">*</span> <span class="n">convertBST</span><span class="p">(</span><span class="n">TreeNode</span><span class="o">*</span> <span class="n">root</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">s</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// 返回子树之和
+</span></span></span><span class="line"><span class="cl">        <span class="k">auto</span> <span class="n">dfs</span> <span class="o">=</span> <span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="k">auto</span><span class="o">&amp;&amp;</span> <span class="n">self</span><span class="p">,</span> <span class="n">TreeNode</span><span class="o">*</span> <span class="n">node</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">node</span><span class="p">)</span> <span class="k">return</span> <span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="n">s</span> <span class="o">+=</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">node</span><span class="o">-&gt;</span><span class="n">val</span> <span class="o">=</span> <span class="n">s</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">dfs</span><span class="p">(</span><span class="n">dfs</span><span class="p">,</span> <span class="n">root</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">root</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></div><h2 id="50-具有所有最深节点的最小子树">50. <strong>具有所有最深节点的最小子树</strong><a hidden class="anchor" aria-hidden="true" href="#50-具有所有最深节点的最小子树">#</a></h2>
+<blockquote>
+<p>二叉树深度和高度的区别：<strong>深度</strong>指从<strong>根节点到某个节点的路径长度</strong>（边数），或节点层数（根为第1层时）。<strong>高度</strong>指从<strong>某个节点到其最远叶子节点的路径长度</strong>（边数）。</p>
+</blockquote>
+<p>这道题目的题目描述有点stupid，翻译一下：找最深节点的最近公共祖先（LCA）。</p>
+<p>我们可以使用DFS递归实现，在递的过程中记录当前层次的深度，并通过全局变量max_depth记录最大深度，在归的过程中如果发现左右子树的深度相同且等于全局最大深度，当前节点就是满足条件的子树。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Solution</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">TreeNode</span><span class="o">*</span> <span class="n">subtreeWithAllDeepest</span><span class="p">(</span><span class="n">TreeNode</span><span class="o">*</span> <span class="n">root</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// 在递的过程中计算最大深度，在归的过程中找最深叶子的LCA
+</span></span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">max_depth</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">TreeNode</span><span class="o">*</span> <span class="n">ans</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        
+</span></span><span class="line"><span class="cl">        <span class="c1">// 返回左右子树中叶子的最大
+</span></span></span><span class="line"><span class="cl">        <span class="k">auto</span> <span class="n">dfs</span> <span class="o">=</span> <span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="k">auto</span><span class="o">&amp;&amp;</span> <span class="n">self</span><span class="p">,</span> <span class="n">TreeNode</span><span class="o">*</span> <span class="n">node</span><span class="p">,</span> <span class="kt">int</span> <span class="n">depth</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">node</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">// max_depth会记录全部叶子中的最大深度
+</span></span></span><span class="line"><span class="cl">                <span class="n">max_depth</span> <span class="o">=</span> <span class="n">max</span><span class="p">(</span><span class="n">max_depth</span><span class="p">,</span> <span class="n">depth</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="k">return</span> <span class="n">depth</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="kt">int</span> <span class="n">l</span> <span class="o">=</span> <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">,</span> <span class="n">depth</span><span class="o">+</span><span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="kt">int</span> <span class="n">r</span> <span class="o">=</span> <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">,</span> <span class="n">depth</span><span class="o">+</span><span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">l</span> <span class="o">==</span> <span class="n">r</span> <span class="o">&amp;&amp;</span> <span class="n">l</span> <span class="o">==</span> <span class="n">max_depth</span><span class="p">)</span> <span class="n">ans</span> <span class="o">=</span> <span class="n">node</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="nf">max</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">r</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">dfs</span><span class="p">(</span><span class="n">dfs</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">ans</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></div><h2 id="51-根到叶路径上的不足节点">51. <strong>根到叶路径上的不足节点</strong><a hidden class="anchor" aria-hidden="true" href="#51-根到叶路径上的不足节点">#</a></h2>
+<p>思路：“递”计算路径和，“归”判断不足节点并删除</p>
+<ul>
+<li>在“递”的过程中：不断用limit减去当前节点的值（等价于计算从根到叶子的路径和）。</li>
+<li>在“归”的过程中：
+<ul>
+<li>当遇到叶子时判断limit是否大于0，如果是表示当前路径和小于limit，是需要被删除的不足节点，返回nullptr；否则不需要被删除，返回当前节点。</li>
+<li>对于非叶子节点，如果只有其左右子树均被删除时才选择将其删除</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Solution</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">TreeNode</span><span class="o">*</span> <span class="n">sufficientSubset</span><span class="p">(</span><span class="n">TreeNode</span><span class="o">*</span> <span class="n">root</span><span class="p">,</span> <span class="kt">int</span> <span class="n">limit</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">root</span><span class="p">)</span> <span class="k">return</span> <span class="k">nullptr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">limit</span> <span class="o">-=</span> <span class="n">root</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">left</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="n">limit</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">?</span> <span class="k">nullptr</span> <span class="o">:</span> <span class="n">root</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">				
+</span></span><span class="line"><span class="cl">        <span class="n">root</span><span class="o">-&gt;</span><span class="n">left</span> <span class="o">=</span> <span class="n">sufficientSubset</span><span class="p">(</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">,</span> <span class="n">limit</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">root</span><span class="o">-&gt;</span><span class="n">right</span> <span class="o">=</span> <span class="n">sufficientSubset</span><span class="p">(</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">,</span> <span class="n">limit</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">				
+</span></span><span class="line"><span class="cl">				<span class="c1">// 只有左右子树均是不足节点才删除
+</span></span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">root</span><span class="o">-&gt;</span><span class="n">left</span> <span class="o">||</span> <span class="n">root</span><span class="o">-&gt;</span><span class="n">right</span> <span class="o">?</span> <span class="nl">root</span> <span class="p">:</span> <span class="k">nullptr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></div><h1 id="二二叉树的直径">二、<strong>二叉树的直径</strong><a hidden class="anchor" aria-hidden="true" href="#二二叉树的直径">#</a></h1>
+<h2 id="52-二叉树的直径">52. <strong>二叉树的直径</strong><a hidden class="anchor" aria-hidden="true" href="#52-二叉树的直径">#</a></h2>
+<p>思路：自底向上DFS遍历二叉树，先求出左右子树的最大高度，用两者之和（直径）更新ans，最后返回当前子树的最大高度，即左右子树高度较大者 + 1。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Solution</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">diameterOfBinaryTree</span><span class="p">(</span><span class="n">TreeNode</span><span class="o">*</span> <span class="n">root</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">ans</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        
+</span></span><span class="line"><span class="cl">        <span class="c1">// 返回子树node到最深叶子的边长
+</span></span></span><span class="line"><span class="cl">        <span class="k">auto</span> <span class="n">dfs</span> <span class="o">=</span> <span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="k">auto</span><span class="o">&amp;&amp;</span> <span class="n">self</span><span class="p">,</span> <span class="n">TreeNode</span><span class="o">*</span> <span class="n">node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">node</span><span class="p">)</span> <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="kt">int</span> <span class="n">l</span> <span class="o">=</span> <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="kt">int</span> <span class="n">r</span> <span class="o">=</span> <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="n">ans</span> <span class="o">=</span> <span class="n">max</span><span class="p">(</span><span class="n">ans</span><span class="p">,</span> <span class="n">l</span> <span class="o">+</span> <span class="n">r</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="nf">max</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">dfs</span><span class="p">(</span><span class="n">dfs</span><span class="p">,</span> <span class="n">root</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">ans</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></div><h2 id="53-最长同值路径">53. <strong>最长同值路径</strong><a hidden class="anchor" aria-hidden="true" href="#53-最长同值路径">#</a></h2>
+<p>自底向上DFS，在归的过程中计算最长同值路径：</p>
+<ul>
+<li>返回值表示子树node下方中与根节点值相同且连续的节点数（不包括node节点）</li>
+<li>l和r为左右子树递归结果+1，表示算上当前节点的最长路径</li>
+<li>如果当前节点的值与左子树的值不同，左子树的最长同值路径设置为0</li>
+<li>如果当前节点的值与右子树的值不同，右子树的最长同值路径设置为0</li>
+</ul>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Solution</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">longestUnivaluePath</span><span class="p">(</span><span class="n">TreeNode</span><span class="o">*</span> <span class="n">root</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">ans</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">// dfs返回子树node下方中与根节点值相同且相连的连续节点数（不包括node节点）
+</span></span></span><span class="line"><span class="cl">        <span class="k">auto</span> <span class="n">dfs</span> <span class="o">=</span> <span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="k">auto</span><span class="o">&amp;&amp;</span> <span class="n">self</span><span class="p">,</span> <span class="n">TreeNode</span><span class="o">*</span> <span class="n">node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">node</span><span class="p">)</span> <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="c1">// 表示算上当前节点
+</span></span></span><span class="line"><span class="cl">            <span class="kt">int</span> <span class="n">l</span> <span class="o">=</span> <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="kt">int</span> <span class="n">r</span> <span class="o">=</span> <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">l</span> <span class="o">&amp;&amp;</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">left</span><span class="o">-&gt;</span><span class="n">val</span> <span class="o">!=</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">)</span> <span class="n">l</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">r</span> <span class="o">&amp;&amp;</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">right</span><span class="o">-&gt;</span><span class="n">val</span> <span class="o">!=</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">)</span> <span class="n">r</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            
+</span></span><span class="line"><span class="cl">            <span class="n">ans</span> <span class="o">=</span> <span class="n">max</span><span class="p">(</span><span class="n">ans</span><span class="p">,</span> <span class="n">l</span> <span class="o">+</span> <span class="n">r</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="nf">max</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">r</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">dfs</span><span class="p">(</span><span class="n">dfs</span><span class="p">,</span> <span class="n">root</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">ans</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></div><h2 id="54-二叉树中的最大路径和">54. <strong>二叉树中的最大路径和</strong><a hidden class="anchor" aria-hidden="true" href="#54-二叉树中的最大路径和">#</a></h2>
+<p>自底向上DFS，先分别递归计算左右子树的路径和，然后与当前节点值求和，并更新ans。</p>
+<p>注意：这里的路径不要求必须经过叶子节点，因此如果子树的路径和小于0，需要将其断开，即返回0。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Solution</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">maxPathSum</span><span class="p">(</span><span class="n">TreeNode</span><span class="o">*</span> <span class="n">root</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">ans</span> <span class="o">=</span> <span class="n">INT_MIN</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">auto</span> <span class="n">dfs</span> <span class="o">=</span> <span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="k">auto</span><span class="o">&amp;&amp;</span> <span class="n">self</span><span class="p">,</span> <span class="n">TreeNode</span><span class="o">*</span> <span class="n">node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">node</span><span class="p">)</span> <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="kt">int</span> <span class="n">sum_left</span> <span class="o">=</span> <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="kt">int</span> <span class="n">sum_right</span> <span class="o">=</span> <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            
+</span></span><span class="line"><span class="cl">            <span class="c1">// 记录以当前节点为根节点的最大路径和
+</span></span></span><span class="line"><span class="cl">            <span class="n">ans</span> <span class="o">=</span> <span class="n">max</span><span class="p">(</span><span class="n">ans</span><span class="p">,</span> <span class="n">sum_left</span> <span class="o">+</span> <span class="n">sum_right</span> <span class="o">+</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            
+</span></span><span class="line"><span class="cl">            <span class="c1">// dfs返回的是以当前节点为根节点的，最大直径和
+</span></span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="nf">max</span><span class="p">(</span><span class="n">max</span><span class="p">(</span><span class="n">sum_left</span><span class="p">,</span> <span class="n">sum_right</span><span class="p">)</span> <span class="o">+</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">};</span>
+</span></span><span class="line"><span class="cl">        <span class="n">dfs</span><span class="p">(</span><span class="n">dfs</span><span class="p">,</span> <span class="n">root</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">ans</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></div><h2 id="55-感染二叉树需要的总时间">55. <strong>感染二叉树需要的总时间</strong><a hidden class="anchor" aria-hidden="true" href="#55-感染二叉树需要的总时间">#</a></h2>
+<p>将问题转化一下：感染二叉树所需的总时间 = 从值为start的节点到其他任意节点的最大长度。</p>
+<blockquote>
+<p>归的过程中需要根据返回值确定start的位置。</p>
+</blockquote>
+<p>本题算法如下：</p>
+<ol>
+<li>递归时，除了返回当前子树的最大链长，还需要返回一个布尔值，表示当前子树是否包含 start。</li>
+<li>如果当前节点是空节点，返回 0 和 false。</li>
+<li>设左子树的返回的链长为 lLen，右子树返回的链长为 rLen。</li>
+<li>如果当前节点值等于 start，初始化答案为 max(lLen,rLen)，即子树 start 的最大深度。然后返回 1 和 true。</li>
+<li>如果左右子树都不包含 start，返回 max(lLen,rLen)+1。</li>
+<li>如果左子树或右子树包含 start，像计算直径那样，用 lLen+rLen 更新答案的最大值。如果左子树包含 start，则返回 lLen 和 true，否则返回 rLen 和 true。这种返回方式可以保证 lLen+rLen 一定是端点为 start 的直径长度。</li>
+</ol>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Solution</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">amountOfTime</span><span class="p">(</span><span class="n">TreeNode</span><span class="o">*</span> <span class="n">root</span><span class="p">,</span> <span class="kt">int</span> <span class="n">start</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">ans</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        
+</span></span><span class="line"><span class="cl">        <span class="k">auto</span> <span class="n">dfs</span> <span class="o">=</span> <span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="k">auto</span><span class="o">&amp;&amp;</span> <span class="n">self</span><span class="p">,</span> <span class="n">TreeNode</span><span class="o">*</span> <span class="n">node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pair</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span> <span class="kt">bool</span><span class="o">&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">node</span><span class="p">)</span> <span class="k">return</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="nb">false</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="k">auto</span> <span class="p">[</span><span class="n">l_len</span><span class="p">,</span> <span class="n">l_found</span><span class="p">]</span> <span class="o">=</span> <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="k">auto</span> <span class="p">[</span><span class="n">r_len</span><span class="p">,</span> <span class="n">r_found</span><span class="p">]</span> <span class="o">=</span> <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="c1">// 如果当前节点就是start节点，更新ans为最大高度，向上返回1
+</span></span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">node</span><span class="o">-&gt;</span><span class="n">val</span> <span class="o">==</span> <span class="n">start</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">ans</span> <span class="o">=</span> <span class="n">max</span><span class="p">(</span><span class="n">l_len</span><span class="p">,</span> <span class="n">r_len</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="k">return</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="nb">true</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="c1">// 左右子树中存在start节点，更新结果，并返回从当前节点到start节点的高度
+</span></span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">l_found</span> <span class="o">||</span> <span class="n">r_found</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">ans</span> <span class="o">=</span> <span class="n">max</span><span class="p">(</span><span class="n">ans</span><span class="p">,</span> <span class="n">l_len</span> <span class="o">+</span> <span class="n">r_len</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="k">return</span> <span class="p">{(</span><span class="n">l_found</span> <span class="o">?</span> <span class="nl">l_len</span><span class="p">:</span> <span class="n">r_len</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="nb">true</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">						
+</span></span><span class="line"><span class="cl">            <span class="c1">// 如果左右子树中均不存在start节点，直接返回高度
+</span></span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="p">{</span><span class="n">max</span><span class="p">(</span><span class="n">l_len</span><span class="p">,</span> <span class="n">r_len</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">false</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl">        <span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">dfs</span><span class="p">(</span><span class="n">dfs</span><span class="p">,</span> <span class="n">root</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">ans</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></div><h1 id="三回溯">三、回溯<a hidden class="anchor" aria-hidden="true" href="#三回溯">#</a></h1>
+<h2 id="56-二叉树的所有路径">56. <strong>二叉树的所有路径</strong><a hidden class="anchor" aria-hidden="true" href="#56-二叉树的所有路径">#</a></h2>
+<p>自顶向下DFS，使用参数path记录从根到叶子的路径，到达叶子时将其加入ans中。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Solution</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">vector</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">binaryTreePaths</span><span class="p">(</span><span class="n">TreeNode</span><span class="o">*</span> <span class="n">root</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">vector</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">ans</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">auto</span> <span class="n">dfs</span> <span class="o">=</span> <span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="k">auto</span><span class="o">&amp;&amp;</span> <span class="n">self</span><span class="p">,</span> <span class="n">TreeNode</span><span class="o">*</span> <span class="n">node</span><span class="p">,</span> <span class="n">string</span> <span class="n">path</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">node</span><span class="p">)</span> <span class="k">return</span> <span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">node</span><span class="o">-&gt;</span><span class="n">left</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">node</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">path</span> <span class="o">+=</span> <span class="n">to_string</span><span class="p">(</span><span class="n">node</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="n">ans</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">path</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="k">return</span> <span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="n">path</span> <span class="o">+=</span> <span class="n">to_string</span><span class="p">(</span><span class="n">node</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#34;-&gt;&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">,</span> <span class="n">path</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">,</span> <span class="n">path</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">dfs</span><span class="p">(</span><span class="n">dfs</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="s">&#34;&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">ans</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></div><h2 id="57-路径总和-ii">57. <strong>路径总和 II</strong><a hidden class="anchor" aria-hidden="true" href="#57-路径总和-ii">#</a></h2>
+<p>自顶向下DFS，使用一个vector变量path记录当前路径：</p>
+<ul>
+<li>若当前节点为空，直接返回；否则将节点值加入和sum，并将节点值加入path。</li>
+<li>若当前节点为叶子，且路径总和为targetSum，将该路径加入ans中。</li>
+<li>否则，向下递归左右子树。</li>
+<li>最后在回溯的时候（即“归”的时候）将当前节点从path中剔除。</li>
+</ul>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Solution</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">vector</span><span class="o">&lt;</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;</span> <span class="n">pathSum</span><span class="p">(</span><span class="n">TreeNode</span><span class="o">*</span> <span class="n">root</span><span class="p">,</span> <span class="kt">int</span> <span class="n">targetSum</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">vector</span><span class="o">&lt;</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;</span> <span class="n">ans</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">path</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        
+</span></span><span class="line"><span class="cl">        <span class="k">auto</span> <span class="n">dfs</span> <span class="o">=</span> <span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="k">auto</span><span class="o">&amp;&amp;</span> <span class="n">self</span><span class="p">,</span> <span class="n">TreeNode</span><span class="o">*</span> <span class="n">node</span><span class="p">,</span> <span class="kt">int</span> <span class="n">sum</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">node</span><span class="p">)</span> <span class="k">return</span> <span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="c1">// 在递的过程中记录路径到path，记录当前路径和到sum
+</span></span></span><span class="line"><span class="cl">            <span class="n">path</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">node</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="n">sum</span> <span class="o">+=</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">node</span><span class="o">-&gt;</span><span class="n">left</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">node</span><span class="o">-&gt;</span><span class="n">right</span> <span class="o">&amp;&amp;</span> <span class="n">sum</span> <span class="o">==</span> <span class="n">targetSum</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">// 到达叶子，路径和正好为targetSum，记录该path
+</span></span></span><span class="line"><span class="cl">                <span class="n">ans</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">path</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">// 否则继续向后递归
+</span></span></span><span class="line"><span class="cl">                <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">,</span> <span class="n">sum</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">,</span> <span class="n">sum</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            
+</span></span><span class="line"><span class="cl">            <span class="c1">// 从当前层退出时要回溯path
+</span></span></span><span class="line"><span class="cl">            <span class="n">path</span><span class="p">.</span><span class="n">pop_back</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">dfs</span><span class="p">(</span><span class="n">dfs</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">ans</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></div><h2 id="58-二叉树中的伪回文路径">58. <strong>二叉树中的伪回文路径</strong><a hidden class="anchor" aria-hidden="true" href="#58-二叉树中的伪回文路径">#</a></h2>
+<p>题目给出了一个前提：每个节点的值为 1 到 9 。</p>
+<p>因此可以创建一个长度为10的整形数组，记录路径中元素值[1, 9]出现的次数，这可以被优化为对1求异或。</p>
+<ul>
+<li>如果当前节点为叶子，检查数组之和是否小于2，如果是表示该路径为伪回文路径；否则当前叶子不是回文路径。</li>
+<li>如果当前节点为分支节点，则递归找到左右子树中的回文路径数</li>
+</ul>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Solution</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">pseudoPalindromicPaths</span><span class="p">(</span><span class="n">TreeNode</span><span class="o">*</span> <span class="n">root</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">p</span><span class="p">[</span><span class="mi">10</span><span class="p">]{};</span>
+</span></span><span class="line"><span class="cl">        <span class="k">auto</span> <span class="n">dfs</span> <span class="o">=</span> <span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="k">auto</span><span class="o">&amp;&amp;</span> <span class="n">self</span><span class="p">,</span> <span class="n">TreeNode</span><span class="o">*</span> <span class="n">node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">node</span> <span class="o">==</span> <span class="k">nullptr</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            
+</span></span><span class="line"><span class="cl">            <span class="c1">// 修改 node-&gt;val 出现次数的奇偶性
+</span></span></span><span class="line"><span class="cl">            <span class="n">p</span><span class="p">[</span><span class="n">node</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">]</span> <span class="o">^=</span> <span class="mi">1</span><span class="p">;</span> 
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="kt">int</span> <span class="n">res</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">node</span><span class="o">-&gt;</span><span class="n">left</span> <span class="o">==</span> <span class="k">nullptr</span> <span class="o">&amp;&amp;</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">right</span> <span class="o">==</span> <span class="k">nullptr</span><span class="p">)</span> <span class="p">{</span> 
+</span></span><span class="line"><span class="cl">		            <span class="c1">// node 是叶子节点
+</span></span></span><span class="line"><span class="cl">                <span class="n">res</span> <span class="o">=</span> <span class="n">reduce</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">p</span> <span class="o">+</span> <span class="mi">10</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">res</span> <span class="o">=</span> <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">)</span> <span class="o">+</span> <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            
+</span></span><span class="line"><span class="cl">            <span class="c1">// 恢复到递归 node 之前的状态（不做这一步就把 node-&gt;val 算到其它路径中了）
+</span></span></span><span class="line"><span class="cl">            <span class="n">p</span><span class="p">[</span><span class="n">node</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">]</span> <span class="o">^=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="n">res</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">};</span>
+</span></span><span class="line"><span class="cl">        
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nf">dfs</span><span class="p">(</span><span class="n">dfs</span><span class="p">,</span> <span class="n">root</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></div><h2 id="59-路径总和-iii">59. <strong>路径总和 III</strong><a hidden class="anchor" aria-hidden="true" href="#59-路径总和-iii">#</a></h2>
+<p>题目要求找到所有和为targetSum的从上到下的连续路径，如果把树视为一组由根到叶子的路径构成的数组，找这样的连续路径就相当于在数组中找区间和为targetSum的区间数量。</p>
+<p>考虑前缀和的思路，区间[l, r]的和为[0, r]的前缀和减去[0, l-1]的前缀和。在“递”的过程中将不同前缀和出现的次数记录在一个哈希表中，对于一个新节点，如果当前前缀和cur，ans += mp[cur - targetSum] 就记录了以当前节点为右端点且和为targetSum的的区间数量。</p>
+<p>注意在向下递归完毕后，要将当前前缀合从哈希表中剔除。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Solution</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">pathSum</span><span class="p">(</span><span class="n">TreeNode</span><span class="o">*</span> <span class="n">root</span><span class="p">,</span> <span class="kt">int</span> <span class="n">targetSum</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">root</span><span class="p">)</span> <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">ans</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">unordered_map</span><span class="o">&lt;</span><span class="kt">long</span><span class="p">,</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">mp</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">mp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>   <span class="c1">// 空前缀，处理&#34;从根开始的路径&#34;
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">auto</span> <span class="n">dfs</span> <span class="o">=</span> <span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="k">auto</span><span class="o">&amp;&amp;</span> <span class="n">self</span><span class="p">,</span> <span class="n">TreeNode</span><span class="o">*</span> <span class="n">node</span><span class="p">,</span> <span class="kt">long</span> <span class="n">cur</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">node</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">cur</span> <span class="o">+=</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">;</span>                    <span class="c1">// 当前节点前缀和
+</span></span></span><span class="line"><span class="cl">            <span class="n">ans</span> <span class="o">+=</span> <span class="n">mp</span><span class="p">[</span><span class="n">cur</span> <span class="o">-</span> <span class="n">targetSum</span><span class="p">];</span>          <span class="c1">// 统计以 node 结尾的合法路径
+</span></span></span><span class="line"><span class="cl">            <span class="n">mp</span><span class="p">[</span><span class="n">cur</span><span class="p">]</span><span class="o">++</span><span class="p">;</span>                           <span class="c1">// 加入当前前缀
+</span></span></span><span class="line"><span class="cl">            <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">,</span>  <span class="n">cur</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">,</span> <span class="n">cur</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="n">mp</span><span class="p">[</span><span class="n">cur</span><span class="p">]</span><span class="o">--</span><span class="p">;</span>                           <span class="c1">// 回溯
+</span></span></span><span class="line"><span class="cl">        <span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">dfs</span><span class="p">(</span><span class="n">dfs</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">ans</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></div><h2 id="60-二叉搜索树的最近公共祖先">60. <strong>二叉搜索树的最近公共祖先</strong><a hidden class="anchor" aria-hidden="true" href="#60-二叉搜索树的最近公共祖先">#</a></h2>
+<p>题目给出root为一颗二叉搜索树，因此可以通过root与p、q的大小关系来确定p和q所处的位置。</p>
+<ul>
+<li>如果p和q的值均小于root，向左递归</li>
+<li>如果p和q的值均大于root，向右递归</li>
+<li>否则，当前节点就是p和q的最近公共祖先</li>
+</ul>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Solution</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">TreeNode</span><span class="o">*</span> <span class="n">lowestCommonAncestor</span><span class="p">(</span><span class="n">TreeNode</span><span class="o">*</span> <span class="n">root</span><span class="p">,</span> <span class="n">TreeNode</span><span class="o">*</span> <span class="n">p</span><span class="p">,</span> <span class="n">TreeNode</span><span class="o">*</span> <span class="n">q</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="n">root</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">p</span><span class="o">-&gt;</span><span class="n">val</span> <span class="o">&lt;</span> <span class="n">x</span> <span class="o">&amp;&amp;</span> <span class="n">q</span><span class="o">-&gt;</span><span class="n">val</span> <span class="o">&lt;</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span>  <span class="c1">// p和q均在根左侧
+</span></span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="nf">lowestCommonAncestor</span><span class="p">(</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span> 
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">p</span><span class="o">-&gt;</span><span class="n">val</span> <span class="o">&gt;</span> <span class="n">x</span> <span class="o">&amp;&amp;</span> <span class="n">q</span><span class="o">-&gt;</span><span class="n">val</span> <span class="o">&gt;</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span>  <span class="c1">// p和q均在根右侧
+</span></span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="nf">lowestCommonAncestor</span><span class="p">(</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">				
+</span></span><span class="line"><span class="cl">				<span class="c1">// p和q在根的左右或者就是根本身这两种情况都直接返回根
+</span></span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">root</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></div><h2 id="61-二叉树的最近公共祖先">61. <strong>二叉树的最近公共祖先</strong><a hidden class="anchor" aria-hidden="true" href="#61-二叉树的最近公共祖先">#</a></h2>
+<p>相比上一道题，这道题没有了BST有序的特性。</p>
+<ul>
+<li>当root为空或root值与p或q相同，直接返回root。</li>
+<li>递归尝试从左子树中找p和q的最近公共祖先。</li>
+<li>如果在左右子树分别找到了p和q，返回root。</li>
+<li>否则，返回存在的那一边。</li>
+</ul>
+<blockquote>
+<p>lowestCommonAncestor返回值是：如果在root中找到p或q就返回节点，没找到就返回nullptr。</p>
+</blockquote>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Solution</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">TreeNode</span><span class="o">*</span> <span class="n">lowestCommonAncestor</span><span class="p">(</span><span class="n">TreeNode</span><span class="o">*</span> <span class="n">root</span><span class="p">,</span> <span class="n">TreeNode</span><span class="o">*</span> <span class="n">p</span><span class="p">,</span> <span class="n">TreeNode</span><span class="o">*</span> <span class="n">q</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">root</span> <span class="o">||</span> <span class="n">p</span> <span class="o">==</span> <span class="n">root</span> <span class="o">||</span> <span class="n">q</span> <span class="o">==</span> <span class="n">root</span><span class="p">)</span> <span class="k">return</span> <span class="n">root</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">				
+</span></span><span class="line"><span class="cl">        <span class="n">TreeNode</span><span class="o">*</span> <span class="n">left</span> <span class="o">=</span> <span class="n">lowestCommonAncestor</span><span class="p">(</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">TreeNode</span><span class="o">*</span> <span class="n">right</span> <span class="o">=</span> <span class="n">lowestCommonAncestor</span><span class="p">(</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">left</span> <span class="o">&amp;&amp;</span> <span class="n">right</span><span class="p">)</span> <span class="k">return</span> <span class="n">root</span><span class="p">;</span>  <span class="c1">// 在左右子树分别找到p和q
+</span></span></span><span class="line"><span class="cl">				
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">left</span> <span class="o">?</span> <span class="nl">left</span> <span class="p">:</span> <span class="n">right</span> <span class="o">?</span> <span class="nl">right</span> <span class="p">:</span> <span class="k">nullptr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></div><h2 id="62-最深叶节点的最近公共祖先">62. <strong>最深叶节点的最近公共祖先</strong><a hidden class="anchor" aria-hidden="true" href="#62-最深叶节点的最近公共祖先">#</a></h2>
+<p>同50题。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Solution</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">TreeNode</span><span class="o">*</span> <span class="n">lcaDeepestLeaves</span><span class="p">(</span><span class="n">TreeNode</span><span class="o">*</span> <span class="n">root</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">max_depth</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">TreeNode</span><span class="o">*</span> <span class="n">ans</span> <span class="o">=</span> <span class="k">nullptr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">auto</span> <span class="n">dfs</span> <span class="o">=</span> <span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="k">auto</span><span class="o">&amp;&amp;</span> <span class="n">self</span><span class="p">,</span> <span class="n">TreeNode</span><span class="o">*</span> <span class="n">node</span><span class="p">,</span> <span class="kt">int</span> <span class="n">depth</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">// 递的过程中记录最大深度
+</span></span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">node</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">max_depth</span> <span class="o">=</span> <span class="n">max</span><span class="p">(</span><span class="n">max_depth</span><span class="p">,</span> <span class="n">depth</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="k">return</span> <span class="n">depth</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="kt">int</span> <span class="n">l</span> <span class="o">=</span> <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">,</span> <span class="n">depth</span><span class="o">+</span><span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="kt">int</span> <span class="n">r</span> <span class="o">=</span> <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">,</span> <span class="n">depth</span><span class="o">+</span><span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="c1">// 归的过程中记录结果
+</span></span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">l</span> <span class="o">==</span> <span class="n">max_depth</span> <span class="o">&amp;&amp;</span> <span class="n">r</span> <span class="o">==</span> <span class="n">max_depth</span><span class="p">)</span> <span class="n">ans</span> <span class="o">=</span> <span class="n">node</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="nf">max</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">r</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">dfs</span><span class="p">(</span><span class="n">dfs</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">ans</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></div><h2 id="63-从二叉树一个节点到另一个节点每一步的方向">63. <strong>从二叉树一个节点到另一个节点每一步的方向</strong><a hidden class="anchor" aria-hidden="true" href="#63-从二叉树一个节点到另一个节点每一步的方向">#</a></h2>
+<p>较难，暂时掠过。</p>
+<h1 id="四二叉搜索树">四、二叉搜索树<a hidden class="anchor" aria-hidden="true" href="#四二叉搜索树">#</a></h1>
+<p>二叉搜索树（BST）的特点是：中序遍历序列有序。</p>
+<h2 id="64-二叉搜索树中的搜索">64. <strong>二叉搜索树中的搜索</strong><a hidden class="anchor" aria-hidden="true" href="#64-二叉搜索树中的搜索">#</a></h2>
+<p>根据BST的特性，可以快速搜索目标节点，思路类似二分查找。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Solution</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">TreeNode</span><span class="o">*</span> <span class="n">searchBST</span><span class="p">(</span><span class="n">TreeNode</span><span class="o">*</span> <span class="n">root</span><span class="p">,</span> <span class="kt">int</span> <span class="n">val</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">root</span><span class="p">)</span> <span class="k">return</span> <span class="k">nullptr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">val</span> <span class="o">==</span> <span class="n">val</span><span class="p">)</span> <span class="k">return</span> <span class="n">root</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">val</span> <span class="o">&lt;</span> <span class="n">root</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">)</span> <span class="k">return</span> <span class="n">searchBST</span><span class="p">(</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">,</span> <span class="n">val</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nf">searchBST</span><span class="p">(</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">,</span> <span class="n">val</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></div><h2 id="65-二叉搜索树的最小绝对差">65. <strong>二叉搜索树的最小绝对差</strong><a hidden class="anchor" aria-hidden="true" href="#65-二叉搜索树的最小绝对差">#</a></h2>
+<p>题目要求找：<strong>树中任意两不同节点值之间的最小差值</strong>。</p>
+<p>最小差值一定来自于BST中序遍历序列中两个相邻原素之差，所以可以用中序遍历BST，使用一个变量prev记录前驱的值，每次让prev和当前节点的值求差，然后更新结果。</p>
+<p>注意：为了避免编译错误，prev的初值要设置为INT_MIN / 2，而不是INT_MIN。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Solution</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">getMinimumDifference</span><span class="p">(</span><span class="n">TreeNode</span><span class="o">*</span> <span class="n">root</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">prev</span> <span class="o">=</span> <span class="n">INT_MIN</span> <span class="o">/</span> <span class="mi">2</span><span class="p">;</span> <span class="c1">// 节点值大于等于0
+</span></span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">ans</span> <span class="o">=</span> <span class="n">INT_MAX</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">auto</span> <span class="n">dfs</span> <span class="o">=</span> <span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="k">auto</span><span class="o">&amp;&amp;</span> <span class="n">self</span><span class="p">,</span> <span class="n">TreeNode</span><span class="o">*</span> <span class="n">node</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">node</span><span class="p">)</span> <span class="k">return</span> <span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="c1">// 中序遍历
+</span></span></span><span class="line"><span class="cl">            <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="n">ans</span> <span class="o">=</span> <span class="n">min</span><span class="p">(</span><span class="n">ans</span><span class="p">,</span> <span class="n">abs</span><span class="p">(</span><span class="n">node</span><span class="o">-&gt;</span><span class="n">val</span> <span class="o">-</span> <span class="n">prev</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">            <span class="n">prev</span> <span class="o">=</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">dfs</span><span class="p">(</span><span class="n">dfs</span><span class="p">,</span> <span class="n">root</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">ans</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></div><h2 id="66-二叉搜索树的范围和">66. <strong>二叉搜索树的范围和</strong><a hidden class="anchor" aria-hidden="true" href="#66-二叉搜索树的范围和">#</a></h2>
+<p>中序遍历，仅记录值在[low, high]之间的节点，并且当节点值大于high时剪枝，避免无效访问。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Solution</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">rangeSumBST</span><span class="p">(</span><span class="n">TreeNode</span><span class="o">*</span> <span class="n">root</span><span class="p">,</span> <span class="kt">int</span> <span class="n">low</span><span class="p">,</span> <span class="kt">int</span> <span class="n">high</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">ans</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">auto</span> <span class="n">dfs</span> <span class="o">=</span> <span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="k">auto</span><span class="o">&amp;&amp;</span> <span class="n">self</span><span class="p">,</span> <span class="n">TreeNode</span><span class="o">*</span> <span class="n">node</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">node</span><span class="p">)</span> <span class="k">return</span> <span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">node</span><span class="o">-&gt;</span><span class="n">val</span> <span class="o">&gt;</span> <span class="n">high</span><span class="p">)</span> <span class="k">return</span> <span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">low</span> <span class="o">&lt;=</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">val</span> <span class="o">&amp;&amp;</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">val</span> <span class="o">&lt;=</span> <span class="n">high</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">ans</span> <span class="o">+=</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">dfs</span><span class="p">(</span><span class="n">dfs</span><span class="p">,</span> <span class="n">root</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">ans</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></div><h2 id="67-二叉搜索树中的众数">67. <strong>二叉搜索树中的众数</strong><a hidden class="anchor" aria-hidden="true" href="#67-二叉搜索树中的众数">#</a></h2>
+<p><strong>法一：哈希表 + 遍历二叉树</strong></p>
+<p>使用一个哈希表记录树中每个值出现的次数，返回出现次数最多的值。</p>
+<p><strong>法二：中序遍历</strong></p>
+<p>使用一个指针prev记录中序遍历的前驱节点，在对中的处理中：</p>
+<ul>
+<li>如果prev为nullptr，说明当前节点为第一个节点，cnt置为1</li>
+</ul>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Solution</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">findMode</span><span class="p">(</span><span class="n">TreeNode</span><span class="o">*</span> <span class="n">root</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">ans</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">TreeNode</span><span class="o">*</span> <span class="n">prev</span> <span class="o">=</span> <span class="k">nullptr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">max_cnt</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">cnt</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">auto</span> <span class="n">dfs</span> <span class="o">=</span> <span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="k">auto</span><span class="o">&amp;&amp;</span> <span class="n">self</span><span class="p">,</span> <span class="n">TreeNode</span><span class="o">*</span> <span class="n">node</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">node</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            
+</span></span><span class="line"><span class="cl">            <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">prev</span><span class="p">)</span> <span class="p">{</span>  <span class="c1">// 根节点
+</span></span></span><span class="line"><span class="cl">                <span class="n">cnt</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span> <span class="k">else</span> <span class="nf">if</span> <span class="p">(</span><span class="n">prev</span><span class="o">-&gt;</span><span class="n">val</span> <span class="o">==</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// 重复节点
+</span></span></span><span class="line"><span class="cl">                <span class="n">cnt</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>      <span class="c1">// 遇到了前后不同的节点
+</span></span></span><span class="line"><span class="cl">                <span class="n">cnt</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="n">prev</span> <span class="o">=</span> <span class="n">node</span><span class="p">;</span>  <span class="c1">// 更新前驱节点
+</span></span></span><span class="line"><span class="cl">            
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">cnt</span> <span class="o">==</span> <span class="n">max_cnt</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">ans</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">node</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">);</span> <span class="c1">// 仅出现次数最多的节点
+</span></span></span><span class="line"><span class="cl">            <span class="p">}</span> <span class="k">else</span> <span class="nf">if</span> <span class="p">(</span><span class="n">cnt</span> <span class="o">&gt;</span> <span class="n">max_cnt</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">max_cnt</span> <span class="o">=</span> <span class="n">cnt</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                <span class="n">ans</span><span class="p">.</span><span class="n">clear</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">                <span class="n">ans</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">node</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            
+</span></span><span class="line"><span class="cl">            <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">dfs</span><span class="p">(</span><span class="n">dfs</span><span class="p">,</span> <span class="n">root</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">ans</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></div><h2 id="68-二叉搜索树中第-k-小的元素">68. 二叉搜索树中第 K 小的元素<a hidden class="anchor" aria-hidden="true" href="#68-二叉搜索树中第-k-小的元素">#</a></h2>
+<p>所谓第 K 小的元素，就是中序遍历中第k个被访问的节点的值。</p>
+<p>我们可以在中序遍历过程中记录访问了的节点数，当遇到第k个节点时返回结果。</p>
+<p>此外，为了及时停止遍历，还需要使用一个布尔变量found来标识目标节点是否已经找到，如果在左子树中已经找到了目标，那么就不要继续递归搜索右子树。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Solution</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">kthSmallest</span><span class="p">(</span><span class="n">TreeNode</span><span class="o">*</span> <span class="n">root</span><span class="p">,</span> <span class="kt">int</span> <span class="n">k</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">ans</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">bool</span> <span class="n">found</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">auto</span> <span class="n">dfs</span> <span class="o">=</span> <span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="k">auto</span><span class="o">&amp;&amp;</span> <span class="n">self</span><span class="p">,</span> <span class="n">TreeNode</span><span class="o">*</span> <span class="n">node</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">node</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            
+</span></span><span class="line"><span class="cl">            <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">found</span><span class="p">)</span> <span class="k">return</span> <span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="o">--</span><span class="n">k</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">ans</span> <span class="o">=</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                <span class="n">found</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                <span class="k">return</span> <span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">dfs</span><span class="p">(</span><span class="n">dfs</span><span class="p">,</span> <span class="n">root</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">ans</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></div><h2 id="69-验证二叉搜索树">69. 验证二叉搜索树<a hidden class="anchor" aria-hidden="true" href="#69-验证二叉搜索树">#</a></h2>
+<p>中序遍历的思路最符合逻辑：用变量记录中序遍历序列的前驱节点值（初始化为比最小节点值更小的值即可）。然后在中序遍历的过沉重不断判断前驱是否严格小于当前节点即可。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Solution</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">long</span> <span class="kt">long</span> <span class="n">prev</span> <span class="o">=</span> <span class="n">LLONG_MIN</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">bool</span> <span class="n">isValidBST</span><span class="p">(</span><span class="n">TreeNode</span><span class="o">*</span> <span class="n">root</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">root</span><span class="p">)</span> <span class="k">return</span> <span class="nb">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">isValidBST</span><span class="p">(</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">))</span> <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">val</span> <span class="o">&lt;=</span> <span class="n">prev</span><span class="p">)</span> <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">prev</span> <span class="o">=</span> <span class="n">root</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nf">isValidBST</span><span class="p">(</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></div><h2 id="70-两棵二叉搜索树中的所有元素">70. 两棵二叉搜索树中的所有元素<a hidden class="anchor" aria-hidden="true" href="#70-两棵二叉搜索树中的所有元素">#</a></h2>
+<p>先中序遍历两颗BST，得到两个有序数组；然后合并这两个有序数组，得到结果。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Solution</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">getAllElements</span><span class="p">(</span><span class="n">TreeNode</span><span class="o">*</span> <span class="n">root1</span><span class="p">,</span> <span class="n">TreeNode</span><span class="o">*</span> <span class="n">root2</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// 中序遍历得到两个有序序列
+</span></span></span><span class="line"><span class="cl">        <span class="k">auto</span> <span class="n">dfs</span> <span class="o">=</span> <span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="k">auto</span><span class="o">&amp;&amp;</span> <span class="n">self</span><span class="p">,</span> <span class="n">TreeNode</span><span class="o">*</span> <span class="n">node</span><span class="p">,</span> <span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span> <span class="n">nums</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">node</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">,</span> <span class="n">nums</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="n">nums</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">node</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">,</span> <span class="n">nums</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">nums1</span><span class="p">,</span> <span class="n">nums2</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">dfs</span><span class="p">(</span><span class="n">dfs</span><span class="p">,</span> <span class="n">root1</span><span class="p">,</span> <span class="n">nums1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">dfs</span><span class="p">(</span><span class="n">dfs</span><span class="p">,</span> <span class="n">root2</span><span class="p">,</span> <span class="n">nums2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">ans</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">// 合并两个有序数组
+</span></span></span><span class="line"><span class="cl">        <span class="k">auto</span> <span class="n">merge</span> <span class="o">=</span> <span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="k">auto</span><span class="o">&amp;&amp;</span> <span class="n">self</span><span class="p">,</span> <span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span> <span class="n">nums1</span><span class="p">,</span> <span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span> <span class="n">nums2</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="k">while</span> <span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">nums1</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">nums2</span><span class="p">.</span><span class="n">size</span><span class="p">())</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="k">if</span> <span class="p">(</span><span class="n">nums1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">nums2</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">ans</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">nums1</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">i</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">ans</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">nums2</span><span class="p">[</span><span class="n">j</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">j</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="k">while</span> <span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">nums1</span><span class="p">.</span><span class="n">size</span><span class="p">())</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">ans</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">nums1</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">                <span class="n">i</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="k">while</span> <span class="p">(</span><span class="n">j</span> <span class="o">&lt;</span> <span class="n">nums2</span><span class="p">.</span><span class="n">size</span><span class="p">())</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">ans</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">nums2</span><span class="p">[</span><span class="n">j</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">                <span class="n">j</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">merge</span><span class="p">(</span><span class="n">merge</span><span class="p">,</span> <span class="n">nums1</span><span class="p">,</span> <span class="n">nums2</span><span class="p">);</span>   
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">ans</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></div><h2 id="71-恢复二叉搜索树重点">71. 恢复二叉搜索树（重点）<a hidden class="anchor" aria-hidden="true" href="#71-恢复二叉搜索树重点">#</a></h2>
+<p><strong>法一：普通中序遍历</strong></p>
+<p>在中序遍历过程中找到互换节点。思路不难：使用a和b记录互换节点，然后使用prev记录中序遍历过程中的前驱节点。</p>
+<ul>
+<li>如果前驱节点存在，并且前驱的值大于当前节点的值，说明违反了顺序
+<ul>
+<li>如果a为nullptr，那么前驱节点就是互换节点之一，用a记录。</li>
+<li>如果a不为nullptr，当前节点就是互换节点之一，用b记录。</li>
+</ul>
+</li>
+<li>遍历完成后交换a和b的值即可</li>
+</ul>
+<p>这里的空间复杂度为O(h)，h为树的高度。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Solution</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">void</span> <span class="n">recoverTree</span><span class="p">(</span><span class="n">TreeNode</span><span class="o">*</span> <span class="n">root</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// 获取中序遍历的序列
+</span></span></span><span class="line"><span class="cl">        <span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">nums</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">TreeNode</span><span class="o">*</span> <span class="n">prev</span> <span class="o">=</span> <span class="k">nullptr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">TreeNode</span><span class="o">*</span> <span class="n">a</span> <span class="o">=</span> <span class="k">nullptr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">TreeNode</span><span class="o">*</span> <span class="n">b</span> <span class="o">=</span> <span class="k">nullptr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">auto</span> <span class="n">dfs</span> <span class="o">=</span> <span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="k">auto</span><span class="o">&amp;&amp;</span> <span class="n">self</span><span class="p">,</span> <span class="n">TreeNode</span><span class="o">*</span> <span class="n">node</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">node</span><span class="p">)</span> <span class="k">return</span> <span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">prev</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="k">if</span> <span class="p">(</span><span class="n">prev</span><span class="o">-&gt;</span><span class="n">val</span> <span class="o">&gt;</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">a</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                        <span class="n">a</span> <span class="o">=</span> <span class="n">prev</span><span class="p">;</span> <span class="n">b</span> <span class="o">=</span> <span class="n">node</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                        <span class="n">b</span> <span class="o">=</span> <span class="n">node</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">                <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            
+</span></span><span class="line"><span class="cl">            <span class="n">prev</span> <span class="o">=</span> <span class="n">node</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">dfs</span><span class="p">(</span><span class="n">dfs</span><span class="p">,</span> <span class="n">root</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">swap</span><span class="p">(</span><span class="n">a</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">,</span> <span class="n">b</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">};</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></div><p><strong>法二：Morris遍历</strong></p>
+<blockquote>
+<p>Morris遍历可以消除DFS过程中的空间开销，将空间复杂度转换为O(1)。</p>
+</blockquote>
+<p>利用叶子节点右子树指针为空的特点，将其利用起来指向中序遍历的后继节点。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Solution</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">void</span> <span class="n">recoverTree</span><span class="p">(</span><span class="n">TreeNode</span><span class="o">*</span> <span class="n">root</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">TreeNode</span><span class="o">*</span> <span class="n">a</span> <span class="o">=</span> <span class="k">nullptr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">TreeNode</span><span class="o">*</span> <span class="n">b</span> <span class="o">=</span> <span class="k">nullptr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">TreeNode</span><span class="o">*</span> <span class="n">prev</span> <span class="o">=</span> <span class="k">nullptr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">while</span> <span class="p">(</span><span class="n">root</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">// 左为空，就直接处理中间节点
+</span></span></span><span class="line"><span class="cl">                <span class="k">if</span> <span class="p">(</span><span class="n">prev</span> <span class="o">&amp;&amp;</span> <span class="n">prev</span><span class="o">-&gt;</span><span class="n">val</span> <span class="o">&gt;</span> <span class="n">root</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">a</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                        <span class="n">a</span> <span class="o">=</span> <span class="n">prev</span><span class="p">;</span> <span class="n">b</span> <span class="o">=</span> <span class="n">root</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                        <span class="n">b</span> <span class="o">=</span> <span class="n">root</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">                <span class="p">}</span>
+</span></span><span class="line"><span class="cl">                <span class="n">prev</span> <span class="o">=</span> <span class="n">root</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                <span class="n">root</span> <span class="o">=</span> <span class="n">root</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">TreeNode</span><span class="o">*</span> <span class="n">t</span> <span class="o">=</span> <span class="n">root</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                <span class="k">while</span> <span class="p">(</span><span class="n">t</span><span class="o">-&gt;</span><span class="n">right</span> <span class="o">&amp;&amp;</span> <span class="n">t</span><span class="o">-&gt;</span><span class="n">right</span> <span class="o">!=</span> <span class="n">root</span><span class="p">)</span> <span class="n">t</span> <span class="o">=</span> <span class="n">t</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                <span class="k">if</span> <span class="p">(</span><span class="n">t</span><span class="o">-&gt;</span><span class="n">right</span> <span class="o">==</span> <span class="k">nullptr</span><span class="p">)</span> <span class="p">{</span>  <span class="c1">// 还未建立索引
+</span></span></span><span class="line"><span class="cl">                    <span class="n">t</span><span class="o">-&gt;</span><span class="n">right</span> <span class="o">=</span> <span class="n">root</span><span class="p">;</span>    <span class="c1">// 建立索引
+</span></span></span><span class="line"><span class="cl">                    <span class="n">root</span> <span class="o">=</span> <span class="n">root</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>                    <span class="c1">// 索引存在
+</span></span></span><span class="line"><span class="cl">                    <span class="n">t</span><span class="o">-&gt;</span><span class="n">right</span> <span class="o">=</span> <span class="k">nullptr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                    <span class="k">if</span> <span class="p">(</span><span class="n">prev</span> <span class="o">&amp;&amp;</span> <span class="n">prev</span><span class="o">-&gt;</span><span class="n">val</span> <span class="o">&gt;</span> <span class="n">root</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">a</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                            <span class="n">a</span> <span class="o">=</span> <span class="n">prev</span><span class="p">;</span> <span class="n">b</span> <span class="o">=</span> <span class="n">root</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                            <span class="n">b</span> <span class="o">=</span> <span class="n">root</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">                    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">prev</span> <span class="o">=</span> <span class="n">root</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">root</span> <span class="o">=</span> <span class="n">root</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="n">swap</span><span class="p">(</span><span class="n">a</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">,</span> <span class="n">b</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">};</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></div><h2 id="72-递增顺序搜索树">72. <strong>递增顺序搜索树</strong><a hidden class="anchor" aria-hidden="true" href="#72-递增顺序搜索树">#</a></h2>
+<p>引入dummy节点统一操作，在中序遍历的过程中改变节点的左右子树指针，构造递增顺序的搜索树。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Solution</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">TreeNode</span><span class="o">*</span> <span class="n">increasingBST</span><span class="p">(</span><span class="n">TreeNode</span><span class="o">*</span> <span class="n">root</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">TreeNode</span> <span class="n">dummy</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">dummy</span><span class="p">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">root</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">auto</span> <span class="n">parent</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">dummy</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">auto</span> <span class="n">dfs</span> <span class="o">=</span> <span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="k">auto</span><span class="o">&amp;&amp;</span> <span class="n">self</span><span class="p">,</span> <span class="n">TreeNode</span><span class="o">*</span> <span class="n">node</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">node</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	           
+</span></span><span class="line"><span class="cl">	          <span class="c1">// 改变节点的连接
+</span></span></span><span class="line"><span class="cl">            <span class="n">parent</span><span class="o">-&gt;</span><span class="n">right</span> <span class="o">=</span> <span class="n">node</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">node</span><span class="o">-&gt;</span><span class="n">left</span> <span class="o">=</span> <span class="k">nullptr</span><span class="p">;</span>    <span class="c1">// 中序遍历，左侧已经访问了
+</span></span></span><span class="line"><span class="cl">            <span class="n">parent</span> <span class="o">=</span> <span class="n">node</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            
+</span></span><span class="line"><span class="cl">            <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">dfs</span><span class="p">(</span><span class="n">dfs</span><span class="p">,</span> <span class="n">root</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">parent</span><span class="o">-&gt;</span><span class="n">right</span> <span class="o">=</span> <span class="k">nullptr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">dummy</span><span class="p">.</span><span class="n">right</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></div><h2 id="73-二叉搜索树最近节点查询">73. <strong>二叉搜索树最近节点查询</strong><a hidden class="anchor" aria-hidden="true" href="#73-二叉搜索树最近节点查询">#</a></h2>
+<p>这道题考查两个点：BST中序遍历结果有序 和 二分法</p>
+<ul>
+<li>首先使用中序遍历取得BST上的有序序列nums</li>
+<li>然后使用二分法在nums中搜索满足条件的元素</li>
+</ul>
+<p>注意：</p>
+<ul>
+<li>经典的lower_bound函数写法不要忘记，用于查找大于等于target的第一个元素
+<ul>
+<li>其返回值的下标范围是[0, n]，返回0不代表找到目标，返回n表示一定没找到</li>
+</ul>
+</li>
+<li>使用lower_bound的返回值为i，如果 i &lt; n 就得到max的下标，否则记为-1</li>
+<li>只有lower_bound的返回值在范围[1, n]时才表示找到了min，min的值为nums[i-1]，否则记为-1</li>
+</ul>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Solution</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="nf">lower_bound</span><span class="p">(</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span> <span class="n">nums</span><span class="p">,</span> <span class="kt">int</span> <span class="n">target</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">l</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">r</span> <span class="o">=</span> <span class="n">nums</span><span class="p">.</span><span class="n">size</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="k">while</span> <span class="p">(</span><span class="n">l</span> <span class="o">&lt;</span> <span class="n">r</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="kt">int</span> <span class="n">mid</span> <span class="o">=</span> <span class="n">l</span> <span class="o">+</span> <span class="p">(</span><span class="n">r</span> <span class="o">-</span> <span class="n">l</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">nums</span><span class="p">[</span><span class="n">mid</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">target</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">r</span> <span class="o">=</span> <span class="n">mid</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">l</span> <span class="o">=</span> <span class="n">mid</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">l</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">vector</span><span class="o">&lt;</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;</span> <span class="n">closestNodes</span><span class="p">(</span><span class="n">TreeNode</span><span class="o">*</span> <span class="n">root</span><span class="p">,</span> <span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span> <span class="n">queries</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// 中序遍历得到有序序列
+</span></span></span><span class="line"><span class="cl">        <span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">nums</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">auto</span> <span class="n">dfs</span> <span class="o">=</span> <span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="k">auto</span><span class="o">&amp;&amp;</span> <span class="n">self</span><span class="p">,</span> <span class="n">TreeNode</span><span class="o">*</span> <span class="n">node</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">node</span><span class="p">)</span> <span class="k">return</span> <span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="n">nums</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">node</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">};</span>
+</span></span><span class="line"><span class="cl">        <span class="n">dfs</span><span class="p">(</span><span class="n">dfs</span><span class="p">,</span> <span class="n">root</span><span class="p">);</span> 
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">vector</span><span class="o">&lt;</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;</span> <span class="n">ans</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">n</span> <span class="o">=</span> <span class="n">nums</span><span class="p">.</span><span class="n">size</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="nl">x</span> <span class="p">:</span> <span class="n">queries</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">lower_bound</span><span class="p">(</span><span class="n">nums</span><span class="p">,</span> <span class="n">x</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="kt">int</span> <span class="n">second</span> <span class="o">=</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span> <span class="o">?</span> <span class="n">nums</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="n">n</span> <span class="o">||</span> <span class="n">nums</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="n">x</span><span class="p">)</span> <span class="n">i</span><span class="o">--</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="kt">int</span> <span class="n">first</span> <span class="o">=</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="o">?</span> <span class="n">nums</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">ans</span><span class="p">.</span><span class="n">push_back</span><span class="p">({</span><span class="n">first</span><span class="p">,</span> <span class="n">second</span><span class="p">});</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">ans</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></div><h2 id="74-两数之和-iv---输入二叉搜索树">74. <strong>两数之和 IV - 输入二叉搜索树</strong><a hidden class="anchor" aria-hidden="true" href="#74-两数之和-iv---输入二叉搜索树">#</a></h2>
+<p><strong>法一：中序遍历BST构造有序数组 + 双指针</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Solution</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">bool</span> <span class="n">findTarget</span><span class="p">(</span><span class="n">TreeNode</span><span class="o">*</span> <span class="n">root</span><span class="p">,</span> <span class="kt">int</span> <span class="n">k</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		    <span class="c1">// 遍历BST，得到有序序列
+</span></span></span><span class="line"><span class="cl">        <span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">nums</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">auto</span> <span class="n">dfs</span> <span class="o">=</span> <span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="k">auto</span><span class="o">&amp;&amp;</span> <span class="n">self</span><span class="p">,</span> <span class="n">TreeNode</span><span class="o">*</span> <span class="n">node</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">node</span><span class="p">)</span> <span class="k">return</span> <span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="n">nums</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">node</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">};</span>
+</span></span><span class="line"><span class="cl">        <span class="n">dfs</span><span class="p">(</span><span class="n">dfs</span><span class="p">,</span> <span class="n">root</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">				
+</span></span><span class="line"><span class="cl">				<span class="c1">// 双指针法解两数之和
+</span></span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">l</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">r</span> <span class="o">=</span> <span class="n">nums</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">while</span> <span class="p">(</span><span class="n">l</span> <span class="o">&lt;</span> <span class="n">r</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="kt">int</span> <span class="n">sum</span> <span class="o">=</span> <span class="n">nums</span><span class="p">[</span><span class="n">l</span><span class="p">]</span> <span class="o">+</span> <span class="n">nums</span><span class="p">[</span><span class="n">r</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">sum</span> <span class="o">&lt;</span> <span class="n">k</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">l</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span> <span class="k">else</span> <span class="nf">if</span> <span class="p">(</span><span class="n">sum</span> <span class="o">&gt;</span> <span class="n">k</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">r</span><span class="o">--</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="k">return</span> <span class="nb">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></div><p><strong>法二：哈希表 + 中序遍历</strong></p>
+<p>使用一个哈希表记录中序遍历中遇到过的所有元素值，在后续遍历过程中如果发现哈希表中存在值为 <strong>k - node→val</strong> 的元素，就返回true。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Solution</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">bool</span> <span class="n">findTarget</span><span class="p">(</span><span class="n">TreeNode</span><span class="o">*</span> <span class="n">root</span><span class="p">,</span> <span class="kt">int</span> <span class="n">k</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">unordered_set</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">s</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">auto</span> <span class="n">dfs</span> <span class="o">=</span> <span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="k">auto</span><span class="o">&amp;&amp;</span> <span class="n">self</span><span class="p">,</span> <span class="n">TreeNode</span><span class="o">*</span> <span class="n">node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">bool</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">node</span><span class="p">)</span> <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            
+</span></span><span class="line"><span class="cl">            <span class="kt">bool</span> <span class="n">ok</span> <span class="o">=</span> <span class="n">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">ok</span><span class="p">)</span> <span class="k">return</span> <span class="nb">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">s</span><span class="p">.</span><span class="n">contains</span><span class="p">(</span><span class="n">k</span> <span class="o">-</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">))</span> <span class="k">return</span> <span class="nb">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">s</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="n">node</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="nf">self</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">};</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nf">dfs</span><span class="p">(</span><span class="n">dfs</span><span class="p">,</span> <span class="n">root</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></div><h2 id="76-二叉搜索子树的最大键值和hard">76. <strong>二叉搜索子树的最大键值和（Hard）</strong><a hidden class="anchor" aria-hidden="true" href="#76-二叉搜索子树的最大键值和hard">#</a></h2>
+<h2 id="77-合并多棵二叉搜索树hard">77. <strong>合并多棵二叉搜索树（Hard）</strong><a hidden class="anchor" aria-hidden="true" href="#77-合并多棵二叉搜索树hard">#</a></h2>
+<p>两道hard，暂时不做。</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="http://localhost:1313/tags/%E4%BA%8C%E6%90%9C%E7%B4%A2%E5%8F%89%E6%A0%91/">二搜索叉树</a></li>
+      <li><a href="http://localhost:1313/tags/%E4%B8%AD%E5%BA%8F%E9%81%8D%E5%8E%86/">中序遍历</a></li>
+      <li><a href="http://localhost:1313/tags/%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E7%9B%B4%E5%BE%84/">二叉树的直径</a></li>
+      <li><a href="http://localhost:1313/tags/%E5%9B%9E%E6%BA%AF/">回溯</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="next" href="http://localhost:1313/posts/unix-linux-ipc/">
+    <span class="title">Next »</span>
+    <span>Unix/Linux 进程间通信</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="http://localhost:1313/">Minghan的博客</a></span> · 
+
+    
+    
+    <span>
+        Powered by
+        <a href="https://gohugo.io/?utm_source=papermod" rel="noopener" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" id="top-link" class="top-link hidden" aria-label="go to top" title="Go to Top (Alt + G)" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevrons-up">
+        <polyline points="17 11 12 6 7 11"></polyline>
+        <polyline points="17 18 12 13 7 18"></polyline>
+    </svg>
+</a><script src="/js/toc-scrollspy.js" defer></script>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var toplink = document.getElementById("top-link");
+    window.onscroll = function () {
+        const scrollThreshold = window.innerHeight;
+        if (document.body.scrollTop > scrollThreshold || document.documentElement.scrollTop > scrollThreshold) {
+            toplink.classList.remove("hidden");
+        } else {
+            toplink.classList.add("hidden");
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>
