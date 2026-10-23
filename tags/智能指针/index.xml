@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>智能指针 on Minghan的博客</title><link>https://Jiangmmh.github.io/tags/%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88/</link><description>Recent content in 智能指针 on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Fri, 23 Oct 2026 16:41:27 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/tags/%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88/index.xml" rel="self" type="application/rss+xml"/><item><title>关于C++智能指针</title><link>https://Jiangmmh.github.io/posts/cpp-smart-ptr/</link><pubDate>Fri, 23 Oct 2026 16:41:27 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/cpp-smart-ptr/</guid><description>&lt;h1 id="1-简介">1. 简介&lt;/h1>
-&lt;h2 id="11-动态内存管理">1.1 动态内存管理&lt;/h2>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>智能指针 on Minghan的博客</title><link>https://Jiangmmh.github.io/tags/%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88/</link><description>Recent content in 智能指针 on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Fri, 23 Oct 2026 16:41:27 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/tags/%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88/index.xml" rel="self" type="application/rss+xml"/><item><title>关于C++智能指针</title><link>https://Jiangmmh.github.io/posts/cpp-smart-ptr/</link><pubDate>Fri, 23 Oct 2026 16:41:27 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/cpp-smart-ptr/</guid><description>&lt;h1 id="一简介">一、简介&lt;/h1>
+&lt;h2 id="动态内存管理">动态内存管理&lt;/h2>
 &lt;p>在 C++ 中，内存管理一直是一个重要而又容易出错的问题。理解智能指针之前，我们需要先回答一个问题：&lt;strong>为什么程序需要动态内存？&lt;/strong>&lt;/p>
 &lt;h3 id="为什么需要动态内存">为什么需要动态内存？&lt;/h3>
 &lt;p>在程序中，我们经常需要创建对象。对于生命周期和数量都能够提前确定的对象，可以直接使用局部变量、全局变量或其他具有适当存储期的对象。然而，在很多实际场景中，程序无法在编译时确定所需对象的数量、具体类型，甚至无法确定对象应该在什么时候销毁。&lt;/p>
@@ -54,4 +54,6 @@
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">std&lt;/span>&lt;span class="o">::&lt;/span>&lt;span class="n">make_unique&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="n">Rectangle&lt;/span>&lt;span class="o">&amp;gt;&lt;/span>&lt;span class="p">();&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>调用者只需要知道自己获得了一个 &lt;code>Shape&lt;/code> 对象，而不必提前确定其具体类型。&lt;/p>
-&lt;p>这类设计广泛存在于插件系统、图形界面、游戏引擎和各种基于多态的程序中。&lt;/p></description></item></channel></rss>
+&lt;p>这类设计广泛存在于插件系统、图形界面、游戏引擎和各种基于多态的程序中。&lt;/p>
+&lt;p>不过，动态分配并不是实现多态的必要条件。这里使用动态对象，主要是为了让不同派生类型能够以统一的接口返回，并具有独立的生命周期。&lt;/p>
+&lt;p>&lt;strong>3. 程序需要在多个对象之间共享数据&lt;/strong>&lt;/p></description></item></channel></rss>
