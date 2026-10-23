@@ -10,7 +10,7 @@ xv6提供了若干功能模块：
 xv6与现实世界的操作系统有些不同：
 Unix 将“标准的”文件描述符、管道以及便捷的 shell 语法相结合，用于对它们进行操作，这在编写通用可重用程序方面是一项重大进步。这一理念催生了 “软件工具”文化 ，而这正是 Unix 强大功能和流行度的重要原因。Shell 则是第一个所谓的“脚本语言”。Unix 系统调用接口至今仍然在 BSD、Linux 和 macOS 等系统中沿用。
 Unix 系统调用接口已通过可移植操作系统接口 (POSIX) 标准进行了标准化。xv6不符合 POSIX 标准：它缺少许多系统调用（包括一些基本调用lseek），而且它提供的许多系统调用也与标准有所不同。我们设计 xv6 的主要目标是在提供简单易用的类 Unix 系统调用接口的同时，保持简洁性和清晰度。一些人已经扩展了 xv6，添加了一些系统调用和一个简单的 C 库，以便运行基本的 Unix 程序。然而，现代内核提供的系统调用和内核服务种类远超 xv6。例如，它们支持网络、窗口系统、用户级线程、多种设备的驱动程序等等。现代内核不断发展且日新月异，并提供了许多超出 POSIX 标准的功能。
-...</p></div><footer class=entry-footer><span title='2026-10-23 13:39:42 +0800 +0800'>October 23, 2026</span>&nbsp;·&nbsp;<span>12 min</span>&nbsp;·&nbsp;<span>2519 words</span></footer><a class=entry-link aria-label="post link to 再探xv6-概述" href=https://Jiangmmh.github.io/posts/xv6-01/></a></article><article class="post-entry tag-entry"><header class=entry-header><h2 class=entry-hint-parent>Unix/Linux 进程间通信</h2></header><div class=entry-content><p>本文是基于经典 BSD 进程间通信教程所涉及的概念重新编写的中文学习笔记，并非原文的逐字翻译。
+...</p></div><footer class=entry-footer><span title='2026-10-23 13:39:42 +0800 +0800'>October 23, 2026</span>&nbsp;·&nbsp;<span>12 min</span>&nbsp;·&nbsp;<span>2527 words</span></footer><a class=entry-link aria-label="post link to 再探xv6-概述" href=https://Jiangmmh.github.io/posts/xv6-01/></a></article><article class="post-entry tag-entry"><header class=entry-header><h2 class=entry-hint-parent>Unix/Linux 进程间通信</h2></header><div class=entry-content><p>本文是基于经典 BSD 进程间通信教程所涉及的概念重新编写的中文学习笔记，并非原文的逐字翻译。
 参考原文： Stuart Sechrest, An Introductory 4.4BSD Interprocess Communication Tutorial 。原文属于 4.4BSD 文档档案。
 一、为什么需要进程间通信？ 现代操作系统通常同时运行大量进程。例如文本编辑器、浏览器、数据库、网络服务、编译器以及系统后台服务，都可能由多个进程协同完成工作。
 进程之间拥有相对独立的地址空间。一个进程中的普通指针通常不能直接访问另一个进程的内存，因此，进程不能像同一个程序中的两个函数那样，直接通过共享变量交换数据。
