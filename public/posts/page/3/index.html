@@ -205,6 +205,30 @@
 
 <article class="post-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">Leetecode 链表
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>这篇文章记录了链表相关的重点算法题 （共51道），使用C&#43;&#43;实现。
+题目链接见灵神的题单：链表题单。
+一、遍历链表 1. 二进制链表转整数 链表元素均为0或1，整个链表表示一个二进制数（最高位在链表头部），将该链表转换为该二进制数的十进制值。
+思路：将ans初始化为0，遍历该链表，每遇到一个节点就将ans左移一位并加上当前节点的值。
+时间复杂度为：O(n)，n为链表长度
+class Solution { public: int getDecimalValue(ListNode* head) { int ans = 0; for (auto cur = head; cur; cur = cur-&gt;next) { ans = (ans &lt;&lt; 1) &#43; cur-&gt;val; } return ans; } }; 2. 找出临界点之间的最小和最大距 临界点就是极值点（严格大于或小于两侧元素）。
+我的思路：先遍历链表，找出全部的临界点，再遍历找出的临界点数组，得到最大和最小临界点距离。
+编写函数findLocalMinMax，找出全部临界点，并返回临界点的下标数组localMinMax 最大临界点距离就是localMinMax第一个元素与最后一个元素之差 最小临界点距离就是localMinMax中相邻元素之差的最小值 时间复杂度：O(n), n为输入链表的长度
+空间复杂度：O(n)
+class Solution { vector&lt;int&gt; findLocalMinMax(ListNode *head) { vector&lt;int&gt; ans; if (!head || !head-&gt;next) return ans; auto prev = head; int idx = 1; for (auto cur = head-&gt;next; cur-&gt;next; cur = cur-&gt;next) { // 取出前驱和后继的值 int p = prev-&gt;val, q = cur-&gt;next-&gt;val; int x = cur-&gt;val; if ((p &lt; x &amp;&amp; q &lt; x) || (p &gt; x &amp;&amp; q &gt; x)) { ans.push_back(idx); } prev = cur; idx&#43;&#43;; } return ans; } public: vector&lt;int&gt; nodesBetweenCriticalPoints(ListNode* head) { // 找到全部的临界点 vector&lt;int&gt; localMinMax = findLocalMinMax(head); int n = localMinMax.size(); // 临界点数量少于两个，直接返回 {-1, -1} if (n &lt; 2) return {-1, -1}; int maxDistance = localMinMax[n-1] - localMinMax[0]; int minDistance = INT_MAX; for (int i = 1; i &lt; n; i&#43;&#43;) { minDistance = min(minDistance, localMinMax[i] - localMinMax[i-1]); } return {minDistance, maxDistance}; } }; 优化：可以在遍历链表的过程中，记录第一个临界点的位置和记录前一个临界点的位置，来得到最大和最小临界点距离，将空间复杂度降为O(1)。
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-14 21:14:25 +0800 CST'>October 14, 2026</span>&nbsp;·&nbsp;<span>25 min</span>&nbsp;·&nbsp;<span>5134 words</span></footer>
+  <a class="entry-link" aria-label="post link to Leetecode 链表" href="http://localhost:1313/posts/leetecode-linkedlist/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">如何快速构建一个静态博客?
     </h2>
   </header>
@@ -222,6 +246,27 @@
 
 <span title='2026-10-14 11:44:43 +0800 CST'>October 14, 2026</span>&nbsp;·&nbsp;<span>6 min</span>&nbsp;·&nbsp;<span>1268 words</span></footer>
   <a class="entry-link" aria-label="post link to 如何快速构建一个静态博客?" href="http://localhost:1313/posts/hello-world/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>xv6概述 1. xv6简介 xv6 以 Dennis Ritchie 和 Ken Thompson 的 Unix version 6 (v6) 为蓝本 。xv6 大致遵循 Unix v6 的结构和风格，但它是使用ANSI C语言为多核RISC-V 架构实现的。
+MIT的操作系统课程6.1810就是以xv6为例，具体阐述操作系统概念。它不仅提供了 Ken Thompson 和 Dennis Ritchie 的 Unix 操作系统所引入的基本接口，还模仿了 Unix 的内部设计。Unix 提供了一个功能较为单一但机制组合良好的接口，从而展现出令人惊讶的通用性。该接口非常成功，以至于现代操作系统——BSD、Linux、macOS、Solaris，甚至在某种程度上也包括 Microsoft Windows——都采用了类似 Unix 的接口。理解 xv6 是理解这些系统以及许多其他系统的良好开端。
+xv6提供了若干功能模块：
+进程管理 内存管理（物理内存和虚拟内存） I/O和文件描述符 文件系统 IPC机制（管道） 与Unix一样，xv6通过系统调用为应用程序提供服务，下面是xv6支持的22个系统调用：
+xv6与现实世界的操作系统有些不同：
+Unix 将“标准的”文件描述符、管道以及便捷的 shell 语法相结合，用于对它们进行操作，这在编写通用可重用程序方面是一项重大进步。这一理念催生了**“软件工具”文化**，而这正是 Unix 强大功能和流行度的重要原因。Shell 则是第一个所谓的“脚本语言”。Unix 系统调用接口至今仍然在 BSD、Linux 和 macOS 等系统中沿用。
+Unix 系统调用接口已通过可移植操作系统接口 (POSIX) 标准进行了标准化。xv6不符合 POSIX 标准：它缺少许多系统调用（包括一些基本调用lseek），而且它提供的许多系统调用也与标准有所不同。我们设计 xv6 的主要目标是在提供简单易用的类 Unix 系统调用接口的同时，保持简洁性和清晰度。一些人已经扩展了 xv6，添加了一些系统调用和一个简单的 C 库，以便运行基本的 Unix 程序。然而，现代内核提供的系统调用和内核服务种类远超 xv6。例如，它们支持网络、窗口系统、用户级线程、多种设备的驱动程序等等。现代内核不断发展且日新月异，并提供了许多超出 POSIX 标准的功能。
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span>12 min</span>&nbsp;·&nbsp;<span>2516 words</span></footer>
+  <a class="entry-link" aria-label="post link to " href="http://localhost:1313/posts/xv6%E6%A6%82%E8%BF%B0-402c4e932614809b98efeeb21bf53cad/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">

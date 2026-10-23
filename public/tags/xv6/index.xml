@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Xv6 on Minghan的博客</title>
+    <link>http://localhost:1313/tags/xv6/</link>
+    <description>Recent content in Xv6 on Minghan的博客</description>
+    <generator>Hugo</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Fri, 23 Oct 2026 13:39:42 +0800</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/xv6/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>再探xv6-概述</title>
+      <link>http://localhost:1313/posts/xv6-01/</link>
+      <pubDate>Fri, 23 Oct 2026 13:39:42 +0800</pubDate>
+      <guid>http://localhost:1313/posts/xv6-01/</guid>
+      <description>&lt;h1 id=&#34;1-xv6简介&#34;&gt;1. xv6简介&lt;/h1&gt;
+&lt;p&gt;xv6 以 Dennis Ritchie 和 Ken Thompson 的 Unix version 6 (v6) 为蓝本 。xv6 大致遵循 Unix v6 的结构和风格，但它是使用ANSI C语言为多核RISC-V 架构实现的。&lt;/p&gt;
+&lt;p&gt;MIT的操作系统课程6.1810就是以xv6为例，具体阐述操作系统概念。&lt;strong&gt;它不仅提供了 Ken Thompson 和 Dennis Ritchie 的 Unix 操作系统所引入的基本接口，还模仿了 Unix 的内部设计。&lt;strong&gt;Unix 提供了一个&lt;/strong&gt;功能较为单一但机制组合良好的接口&lt;/strong&gt;，从而展现出令人惊讶的通用性。该接口非常成功，以至于现代操作系统——BSD、Linux、macOS、Solaris，甚至在某种程度上也包括 Microsoft Windows——都采用了类似 Unix 的接口。理解 xv6 是理解这些系统以及许多其他系统的良好开端。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;xv6提供了若干功能模块：&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;进程管理&lt;/li&gt;
+&lt;li&gt;内存管理（物理内存和虚拟内存）&lt;/li&gt;
+&lt;li&gt;I/O和文件描述符&lt;/li&gt;
+&lt;li&gt;文件系统&lt;/li&gt;
+&lt;li&gt;IPC机制（管道）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;与Unix一样，xv6通过系统调用为应用程序提供服务，下面是xv6支持的22个系统调用：&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;xv6%E6%A6%82%E8%BF%B0/image.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;xv6与现实世界的操作系统有些不同：&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Unix 将“标准的”文件描述符、管道以及便捷的 shell 语法相结合，用于对它们进行操作，这在编写通用可重用程序方面是一项重大进步。这一理念催生了**“软件工具”文化**，而这正是 Unix 强大功能和流行度的重要原因。Shell 则是第一个所谓的“脚本语言”。Unix 系统调用接口至今仍然在 BSD、Linux 和 macOS 等系统中沿用。&lt;/p&gt;
+&lt;p&gt;Unix 系统调用接口已通过&lt;strong&gt;可移植操作系统接口 (POSIX) 标准&lt;/strong&gt;进行了标准化。&lt;strong&gt;xv6不符合 POSIX 标准&lt;/strong&gt;：它缺少许多系统调用（包括一些基本调用&lt;code&gt;lseek&lt;/code&gt;），而且它提供的许多系统调用也与标准有所不同。我们设计 xv6 的主要目标是在提供简单易用的类 Unix 系统调用接口的同时，保持简洁性和清晰度。一些人已经扩展了 xv6，添加了一些系统调用和一个简单的 C 库，以便运行基本的 Unix 程序。然而，现代内核提供的系统调用和内核服务种类远超 xv6。例如，它们支持网络、窗口系统、用户级线程、多种设备的驱动程序等等。现代内核不断发展且日新月异，并提供了许多超出 POSIX 标准的功能。&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>
