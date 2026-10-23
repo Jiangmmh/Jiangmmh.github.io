@@ -227,11 +227,30 @@
 
 <article class="post-entry"> 
   <header class="entry-header">
-    <h2 class="entry-hint-parent">关于C&#43;&#43;智能指针：动态内存管理和所有权
+    <h2 class="entry-hint-parent">从目标文件到运行时装载：深入理解链接
     </h2>
   </header>
   <div class="entry-content">
-    <p>1. 简介 1.1 动态内存管理 在 C&#43;&#43; 中，内存管理一直是一个重要而又容易出错的问题。理解智能指针之前，我们需要先回答一个问题：为什么程序需要动态内存？
+    <p>1. 链接的历史：为什么需要链接器？ 1.1 从一个源文件到一个完整的程序 当我们编写一个 C 程序时，通常会经历以下过程：
+源代码 │ ▼ 预处理（Preprocessing） │ ▼ 编译（Compilation） │ ▼ 汇编（Assembly） │ ▼ 目标文件（Object File） │ ▼ 链接（Linking） │ ▼ 可执行文件（Executable） │ ▼ 装载与执行（Loading &amp; Execution） 初学编程时，我们可能会认为，编译器只需要把源代码翻译成机器指令，再将这些指令交给处理器执行即可。但当软件规模扩大到数十万行、数百万行甚至更多时，问题就变得复杂起来。
+假设我们有这样一个程序：
+// main.c #include &lt;stdio.h&gt; int add(int a, int b); int main(void) { int result = add(10, 20); printf(&#34;%d\n&#34;, result); return 0; } 函数 add() 的实现位于另一个文件：
+// add.c int add(int a, int b) { return a &#43; b; } 我们可以分别编译这两个源文件：
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-23 21:36:30 +0800 CST'>October 23, 2026</span>&nbsp;·&nbsp;<span>9 min</span>&nbsp;·&nbsp;<span>1768 words</span></footer>
+  <a class="entry-link" aria-label="post link to 从目标文件到运行时装载：深入理解链接" href="http://localhost:1313/posts/link/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">关于C&#43;&#43;智能指针
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>一、简介 动态内存管理 在 C&#43;&#43; 中，内存管理一直是一个重要而又容易出错的问题。理解智能指针之前，我们需要先回答一个问题：为什么程序需要动态内存？
 为什么需要动态内存？ 在程序中，我们经常需要创建对象。对于生命周期和数量都能够提前确定的对象，可以直接使用局部变量、全局变量或其他具有适当存储期的对象。然而，在很多实际场景中，程序无法在编译时确定所需对象的数量、具体类型，甚至无法确定对象应该在什么时候销毁。
 动态内存管理正是为了解决这些问题而存在的。
 1. 程序不知道自己需要多少对象
@@ -244,12 +263,14 @@
 例如，一个图形程序需要处理圆形和矩形：
 #include &lt;memory&gt; struct Shape { virtual ~Shape() = default; virtual void draw() = 0; }; struct Circle : Shape { void draw() override { // 绘制圆形 } }; struct Rectangle : Shape { void draw() override { // 绘制矩形 } }; std::unique_ptr&lt;Shape&gt; createShape(bool isCircle) { if (isCircle) { return std::make_unique&lt;Circle&gt;(); } return std::make_unique&lt;Rectangle&gt;(); } 调用者只需要知道自己获得了一个 Shape 对象，而不必提前确定其具体类型。
 这类设计广泛存在于插件系统、图形界面、游戏引擎和各种基于多态的程序中。
+不过，动态分配并不是实现多态的必要条件。这里使用动态对象，主要是为了让不同派生类型能够以统一的接口返回，并具有独立的生命周期。
+3. 程序需要在多个对象之间共享数据
 ...</p>
   </div>
   <footer class="entry-footer">
 
-<span title='2026-10-23 16:41:27 +0800 CST'>October 23, 2026</span>&nbsp;·&nbsp;<span>10 min</span>&nbsp;·&nbsp;<span>2013 words</span></footer>
-  <a class="entry-link" aria-label="post link to 关于C&#43;&#43;智能指针：动态内存管理和所有权" href="http://localhost:1313/posts/cpp-smart-ptr/"></a>
+<span title='2026-10-23 16:41:27 +0800 CST'>October 23, 2026</span>&nbsp;·&nbsp;<span>10 min</span>&nbsp;·&nbsp;<span>2008 words</span></footer>
+  <a class="entry-link" aria-label="post link to 关于C&#43;&#43;智能指针" href="http://localhost:1313/posts/cpp-smart-ptr/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -269,7 +290,7 @@ Unix 系统调用接口已通过可移植操作系统接口 (POSIX) 标准进行
   </div>
   <footer class="entry-footer">
 
-<span title='2026-10-23 13:39:42 +0800 CST'>October 23, 2026</span>&nbsp;·&nbsp;<span>12 min</span>&nbsp;·&nbsp;<span>2527 words</span></footer>
+<span title='2026-10-23 13:39:42 +0800 CST'>October 23, 2026</span>&nbsp;·&nbsp;<span>12 min</span>&nbsp;·&nbsp;<span>2526 words</span></footer>
   <a class="entry-link" aria-label="post link to 再探xv6-概述" href="http://localhost:1313/posts/xv6-01/"></a>
 </article>
 
@@ -452,35 +473,6 @@ Every access（每一次访问）：不能只在登录时检查，也不能只�
 
 <span title='2026-10-19 23:09:45 +0800 CST'>October 19, 2026</span>&nbsp;·&nbsp;<span>3 min</span>&nbsp;·&nbsp;<span>581 words</span></footer>
   <a class="entry-link" aria-label="post link to [转载]从硅片到智能：Jim Keller谈AI算力的未来" href="http://localhost:1313/posts/jim-keller-future-ai-compute/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">[转载]Linux内核代码风格：官方规范与实践指南
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>Linux 内核代码风格：官方规范与实践指南 原始文档：Linux kernel coding style
-本文根据 Linux 内核官方文档整理，以中文概括核心规则并补充实践说明。具体开发时，应结合目标内核版本、所属子系统的现有代码和相关 API 文档。
-代码风格并非单纯的排版问题。Linux 内核是一个由大量开发者长期协作维护的项目，统一的编码约定可以降低阅读成本，使代码审查更容易进行，也有助于发现资源管理、错误处理和并发访问中的问题。
-本文按官方文档的主要主题梳理相关规范，并重点说明这些规则在 C 语言和 Linux 内核开发中的实际意义。
-1. 缩进与代码布局 1.1 使用 8 字符宽度的制表符缩进 Linux 内核传统代码风格使用 Tab 进行缩进，Tab 宽度为 8 个字符。不要将普通空格当作代码块的缩进字符。
-static int process_item(int value) { if (value &lt; 0) return -EINVAL; return handle_item(value); } 较宽的缩进能够突出代码层级。当函数需要过多缩进时，也是在提醒开发者：控制流可能过于复杂，需要重新审视函数结构。
-1.2 避免一行写多个语句 不要为了节省行数而将多个语句挤在一行，也不要通过逗号运算符绕过大括号约定。
-不推荐：
-if (condition) do_this(); do_that(); 更清晰的写法：
-if (condition) { do_this(); do_that(); } 对于包含多个操作的分支，应使用大括号明确划分代码块。
-1.3 避免过深的嵌套 过多的条件分支和循环会增加理解成本。与其不断增加缩进，不如考虑：
-提前处理错误条件并返回。 将独立职责拆分为辅助函数。 简化条件表达式。 减少不必要的控制流层级。 1.4 控制行长度 官方文档建议通常将单行长度控制在 80 列左右。超长语句应根据逻辑结构合理换行，但不要为了机械满足列数而牺牲可读性。
-函数参数较多时，可以按参数列表的结构进行对齐。
-另外，不要随意拆分用户可见的日志字符串，否则会增加通过日志文本检索代码的难度。
-2. 大括号、空格与运算符 2.1 大括号的位置 对于 if、switch、for、while 等非函数代码块，通常将左大括号放在控制语句行末尾：
-...</p>
-  </div>
-  <footer class="entry-footer">
-
-<span title='2026-10-19 21:44:39 +0800 CST'>October 19, 2026</span>&nbsp;·&nbsp;<span>4 min</span>&nbsp;·&nbsp;<span>646 words</span></footer>
-  <a class="entry-link" aria-label="post link to [转载]Linux内核代码风格：官方规范与实践指南" href="http://localhost:1313/posts/linux-style/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">

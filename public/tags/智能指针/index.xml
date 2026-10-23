@@ -13,14 +13,8 @@
       <link>http://localhost:1313/posts/cpp-smart-ptr/</link>
       <pubDate>Fri, 23 Oct 2026 16:41:27 +0800</pubDate>
       <guid>http://localhost:1313/posts/cpp-smart-ptr/</guid>
-      <description>&lt;hr&gt;
-&lt;h2 id=&#34;categories-c&#34;&gt;title: &amp;ldquo;C++ 智能指针：从动态内存管理到现代 C++ 的资源所有权&amp;rdquo;
-date: 2026-10-23T16:38:00+08:00
-draft: false
-tags: [C++, 智能指针, RAII, 内存管理]
-categories: [C++]&lt;/h2&gt;
-&lt;h1 id=&#34;1-简介&#34;&gt;1. 简介&lt;/h1&gt;
-&lt;h2 id=&#34;11-动态内存管理&#34;&gt;1.1 动态内存管理&lt;/h2&gt;
+      <description>&lt;h1 id=&#34;一简介&#34;&gt;一、简介&lt;/h1&gt;
+&lt;h2 id=&#34;动态内存管理&#34;&gt;动态内存管理&lt;/h2&gt;
 &lt;p&gt;在 C++ 中，内存管理一直是一个重要而又容易出错的问题。理解智能指针之前，我们需要先回答一个问题：&lt;strong&gt;为什么程序需要动态内存？&lt;/strong&gt;&lt;/p&gt;
 &lt;h3 id=&#34;为什么需要动态内存&#34;&gt;为什么需要动态内存？&lt;/h3&gt;
 &lt;p&gt;在程序中，我们经常需要创建对象。对于生命周期和数量都能够提前确定的对象，可以直接使用局部变量、全局变量或其他具有适当存储期的对象。然而，在很多实际场景中，程序无法在编译时确定所需对象的数量、具体类型，甚至无法确定对象应该在什么时候销毁。&lt;/p&gt;
@@ -74,7 +68,10 @@ categories: [C++]&lt;/h2&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;std&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;::&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;make_unique&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Rectangle&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;();&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;调用者只需要知道自己获得了一个 &lt;code&gt;Shape&lt;/code&gt; 对象，而不必提前确定其具体类型。&lt;/p&gt;</description>
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;调用者只需要知道自己获得了一个 &lt;code&gt;Shape&lt;/code&gt; 对象，而不必提前确定其具体类型。&lt;/p&gt;
+&lt;p&gt;这类设计广泛存在于插件系统、图形界面、游戏引擎和各种基于多态的程序中。&lt;/p&gt;
+&lt;p&gt;不过，动态分配并不是实现多态的必要条件。这里使用动态对象，主要是为了让不同派生类型能够以统一的接口返回，并具有独立的生命周期。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;3. 程序需要在多个对象之间共享数据&lt;/strong&gt;&lt;/p&gt;</description>
     </item>
   </channel>
 </rss>
