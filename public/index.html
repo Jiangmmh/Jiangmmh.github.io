@@ -227,6 +227,33 @@
 
 <article class="post-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">关于C&#43;&#43;智能指针：动态内存管理和所有权
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>1. 简介 1.1 动态内存管理 在 C&#43;&#43; 中，内存管理一直是一个重要而又容易出错的问题。理解智能指针之前，我们需要先回答一个问题：为什么程序需要动态内存？
+为什么需要动态内存？ 在程序中，我们经常需要创建对象。对于生命周期和数量都能够提前确定的对象，可以直接使用局部变量、全局变量或其他具有适当存储期的对象。然而，在很多实际场景中，程序无法在编译时确定所需对象的数量、具体类型，甚至无法确定对象应该在什么时候销毁。
+动态内存管理正是为了解决这些问题而存在的。
+1. 程序不知道自己需要多少对象
+考虑一个读取用户输入并处理数据的程序：
+#include &lt;iostream&gt; #include &lt;vector&gt; int main() { int n; std::cin &gt;&gt; n; std::vector&lt;int&gt; data(n); for (int i = 0; i &lt; n; &#43;&#43;i) { std::cin &gt;&gt; data[i]; } // 处理数据 } 程序在运行之前并不知道用户会输入多少个整数。数据量取决于运行时的输入，因此程序需要在运行时管理相应的存储空间。
+这里使用 std::vector，它能够根据需要管理动态分配的内存。我们不必手动申请和释放底层存储空间。
+需要注意的是，动态内存并不意味着必须显式调用 new。标准容器、字符串以及其他资源管理类型已经封装了大量动态内存管理工作。
+2. 程序不知道所需对象的准确类型
+在面向对象程序中，我们可能需要根据运行时的信息创建不同类型的对象。
+例如，一个图形程序需要处理圆形和矩形：
+#include &lt;memory&gt; struct Shape { virtual ~Shape() = default; virtual void draw() = 0; }; struct Circle : Shape { void draw() override { // 绘制圆形 } }; struct Rectangle : Shape { void draw() override { // 绘制矩形 } }; std::unique_ptr&lt;Shape&gt; createShape(bool isCircle) { if (isCircle) { return std::make_unique&lt;Circle&gt;(); } return std::make_unique&lt;Rectangle&gt;(); } 调用者只需要知道自己获得了一个 Shape 对象，而不必提前确定其具体类型。
+这类设计广泛存在于插件系统、图形界面、游戏引擎和各种基于多态的程序中。
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-23 16:41:27 +0800 CST'>October 23, 2026</span>&nbsp;·&nbsp;<span>10 min</span>&nbsp;·&nbsp;<span>2013 words</span></footer>
+  <a class="entry-link" aria-label="post link to 关于C&#43;&#43;智能指针：动态内存管理和所有权" href="http://localhost:1313/posts/cpp-smart-ptr/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">再探xv6-概述
     </h2>
   </header>
@@ -242,7 +269,7 @@ Unix 系统调用接口已通过可移植操作系统接口 (POSIX) 标准进行
   </div>
   <footer class="entry-footer">
 
-<span title='2026-10-23 13:39:42 +0800 CST'>October 23, 2026</span>&nbsp;·&nbsp;<span>12 min</span>&nbsp;·&nbsp;<span>2519 words</span></footer>
+<span title='2026-10-23 13:39:42 +0800 CST'>October 23, 2026</span>&nbsp;·&nbsp;<span>12 min</span>&nbsp;·&nbsp;<span>2527 words</span></footer>
   <a class="entry-link" aria-label="post link to 再探xv6-概述" href="http://localhost:1313/posts/xv6-01/"></a>
 </article>
 
@@ -454,33 +481,6 @@ if (condition) { do_this(); do_that(); } 对于包含多个操作的分支，应
 
 <span title='2026-10-19 21:44:39 +0800 CST'>October 19, 2026</span>&nbsp;·&nbsp;<span>4 min</span>&nbsp;·&nbsp;<span>646 words</span></footer>
   <a class="entry-link" aria-label="post link to [转载]Linux内核代码风格：官方规范与实践指南" href="http://localhost:1313/posts/linux-style/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">一生一芯-E1阶段笔记
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>在F阶段我们了解了数字电路的原理（数字信号的表示、存储和处理）和状态机模型，使用Ligisim实现了一个简单的sCPU，并在其上运行了数列求和程序。但是，Logisim的方案难以满足现代处理器设计的需求，因此在E1阶段中我将学习使用HDL（硬件描述语言）实现处理器。
-我的学习路线是：先过了一遍verilog的基本语法，然后刷HDLBits中的题目。
-verilog语法简介：https://vlab.ustc.edu.cn/guide/doc_verilog.html HDLBits 网址：https://hdlbits.01xz.net/wiki/Main_Page HDLBits提供了大量的Verilog的练习题，由浅入深，非常适合verilog的初学者。
-这篇文章的内容主要是我刷HDLBits题目的笔记，请根据需要阅读。
-这两天基本上把HDLBits中的题目全部刷了一遍，大部份题目已经吃透，少部份未能完全理解，后续有时间再复习吧。
-Getting Started Step one Hardware Description Language（硬件描述语言）使用代码来描述数字硬件。
-下面是一个最简单的示例：
-module top_module( output one ); assign one = 1; endmodule 该代码定义了一个名为top_module的module，没有输入，只有一个输出名为one，其中使用assign语句将输出端one置为1。
-Zero 同上，不过这里将输出端置为0。
-module top_module( output zero );// Module body starts after semicolon assign zero = 0; endmodule Verilog Language Basics Wire Create a module with one input and one output that behaves like a wire.
-和物理的连线（wire）不同，verilog中的连线是有方向的。
-我们可以使用assign语句连接输入和输出。
-module top_module( input in, output out ); assign out = in; endmodule Wire4 Create a module with 3 inputs and 4 outputs that behaves like wires that makes these connections:
-...</p>
-  </div>
-  <footer class="entry-footer">
-
-<span title='2026-10-19 16:11:46 +0800 CST'>October 19, 2026</span>&nbsp;·&nbsp;<span>44 min</span>&nbsp;·&nbsp;<span>9260 words</span></footer>
-  <a class="entry-link" aria-label="post link to 一生一芯-E1阶段笔记" href="http://localhost:1313/posts/ysyx-e1/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">

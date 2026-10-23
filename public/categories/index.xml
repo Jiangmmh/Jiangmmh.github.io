@@ -6,8 +6,22 @@
     <description>Recent content in Categories on Minghan的博客</description>
     <generator>Hugo</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Thu, 22 Oct 2026 16:17:04 +0800</lastBuildDate>
+    <lastBuildDate>Fri, 23 Oct 2026 16:41:27 +0800</lastBuildDate>
     <atom:link href="http://localhost:1313/categories/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>C&#43;&#43;</title>
+      <link>http://localhost:1313/categories/c&#43;&#43;/</link>
+      <pubDate>Fri, 23 Oct 2026 16:41:27 +0800</pubDate>
+      <guid>http://localhost:1313/categories/c&#43;&#43;/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Xv6</title>
+      <link>http://localhost:1313/categories/xv6/</link>
+      <pubDate>Fri, 23 Oct 2026 13:39:42 +0800</pubDate>
+      <guid>http://localhost:1313/categories/xv6/</guid>
+      <description></description>
+    </item>
     <item>
       <title>Leetecode</title>
       <link>http://localhost:1313/categories/leetecode/</link>

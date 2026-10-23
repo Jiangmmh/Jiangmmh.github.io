@@ -204,13 +204,13 @@ MIT的操作系统课程6.1810就是以xv6为例，具体阐述操作系统概�
 xv6提供了若干功能模块：
 进程管理 内存管理（物理内存和虚拟内存） I/O和文件描述符 文件系统 IPC机制（管道） 与Unix一样，xv6通过系统调用为应用程序提供服务，下面是xv6支持的22个系统调用：
 xv6与现实世界的操作系统有些不同：
-Unix 将“标准的”文件描述符、管道以及便捷的 shell 语法相结合，用于对它们进行操作，这在编写通用可重用程序方面是一项重大进步。这一理念催生了**“软件工具”文化**，而这正是 Unix 强大功能和流行度的重要原因。Shell 则是第一个所谓的“脚本语言”。Unix 系统调用接口至今仍然在 BSD、Linux 和 macOS 等系统中沿用。
+Unix 将“标准的”文件描述符、管道以及便捷的 shell 语法相结合，用于对它们进行操作，这在编写通用可重用程序方面是一项重大进步。这一理念催生了 “软件工具”文化 ，而这正是 Unix 强大功能和流行度的重要原因。Shell 则是第一个所谓的“脚本语言”。Unix 系统调用接口至今仍然在 BSD、Linux 和 macOS 等系统中沿用。
 Unix 系统调用接口已通过可移植操作系统接口 (POSIX) 标准进行了标准化。xv6不符合 POSIX 标准：它缺少许多系统调用（包括一些基本调用lseek），而且它提供的许多系统调用也与标准有所不同。我们设计 xv6 的主要目标是在提供简单易用的类 Unix 系统调用接口的同时，保持简洁性和清晰度。一些人已经扩展了 xv6，添加了一些系统调用和一个简单的 C 库，以便运行基本的 Unix 程序。然而，现代内核提供的系统调用和内核服务种类远超 xv6。例如，它们支持网络、窗口系统、用户级线程、多种设备的驱动程序等等。现代内核不断发展且日新月异，并提供了许多超出 POSIX 标准的功能。
 ...</p>
   </div>
   <footer class="entry-footer">
 
-<span title='2026-10-23 13:39:42 +0800 CST'>October 23, 2026</span>&nbsp;·&nbsp;<span>12 min</span>&nbsp;·&nbsp;<span>2515 words</span></footer>
+<span title='2026-10-23 13:39:42 +0800 CST'>October 23, 2026</span>&nbsp;·&nbsp;<span>12 min</span>&nbsp;·&nbsp;<span>2527 words</span></footer>
   <a class="entry-link" aria-label="post link to 再探xv6-概述" href="http://localhost:1313/posts/xv6-01/"></a>
 </article>
     </main>

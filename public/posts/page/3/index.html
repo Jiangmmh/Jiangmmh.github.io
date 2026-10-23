@@ -205,6 +205,30 @@
 
 <article class="post-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">Leetecode 二叉树(一)
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>题目来自灵神的题单：二叉树题单。
+在做时带着问题去做下面的题目：
+一般来说，DFS 的递归边界是空节点。 在什么情况下，要额外把叶子节点作为递归边界？ 在什么情况下，DFS 需要有返回值？什么情况下不需要有返回值？ 在什么情况下，题目更适合用自顶向下的方法解决？ 什么情况下更适合用自底向上的方法解决？ C&#43;&#43;不同标准下，支持递归的Lambda表达式写法：
+C&#43;&#43;11标准起支持 #include &lt;functional&gt; std::function&lt;void(TreeNode*, string)&gt; dfs = [&amp;](TreeNode* node, string s) { if (!node) return; // ... dfs(node-&gt;left, s); // 直接用 dfs，因为 dfs 已经声明了 dfs(node-&gt;right, s); }; dfs(root, &#34;&#34;); C&#43;&#43;14标准支持 auto dfs = [&amp;](auto&amp;&amp; self, TreeNode* node, string s) -&gt; void { if (!node) return; // ... self(self, node-&gt;left, s); // 把自己作为参数传进去 self(self, node-&gt;right, s); }; dfs(dfs, root, &#34;&#34;); // 调用时也要把自己传进去 在我的解法实现中采用的是C&#43;&#43;14标准的写法。
+一、遍历二叉树 因为树本身就是递归定义的，即树的子树本身就是一棵树，所以树的算法大多通过递归来实现。
+1. 二叉树的前序遍历 法一：DFS 树的先序遍历的顺序是：根-左-右
+在遍历过程中:
+如果当前节点为空，直接返回； 如果当前节点非空，先访问当前节点，然后依次递归访问左右子树； class Solution { vector&lt;int&gt; ans; void dfs(TreeNode* root) { if (root) { ans.push_back(root-&gt;val); dfs(root-&gt;left); dfs(root-&gt;right); } } public: vector&lt;int&gt; preorderTraversal(TreeNode* root) { dfs(root); return ans; } }; 法二：非递归法
+使用一个栈来实现，对于每个节点先处理当前节点（中），然后依次压入右子树和左子树，根据栈的特点，得到的顺序是先左后右。
+class Solution { public: vector&lt;int&gt; preorderTraversal(TreeNode* root) { vector&lt;int&gt; ans; if (!root) return ans; stack&lt;TreeNode*&gt; st; st.push(root); while (!st.empty()) { auto node = st.top(); st.pop(); if (node) { ans.push_back(node-&gt;val); if (node-&gt;right) st.push(node-&gt;right); if (node-&gt;left) st.push(node-&gt;left); } } return ans; } }; 2. 二叉树的中序遍历 法一：DFS
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-14 22:02:01 +0800 CST'>October 14, 2026</span>&nbsp;·&nbsp;<span>8 min</span>&nbsp;·&nbsp;<span>1582 words</span></footer>
+  <a class="entry-link" aria-label="post link to Leetecode 二叉树(一)" href="http://localhost:1313/posts/leetecode-tree01/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">Leetecode 链表
     </h2>
   </header>
@@ -246,27 +270,6 @@ class Solution { vector&lt;int&gt; findLocalMinMax(ListNode *head) { vector&lt;i
 
 <span title='2026-10-14 11:44:43 +0800 CST'>October 14, 2026</span>&nbsp;·&nbsp;<span>6 min</span>&nbsp;·&nbsp;<span>1268 words</span></footer>
   <a class="entry-link" aria-label="post link to 如何快速构建一个静态博客?" href="http://localhost:1313/posts/hello-world/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>xv6概述 1. xv6简介 xv6 以 Dennis Ritchie 和 Ken Thompson 的 Unix version 6 (v6) 为蓝本 。xv6 大致遵循 Unix v6 的结构和风格，但它是使用ANSI C语言为多核RISC-V 架构实现的。
-MIT的操作系统课程6.1810就是以xv6为例，具体阐述操作系统概念。它不仅提供了 Ken Thompson 和 Dennis Ritchie 的 Unix 操作系统所引入的基本接口，还模仿了 Unix 的内部设计。Unix 提供了一个功能较为单一但机制组合良好的接口，从而展现出令人惊讶的通用性。该接口非常成功，以至于现代操作系统——BSD、Linux、macOS、Solaris，甚至在某种程度上也包括 Microsoft Windows——都采用了类似 Unix 的接口。理解 xv6 是理解这些系统以及许多其他系统的良好开端。
-xv6提供了若干功能模块：
-进程管理 内存管理（物理内存和虚拟内存） I/O和文件描述符 文件系统 IPC机制（管道） 与Unix一样，xv6通过系统调用为应用程序提供服务，下面是xv6支持的22个系统调用：
-xv6与现实世界的操作系统有些不同：
-Unix 将“标准的”文件描述符、管道以及便捷的 shell 语法相结合，用于对它们进行操作，这在编写通用可重用程序方面是一项重大进步。这一理念催生了**“软件工具”文化**，而这正是 Unix 强大功能和流行度的重要原因。Shell 则是第一个所谓的“脚本语言”。Unix 系统调用接口至今仍然在 BSD、Linux 和 macOS 等系统中沿用。
-Unix 系统调用接口已通过可移植操作系统接口 (POSIX) 标准进行了标准化。xv6不符合 POSIX 标准：它缺少许多系统调用（包括一些基本调用lseek），而且它提供的许多系统调用也与标准有所不同。我们设计 xv6 的主要目标是在提供简单易用的类 Unix 系统调用接口的同时，保持简洁性和清晰度。一些人已经扩展了 xv6，添加了一些系统调用和一个简单的 C 库，以便运行基本的 Unix 程序。然而，现代内核提供的系统调用和内核服务种类远超 xv6。例如，它们支持网络、窗口系统、用户级线程、多种设备的驱动程序等等。现代内核不断发展且日新月异，并提供了许多超出 POSIX 标准的功能。
-...</p>
-  </div>
-  <footer class="entry-footer">
-
-<span>12 min</span>&nbsp;·&nbsp;<span>2516 words</span></footer>
-  <a class="entry-link" aria-label="post link to " href="http://localhost:1313/posts/xv6%E6%A6%82%E8%BF%B0-402c4e932614809b98efeeb21bf53cad/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">

@@ -2,25 +2,52 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>http://localhost:1313/categories/c&#43;&#43;/</loc>
+    <lastmod>2026-10-23T16:41:27+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/c&#43;&#43;/</loc>
+    <lastmod>2026-10-23T16:41:27+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/categories/</loc>
+    <lastmod>2026-10-23T16:41:27+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/</loc>
+    <lastmod>2026-10-23T16:41:27+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/posts/</loc>
+    <lastmod>2026-10-23T16:41:27+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/</loc>
+    <lastmod>2026-10-23T16:41:27+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/posts/cpp-smart-ptr/</loc>
+    <lastmod>2026-10-23T16:41:27+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/%E5%8A%A8%E6%80%81%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/</loc>
+    <lastmod>2026-10-23T16:41:27+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88/</loc>
+    <lastmod>2026-10-23T16:41:27+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/mit6.1810/</loc>
+    <lastmod>2026-10-23T13:39:42+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/categories/xv6/</loc>
+    <lastmod>2026-10-23T13:39:42+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/xv6/</loc>
+    <lastmod>2026-10-23T13:39:42+08:00</lastmod>
+  </url><url>
     <loc>http://localhost:1313/posts/xv6-01/</loc>
     <lastmod>2026-10-23T13:39:42+08:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/</loc>
+    <loc>http://localhost:1313/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/</loc>
     <lastmod>2026-10-23T13:39:42+08:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/posts/</loc>
-    <lastmod>2026-10-23T13:39:42+08:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/categories/</loc>
-    <lastmod>2026-10-22T16:17:04+08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/categories/leetecode/</loc>
     <lastmod>2026-10-22T16:17:04+08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/posts/leetecode-tree03/</loc>
-    <lastmod>2026-10-22T16:17:04+08:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/tags/</loc>
     <lastmod>2026-10-22T16:17:04+08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/tags/%E4%B8%AD%E5%BA%8F%E9%81%8D%E5%8E%86/</loc>
@@ -57,9 +84,6 @@
     <lastmod>2026-10-22T15:33:34+08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/</loc>
-    <lastmod>2026-10-22T15:33:34+08:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/</loc>
     <lastmod>2026-10-22T15:33:34+08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/posts/unix-socket/</loc>
@@ -244,8 +268,6 @@
   </url><url>
     <loc>http://localhost:1313/books/nvidia/</loc>
     <lastmod>2026-09-11T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/posts/xv6%E6%A6%82%E8%BF%B0-402c4e932614809b98efeeb21bf53cad/</loc>
   </url><url>
     <loc>http://localhost:1313/archives/</loc>
   </url>
