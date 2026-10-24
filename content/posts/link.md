@@ -2,8 +2,8 @@
 title: "从目标文件到运行时装载：深入理解链接"
 date: '2026-10-23T21:36:30+08:00'
 draft: false
-tags: []
-categories: []
+tags: [链接]
+categories: [操作系统]
 ---
 
 ## 1. 链接的历史：为什么需要链接器？
