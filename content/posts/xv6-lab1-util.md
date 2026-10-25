@@ -8,7 +8,7 @@ categories: [xv6]
 
 # 一、环境准备
 
-环境配置见[文档](lab tools page)，Linux和Mac皆可。
+环境配置见[文档](https://pdos.csail.mit.edu/6.1810/2026/tools.html)，Linux和Mac皆可。
 
 拉取实验代码：
 
