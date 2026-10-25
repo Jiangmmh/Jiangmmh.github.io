@@ -1,9 +1,9 @@
 ---
-title: "再探xv6: Lab1 Utils"
+title: "MIT6.1810: Lab1 Utils"
 date: '2026-10-25T15:12:01+08:00'
 draft: false
-tags: [操作系统, xv6, MIT6.1810]
-categories: [xv6]
+tags: [操作系统, xv6]
+categories: [MIT6.1810]
 ---
 
 # 一、环境准备
