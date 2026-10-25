@@ -639,6 +639,58 @@ C++20 提供了 `std::atomic<std::shared_ptr<T>>`，用于需要原子操作共�
 接口参考：[cppreference — `std::shared_ptr`](https://en.cppreference.com/w/cpp/memory/shared_ptr)
 
 ## std::weak_ptr
+### 为什么需要weak_ptr?
+shared_ptr 使用引用计数管理对象生命周期。当两个对象通过 shared_ptr 互相持有对方时，双方引用计数都无法归零，导致内存泄漏。
+
+```c++
+class B;  // 前向声明
+
+class A {
+public:
+    std::shared_ptr<B> b_ptr;
+    ~A() { std::cout << "A destroyed\n"; }
+};
+
+class B {
+public:
+    std::shared_ptr<A> a_ptr;
+    ~B() { std::cout << "B destroyed\n"; }
+};
+
+void leak() {
+    auto a = std::make_shared<A>();
+    auto b = std::make_shared<B>();
+    a->b_ptr = b;   // B 引用计数 = 2
+    b->a_ptr = a;   // A 引用计数 = 2
+}   // 离开作用域：a、b 各自减 1，引用计数均为 1，永不释放
+```
+
+解决方案就是weak_ptr：
+
+weak_ptr 是"弱引用"，不增加引用计数，只观察对象是否存活。需要访问时通过 lock() 升级为 shared_ptr。
+
+```c++
+class B;
+
+class A {
+public:
+    std::shared_ptr<B> b_ptr;   // 一方用 shared_ptr
+    ~A() { std::cout << "A destroyed\n"; }
+};
+
+class B {
+public:
+    std::weak_ptr<A> a_ptr;     // 另一方用 weak_ptr，打破循环
+    ~B() { std::cout << "B destroyed\n"; }
+};
+
+void no_leak() {
+    auto a = std::make_shared<A>();
+    auto b = std::make_shared<B>();
+    a->b_ptr = b;
+    b->a_ptr = a;
+}   // a 计数归零 → 析构 A → 释放 b_ptr → b 计数归零 → 析构 B ✓
+```
 
 ### 不拥有对象的弱引用
 
