@@ -193,6 +193,66 @@
 
 <article class="post-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">Leetecode 二叉树(二)
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>题目来自灵神的题单：二叉树题单。
+在上一篇文章中已经介绍了简单遍历和自顶向下DFS的思路，这篇文章主要介绍自底向上DFS的思路。
+一、自底向上 DFS（后序遍历） 在二叉树系列的前一篇博客中其实已经提到过了自顶向下和自底向上的区别了，这里再啰嗦一遍。
+自顶向下，指从根节点往叶子节点 “递”的过程中 更新结果 自底向上，指先递归处理叶子节点，在 “归“的过程中 更新结果 21. 二叉树的最大深度 自底向上的解法：
+先递归得到左右子树各自的最大深度，然后取大者&#43;1作为结果返回。
+时间复杂度：O(n)，空间复杂度：O(n)
+class Solution { public: int maxDepth(TreeNode* root) { // base case if (!root) return 0; // 递归求解左右子树的最大深度 int l = maxDepth(root-&gt;left); int r = maxDepth(root-&gt;right); return max(l, r) &#43; 1; } }; 22. 二叉树的最小深度 注意：最小深度必须从根到叶子，即当一个节点只有一个孩子时，不能直接返回，而是要继续递归直至叶子节点。
+自底向上的解法
+有这么几种情况：
+当前节点为空，直接返回0 左子树为空，右子树不为空，返回minDepth(root-&gt;right) &#43; 1 右子树为空，左子树不为空，返回minDepth(root-&gt;left) &#43; 1 左右子树均不为空，返回min(min_l, min_r)&#43;1 时间复杂度：O(n)，空间复杂度：O(n)
+class Solution { public: int minDepth(TreeNode* root) { if (!root) return 0; if (!root-&gt;left &amp;&amp; root-&gt;right) return minDepth(root-&gt;right) &#43; 1; if (!root-&gt;right &amp;&amp; root-&gt;left) return minDepth(root-&gt;left) &#43; 1; int min_l = minDepth(root-&gt;left); int min_r = minDepth(root-&gt;right); return min(min_l, min_r)&#43;1; } }; 23. 单值二叉树 题目要求判断树中各节点的值是否均相同，我的思路：
+使用变量rootval记录根节点的值（题目保证树非空） 准备一个初值为true的bool变量ans记录答案 遍历整棵二叉树，如果发现存在节点值不等于rootval，则将ans置为false 最后返回ans即可 class Solution { public: bool isUnivalTree(TreeNode* root) { // 树非空 int rootval = root-&gt;val; bool ans = true; auto dfs = [&amp;](auto&amp;&amp; self, TreeNode* node) { if (!node) return; if (node-&gt;val != rootval) { ans = false; return ; } self(self, node-&gt;left); self(self, node-&gt;right); }; dfs(dfs, root); return ans; } }; 24. 相同的树 题目要求：判断两棵树上对应节点的值是否完全相同
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-16 11:20:25 +0800 CST'>October 16, 2026</span>&nbsp;·&nbsp;<span>9 min</span>&nbsp;·&nbsp;<span>1829 words</span></footer>
+  <a class="entry-link" aria-label="post link to Leetecode 二叉树(二)" href="http://localhost:1313/posts/leetecode-tree02/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">UCLA Computer Architecture Lec2&amp;Lec3
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>1. Main objective of architecting a computer 关键目标：Make efficient computer.
+何谓高效？
+🌟性能（Performance） 低能耗（Power Consumption） 成本（Cost） 可靠&amp;安全（Reliable &amp; Secure） 2. 处理器的发展 注：这部分内容来自我过去的笔记。
+2.1 过去 摩尔定律: 集成电路上的晶体管数目大约每两年翻一番，而成本几乎不增加。虽名为“定律”，描述的却是一种经验关系，而非科学定律。
+下图的横轴为年份，纵轴为微处理器中即成的晶体管数量，可以看到从1970年代开始到当下一直呈现出线性增长的趋势。
+Dennard Scaling（登纳德缩放比例定律）： 当晶体管的尺寸（长宽高）每年缩小约 30%（即工艺节点推进一代）时，只要电压和电流也等比例地降低，芯片的功率密度（每平方毫米的功耗）将保持不变。
+Dennard Scaling定律量化了随着晶体管尺寸的缩小，其所需加上的电压和电流是多少。
+该定律揭示了：随着晶体管尺寸的缩小，所需的电压和电流也等比例降低，由功率计算公式：P = IV，只要晶体管尺寸能够持续缩小，即使在单位面积上放入更多的晶体管，功耗也不会增加，因而无需考虑散热等问题。
+Insight：根据摩尔定律和德纳德缩放定律，处理器每年都会更快、更便宜、能耗更低。
+2.2 现在和未来 晶体管本该像完美的开关，但尺寸太小后，即使处于“关断”状态，电子也会像漏水一样穿过去，产生静态功耗。
+等到了2005年左右，继续缩小晶体管的尺寸会导致静态功耗（static power leakage） 剧增。Dennard Scaling定律失效，无法继续降低电压，进而导致频率无法继续提高（功耗太大，发热无法解决）。
+随着Dennard Scaling定律的失效，处理器行业发生了急转弯：既然单个核心不能再快了，那就用多出来的晶体管，塞进更多的核心。
+程序性能的进一步提升要依赖于多核处理器、专用并行芯片和并行化的程序。
+Amdahl’s Law给出了程序性能提高的上限取决于该程序并行部分的比例（因为单核性能难以继续提高）。
+未来处理器发展的趋势如下：
+晶体管数量仍在不断增加 时钟频率难以继续提高 处理器Core的数量不断增加 结果：并行程序的性能随之增加，但串行程序的性能几乎不变 但是现在继续增多处理器核心的策略也遇到了瓶颈，见这篇文章：https://www.bohrium.com/sciencepedia/feynman/keyword/dark_silicon
+总结：
+3. 冯诺依曼机与RISC-V 这部分内容介绍了冯诺依曼机的特点（存储程序）、RISCV处理器与CISC处理器的区别、RISC-V处理器（寄存器、指令）。
+3.1 冯诺依曼机 冯诺依曼提出了一个重要观念：存储程序计算机。
+将内存视为一个按字节编址的数组 将程序（指令）与数据一起存储在内存中 然后让计算机自动地取指-执行。 冯诺依曼机的五大部件：
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-15 20:55:46 +0800 CST'>October 15, 2026</span>&nbsp;·&nbsp;<span>1 min</span>&nbsp;·&nbsp;<span>128 words</span></footer>
+  <a class="entry-link" aria-label="post link to UCLA Computer Architecture Lec2&Lec3" href="http://localhost:1313/posts/ucla-ca-02/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">UCLA Computer Architecture Lec1
     </h2>
   </header>
@@ -287,6 +347,31 @@ class Solution { vector&lt;int&gt; findLocalMinMax(ListNode *head) { vector&lt;i
 
 <span title='2026-10-14 11:44:43 +0800 CST'>October 14, 2026</span>&nbsp;·&nbsp;<span>6 min</span>&nbsp;·&nbsp;<span>1268 words</span></footer>
   <a class="entry-link" aria-label="post link to 如何快速构建一个静态博客?" href="http://localhost:1313/posts/hello-world/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Lab syscall 在这个lab中我们将深入理解xv6（其他系统也差不多）的系统调用是如何实现的，并尝试根据功能需求实现自己的系统调用。
+关于xv6的概述和系统调用的逻辑可以看这篇文章，后面就不过多介绍了。
+一、Using gdb (easy) 这部分内容主要是介绍gdb的使用方法，略。
+二、Sandbox a command(moderate) 题目要求实现一个系统调用interpose，其接受两个参数：一个整数掩码和一个路径，前者指定了要屏蔽哪些系统调用，后者暂时不用管。如果要使用interpose屏蔽当前进程的open系统调用，用法如下：
+interpose(1 &lt;&lt; SYS_open, &#34;-&#34;) 现在开始实现该系统调用，首先是用户侧：
+在 user/user.h 中添加 interpose() 的声明 。 int interpose(int, const char *); 在 user/usys.pl 中添加一行内容用于生成系统调用入口函数的实现。 entry(“interpose”); 题目提供了两个程序sandbox.c和sbtest.c，我们需要在Makefile中将其加入编译：
+UPROGS=\ ...... $U/_sandbox\ $U/_sbtest\ 在内核侧：
+在 kernel/syscall.h 中添加 interpose 的系统调用号宏定义
+#define SYS_interpose 23 在 kernel/proc.h 的proc结构体中添加一个interpose_mask，记录屏蔽字
+int interpose_mask; 在 kernel/sysproc.c 中添加函数 sys_interpose() 处理interpose系统调用
+uint64 sys_interpose(void) { int interpose_mask; argint(0, &amp;interpose_mask); myproc()-&gt;interpose_mask = interpose_mask; return 0; } 为了使子进程能够继承父进程的屏蔽字，需要在创建子进程时拷贝interpose_mask，在 kernel/proc.c 中的 kfork() 函数的末尾添加 interpose_mask 的拷贝。
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span>5 min</span>&nbsp;·&nbsp;<span>1046 words</span></footer>
+  <a class="entry-link" aria-label="post link to " href="http://localhost:1313/posts/lab-syscall-404c4e932614806791f9f56aefa199e3/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">

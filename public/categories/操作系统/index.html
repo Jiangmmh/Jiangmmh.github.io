@@ -195,6 +195,25 @@
 
 <article class="post-entry tag-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">从目标文件到运行时装载：深入理解链接
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>1. 链接的历史：为什么需要链接器？ 1.1 从一个源文件到一个完整的程序 当我们编写一个 C 程序时，通常会经历以下过程：
+源代码 │ ▼ 预处理（Preprocessing） │ ▼ 编译（Compilation） │ ▼ 汇编（Assembly） │ ▼ 目标文件（Object File） │ ▼ 链接（Linking） │ ▼ 可执行文件（Executable） │ ▼ 装载与执行（Loading &amp; Execution） 初学编程时，我们可能会认为，编译器只需要把源代码翻译成机器指令，再将这些指令交给处理器执行即可。但当软件规模扩大到数十万行、数百万行甚至更多时，问题就变得复杂起来。
+假设我们有这样一个程序：
+// main.c #include &lt;stdio.h&gt; int add(int a, int b); int main(void) { int result = add(10, 20); printf(&#34;%d\n&#34;, result); return 0; } 函数 add() 的实现位于另一个文件：
+// add.c int add(int a, int b) { return a &#43; b; } 我们可以分别编译这两个源文件：
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-23 21:36:30 +0800 CST'>October 23, 2026</span>&nbsp;·&nbsp;<span>9 min</span>&nbsp;·&nbsp;<span>1768 words</span></footer>
+  <a class="entry-link" aria-label="post link to 从目标文件到运行时装载：深入理解链接" href="http://localhost:1313/posts/link/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">Unix/Linux 进程间通信
     </h2>
   </header>
