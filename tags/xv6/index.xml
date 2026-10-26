@@ -1,4 +1,57 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Xv6 on Minghan的博客</title><link>https://Jiangmmh.github.io/tags/xv6/</link><description>Recent content in Xv6 on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Sun, 25 Oct 2026 15:12:01 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/tags/xv6/index.xml" rel="self" type="application/rss+xml"/><item><title>MIT6.1810: Lab1 Utils</title><link>https://Jiangmmh.github.io/posts/xv6-lab1-util/</link><pubDate>Sun, 25 Oct 2026 15:12:01 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/xv6-lab1-util/</guid><description>&lt;h1 id="一环境准备">一、环境准备&lt;/h1>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Xv6 on Minghan的博客</title><link>https://Jiangmmh.github.io/tags/xv6/</link><description>Recent content in Xv6 on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Mon, 26 Oct 2026 09:23:20 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/tags/xv6/index.xml" rel="self" type="application/rss+xml"/><item><title>MIT6.1810: Lab2 Syscall</title><link>https://Jiangmmh.github.io/posts/xv6-lab2-syscall/</link><pubDate>Mon, 26 Oct 2026 09:23:20 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/xv6-lab2-syscall/</guid><description>&lt;p>在这个lab中我们将深入理解xv6（其他系统也差不多）的系统调用是如何实现的，并尝试根据功能需求实现自己的系统调用。&lt;/p>
+&lt;p>关于xv6的概述和系统调用的逻辑可以看&lt;a href="https://jiangmmh.github.io/posts/xv6-01/">这篇文章&lt;/a>，后面就不过多介绍了。&lt;/p>
+&lt;h1 id="一using-gdbeasy">一、&lt;strong>Using gdb (easy)&lt;/strong>&lt;/h1>
+&lt;p>这部分内容主要是介绍gdb的使用方法，略。&lt;/p>
+&lt;h1 id="二sandbox-a-commandmoderate">二、&lt;strong>Sandbox a command(moderate)&lt;/strong>&lt;/h1>
+&lt;p>题目要求实现一个系统调用interpose，其接受两个参数：一个整数掩码和一个路径，前者指定了要屏蔽哪些系统调用，后者暂时不用管。如果要使用interpose屏蔽当前进程的open系统调用，用法如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-c" data-lang="c">&lt;span class="line">&lt;span class="cl">&lt;span class="nf">interpose&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">1&lt;/span> &lt;span class="o">&amp;lt;&amp;lt;&lt;/span> &lt;span class="n">SYS_open&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s">&amp;#34;-&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>现在开始实现该系统调用，首先是用户侧：&lt;/p>
+&lt;ul>
+&lt;li>在 user/user.h 中添加 interpose() 的声明 。
+&lt;ul>
+&lt;li>int interpose(int, const char *);&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>在 user/usys.pl 中添加一行内容用于生成系统调用入口函数的实现。
+&lt;ul>
+&lt;li>entry(&amp;ldquo;interpose&amp;rdquo;);&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;p>题目提供了两个程序sandbox.c和sbtest.c，我们需要在Makefile中将其加入编译：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-makefile" data-lang="makefile">&lt;span class="line">&lt;span class="cl">&lt;span class="nv">UPROGS&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> ......
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nv">$U&lt;/span>/_sandbox&lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> &lt;span class="nv">$U&lt;/span>/_sbtest&lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在内核侧：&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>在 kernel/syscall.h 中添加 interpose 的系统调用号宏定义&lt;/p>
+&lt;ul>
+&lt;li>#define SYS_interpose 23&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>在 kernel/proc.h 的proc结构体中添加一个interpose_mask，记录屏蔽字&lt;/p>
+&lt;ul>
+&lt;li>int interpose_mask;&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>在 kernel/sysproc.c 中添加函数 sys_interpose() 处理interpose系统调用&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-c" data-lang="c">&lt;span class="line">&lt;span class="cl">&lt;span class="n">uint64&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nf">sys_interpose&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="kt">void&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kt">int&lt;/span> &lt;span class="n">interpose_mask&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">argint&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">0&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">interpose_mask&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">myproc&lt;/span>&lt;span class="p">()&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">interpose_mask&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">interpose_mask&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>为了使子进程能够继承父进程的屏蔽字，需要在创建子进程时拷贝interpose_mask，在 kernel/proc.c 中的 kfork() 函数的末尾添加 interpose_mask 的拷贝。&lt;/p></description></item><item><title>MIT6.1810: Lab1 Utils</title><link>https://Jiangmmh.github.io/posts/xv6-lab1-util/</link><pubDate>Sun, 25 Oct 2026 15:12:01 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/xv6-lab1-util/</guid><description>&lt;h1 id="一环境准备">一、环境准备&lt;/h1>
 &lt;p>环境配置见&lt;a href="https://pdos.csail.mit.edu/6.1810/2026/tools.html">文档&lt;/a>，Linux和Mac皆可。&lt;/p>
 &lt;p>拉取实验代码：&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">$ git clone git://g.csail.mit.edu/xv6-labs-2026

@@ -1,0 +1,386 @@
+<!doctype html><html lang=en dir=auto data-theme=auto><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=robots content="index, follow"><title>MIT6.1810: Lab2 Syscall | Minghan的博客</title><meta name=keywords content="操作系统,xv6"><meta name=description content='在这个lab中我们将深入理解xv6（其他系统也差不多）的系统调用是如何实现的，并尝试根据功能需求实现自己的系统调用。
+关于xv6的概述和系统调用的逻辑可以看这篇文章，后面就不过多介绍了。
+一、Using gdb (easy)
+这部分内容主要是介绍gdb的使用方法，略。
+二、Sandbox a command(moderate)
+题目要求实现一个系统调用interpose，其接受两个参数：一个整数掩码和一个路径，前者指定了要屏蔽哪些系统调用，后者暂时不用管。如果要使用interpose屏蔽当前进程的open系统调用，用法如下：
+interpose(1 << SYS_open, "-")
+现在开始实现该系统调用，首先是用户侧：
+
+在 user/user.h 中添加 interpose() 的声明 。
+
+int interpose(int, const char *);
+
+
+在 user/usys.pl 中添加一行内容用于生成系统调用入口函数的实现。
+
+entry(&ldquo;interpose&rdquo;);
+
+
+
+题目提供了两个程序sandbox.c和sbtest.c，我们需要在Makefile中将其加入编译：
+UPROGS=\
+	......
+	$U/_sandbox\
+	$U/_sbtest\
+在内核侧：
+
+
+在 kernel/syscall.h 中添加 interpose 的系统调用号宏定义
+
+#define SYS_interpose   23
+
+
+
+在 kernel/proc.h 的proc结构体中添加一个interpose_mask，记录屏蔽字
+
+int interpose_mask;
+
+
+
+在 kernel/sysproc.c 中添加函数 sys_interpose() 处理interpose系统调用
+uint64
+sys_interpose(void)
+{
+  int interpose_mask;
+  argint(0, &amp;interpose_mask);
+
+  myproc()->interpose_mask = interpose_mask;
+
+  return 0;
+}
+
+
+为了使子进程能够继承父进程的屏蔽字，需要在创建子进程时拷贝interpose_mask，在 kernel/proc.c 中的 kfork() 函数的末尾添加 interpose_mask 的拷贝。'><meta name=author content><link rel=canonical href=https://Jiangmmh.github.io/posts/xv6-lab2-syscall/><link crossorigin=anonymous href=/assets/css/stylesheet.a130102b043e0442948a101d3a50a788218de8b3e9b0e092e90b92df5e8ad519.css integrity="sha256-oTAQKwQ+BEKUihAdOlCniCGN6LPpsOCS6QuS316K1Rk=" rel="preload stylesheet" as=style><link rel=icon href=https://Jiangmmh.github.io/favicon.ico><link rel=icon type=image/png sizes=16x16 href=https://Jiangmmh.github.io/favicon-16x16.png><link rel=icon type=image/png sizes=32x32 href=https://Jiangmmh.github.io/favicon-32x32.png><link rel=apple-touch-icon href=https://Jiangmmh.github.io/apple-touch-icon.png><link rel=mask-icon href=https://Jiangmmh.github.io/safari-pinned-tab.svg><meta name=theme-color content="#2e2e33"><meta name=msapplication-TileColor content="#2e2e33"><link rel=alternate hreflang=en href=https://Jiangmmh.github.io/posts/xv6-lab2-syscall/><noscript><style>#theme-toggle,.top-link{display:none}</style><style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--code-block-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51);color-scheme:dark}.list{background:var(--theme)}.toc{background:var(--entry)}}</style></noscript><script>localStorage.getItem("pref-theme")==="dark"?document.querySelector("html").dataset.theme="dark":localStorage.getItem("pref-theme")==="light"?document.querySelector("html").dataset.theme="light":window.matchMedia("(prefers-color-scheme: dark)").matches?document.querySelector("html").dataset.theme="dark":document.querySelector("html").dataset.theme="light"</script><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css><script defer src=https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.js></script><script defer src=https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded",function(){if(typeof renderMathInElement!="function"){console.error("KaTeX auto-render 加载失败");return}document.querySelectorAll(".post-content, .book-content").forEach(function(e){renderMathInElement(e,{delimiters:[{left:"$$",right:"$$",display:!0},{left:"\\[",right:"\\]",display:!0},{left:"\\(",right:"\\)",display:!1}],throwOnError:!1})})})</script><meta property="og:url" content="https://Jiangmmh.github.io/posts/xv6-lab2-syscall/"><meta property="og:site_name" content="Minghan的博客"><meta property="og:title" content="MIT6.1810: Lab2 Syscall"><meta property="og:description" content='在这个lab中我们将深入理解xv6（其他系统也差不多）的系统调用是如何实现的，并尝试根据功能需求实现自己的系统调用。
+关于xv6的概述和系统调用的逻辑可以看这篇文章，后面就不过多介绍了。
+一、Using gdb (easy) 这部分内容主要是介绍gdb的使用方法，略。
+二、Sandbox a command(moderate) 题目要求实现一个系统调用interpose，其接受两个参数：一个整数掩码和一个路径，前者指定了要屏蔽哪些系统调用，后者暂时不用管。如果要使用interpose屏蔽当前进程的open系统调用，用法如下：
+interpose(1 << SYS_open, "-") 现在开始实现该系统调用，首先是用户侧：
+在 user/user.h 中添加 interpose() 的声明 。 int interpose(int, const char *); 在 user/usys.pl 中添加一行内容用于生成系统调用入口函数的实现。 entry(“interpose”); 题目提供了两个程序sandbox.c和sbtest.c，我们需要在Makefile中将其加入编译：
+UPROGS=\ ...... $U/_sandbox\ $U/_sbtest\ 在内核侧：
+在 kernel/syscall.h 中添加 interpose 的系统调用号宏定义
+#define SYS_interpose 23 在 kernel/proc.h 的proc结构体中添加一个interpose_mask，记录屏蔽字
+int interpose_mask; 在 kernel/sysproc.c 中添加函数 sys_interpose() 处理interpose系统调用
+uint64 sys_interpose(void) { int interpose_mask; argint(0, &amp;interpose_mask); myproc()->interpose_mask = interpose_mask; return 0; } 为了使子进程能够继承父进程的屏蔽字，需要在创建子进程时拷贝interpose_mask，在 kernel/proc.c 中的 kfork() 函数的末尾添加 interpose_mask 的拷贝。'><meta property="og:locale" content="en"><meta property="og:type" content="article"><meta property="article:section" content="posts"><meta property="article:published_time" content="2026-10-26T09:23:20+08:00"><meta property="article:modified_time" content="2026-10-26T09:23:20+08:00"><meta property="article:tag" content="操作系统"><meta property="article:tag" content="Xv6"><meta name=twitter:card content="summary"><meta name=twitter:title content="MIT6.1810: Lab2 Syscall"><meta name=twitter:description content='在这个lab中我们将深入理解xv6（其他系统也差不多）的系统调用是如何实现的，并尝试根据功能需求实现自己的系统调用。
+关于xv6的概述和系统调用的逻辑可以看这篇文章，后面就不过多介绍了。
+一、Using gdb (easy) 这部分内容主要是介绍gdb的使用方法，略。
+二、Sandbox a command(moderate) 题目要求实现一个系统调用interpose，其接受两个参数：一个整数掩码和一个路径，前者指定了要屏蔽哪些系统调用，后者暂时不用管。如果要使用interpose屏蔽当前进程的open系统调用，用法如下：
+interpose(1 << SYS_open, "-") 现在开始实现该系统调用，首先是用户侧：
+在 user/user.h 中添加 interpose() 的声明 。 int interpose(int, const char *); 在 user/usys.pl 中添加一行内容用于生成系统调用入口函数的实现。 entry(“interpose”); 题目提供了两个程序sandbox.c和sbtest.c，我们需要在Makefile中将其加入编译：
+UPROGS=\ ...... $U/_sandbox\ $U/_sbtest\ 在内核侧：
+在 kernel/syscall.h 中添加 interpose 的系统调用号宏定义
+#define SYS_interpose 23 在 kernel/proc.h 的proc结构体中添加一个interpose_mask，记录屏蔽字
+int interpose_mask; 在 kernel/sysproc.c 中添加函数 sys_interpose() 处理interpose系统调用
+uint64 sys_interpose(void) { int interpose_mask; argint(0, &amp;interpose_mask); myproc()->interpose_mask = interpose_mask; return 0; } 为了使子进程能够继承父进程的屏蔽字，需要在创建子进程时拷贝interpose_mask，在 kernel/proc.c 中的 kfork() 函数的末尾添加 interpose_mask 的拷贝。'><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Posts","item":"https://Jiangmmh.github.io/posts/"},{"@type":"ListItem","position":2,"name":"MIT6.1810: Lab2 Syscall","item":"https://Jiangmmh.github.io/posts/xv6-lab2-syscall/"}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"MIT6.1810: Lab2 Syscall","name":"MIT6.1810: Lab2 Syscall","description":"在这个lab中我们将深入理解xv6（其他系统也差不多）的系统调用是如何实现的，并尝试根据功能需求实现自己的系统调用。\n关于xv6的概述和系统调用的逻辑可以看这篇文章，后面就不过多介绍了。\n一、Using gdb (easy) 这部分内容主要是介绍gdb的使用方法，略。\n二、Sandbox a command(moderate) 题目要求实现一个系统调用interpose，其接受两个参数：一个整数掩码和一个路径，前者指定了要屏蔽哪些系统调用，后者暂时不用管。如果要使用interpose屏蔽当前进程的open系统调用，用法如下：\ninterpose(1 \u0026lt;\u0026lt; SYS_open, \u0026#34;-\u0026#34;) 现在开始实现该系统调用，首先是用户侧：\n在 user/user.h 中添加 interpose() 的声明 。 int interpose(int, const char *); 在 user/usys.pl 中添加一行内容用于生成系统调用入口函数的实现。 entry(\u0026ldquo;interpose\u0026rdquo;); 题目提供了两个程序sandbox.c和sbtest.c，我们需要在Makefile中将其加入编译：\nUPROGS=\\ ...... $U/_sandbox\\ $U/_sbtest\\ 在内核侧：\n在 kernel/syscall.h 中添加 interpose 的系统调用号宏定义\n#define SYS_interpose 23 在 kernel/proc.h 的proc结构体中添加一个interpose_mask，记录屏蔽字\nint interpose_mask; 在 kernel/sysproc.c 中添加函数 sys_interpose() 处理interpose系统调用\nuint64 sys_interpose(void) { int interpose_mask; argint(0, \u0026amp;interpose_mask); myproc()-\u0026gt;interpose_mask = interpose_mask; return 0; } 为了使子进程能够继承父进程的屏蔽字，需要在创建子进程时拷贝interpose_mask，在 kernel/proc.c 中的 kfork() 函数的末尾添加 interpose_mask 的拷贝。\n","keywords":["操作系统","xv6"],"articleBody":"在这个lab中我们将深入理解xv6（其他系统也差不多）的系统调用是如何实现的，并尝试根据功能需求实现自己的系统调用。\n关于xv6的概述和系统调用的逻辑可以看这篇文章，后面就不过多介绍了。\n一、Using gdb (easy) 这部分内容主要是介绍gdb的使用方法，略。\n二、Sandbox a command(moderate) 题目要求实现一个系统调用interpose，其接受两个参数：一个整数掩码和一个路径，前者指定了要屏蔽哪些系统调用，后者暂时不用管。如果要使用interpose屏蔽当前进程的open系统调用，用法如下：\ninterpose(1 \u003c\u003c SYS_open, \"-\") 现在开始实现该系统调用，首先是用户侧：\n在 user/user.h 中添加 interpose() 的声明 。 int interpose(int, const char *); 在 user/usys.pl 中添加一行内容用于生成系统调用入口函数的实现。 entry(“interpose”); 题目提供了两个程序sandbox.c和sbtest.c，我们需要在Makefile中将其加入编译：\nUPROGS=\\ ...... $U/_sandbox\\ $U/_sbtest\\ 在内核侧：\n在 kernel/syscall.h 中添加 interpose 的系统调用号宏定义\n#define SYS_interpose 23 在 kernel/proc.h 的proc结构体中添加一个interpose_mask，记录屏蔽字\nint interpose_mask; 在 kernel/sysproc.c 中添加函数 sys_interpose() 处理interpose系统调用\nuint64 sys_interpose(void) { int interpose_mask; argint(0, \u0026interpose_mask); myproc()-\u003einterpose_mask = interpose_mask; return 0; } 为了使子进程能够继承父进程的屏蔽字，需要在创建子进程时拷贝interpose_mask，在 kernel/proc.c 中的 kfork() 函数的末尾添加 interpose_mask 的拷贝。\n// Create a new process, copying the parent. // Sets up child kernel stack to return as if from fork() system call. int kfork(void) { ...... // 子进程继承父进程的interpose_mask np-\u003einterpose_mask = p-\u003einterpose_mask; return pid; } 最后修改syscall.c，在syscalls表中添加sys_interpose，然后在syscall()函数中检查用户进程请求的系统调用是否已被屏蔽，如果是就将返回值置为-1（注意，系统调用的结果会通过a0寄存器返回）。\nextern uint64 sys_interpose(void); // An array mapping syscall numbers from syscall.h // to the function that handles the system call. static uint64 (*syscalls[])(void) = { // clang-format off ...... [SYS_interpose] = sys_interpose, // clang-format on }; void syscall(void) { int num; struct proc *p = myproc(); num = p-\u003etrapframe-\u003ea7; if (num \u003e 0 \u0026\u0026 num \u003c NELEM(syscalls) \u0026\u0026 syscalls[num]) { // Use num to lookup the system call function for num, call it, // and store its return value in p-\u003etrapframe-\u003ea0 // 检查num号系统调用是否被屏蔽 if (p-\u003einterpose_mask \u0026 (1 \u003c\u003c num)) { p-\u003etrapframe-\u003ea0 = -1; } else { p-\u003etrapframe-\u003ea0 = syscalls[num](); } } else { printk(\"%d %s: unknown sys call %d\\n\", p-\u003epid, p-\u003ename, num); p-\u003etrapframe-\u003ea0 = -1; } } 测试一下：\nxv6-labs-2026 ➜ ./grade-lab-syscall sandbox_mask make: `kernel/kernel' is up to date. == Test sandbox_mask == sandbox_mask: OK (0.4s) 三、Sandbox with allowed pathnames(easy) 这里要求实现上一题中未处理的第二个参数，该参数会传入一个路径allowed_path，如果请求的系统调用是exec或open，且目标路径在allowed_path之下，那么即使该系统调用被屏蔽了仍可以成功执行。\n在proc结构体中添加新成员 allowed_path：\n// Per-process state struct proc { ...... int interpose_mask; char allowed_path[MAXPATH]; }; 首先修改sys_interpose()，在其中获取第二个参数，并将其记录在进程结构体的allowed_path中。\n注意这里对于已经调用过interpose()的进程，不允许再次修改屏蔽字和allowed_path。\nuint64 sys_interpose(void) { int interpose_mask; char buf[MAXPATH]; argint(0, \u0026interpose_mask); if (argstr(1, buf, MAXPATH) == -1) { return -1; } struct proc *p = myproc(); // 已经设置沙箱限制后，不允许进程自行修改 if (p-\u003einterpose_mask != 0 || p-\u003eallowed_path[0] != '\\0') { return -1; } p-\u003einterpose_mask = interpose_mask; safestrcpy(p-\u003eallowed_path, buf, MAXPATH); return 0; } 实现思路：\n如果发现系统调用被屏蔽，检查该调用是否为exec或open 如果不是，直接返回-1 如果是，调用函数path_allowed()检查该调用的目标路径是否被允许 如果是就执行调用 否则返回-1 如果未被屏蔽，执行该调用 void syscall(void) { int num; struct proc *p = myproc(); num = p-\u003etrapframe-\u003ea7; if (num \u003e 0 \u0026\u0026 num \u003c NELEM(syscalls) \u0026\u0026 syscalls[num]) { // Use num to lookup the system call function for num, call it, // and store its return value in p-\u003etrapframe-\u003ea0 // 检查num号系统调用是否被屏蔽 if (p-\u003einterpose_mask \u0026 (1 \u003c\u003c num)) { if (num == SYS_exec || num == SYS_open) { char buf[MAXPATH]; if (argstr(0, buf, MAXPATH) == -1) { // argstr失败，直接返回-1 p-\u003etrapframe-\u003ea0 = -1; } else if (path_allowed(buf, p-\u003eallowed_path)) { // path被允许 p-\u003etrapframe-\u003ea0 = syscalls[num](); } else { // path不被允许 p-\u003etrapframe-\u003ea0 = -1; } } else { // 非exec \u0026 非fork p-\u003etrapframe-\u003ea0 = -1; } } else { p-\u003etrapframe-\u003ea0 = syscalls[num](); } } else { printk(\"%d %s: unknown sys call %d\\n\", p-\u003epid, p-\u003ename, num); p-\u003etrapframe-\u003ea0 = -1; } } 最后来实现判断路径是否被允许的函数path_allowed()，其功能为：判断一个文件路径是否位于允许访问的路径范围内，同时拒绝通过 .. 进行目录穿越。\n// 检查路径中是否包含 \"..\" 目录分量 static int has_parent_dir(char *path) { char *p = path; while (*p != '\\0') { // 找到一个路径分量的起点 if (p == path || p[-1] == '/') { if (p[0] == '.' \u0026\u0026 p[1] == '.' \u0026\u0026 (p[2] == '/' || p[2] == '\\0')) { return 1; } } p++; } return 0; } // 检查 path 是否位于 allowed 指定的路径范围内 static int path_allowed(char *path, char *allowed) { int len; // 没有设置允许路径，拒绝访问 if (allowed == 0 || allowed[0] == '\\0') { return 0; } // 拒绝通过 \"..\" 进行目录穿越 if (has_parent_dir(path)) { return 0; } // path 必须以 allowed 为前缀 len = strlen(allowed); if (strncmp(path, allowed, len) != 0) { return 0; } // 前缀后面必须是路径结束符或目录分隔符 if (path[len] != '\\0' \u0026\u0026 path[len] != '/') { return 0; } return 1; } 测试一下：\n== Test sandbox_mask == $ make qemu-gdb sandbox_mask: OK (5.9s) == Test sandbox_fork == $ make qemu-gdb sandbox_fork: OK (1.2s) == Test sandbox_path == $ make qemu-gdb sandbox_path: OK (1.0s) == Test sandbox_most == $ make qemu-gdb sandbox_most: OK (0.9s) == Test sandbox_minus == $ make qemu-gdb sandbox_minus: OK (1.1s) == Test sandbox_block == $ make qemu-gdb sandbox_block: OK (0.9s) == Test sandbox_escape == $ make qemu-gdb sandbox_escape: OK (1.1s) (Old xv6.out.sandbox_escape failure log removed) == Test sandbox_forkpath == $ make qemu-gdb sandbox_forkpath: OK (0.9s) 四、Attack xv6 (moderate) 在该lab中，conf/lab.mk 里是 LAB=syscall ，Makefile会加上LAB_SYSCALL宏，这个宏关掉了xv6中的三个内存擦除行为：\n// kernel/kalloc.c kfree() #ifndef LAB_SYSCALL memset(pa, 1, PGSIZE); // 原本用垃圾填满整页以暴露野指针 #endif // kernel/kalloc.c kalloc() #ifndef LAB_SYSCALL memset((char *)r, 5, PGSIZE); #endif // kernel/vm.c uvmalloc() #ifndef LAB_SYSCALL memset(mem, 0, sz); // 原本把新用户页清零 #endif 下面是几个内存布局相关的常量：\n物理页分配器 kalloc()/kfree() 维护一个单向 LIFO 链表 kmem.freelist ，页面的分配和释放是后进先出的：\n// kfree(): 头插 r-\u003enext = kmem.freelist; kmem.freelist = r; // kalloc(): 头出 r = kmem.freelist; kmem.freelist = r-\u003enext;` 关键问题：从在shell中执行secret后，到运行attack之间内存是如何分配和释放的？\n在shell中运行程序会先调用fork()系统调用，然后执行exec()系统调用。\n先来看fork()，该系统调用在内核侧会调用kfork()：\n其中会调用allocproc()分配一个进程，其中分配了一个页面，作为trapframe 调用proc_pagetable()为进程分配页表 其中调用uvmcreate()，分配一个页面作为页目录表 调用mappages()为TRAMPOLINE和TRAPFRAME分配页表 为TRAMPOLINE分配页表时，分配两个页面作为次两级页表 TRAPFRAME的地址紧接TRAMPOLINE，因此两者共用三级页表，无需再分配页面 调用uvmcopy()拷贝父进程的内存空间，分了若干页面，但不知道具体分配了多少，假设为k。 再来看exec()，在内核侧会调用sys_exec()：\n其中会为程序的每个命令行参数分配一个页面，然后调用kexec() 在其中调用proc_pagetable()为进程分配页表，同fork()，分配了若干页面。 在加载目标程序到内存的过程中分配了若干页面。 分配两个页面作为用户栈（一个作为栈，另一个作为guard page） 最后调用proc_freepagetable()释放前面在fork中分配的旧页表中的全部页面（对应fork中第2步和第3步的全部页面） 用户程序执行完毕后会使用系统调用exit()退出，其中会：\n关闭全部打开的文件 将所有子进程都交给init进程 唤醒父进程 将当前进程的状态设置为ZOMBIE 在shell中会调用系统调用wait()等待子进程执行完毕，其会释放进程的资源：\n反复从shell进程的子进程中过搜索状态为ZOMBIE的进程 调用freeproc()释放子进程 先释放trapframe的一个页面 释放当前进程的页表中的全部页面。 当然，即使知道了这些，我们还是无法弄清楚目标secret在哪。\n解题的核心思路：不要去算秘密落在哪个物理页。让 attack 申请一大块堆，然后在里面扫标记字符串即可 —— 页被复用到哪算哪。\n#include \"kernel/types.h\" #include \"user/user.h\" #define NUMPAGES 128 #define MARKER \"Here it is: \" #define MARKLEN 12 #define SECRETLEN 8 static int isalnum_(char c) { return (c \u003e= '0' \u0026\u0026 c \u003c= '9') || (c \u003e= 'a' \u0026\u0026 c \u003c= 'z') || (c \u003e= 'A' \u0026\u0026 c \u003c= 'Z'); } int main(int argc, char *argv[]) { char *base, *end, *p; int i; // 一次要够多的页：秘密页在 free list 里排第 19 位左右， // 128 页足够覆盖（两次 attack 的位置分别是第 20 页和第 104 页）。 base = sbrk(NUMPAGES * 4096); if (base == SBRK_ERROR) { printf(\"attack: sbrk failed\\n\"); exit(1); } end = base + NUMPAGES * 4096; for (p = base; p + MARKLEN + SECRETLEN + 1 \u003c end; p++) { if (memcmp(p, MARKER, MARKLEN) != 0) continue; // 排除 .rodata 里那个只有标记、没有秘密的拷贝 for (i = 0; i \u003c SECRETLEN; i++) if (!isalnum_(p[MARKLEN + i])) break; if (i != SECRETLEN || p[MARKLEN + SECRETLEN] != '\\0') continue; printf(\"%s\\n\", p + MARKLEN); // 秘密必须独占一行，grader 用 ^secret 匹配 exit(0); } printf(\"attack: secret not found\\n\"); exit(1); } 测试一下：\nxv6-labs-2026 ➜ make grade == Test answers-syscall.txt == answers-syscall.txt: OK == Test sandbox_mask == $ make qemu-gdb sandbox_mask: OK (4.3s) == Test sandbox_fork == $ make qemu-gdb sandbox_fork: OK (1.1s) == Test sandbox_path == $ make qemu-gdb sandbox_path: OK (1.1s) == Test sandbox_most == $ make qemu-gdb sandbox_most: OK (0.9s) == Test sandbox_minus == $ make qemu-gdb sandbox_minus: OK (1.0s) == Test sandbox_block == $ make qemu-gdb sandbox_block: OK (1.0s) == Test sandbox_escape == $ make qemu-gdb sandbox_escape: OK (1.1s) == Test sandbox_forkpath == $ make qemu-gdb sandbox_forkpath: OK (0.9s) == Test attack == $ make qemu-gdb attack: OK (1.1s) == Test time == time: OK Score: 60/60 总结：手工推算每个物理页的复用顺序就当作加深对xv6进程创建和销毁过程的理解，但是不能用其来解题。编写attack 只需要申请大量页面，然后在其中搜索即可。\n","wordCount":"1044","inLanguage":"en","datePublished":"2026-10-26T09:23:20+08:00","dateModified":"2026-10-26T09:23:20+08:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://Jiangmmh.github.io/posts/xv6-lab2-syscall/"},"publisher":{"@type":"Organization","name":"Minghan的博客","logo":{"@type":"ImageObject","url":"https://Jiangmmh.github.io/favicon.ico"}}}</script></head><body id=top><header class=header><nav class=header-nav><div class=logo><a href=https://Jiangmmh.github.io/ accesskey=h title="Minghan的博客 (Alt + H)">Minghan的博客</a><div class=logo-switches><button id=theme-toggle class=theme-toggle accesskey=t title="(Alt + T)" aria-label="Toggle theme">
+<svg class="moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+<svg class="sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button></div></div><ul id=menu class=menu><li><a href=https://Jiangmmh.github.io/posts/ title=文章><span>文章</span></a></li><li><a href=https://Jiangmmh.github.io/archives/ title=归档><span>归档</span></a></li><li><a href=https://Jiangmmh.github.io/categories/ title=分类><span>分类</span></a></li><li><a href=https://Jiangmmh.github.io/tags/ title=标签><span>标签</span></a></li><li><a href=https://Jiangmmh.github.io/moments/ title=随记><span>随记</span></a></li><li><a href=https://Jiangmmh.github.io/photos/ title=照片墙><span>照片墙</span></a></li><li><a href=https://Jiangmmh.github.io/books/ title=阅读><span>阅读</span></a></li><li><a href=https://Jiangmmh.github.io/about/ title=关于><span>关于</span></a></li></ul></nav></header><main class=main><article class=post-single><header class=post-header><nav class=breadcrumbs role=navigation aria-label=Breadcrumb><a href=/>Home</a>
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right"><polyline points="9 18 15 12 9 6"/></svg>
+<a href=/posts/>Posts</a>
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right"><polyline points="9 18 15 12 9 6"/></svg></nav><h1 class="post-title entry-hint-parent">MIT6.1810: Lab2 Syscall</h1><div class=post-meta><span title='2026-10-26 09:23:20 +0800 +0800'>October 26, 2026</span>&nbsp;·&nbsp;<span>5 min</span>&nbsp;·&nbsp;<span>1044 words</span></div></header><details class=toc open><summary accesskey=c title="(Alt + C)"><span class=title>Table of Contents</span></summary><div class=inner><ul><li><a href=#%e4%b8%80using-gdbeasy aria-label="一、Using gdb (easy)">一、Using gdb (easy)</a></li><li><a href=#%e4%ba%8csandbox-a-commandmoderate aria-label="二、Sandbox a command(moderate)">二、Sandbox a command(moderate)</a></li><li><a href=#%e4%b8%89sandbox-with-allowed-pathnameseasy aria-label="三、Sandbox with allowed pathnames(easy)">三、Sandbox with allowed pathnames(easy)</a></li><li><a href=#%e5%9b%9battack-xv6moderate aria-label="四、Attack xv6 (moderate)">四、Attack xv6 (moderate)</a></li></ul></div></details><div class="post-content md-content"><p>在这个lab中我们将深入理解xv6（其他系统也差不多）的系统调用是如何实现的，并尝试根据功能需求实现自己的系统调用。</p><p>关于xv6的概述和系统调用的逻辑可以看<a href=https://jiangmmh.github.io/posts/xv6-01/>这篇文章</a>，后面就不过多介绍了。</p><h1 id=一using-gdbeasy>一、<strong>Using gdb (easy)</strong><a hidden class=anchor aria-hidden=true href=#一using-gdbeasy>#</a></h1><p>这部分内容主要是介绍gdb的使用方法，略。</p><h1 id=二sandbox-a-commandmoderate>二、<strong>Sandbox a command(moderate)</strong><a hidden class=anchor aria-hidden=true href=#二sandbox-a-commandmoderate>#</a></h1><p>题目要求实现一个系统调用interpose，其接受两个参数：一个整数掩码和一个路径，前者指定了要屏蔽哪些系统调用，后者暂时不用管。如果要使用interpose屏蔽当前进程的open系统调用，用法如下：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=nf>interpose</span><span class=p>(</span><span class=mi>1</span> <span class=o>&lt;&lt;</span> <span class=n>SYS_open</span><span class=p>,</span> <span class=s>&#34;-&#34;</span><span class=p>)</span>
+</span></span></code></pre></div><p>现在开始实现该系统调用，首先是用户侧：</p><ul><li>在 user/user.h 中添加 interpose() 的声明 。<ul><li>int interpose(int, const char *);</li></ul></li><li>在 user/usys.pl 中添加一行内容用于生成系统调用入口函数的实现。<ul><li>entry(&ldquo;interpose&rdquo;);</li></ul></li></ul><p>题目提供了两个程序sandbox.c和sbtest.c，我们需要在Makefile中将其加入编译：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-makefile data-lang=makefile><span class=line><span class=cl><span class=nv>UPROGS</span><span class=o>=</span><span class=se>\
+</span></span></span><span class=line><span class=cl><span class=se></span>	......
+</span></span><span class=line><span class=cl>	<span class=nv>$U</span>/_sandbox<span class=se>\
+</span></span></span><span class=line><span class=cl><span class=se></span>	<span class=nv>$U</span>/_sbtest<span class=se>\
+</span></span></span></code></pre></div><p>在内核侧：</p><ul><li><p>在 kernel/syscall.h 中添加 interpose 的系统调用号宏定义</p><ul><li>#define SYS_interpose 23</li></ul></li><li><p>在 kernel/proc.h 的proc结构体中添加一个interpose_mask，记录屏蔽字</p><ul><li>int interpose_mask;</li></ul></li><li><p>在 kernel/sysproc.c 中添加函数 sys_interpose() 处理interpose系统调用</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=n>uint64</span>
+</span></span><span class=line><span class=cl><span class=nf>sys_interpose</span><span class=p>(</span><span class=kt>void</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=kt>int</span> <span class=n>interpose_mask</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=nf>argint</span><span class=p>(</span><span class=mi>0</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>interpose_mask</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=nf>myproc</span><span class=p>()</span><span class=o>-&gt;</span><span class=n>interpose_mask</span> <span class=o>=</span> <span class=n>interpose_mask</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></div></li><li><p>为了使子进程能够继承父进程的屏蔽字，需要在创建子进程时拷贝interpose_mask，在 kernel/proc.c 中的 kfork() 函数的末尾添加 interpose_mask 的拷贝。</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=c1>// Create a new process, copying the parent.
+</span></span></span><span class=line><span class=cl><span class=c1>// Sets up child kernel stack to return as if from fork() system call.
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=kt>int</span>
+</span></span><span class=line><span class=cl><span class=nf>kfork</span><span class=p>(</span><span class=kt>void</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=p>......</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=c1>// 子进程继承父进程的interpose_mask
+</span></span></span><span class=line><span class=cl><span class=c1></span>  <span class=n>np</span><span class=o>-&gt;</span><span class=n>interpose_mask</span> <span class=o>=</span> <span class=n>p</span><span class=o>-&gt;</span><span class=n>interpose_mask</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=k>return</span> <span class=n>pid</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></div></li><li><p>最后修改syscall.c，在syscalls表中添加sys_interpose，然后在syscall()函数中检查用户进程请求的系统调用是否已被屏蔽，如果是就将返回值置为-1（注意，<strong>系统调用的结果会通过a0寄存器返回</strong>）。</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=k>extern</span> <span class=n>uint64</span> <span class=nf>sys_interpose</span><span class=p>(</span><span class=kt>void</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// An array mapping syscall numbers from syscall.h
+</span></span></span><span class=line><span class=cl><span class=c1>// to the function that handles the system call.
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=k>static</span> <span class=nf>uint64</span> <span class=p>(</span><span class=o>*</span><span class=n>syscalls</span><span class=p>[])(</span><span class=kt>void</span><span class=p>)</span> <span class=o>=</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=c1>// clang-format off
+</span></span></span><span class=line><span class=cl><span class=c1></span>  <span class=p>......</span>
+</span></span><span class=line><span class=cl>  <span class=p>[</span><span class=n>SYS_interpose</span><span class=p>]</span>     <span class=o>=</span> <span class=n>sys_interpose</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>  <span class=c1>// clang-format on
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kt>void</span>
+</span></span><span class=line><span class=cl><span class=nf>syscall</span><span class=p>(</span><span class=kt>void</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=kt>int</span> <span class=n>num</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=k>struct</span> <span class=n>proc</span> <span class=o>*</span><span class=n>p</span> <span class=o>=</span> <span class=nf>myproc</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=n>num</span> <span class=o>=</span> <span class=n>p</span><span class=o>-&gt;</span><span class=n>trapframe</span><span class=o>-&gt;</span><span class=n>a7</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=n>num</span> <span class=o>&gt;</span> <span class=mi>0</span> <span class=o>&amp;&amp;</span> <span class=n>num</span> <span class=o>&lt;</span> <span class=nf>NELEM</span><span class=p>(</span><span class=n>syscalls</span><span class=p>)</span> <span class=o>&amp;&amp;</span> <span class=n>syscalls</span><span class=p>[</span><span class=n>num</span><span class=p>])</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// Use num to lookup the system call function for num, call it,
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=c1>// and store its return value in p-&gt;trapframe-&gt;a0
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl>    <span class=c1>// 检查num号系统调用是否被屏蔽
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=k>if</span> <span class=p>(</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>interpose_mask</span> <span class=o>&amp;</span> <span class=p>(</span><span class=mi>1</span> <span class=o>&lt;&lt;</span> <span class=n>num</span><span class=p>))</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>      <span class=n>p</span><span class=o>-&gt;</span><span class=n>trapframe</span><span class=o>-&gt;</span><span class=n>a0</span> <span class=o>=</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>      <span class=n>p</span><span class=o>-&gt;</span><span class=n>trapframe</span><span class=o>-&gt;</span><span class=n>a0</span> <span class=o>=</span> <span class=n>syscalls</span><span class=p>[</span><span class=n>num</span><span class=p>]();</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=nf>printk</span><span class=p>(</span><span class=s>&#34;%d %s: unknown sys call %d</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span> <span class=n>p</span><span class=o>-&gt;</span><span class=n>pid</span><span class=p>,</span> <span class=n>p</span><span class=o>-&gt;</span><span class=n>name</span><span class=p>,</span> <span class=n>num</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=n>p</span><span class=o>-&gt;</span><span class=n>trapframe</span><span class=o>-&gt;</span><span class=n>a0</span> <span class=o>=</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></div></li></ul><p>测试一下：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>xv6-labs-2026 ➜ ./grade-lab-syscall sandbox_mask
+</span></span><span class=line><span class=cl>make: <span class=sb>`</span>kernel/kernel<span class=err>&#39;</span> is up to date.
+</span></span><span class=line><span class=cl><span class=o>==</span> Test <span class=nv>sandbox_mask</span> <span class=o>==</span> sandbox_mask: OK <span class=o>(</span>0.4s<span class=o>)</span> 
+</span></span></code></pre></div><h1 id=三sandbox-with-allowed-pathnameseasy>三、<strong>Sandbox with allowed pathnames(easy)</strong><a hidden class=anchor aria-hidden=true href=#三sandbox-with-allowed-pathnameseasy>#</a></h1><p>这里要求实现上一题中未处理的第二个参数，该参数会传入一个路径<strong>allowed_path</strong>，如果请求的系统调用是exec或open，且目标路径在allowed_path之下，那么即使该系统调用被屏蔽了仍可以成功执行。</p><p>在proc结构体中添加新成员 allowed_path：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=c1>// Per-process state
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=k>struct</span> <span class=n>proc</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=p>......</span>
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>  <span class=kt>int</span> <span class=n>interpose_mask</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=kt>char</span> <span class=n>allowed_path</span><span class=p>[</span><span class=n>MAXPATH</span><span class=p>];</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span></code></pre></div><p>首先修改sys_interpose()，在其中获取第二个参数，并将其记录在进程结构体的allowed_path中。</p><p>注意这里对于已经调用过interpose()的进程，不允许再次修改屏蔽字和allowed_path。</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=n>uint64</span>
+</span></span><span class=line><span class=cl><span class=nf>sys_interpose</span><span class=p>(</span><span class=kt>void</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=kt>int</span> <span class=n>interpose_mask</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=kt>char</span> <span class=n>buf</span><span class=p>[</span><span class=n>MAXPATH</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=nf>argint</span><span class=p>(</span><span class=mi>0</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>interpose_mask</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=nf>argstr</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span> <span class=n>buf</span><span class=p>,</span> <span class=n>MAXPATH</span><span class=p>)</span> <span class=o>==</span> <span class=o>-</span><span class=mi>1</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=k>struct</span> <span class=n>proc</span> <span class=o>*</span><span class=n>p</span> <span class=o>=</span> <span class=nf>myproc</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=c1>// 已经设置沙箱限制后，不允许进程自行修改
+</span></span></span><span class=line><span class=cl><span class=c1></span>  <span class=k>if</span> <span class=p>(</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>interpose_mask</span> <span class=o>!=</span> <span class=mi>0</span> <span class=o>||</span> <span class=n>p</span><span class=o>-&gt;</span><span class=n>allowed_path</span><span class=p>[</span><span class=mi>0</span><span class=p>]</span> <span class=o>!=</span> <span class=sc>&#39;\0&#39;</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl>	
+</span></span><span class=line><span class=cl>  <span class=n>p</span><span class=o>-&gt;</span><span class=n>interpose_mask</span> <span class=o>=</span> <span class=n>interpose_mask</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=nf>safestrcpy</span><span class=p>(</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>allowed_path</span><span class=p>,</span> <span class=n>buf</span><span class=p>,</span> <span class=n>MAXPATH</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><p>实现思路：</p><ul><li>如果发现系统调用被屏蔽，检查该调用是否为exec或open<ul><li>如果不是，直接返回-1</li><li>如果是，调用函数path_allowed()检查该调用的目标路径是否被允许<ul><li>如果是就执行调用</li><li>否则返回-1</li></ul></li></ul></li><li>如果未被屏蔽，执行该调用</li></ul><div class=highlight><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=kt>void</span>
+</span></span><span class=line><span class=cl><span class=nf>syscall</span><span class=p>(</span><span class=kt>void</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=kt>int</span> <span class=n>num</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=k>struct</span> <span class=n>proc</span> <span class=o>*</span><span class=n>p</span> <span class=o>=</span> <span class=nf>myproc</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=n>num</span> <span class=o>=</span> <span class=n>p</span><span class=o>-&gt;</span><span class=n>trapframe</span><span class=o>-&gt;</span><span class=n>a7</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=n>num</span> <span class=o>&gt;</span> <span class=mi>0</span> <span class=o>&amp;&amp;</span> <span class=n>num</span> <span class=o>&lt;</span> <span class=nf>NELEM</span><span class=p>(</span><span class=n>syscalls</span><span class=p>)</span> <span class=o>&amp;&amp;</span> <span class=n>syscalls</span><span class=p>[</span><span class=n>num</span><span class=p>])</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// Use num to lookup the system call function for num, call it,
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=c1>// and store its return value in p-&gt;trapframe-&gt;a0
+</span></span></span><span class=line><span class=cl><span class=c1></span>    
+</span></span><span class=line><span class=cl>    <span class=c1>// 检查num号系统调用是否被屏蔽
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=k>if</span> <span class=p>(</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>interpose_mask</span> <span class=o>&amp;</span> <span class=p>(</span><span class=mi>1</span> <span class=o>&lt;&lt;</span> <span class=n>num</span><span class=p>))</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>      <span class=k>if</span> <span class=p>(</span><span class=n>num</span> <span class=o>==</span> <span class=n>SYS_exec</span> <span class=o>||</span> <span class=n>num</span> <span class=o>==</span> <span class=n>SYS_open</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=kt>char</span> <span class=n>buf</span><span class=p>[</span><span class=n>MAXPATH</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=p>(</span><span class=nf>argstr</span><span class=p>(</span><span class=mi>0</span><span class=p>,</span> <span class=n>buf</span><span class=p>,</span> <span class=n>MAXPATH</span><span class=p>)</span> <span class=o>==</span> <span class=o>-</span><span class=mi>1</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>          <span class=c1>// argstr失败，直接返回-1
+</span></span></span><span class=line><span class=cl><span class=c1></span>          <span class=n>p</span><span class=o>-&gt;</span><span class=n>trapframe</span><span class=o>-&gt;</span><span class=n>a0</span> <span class=o>=</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span> <span class=k>else</span> <span class=k>if</span> <span class=p>(</span><span class=nf>path_allowed</span><span class=p>(</span><span class=n>buf</span><span class=p>,</span> <span class=n>p</span><span class=o>-&gt;</span><span class=n>allowed_path</span><span class=p>))</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>          <span class=c1>// path被允许
+</span></span></span><span class=line><span class=cl><span class=c1></span>          <span class=n>p</span><span class=o>-&gt;</span><span class=n>trapframe</span><span class=o>-&gt;</span><span class=n>a0</span> <span class=o>=</span> <span class=n>syscalls</span><span class=p>[</span><span class=n>num</span><span class=p>]();</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>          <span class=c1>// path不被允许
+</span></span></span><span class=line><span class=cl><span class=c1></span>          <span class=n>p</span><span class=o>-&gt;</span><span class=n>trapframe</span><span class=o>-&gt;</span><span class=n>a0</span> <span class=o>=</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>      <span class=p>}</span> <span class=k>else</span> <span class=p>{</span> 
+</span></span><span class=line><span class=cl>        <span class=c1>// 非exec &amp; 非fork
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=n>p</span><span class=o>-&gt;</span><span class=n>trapframe</span><span class=o>-&gt;</span><span class=n>a0</span> <span class=o>=</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>      <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>      <span class=n>p</span><span class=o>-&gt;</span><span class=n>trapframe</span><span class=o>-&gt;</span><span class=n>a0</span> <span class=o>=</span> <span class=n>syscalls</span><span class=p>[</span><span class=n>num</span><span class=p>]();</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=nf>printk</span><span class=p>(</span><span class=s>&#34;%d %s: unknown sys call %d</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span> <span class=n>p</span><span class=o>-&gt;</span><span class=n>pid</span><span class=p>,</span> <span class=n>p</span><span class=o>-&gt;</span><span class=n>name</span><span class=p>,</span> <span class=n>num</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=n>p</span><span class=o>-&gt;</span><span class=n>trapframe</span><span class=o>-&gt;</span><span class=n>a0</span> <span class=o>=</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><p>最后来实现判断路径是否被允许的函数path_allowed()，其功能为：判断一个文件路径是否位于允许访问的路径范围内，同时拒绝通过 <code>..</code> 进行目录穿越。</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=c1>// 检查路径中是否包含 &#34;..&#34; 目录分量
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=k>static</span> <span class=kt>int</span>
+</span></span><span class=line><span class=cl><span class=nf>has_parent_dir</span><span class=p>(</span><span class=kt>char</span> <span class=o>*</span><span class=n>path</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kt>char</span> <span class=o>*</span><span class=n>p</span> <span class=o>=</span> <span class=n>path</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>while</span> <span class=p>(</span><span class=o>*</span><span class=n>p</span> <span class=o>!=</span> <span class=sc>&#39;\0&#39;</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=c1>// 找到一个路径分量的起点
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=k>if</span> <span class=p>(</span><span class=n>p</span> <span class=o>==</span> <span class=n>path</span> <span class=o>||</span> <span class=n>p</span><span class=p>[</span><span class=o>-</span><span class=mi>1</span><span class=p>]</span> <span class=o>==</span> <span class=sc>&#39;/&#39;</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=k>if</span> <span class=p>(</span><span class=n>p</span><span class=p>[</span><span class=mi>0</span><span class=p>]</span> <span class=o>==</span> <span class=sc>&#39;.&#39;</span> <span class=o>&amp;&amp;</span>
+</span></span><span class=line><span class=cl>                <span class=n>p</span><span class=p>[</span><span class=mi>1</span><span class=p>]</span> <span class=o>==</span> <span class=sc>&#39;.&#39;</span> <span class=o>&amp;&amp;</span>
+</span></span><span class=line><span class=cl>                <span class=p>(</span><span class=n>p</span><span class=p>[</span><span class=mi>2</span><span class=p>]</span> <span class=o>==</span> <span class=sc>&#39;/&#39;</span> <span class=o>||</span> <span class=n>p</span><span class=p>[</span><span class=mi>2</span><span class=p>]</span> <span class=o>==</span> <span class=sc>&#39;\0&#39;</span><span class=p>))</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>                <span class=k>return</span> <span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=p>}</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>        <span class=n>p</span><span class=o>++</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 检查 path 是否位于 allowed 指定的路径范围内
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=k>static</span> <span class=kt>int</span>
+</span></span><span class=line><span class=cl><span class=nf>path_allowed</span><span class=p>(</span><span class=kt>char</span> <span class=o>*</span><span class=n>path</span><span class=p>,</span> <span class=kt>char</span> <span class=o>*</span><span class=n>allowed</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kt>int</span> <span class=n>len</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// 没有设置允许路径，拒绝访问 
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=k>if</span> <span class=p>(</span><span class=n>allowed</span> <span class=o>==</span> <span class=mi>0</span> <span class=o>||</span> <span class=n>allowed</span><span class=p>[</span><span class=mi>0</span><span class=p>]</span> <span class=o>==</span> <span class=sc>&#39;\0&#39;</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=c1>// 拒绝通过 &#34;..&#34; 进行目录穿越
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=k>if</span> <span class=p>(</span><span class=nf>has_parent_dir</span><span class=p>(</span><span class=n>path</span><span class=p>))</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// path 必须以 allowed 为前缀
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=n>len</span> <span class=o>=</span> <span class=nf>strlen</span><span class=p>(</span><span class=n>allowed</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=nf>strncmp</span><span class=p>(</span><span class=n>path</span><span class=p>,</span> <span class=n>allowed</span><span class=p>,</span> <span class=n>len</span><span class=p>)</span> <span class=o>!=</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// 前缀后面必须是路径结束符或目录分隔符
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=k>if</span> <span class=p>(</span><span class=n>path</span><span class=p>[</span><span class=n>len</span><span class=p>]</span> <span class=o>!=</span> <span class=sc>&#39;\0&#39;</span> <span class=o>&amp;&amp;</span> <span class=n>path</span><span class=p>[</span><span class=n>len</span><span class=p>]</span> <span class=o>!=</span> <span class=sc>&#39;/&#39;</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><p>测试一下：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=o>==</span> Test <span class=nv>sandbox_mask</span> <span class=o>==</span> 
+</span></span><span class=line><span class=cl>$ make qemu-gdb
+</span></span><span class=line><span class=cl>sandbox_mask: OK <span class=o>(</span>5.9s<span class=o>)</span> 
+</span></span><span class=line><span class=cl><span class=o>==</span> Test <span class=nv>sandbox_fork</span> <span class=o>==</span> 
+</span></span><span class=line><span class=cl>$ make qemu-gdb
+</span></span><span class=line><span class=cl>sandbox_fork: OK <span class=o>(</span>1.2s<span class=o>)</span> 
+</span></span><span class=line><span class=cl><span class=o>==</span> Test <span class=nv>sandbox_path</span> <span class=o>==</span> 
+</span></span><span class=line><span class=cl>$ make qemu-gdb
+</span></span><span class=line><span class=cl>sandbox_path: OK <span class=o>(</span>1.0s<span class=o>)</span> 
+</span></span><span class=line><span class=cl><span class=o>==</span> Test <span class=nv>sandbox_most</span> <span class=o>==</span> 
+</span></span><span class=line><span class=cl>$ make qemu-gdb
+</span></span><span class=line><span class=cl>sandbox_most: OK <span class=o>(</span>0.9s<span class=o>)</span> 
+</span></span><span class=line><span class=cl><span class=o>==</span> Test <span class=nv>sandbox_minus</span> <span class=o>==</span> 
+</span></span><span class=line><span class=cl>$ make qemu-gdb
+</span></span><span class=line><span class=cl>sandbox_minus: OK <span class=o>(</span>1.1s<span class=o>)</span> 
+</span></span><span class=line><span class=cl><span class=o>==</span> Test <span class=nv>sandbox_block</span> <span class=o>==</span> 
+</span></span><span class=line><span class=cl>$ make qemu-gdb
+</span></span><span class=line><span class=cl>sandbox_block: OK <span class=o>(</span>0.9s<span class=o>)</span> 
+</span></span><span class=line><span class=cl><span class=o>==</span> Test <span class=nv>sandbox_escape</span> <span class=o>==</span> 
+</span></span><span class=line><span class=cl>$ make qemu-gdb
+</span></span><span class=line><span class=cl>sandbox_escape: OK <span class=o>(</span>1.1s<span class=o>)</span> 
+</span></span><span class=line><span class=cl>    <span class=o>(</span>Old xv6.out.sandbox_escape failure log removed<span class=o>)</span>
+</span></span><span class=line><span class=cl><span class=o>==</span> Test <span class=nv>sandbox_forkpath</span> <span class=o>==</span> 
+</span></span><span class=line><span class=cl>$ make qemu-gdb
+</span></span><span class=line><span class=cl>sandbox_forkpath: OK <span class=o>(</span>0.9s<span class=o>)</span> 
+</span></span></code></pre></div><h1 id=四attack-xv6moderate>四、<strong>Attack xv6 (moderate)</strong><a hidden class=anchor aria-hidden=true href=#四attack-xv6moderate>#</a></h1><p>在该lab中，conf/lab.mk 里是 LAB=syscall ，Makefile会加上LAB_SYSCALL宏，这个宏关掉了xv6中的三个内存擦除行为：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=c1>// kernel/kalloc.c  kfree()
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=cp>#ifndef LAB_SYSCALL
+</span></span></span><span class=line><span class=cl><span class=cp></span>  <span class=nf>memset</span><span class=p>(</span><span class=n>pa</span><span class=p>,</span> <span class=mi>1</span><span class=p>,</span> <span class=n>PGSIZE</span><span class=p>);</span>   <span class=c1>// 原本用垃圾填满整页以暴露野指针
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span>
+</span></span><span class=line><span class=cl><span class=c1>// kernel/kalloc.c  kalloc()
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=cp>#ifndef LAB_SYSCALL
+</span></span></span><span class=line><span class=cl><span class=cp></span>  <span class=nf>memset</span><span class=p>((</span><span class=kt>char</span> <span class=o>*</span><span class=p>)</span><span class=n>r</span><span class=p>,</span> <span class=mi>5</span><span class=p>,</span> <span class=n>PGSIZE</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span>
+</span></span><span class=line><span class=cl><span class=c1>// kernel/vm.c  uvmalloc()
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=cp>#ifndef LAB_SYSCALL
+</span></span></span><span class=line><span class=cl><span class=cp></span>  <span class=nf>memset</span><span class=p>(</span><span class=n>mem</span><span class=p>,</span> <span class=mi>0</span><span class=p>,</span> <span class=n>sz</span><span class=p>);</span>      <span class=c1>// 原本把新用户页清零
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=cp>#endif
+</span></span></span></code></pre></div><p>下面是几个内存布局相关的常量：</p><p><img alt=image.png loading=lazy src=/images/posts/lab-syscall/image.png></p><p>物理页分配器 <code>kalloc()</code>/<code>kfree()</code> 维护一个<strong>单向 LIFO 链表</strong> <code>kmem.freelist</code> ，页面的分配和释放是后进先出的：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=c1>// kfree(): 头插
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=n>r</span><span class=o>-&gt;</span><span class=n>next</span> <span class=o>=</span> <span class=n>kmem</span><span class=p>.</span><span class=n>freelist</span><span class=p>;</span>  <span class=n>kmem</span><span class=p>.</span><span class=n>freelist</span> <span class=o>=</span> <span class=n>r</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=c1>// kalloc(): 头出
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=n>r</span> <span class=o>=</span> <span class=n>kmem</span><span class=p>.</span><span class=n>freelist</span><span class=p>;</span>  <span class=n>kmem</span><span class=p>.</span><span class=n>freelist</span> <span class=o>=</span> <span class=n>r</span><span class=o>-&gt;</span><span class=n>next</span><span class=p>;</span><span class=err>`</span>
+</span></span></code></pre></div><blockquote><p>关键问题：从在shell中执行secret后，到运行attack之间内存是如何分配和释放的？</p></blockquote><p><strong>在shell中运行程序会先调用fork()系统调用，然后执行exec()系统调用。</strong></p><p><strong>先来看fork()，该系统调用在内核侧会调用kfork()：</strong></p><ol><li>其中会调用allocproc()分配一个进程，其中<strong>分配了一个页面</strong>，作为trapframe</li><li>调用proc_pagetable()为进程分配页表<ul><li>其中调用uvmcreate()，<strong>分配一个页面</strong>作为页目录表</li><li>调用mappages()为TRAMPOLINE和TRAPFRAME分配页表<ul><li>为TRAMPOLINE分配页表时，<strong>分配两个页面</strong>作为次两级页表</li><li>TRAPFRAME的地址紧接TRAMPOLINE，因此两者共用三级页表，无需再分配页面</li></ul></li></ul></li><li>调用uvmcopy()拷贝父进程的内存空间，<strong>分了若干页面，但不知道具体分配了多少，假设为k</strong>。</li></ol><p><strong>再来看exec()，在内核侧会调用sys_exec()：</strong></p><ol><li>其中会为程序的<strong>每个命令行参数分配一个页面</strong>，然后调用kexec()</li><li>在其中调用proc_pagetable()为进程分配页表，同fork()，<strong>分配了若干页面</strong>。</li><li>在加载目标程序到内存的过程中<strong>分配了若干页面</strong>。</li><li><strong>分配两个页面</strong>作为用户栈（一个作为栈，另一个作为guard page）</li><li><strong>最后调用proc_freepagetable()释放前面在fork中分配的旧页表中的全部页面（对应fork中第2步和第3步的全部页面）</strong></li></ol><p><strong>用户程序执行完毕后会使用系统调用exit()退出，其中会：</strong></p><ol><li>关闭全部打开的文件</li><li>将所有子进程都交给init进程</li><li>唤醒父进程</li><li>将当前进程的状态设置为ZOMBIE</li></ol><p><strong>在shell中会调用系统调用wait()等待子进程执行完毕，其会释放进程的资源：</strong></p><ul><li>反复从shell进程的子进程中过搜索状态为ZOMBIE的进程</li><li>调用freeproc()释放子进程<ul><li>先释放trapframe的<strong>一个页面</strong></li><li>释放当前进程的页表中的全部页面。</li></ul></li></ul><hr><blockquote><p>当然，即使知道了这些，我们还是无法弄清楚目标secret在哪。</p></blockquote><p>解题的核心思路：<strong>不要去算秘密落在哪个物理页。让 attack 申请一大块堆，然后在里面扫标记字符串即可 —— 页被复用到哪算哪。</strong></p><div class=highlight><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&#34;kernel/types.h&#34;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&#34;user/user.h&#34;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp></span>
+</span></span><span class=line><span class=cl><span class=cp>#define NUMPAGES 128
+</span></span></span><span class=line><span class=cl><span class=cp>#define MARKER   &#34;Here it is: &#34;
+</span></span></span><span class=line><span class=cl><span class=cp>#define MARKLEN  12
+</span></span></span><span class=line><span class=cl><span class=cp>#define SECRETLEN 8
+</span></span></span><span class=line><span class=cl><span class=cp></span>
+</span></span><span class=line><span class=cl><span class=k>static</span> <span class=kt>int</span>
+</span></span><span class=line><span class=cl><span class=nf>isalnum_</span><span class=p>(</span><span class=kt>char</span> <span class=n>c</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=k>return</span> <span class=p>(</span><span class=n>c</span> <span class=o>&gt;=</span> <span class=sc>&#39;0&#39;</span> <span class=o>&amp;&amp;</span> <span class=n>c</span> <span class=o>&lt;=</span> <span class=sc>&#39;9&#39;</span><span class=p>)</span> <span class=o>||</span> <span class=p>(</span><span class=n>c</span> <span class=o>&gt;=</span> <span class=sc>&#39;a&#39;</span> <span class=o>&amp;&amp;</span> <span class=n>c</span> <span class=o>&lt;=</span> <span class=sc>&#39;z&#39;</span><span class=p>)</span> <span class=o>||</span>
+</span></span><span class=line><span class=cl>         <span class=p>(</span><span class=n>c</span> <span class=o>&gt;=</span> <span class=sc>&#39;A&#39;</span> <span class=o>&amp;&amp;</span> <span class=n>c</span> <span class=o>&lt;=</span> <span class=sc>&#39;Z&#39;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kt>int</span>
+</span></span><span class=line><span class=cl><span class=nf>main</span><span class=p>(</span><span class=kt>int</span> <span class=n>argc</span><span class=p>,</span> <span class=kt>char</span> <span class=o>*</span><span class=n>argv</span><span class=p>[])</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=kt>char</span> <span class=o>*</span><span class=n>base</span><span class=p>,</span> <span class=o>*</span><span class=n>end</span><span class=p>,</span> <span class=o>*</span><span class=n>p</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=kt>int</span> <span class=n>i</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=c1>// 一次要够多的页：秘密页在 free list 里排第 19 位左右，
+</span></span></span><span class=line><span class=cl><span class=c1></span>  <span class=c1>// 128 页足够覆盖（两次 attack 的位置分别是第 20 页和第 104 页）。
+</span></span></span><span class=line><span class=cl><span class=c1></span>  <span class=n>base</span> <span class=o>=</span> <span class=nf>sbrk</span><span class=p>(</span><span class=n>NUMPAGES</span> <span class=o>*</span> <span class=mi>4096</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=n>base</span> <span class=o>==</span> <span class=n>SBRK_ERROR</span><span class=p>)</span> <span class=p>{</span> <span class=nf>printf</span><span class=p>(</span><span class=s>&#34;attack: sbrk failed</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>);</span> <span class=nf>exit</span><span class=p>(</span><span class=mi>1</span><span class=p>);</span> <span class=p>}</span>
+</span></span><span class=line><span class=cl>  <span class=n>end</span> <span class=o>=</span> <span class=n>base</span> <span class=o>+</span> <span class=n>NUMPAGES</span> <span class=o>*</span> <span class=mi>4096</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=k>for</span> <span class=p>(</span><span class=n>p</span> <span class=o>=</span> <span class=n>base</span><span class=p>;</span> <span class=n>p</span> <span class=o>+</span> <span class=n>MARKLEN</span> <span class=o>+</span> <span class=n>SECRETLEN</span> <span class=o>+</span> <span class=mi>1</span> <span class=o>&lt;</span> <span class=n>end</span><span class=p>;</span> <span class=n>p</span><span class=o>++</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=nf>memcmp</span><span class=p>(</span><span class=n>p</span><span class=p>,</span> <span class=n>MARKER</span><span class=p>,</span> <span class=n>MARKLEN</span><span class=p>)</span> <span class=o>!=</span> <span class=mi>0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>      <span class=k>continue</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// 排除 .rodata 里那个只有标记、没有秘密的拷贝
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=k>for</span> <span class=p>(</span><span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=n>SECRETLEN</span><span class=p>;</span> <span class=n>i</span><span class=o>++</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>      <span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=nf>isalnum_</span><span class=p>(</span><span class=n>p</span><span class=p>[</span><span class=n>MARKLEN</span> <span class=o>+</span> <span class=n>i</span><span class=p>]))</span>
+</span></span><span class=line><span class=cl>        <span class=k>break</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>i</span> <span class=o>!=</span> <span class=n>SECRETLEN</span> <span class=o>||</span> <span class=n>p</span><span class=p>[</span><span class=n>MARKLEN</span> <span class=o>+</span> <span class=n>SECRETLEN</span><span class=p>]</span> <span class=o>!=</span> <span class=sc>&#39;\0&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>      <span class=k>continue</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=nf>printf</span><span class=p>(</span><span class=s>&#34;%s</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span> <span class=n>p</span> <span class=o>+</span> <span class=n>MARKLEN</span><span class=p>);</span>   <span class=c1>// 秘密必须独占一行，grader 用 ^secret 匹配
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=nf>exit</span><span class=p>(</span><span class=mi>0</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=nf>printf</span><span class=p>(</span><span class=s>&#34;attack: secret not found</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=nf>exit</span><span class=p>(</span><span class=mi>1</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><p>测试一下：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>xv6-labs-2026 ➜ make <span class=nv>grade</span>
+</span></span><span class=line><span class=cl><span class=o>==</span> Test answers-syscall.txt <span class=o>==</span> 
+</span></span><span class=line><span class=cl>answers-syscall.txt: <span class=nv>OK</span> 
+</span></span><span class=line><span class=cl><span class=o>==</span> Test <span class=nv>sandbox_mask</span> <span class=o>==</span> 
+</span></span><span class=line><span class=cl>$ make qemu-gdb
+</span></span><span class=line><span class=cl>sandbox_mask: OK <span class=o>(</span>4.3s<span class=o>)</span> 
+</span></span><span class=line><span class=cl><span class=o>==</span> Test <span class=nv>sandbox_fork</span> <span class=o>==</span> 
+</span></span><span class=line><span class=cl>$ make qemu-gdb
+</span></span><span class=line><span class=cl>sandbox_fork: OK <span class=o>(</span>1.1s<span class=o>)</span> 
+</span></span><span class=line><span class=cl><span class=o>==</span> Test <span class=nv>sandbox_path</span> <span class=o>==</span> 
+</span></span><span class=line><span class=cl>$ make qemu-gdb
+</span></span><span class=line><span class=cl>sandbox_path: OK <span class=o>(</span>1.1s<span class=o>)</span> 
+</span></span><span class=line><span class=cl><span class=o>==</span> Test <span class=nv>sandbox_most</span> <span class=o>==</span> 
+</span></span><span class=line><span class=cl>$ make qemu-gdb
+</span></span><span class=line><span class=cl>sandbox_most: OK <span class=o>(</span>0.9s<span class=o>)</span> 
+</span></span><span class=line><span class=cl><span class=o>==</span> Test <span class=nv>sandbox_minus</span> <span class=o>==</span> 
+</span></span><span class=line><span class=cl>$ make qemu-gdb
+</span></span><span class=line><span class=cl>sandbox_minus: OK <span class=o>(</span>1.0s<span class=o>)</span> 
+</span></span><span class=line><span class=cl><span class=o>==</span> Test <span class=nv>sandbox_block</span> <span class=o>==</span> 
+</span></span><span class=line><span class=cl>$ make qemu-gdb
+</span></span><span class=line><span class=cl>sandbox_block: OK <span class=o>(</span>1.0s<span class=o>)</span> 
+</span></span><span class=line><span class=cl><span class=o>==</span> Test <span class=nv>sandbox_escape</span> <span class=o>==</span> 
+</span></span><span class=line><span class=cl>$ make qemu-gdb
+</span></span><span class=line><span class=cl>sandbox_escape: OK <span class=o>(</span>1.1s<span class=o>)</span> 
+</span></span><span class=line><span class=cl><span class=o>==</span> Test <span class=nv>sandbox_forkpath</span> <span class=o>==</span> 
+</span></span><span class=line><span class=cl>$ make qemu-gdb
+</span></span><span class=line><span class=cl>sandbox_forkpath: OK <span class=o>(</span>0.9s<span class=o>)</span> 
+</span></span><span class=line><span class=cl><span class=o>==</span> Test <span class=nv>attack</span> <span class=o>==</span> 
+</span></span><span class=line><span class=cl>$ make qemu-gdb
+</span></span><span class=line><span class=cl>attack: OK <span class=o>(</span>1.1s<span class=o>)</span> 
+</span></span><span class=line><span class=cl><span class=o>==</span> Test <span class=nb>time</span> <span class=o>==</span> 
+</span></span><span class=line><span class=cl>time: OK 
+</span></span><span class=line><span class=cl>Score: 60/60
+</span></span></code></pre></div><blockquote><p><strong>总结</strong>：手工推算每个物理页的复用顺序就当作加深对xv6进程创建和销毁过程的理解，但是不能用其来解题。编写attack 只需要申请大量页面，然后在其中搜索即可。</p></blockquote></div><footer class=post-footer><ul class=post-tags><li><a href=https://Jiangmmh.github.io/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/>操作系统</a></li><li><a href=https://Jiangmmh.github.io/tags/xv6/>Xv6</a></li></ul><nav class=paginav><a class=next href=https://Jiangmmh.github.io/posts/xv6-lab1-util/><span class=title>Next »</span>
+<span>MIT6.1810: Lab1 Utils</span></a></nav></footer></article></main><footer class=footer><span>&copy; 2026 <a href=https://Jiangmmh.github.io/>Minghan的博客</a></span> ·
+<span>Powered by
+<a href="https://gohugo.io/?utm_source=papermod" rel=noopener target=_blank>Hugo</a> &
+<a href=https://github.com/adityatelange/hugo-PaperMod/ rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top id=top-link class="top-link hidden" aria-label="go to top" title="Go to Top (Alt + G)" accesskey=g><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevrons-up"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg>
+</a><script src=/js/toc-scrollspy.js defer></script><script>let menu=document.getElementById("menu");if(menu){const e=localStorage.getItem("menu-scroll-position");e&&(menu.scrollLeft=parseInt(e,10)),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}}document.querySelectorAll('a[href^="#"]').forEach(e=>{e.addEventListener("click",function(e){e.preventDefault();var t=this.getAttribute("href").substr(1);window.matchMedia("(prefers-reduced-motion: reduce)").matches?document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView({behavior:"smooth"}),t==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${t}`)})})</script><script>var toplink=document.getElementById("top-link");window.onscroll=function(){const e=window.innerHeight;document.body.scrollTop>e||document.documentElement.scrollTop>e?toplink.classList.remove("hidden"):toplink.classList.add("hidden")}</script><script>document.getElementById("theme-toggle").addEventListener("click",()=>{const e=document.querySelector("html");e.dataset.theme==="dark"?(e.dataset.theme="light",localStorage.setItem("pref-theme","light")):(e.dataset.theme="dark",localStorage.setItem("pref-theme","dark"))})</script><script>document.querySelectorAll("pre > code").forEach(e=>{const n=e.parentNode.parentNode,t=document.createElement("button");t.classList.add("copy-code"),t.innerHTML="copy";function s(){t.innerHTML="copied!",setTimeout(()=>{t.innerHTML="copy"},2e3)}t.addEventListener("click",t=>{if("clipboard"in navigator){navigator.clipboard.writeText(e.textContent),s();return}const n=document.createRange();n.selectNodeContents(e);const o=window.getSelection();o.removeAllRanges(),o.addRange(n);try{document.execCommand("copy"),s()}catch{}o.removeRange(n)}),n.classList.contains("highlight")?n.appendChild(t):n.parentNode.firstChild==n||(e.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName=="TABLE"?e.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(t):e.parentNode.appendChild(t))})</script></body></html>
