@@ -195,7 +195,34 @@
 
 <article class="post-entry tag-entry"> 
   <header class="entry-header">
-    <h2 class="entry-hint-parent">MIT6.1810: Lab1 Syscall
+    <h2 class="entry-hint-parent">再探xv6: 内存篇
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>一、简介 RISC-V的支持 RISC-V 指令（包括用户指令和内核指令）操作的是虚拟地址。而机器的RAM则需要使用物理地址来访问。RISC-V 页表硬件通过将每个虚拟地址映射到一个物理地址，将这两种地址连接起来。
+xv6使用RISC-V的Sv39模式，其仅使用64位虚拟地址中低39位。在该设置下：
+每个页面为4KB，使用低12位地址索引 采用三级页表，每级页表使用9位，共剩余27位进行索引 RISC-V 的设计为虚拟地址和物理地址的扩展都预留了空间。如果需要更多虚拟地址空间，RISC-V 支持 Sv48 模式，即 48 位虚拟地址。
+下面是页表项的构成，包括了上述的39位物理地址和低10位的标志位。
+PTE_V：指示了该PTE是否存在 PTE_R、PTE_W、PTE_X：指示可读、可写和可执行权限 PTE_U：控制该页面是否可以被用户程序访问 PTE_G、PTE_A：暂时未使用 RSW：还剩下两个保留位，可以根据需要来使用 每当执行RISC-V的访存指令时，就需要执行上述地址转换过程。在xv6的进程被调度上CPU时，会将进程根页目录表的地址存放到当前CPU的控制寄存器 satp 中。
+多级页表虽然节省内存，但是访问某个页面中的数据需要多次访问内存，为了尽可能避免从虚拟地址到物理地址转换过程中的访存开销，RISC-V硬件提供了TLB（Translation Look-aside Buffer）来缓存部分虚拟地址到物理地址到映射，其思想和Cache类似，都是通过局部性原理构建。
+内核地址空间 xv6 启动时会创建一个单页表，用于描述内核的地址空间，具体的布局定义见kernel/memlayout.h。
+QEMU 模拟一台计算机，该计算机包含从物理地址0x80000000开始，直至0x88000000 。
+其中大部分页面都采用对等映射（对等映射）实现（虚拟地址 == 物理地址），只有少数几个内核虚拟页面没有直接映射：
+跳转页（Trampoline）。它被映射到虚拟地址空间的顶部；用户页表也具有相同的映射关系。一个物理页（包含跳转代码）在内核的虚拟地址空间中被映射了两次：一次在虚拟地址空间的顶部，另一次是直接映射。 内核栈保护页。每个进程都有自己的内核栈，它映射到较高的内核虚拟地址，这样 xv6 可以在其下方留下一个未映射的保护页。保护页的页表项 (PTE) 无效（即PTE_V未设置），因此如果内核栈溢出，很可能会导致缺页错误，内核崩溃。如果没有保护页，溢出的栈会覆盖其他内核内存，导致运行异常。崩溃崩溃是更可取的。 二、物理内存源码分析 物理内存的初始化 在main()函数中，调用了kinit()函数来初始化物理内存子模块：
+void kinit() { initlock(&amp;kmem.lock, &#34;kmem&#34;); freerange(end, (void *)PHYSTOP); } 其中调用了freerange()函数，传入两个参数end和PHYSTOP，前者在链接脚本中被定义，位于 .text, .rodata, .data, .bss段之后的位置。后者的值为0x88000000，表示物理地址顶部。
+void freerange(void *pa_start, void *pa_end) { char *p; p = (char *)PGROUNDUP((uint64)pa_start); for (; p &#43; PGSIZE &lt;= (char *)pa_end; p &#43;= PGSIZE) { kfree(p); } } 其中通过反复调用kfree()构造出一个存储4KB物理页帧的freelist。
+struct run { struct run *next; }; struct { struct spinlock lock; struct run *freelist; } kmem; // Free the page of physical memory pointed at by pa, // which normally should have been returned by a // call to kalloc(). (The exception is when // initializing the allocator; see kinit above.) void kfree(void *pa) { struct run *r; if (((uint64)pa % PGSIZE) != 0 || (char *)pa &lt; end || (uint64)pa &gt;= PHYSTOP) panic(&#34;kfree&#34;); memset(pa, 1, PGSIZE); r = (struct run *)pa; acquire(&amp;kmem.lock); r-&gt;next = kmem.freelist; kmem.freelist = r; release(&amp;kmem.lock); } 物理页面的分配和释放 释放前面已经解释了。当内核需要物理内存时，会通过调用kalloc()从kmem头部取出一个物理页帧返回。
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-26 10:42:45 +0800 CST'>October 26, 2026</span>&nbsp;·&nbsp;<span>5 min</span>&nbsp;·&nbsp;<span>1016 words</span></footer>
+  <a class="entry-link" aria-label="post link to 再探xv6: 内存篇" href="http://localhost:1313/posts/xv6-02/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">MIT6.1810: Lab2 Syscall
     </h2>
   </header>
   <div class="entry-content">
@@ -215,7 +242,7 @@ uint64 sys_interpose(void) { int interpose_mask; argint(0, &amp;interpose_mask);
   <footer class="entry-footer">
 
 <span title='2026-10-26 09:23:20 +0800 CST'>October 26, 2026</span>&nbsp;·&nbsp;<span>5 min</span>&nbsp;·&nbsp;<span>1044 words</span></footer>
-  <a class="entry-link" aria-label="post link to MIT6.1810: Lab1 Syscall" href="http://localhost:1313/posts/xv6-lab2-syscall/"></a>
+  <a class="entry-link" aria-label="post link to MIT6.1810: Lab2 Syscall" href="http://localhost:1313/posts/xv6-lab2-syscall/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 

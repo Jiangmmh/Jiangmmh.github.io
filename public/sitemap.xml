@@ -3,10 +3,31 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>http://localhost:1313/categories/</loc>
-    <lastmod>2026-10-26T09:23:20+08:00</lastmod>
+    <lastmod>2026-10-26T10:42:45+08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/</loc>
-    <lastmod>2026-10-26T09:23:20+08:00</lastmod>
+    <lastmod>2026-10-26T10:42:45+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/mit6.1810/</loc>
+    <lastmod>2026-10-26T10:42:45+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/posts/</loc>
+    <lastmod>2026-10-26T10:42:45+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/</loc>
+    <lastmod>2026-10-26T10:42:45+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/categories/xv6/</loc>
+    <lastmod>2026-10-26T10:42:45+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/</loc>
+    <lastmod>2026-10-26T10:42:45+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/posts/xv6-02/</loc>
+    <lastmod>2026-10-26T10:42:45+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/</loc>
+    <lastmod>2026-10-26T10:42:45+08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/categories/mit6.1810/</loc>
     <lastmod>2026-10-26T09:23:20+08:00</lastmod>
@@ -14,16 +35,7 @@
     <loc>http://localhost:1313/posts/xv6-lab2-syscall/</loc>
     <lastmod>2026-10-26T09:23:20+08:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/posts/</loc>
-    <lastmod>2026-10-26T09:23:20+08:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/tags/</loc>
-    <lastmod>2026-10-26T09:23:20+08:00</lastmod>
-  </url><url>
     <loc>http://localhost:1313/tags/xv6/</loc>
-    <lastmod>2026-10-26T09:23:20+08:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/</loc>
     <lastmod>2026-10-26T09:23:20+08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/posts/xv6-lab1-util/</loc>
@@ -50,17 +62,8 @@
     <loc>http://localhost:1313/posts/cpp-smart-ptr/</loc>
     <lastmod>2026-10-23T16:41:27+08:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/</loc>
-    <lastmod>2026-10-23T16:41:27+08:00</lastmod>
-  </url><url>
     <loc>http://localhost:1313/tags/%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88/</loc>
     <lastmod>2026-10-23T16:41:27+08:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/tags/mit6.1810/</loc>
-    <lastmod>2026-10-23T13:39:42+08:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/categories/xv6/</loc>
-    <lastmod>2026-10-23T13:39:42+08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/posts/xv6-01/</loc>
     <lastmod>2026-10-23T13:39:42+08:00</lastmod>
@@ -288,6 +291,8 @@
     <lastmod>2026-09-11T00:00:00+00:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/posts/lab-syscall-404c4e932614806791f9f56aefa199e3/</loc>
+  </url><url>
+    <loc>http://localhost:1313/posts/%E5%86%8D%E6%8E%A2xv6-%E5%86%85%E5%AD%98%E7%AF%87-405c4e932614803a8085c8bcbf7cff1f/</loc>
   </url><url>
     <loc>http://localhost:1313/archives/</loc>
   </url>
