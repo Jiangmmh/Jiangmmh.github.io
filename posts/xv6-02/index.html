@@ -365,7 +365,9 @@ struct run { struct run *next; }; struct { struct spinlock lock; struct run *fre
 </span></span><span class=line><span class=cl>  <span class=p>}</span>
 </span></span><span class=line><span class=cl>  <span class=k>return</span> <span class=n>newsz</span><span class=p>;</span>
 </span></span><span class=line><span class=cl><span class=p>}</span>
-</span></span></code></pre></div><p>在vm.c中还提供了很多功能函数，逐一解释的意义不大。只需要抓住虚拟内存的核心：分配物理页面并通过构造页表来实现虚拟地址到物理地址到映射。</p></div><footer class=post-footer><ul class=post-tags><li><a href=https://Jiangmmh.github.io/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/>操作系统</a></li><li><a href=https://Jiangmmh.github.io/tags/mit6.1810/>MIT6.1810</a></li><li><a href=https://Jiangmmh.github.io/tags/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/>内存管理</a></li></ul><nav class=paginav><a class=next href=https://Jiangmmh.github.io/posts/xv6-lab2-syscall/><span class=title>Next »</span>
+</span></span></code></pre></div><p>在vm.c中还提供了很多功能函数，逐一解释的意义不大。只需要抓住虚拟内存的核心：分配物理页面并通过构造页表来实现虚拟地址到物理地址到映射。</p></div><footer class=post-footer><ul class=post-tags><li><a href=https://Jiangmmh.github.io/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/>操作系统</a></li><li><a href=https://Jiangmmh.github.io/tags/mit6.1810/>MIT6.1810</a></li><li><a href=https://Jiangmmh.github.io/tags/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/>内存管理</a></li></ul><nav class=paginav><a class=prev href=https://Jiangmmh.github.io/posts/xv6-03/><span class=title>« Prev</span>
+<span>再探xv6: 并发篇</span>
+</a><a class=next href=https://Jiangmmh.github.io/posts/xv6-lab2-syscall/><span class=title>Next »</span>
 <span>MIT6.1810: Lab2 Syscall</span></a></nav></footer></article></main><footer class=footer><span>&copy; 2026 <a href=https://Jiangmmh.github.io/>Minghan的博客</a></span> ·
 <span>Powered by
 <a href="https://gohugo.io/?utm_source=papermod" rel=noopener target=_blank>Hugo</a> &

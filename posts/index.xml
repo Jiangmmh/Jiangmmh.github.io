@@ -1,4 +1,51 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Posts on Minghan的博客</title><link>https://Jiangmmh.github.io/posts/</link><description>Recent content in Posts on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Mon, 26 Oct 2026 10:42:45 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>再探xv6: 内存篇</title><link>https://Jiangmmh.github.io/posts/xv6-02/</link><pubDate>Mon, 26 Oct 2026 10:42:45 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/xv6-02/</guid><description>&lt;h1 id="一简介">一、简介&lt;/h1>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Posts on Minghan的博客</title><link>https://Jiangmmh.github.io/posts/</link><description>Recent content in Posts on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Mon, 26 Oct 2026 17:25:46 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>埃拉托色尼筛法（Sieve of Eratosthenes）</title><link>https://Jiangmmh.github.io/posts/sieve/</link><pubDate>Mon, 26 Oct 2026 17:25:46 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/sieve/</guid><description>&lt;h1 id="一原理">一、原理&lt;/h1>
+&lt;p>埃拉托色尼筛法是一种古老而高效的求素数算法，由古希腊数学家埃拉托色尼（Eratosthenes，约公元前276—前194年）提出。&lt;/p>
+&lt;p>&lt;strong>核心思想&lt;/strong>：&lt;strong>素数的倍数一定不是素数&lt;/strong>。因此，从最小的素数 2 开始，把它的所有倍数&amp;quot;筛掉&amp;quot;（标记为合数），然后找到下一个未被筛掉的数（它一定是素数），再筛掉它的倍数……如此反复，最后剩下的就是素数。&lt;/p>
+&lt;p>&lt;strong>算法步骤&lt;/strong>：以求 n = 30 以内的素数为例&lt;/p>
+&lt;ol>
+&lt;li>列出 2 到 n 的所有整数。&lt;/li>
+&lt;li>从 2 开始，2 是素数，划掉所有 2 的倍数（4, 6, 8, …, 30）。&lt;/li>
+&lt;li>找到下一个未划掉的数 3，它是素数，划掉所有 3 的倍数（6, 9, 12, …, 30）。&lt;/li>
+&lt;li>下一个未划掉的数是 5，划掉 5 的倍数（10, 15, 20, 25, 30）。&lt;/li>
+&lt;li>下一个是 7，划掉 7 的倍数（14, 21, 28）。&lt;/li>
+&lt;li>下一个是 11，但 11² = 121 &amp;gt; 30，停止（见下方优化说明）。&lt;/li>
+&lt;li>剩下未被划掉的数即为素数：2, 3, 5, 7, 11, 13, 17, 19, 23, 29。&lt;/li>
+&lt;/ol>
+&lt;p>&lt;strong>进一步优化&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>只需筛到 √n：若 &lt;code>i * i &amp;gt; n&lt;/code>，则 i 之后的合数必然已被更小的素数筛掉，无需继续。&lt;/li>
+&lt;li>从 &lt;code>i²&lt;/code> 开始筛：筛素数 i 的倍数时，可以从 &lt;code>i*i&lt;/code> 开始，因为小于 &lt;code>i*i&lt;/code> 的 i 的倍数（如 i&lt;em>2, i&lt;/em>3, …）已经被比 i 小的素数筛掉了。&lt;/li>
+&lt;li>只处理奇数（可选）：除 2 以外，偶数都不是素数，可以只对奇数进行筛选，节省一半空间和时间。&lt;/li>
+&lt;/ul>
+&lt;h1 id="二实现">二、实现&lt;/h1>
+&lt;p>Python实现：&lt;/p></description></item><item><title>再探xv6: 并发篇</title><link>https://Jiangmmh.github.io/posts/xv6-03/</link><pubDate>Mon, 26 Oct 2026 11:55:00 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/xv6-03/</guid><description>&lt;p>上一篇讲的是内存，这一篇讲并发。并发是 xv6 里最容易写出 bug、也最难调试的部分：对多核的支持让两个 CPU 同时修改同一份数据，中断让内核代码在任意时刻被打断，进程切换又让同一个数据结构被不同的进程轮流访问。&lt;/p>
+&lt;p>这一篇先回答&amp;quot;为什么需要锁&amp;quot;，再逐行拆解 xv6 里的两种锁（Spinlock 和 Sleeplock），最后对照 Linux 的并发机制，看看一个通用操作系统为了应付更复杂的场景，做了哪些 xv6 没做的设计。&lt;/p>
+&lt;h1 id="一为什么要提供并发机制">一、为什么要提供并发机制？&lt;/h1>
+&lt;h2 id="11-并发的三个来源">1.1 并发的三个来源&lt;/h2>
+&lt;p>并发不等于&amp;quot;多核&amp;quot;。只要存在两个执行流能同时访问同一份内存，并发就存在。在 xv6 里，它有三个来源：&lt;/p>
+&lt;p>&lt;strong>来源一：多核（SMP）。&lt;/strong> &lt;code>kernel/param.h&lt;/code> 中定义了 &lt;code>NCPU 8&lt;/code>，即最多 8 个 hart（CPU 核）可以同时运行内核代码。它们共享同一片物理内存，也共享同一批外设（virtio 磁盘、uart）。两个核同时修改同一个内存地址，就是一次数据竞争。&lt;/p>
+&lt;p>&lt;strong>来源二：中断与抢占。&lt;/strong> 内核代码随时可能被中断打断，而中断处理程序与被中断的代码共享数据结构。最典型的例子在 &lt;code>kernel/console.c&lt;/code> 里：键盘中断处理程序 &lt;code>consoleintr()&lt;/code> 往输入缓冲区写字符，进程通过 &lt;code>consread()&lt;/code> 从同一个缓冲区读字符，两者靠同一把 &lt;code>cons.lock&lt;/code> 保护。&lt;/p>
+&lt;p>&lt;strong>来源三：进程切换。&lt;/strong> 多个进程通过系统调用共享文件、管道、inode 和页表。&lt;code>struct file&lt;/code> 的引用计数、pipe 的环形缓冲区、inode 的引用计数，都会被多个进程并发访问。&lt;/p>
+&lt;p>这三个来源有一个共同点：&lt;strong>它们都会打断一段正在运行的代码&lt;/strong>。因此临界区里的代码必须假设&amp;quot;我随时可能被打断，并且被打断后别人也在改同样的数据&amp;quot;。&lt;/p>
+&lt;h2 id="12-没有同步会发生什么">1.2 没有同步会发生什么&lt;/h2>
+&lt;h3 id="竞态条件结果依赖执行顺序">竞态条件：结果依赖执行顺序&lt;/h3>
+&lt;p>看 &lt;code>kernel/kalloc.c&lt;/code> 里分配物理页的代码：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-c" data-lang="c">&lt;span class="line">&lt;span class="cl">&lt;span class="kt">void&lt;/span> &lt;span class="o">*&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nf">kalloc&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="kt">void&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">struct&lt;/span> &lt;span class="n">run&lt;/span> &lt;span class="o">*&lt;/span>&lt;span class="n">r&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">acquire&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">kmem&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">lock&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">r&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">kmem&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">freelist&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">r&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">kmem&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">freelist&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">r&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">next&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">release&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">kmem&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">lock&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">r&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">memset&lt;/span>&lt;span class="p">((&lt;/span>&lt;span class="kt">char&lt;/span> &lt;span class="o">*&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="n">r&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">5&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">PGSIZE&lt;/span>&lt;span class="p">);&lt;/span> &lt;span class="c1">// fill with junk
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="k">return&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="kt">void&lt;/span> &lt;span class="o">*&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="n">r&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>假设去掉 &lt;code>acquire/release&lt;/code>。CPU0 和 CPU1 同时进入临界区，可能读到同一个 &lt;code>r&lt;/code>：&lt;/p></description></item><item><title>再探xv6: 内存篇</title><link>https://Jiangmmh.github.io/posts/xv6-02/</link><pubDate>Mon, 26 Oct 2026 10:42:45 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/xv6-02/</guid><description>&lt;h1 id="一简介">一、简介&lt;/h1>
 &lt;h2 id="risc-v的支持">RISC-V的支持&lt;/h2>
 &lt;p>RISC-V 指令（包括用户指令和内核指令）操作的是虚拟地址。而机器的RAM则需要使用物理地址来访问。&lt;strong>RISC-V 页表硬件通过将每个虚拟地址映射到一个物理地址，将这两种地址连接起来&lt;/strong>。&lt;/p>
 &lt;p>&lt;img alt="image.png" loading="lazy" src="https://Jiangmmh.github.io/images/posts/xv6-mem/image.png">&lt;/p>
@@ -1308,55 +1355,4 @@
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
 &lt;li>
-&lt;p>为了使子进程能够继承父进程的屏蔽字，需要在创建子进程时拷贝interpose_mask，在 kernel/proc.c 中的 kfork() 函数的末尾添加 interpose_mask 的拷贝。&lt;/p></description></item><item><title/><link>https://Jiangmmh.github.io/posts/%E5%86%8D%E6%8E%A2xv6-%E5%86%85%E5%AD%98%E7%AF%87-405c4e932614803a8085c8bcbf7cff1f/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://Jiangmmh.github.io/posts/%E5%86%8D%E6%8E%A2xv6-%E5%86%85%E5%AD%98%E7%AF%87-405c4e932614803a8085c8bcbf7cff1f/</guid><description>&lt;h1 id="再探xv6-内存篇">再探xv6: 内存篇&lt;/h1>
-&lt;h1 id="一简介">一、简介&lt;/h1>
-&lt;h2 id="risc-v的支持">RISC-V的支持&lt;/h2>
-&lt;p>RISC-V 指令（包括用户指令和内核指令）操作的是虚拟地址。而机器的RAM则需要使用物理地址来访问。&lt;strong>RISC-V 页表硬件通过将每个虚拟地址映射到一个物理地址，将这两种地址连接起来&lt;/strong>。&lt;/p>
-&lt;p>&lt;img alt="image.png" loading="lazy" src="%E5%86%8D%E6%8E%A2xv6%20%E5%86%85%E5%AD%98%E7%AF%87/image.png">&lt;/p>
-&lt;p>xv6使用RISC-V的Sv39模式，其仅使用64位虚拟地址中低39位。在该设置下：&lt;/p>
-&lt;ul>
-&lt;li>每个页面为4KB，使用低12位地址索引&lt;/li>
-&lt;li>采用三级页表，每级页表使用9位，共剩余27位进行索引&lt;/li>
-&lt;/ul>
-&lt;p>&lt;img alt="image.png" loading="lazy" src="%E5%86%8D%E6%8E%A2xv6%20%E5%86%85%E5%AD%98%E7%AF%87/image%201.png">&lt;/p>
-&lt;p>RISC-V 的设计为虚拟地址和物理地址的扩展都预留了空间。如果需要更多虚拟地址空间，RISC-V 支持 Sv48 模式，即 48 位虚拟地址。&lt;/p>
-&lt;p>下面是页表项的构成，包括了上述的39位物理地址和低10位的标志位。&lt;/p>
-&lt;p>&lt;img alt="image.png" loading="lazy" src="%E5%86%8D%E6%8E%A2xv6%20%E5%86%85%E5%AD%98%E7%AF%87/image%202.png">&lt;/p>
-&lt;ul>
-&lt;li>PTE_V：指示了该PTE是否存在&lt;/li>
-&lt;li>PTE_R、PTE_W、PTE_X：指示可读、可写和可执行权限&lt;/li>
-&lt;li>PTE_U：控制该页面是否可以被用户程序访问&lt;/li>
-&lt;li>PTE_G、PTE_A：暂时未使用&lt;/li>
-&lt;li>RSW：还剩下两个保留位，可以根据需要来使用&lt;/li>
-&lt;/ul>
-&lt;p>每当执行RISC-V的访存指令时，就需要执行上述地址转换过程。在xv6的进程被调度上CPU时，会将进程根页目录表的地址存放到当前CPU的控制寄存器 satp 中。&lt;/p>
-&lt;p>多级页表虽然节省内存，但是访问某个页面中的数据需要多次访问内存，为了尽可能避免从虚拟地址到物理地址转换过程中的访存开销，RISC-V硬件提供了TLB（&lt;em>Translation Look-aside Buffer&lt;/em>）来缓存部分虚拟地址到物理地址到映射，其思想和Cache类似，都是通过局部性原理构建。&lt;/p>
-&lt;h2 id="内核地址空间">内核地址空间&lt;/h2>
-&lt;p>xv6 启动时会创建一个单页表，用于描述内核的地址空间，具体的布局定义见kernel/memlayout.h。&lt;/p>
-&lt;p>&lt;img alt="image.png" loading="lazy" src="%E5%86%8D%E6%8E%A2xv6%20%E5%86%85%E5%AD%98%E7%AF%87/image%203.png">&lt;/p>
-&lt;p>QEMU 模拟一台计算机，该计算机包含从物理地址0x80000000开始，直至0x88000000 。&lt;/p>
-&lt;p>其中大部分页面都采用对等映射（对等映射）实现（虚拟地址 == 物理地址），只有少数几个内核虚拟页面没有直接映射：&lt;/p>
-&lt;ul>
-&lt;li>跳转页（Trampoline）。它被映射到虚拟地址空间的顶部；用户页表也具有相同的映射关系。一个物理页（包含跳转代码）在内核的虚拟地址空间中被映射了两次：一次在虚拟地址空间的顶部，另一次是直接映射。&lt;/li>
-&lt;li>内核栈保护页。每个进程都有自己的内核栈，它映射到较高的内核虚拟地址，这样 xv6 可以在其下方留下一个未映射的保护页。&lt;strong>保护页的页表项 (PTE) 无效（即&lt;code>PTE_V&lt;/code>未设置），因此如果内核栈溢出，很可能会导致缺页错误&lt;/strong>，内核崩溃。如果没有保护页，溢出的栈会覆盖其他内核内存，导致运行异常。崩溃崩溃是更可取的。&lt;/li>
-&lt;/ul>
-&lt;h1 id="二物理内存源码分析">二、物理内存源码分析&lt;/h1>
-&lt;h2 id="物理内存的初始化">物理内存的初始化&lt;/h2>
-&lt;p>在main()函数中，调用了kinit()函数来初始化物理内存子模块：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-c" data-lang="c">&lt;span class="line">&lt;span class="cl">&lt;span class="kt">void&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nf">kinit&lt;/span>&lt;span class="p">()&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">initlock&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">kmem&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">lock&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s">&amp;#34;kmem&amp;#34;&lt;/span>&lt;span class="p">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">freerange&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">end&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="kt">void&lt;/span> &lt;span class="o">*&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="n">PHYSTOP&lt;/span>&lt;span class="p">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>其中调用了freerange()函数，传入两个参数end和PHYSTOP，前者在链接脚本中被定义，位于 .text, .rodata, .data, .bss段之后的位置。后者的值为0x88000000，表示物理地址顶部。&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-c" data-lang="c">&lt;span class="line">&lt;span class="cl">&lt;span class="kt">void&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nf">freerange&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="kt">void&lt;/span> &lt;span class="o">*&lt;/span>&lt;span class="n">pa_start&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="kt">void&lt;/span> &lt;span class="o">*&lt;/span>&lt;span class="n">pa_end&lt;/span>&lt;span class="p">)&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kt">char&lt;/span> &lt;span class="o">*&lt;/span>&lt;span class="n">p&lt;/span>&lt;span class="p">;&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">p&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="kt">char&lt;/span> &lt;span class="o">*&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="nf">PGROUNDUP&lt;/span>&lt;span class="p">((&lt;/span>&lt;span class="n">uint64&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="n">pa_start&lt;/span>&lt;span class="p">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">for&lt;/span> &lt;span class="p">(;&lt;/span> &lt;span class="n">p&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="n">PGSIZE&lt;/span> &lt;span class="o">&amp;lt;=&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="kt">char&lt;/span> &lt;span class="o">*&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="n">pa_end&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="n">p&lt;/span> &lt;span class="o">+=&lt;/span> &lt;span class="n">PGSIZE&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">kfree&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">p&lt;/span>&lt;span class="p">);&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>其中通过反复调用kfree()构造出一个存储4KB物理页帧的freelist。&lt;/p></description></item></channel></rss>
+&lt;p>为了使子进程能够继承父进程的屏蔽字，需要在创建子进程时拷贝interpose_mask，在 kernel/proc.c 中的 kfork() 函数的末尾添加 interpose_mask 的拷贝。&lt;/p></description></item></channel></rss>
