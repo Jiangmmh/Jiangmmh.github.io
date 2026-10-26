@@ -227,6 +227,29 @@
 
 <article class="post-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">再探xv6: 并发篇
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>上一篇讲的是内存，这一篇讲并发。并发是 xv6 里最容易写出 bug、也最难调试的部分：对多核的支持让两个 CPU 同时修改同一份数据，中断让内核代码在任意时刻被打断，进程切换又让同一个数据结构被不同的进程轮流访问。
+这一篇先回答&#34;为什么需要锁&#34;，再逐行拆解 xv6 里的两种锁（Spinlock 和 Sleeplock），最后对照 Linux 的并发机制，看看一个通用操作系统为了应付更复杂的场景，做了哪些 xv6 没做的设计。
+一、为什么要提供并发机制？ 1.1 并发的三个来源 并发不等于&#34;多核&#34;。只要存在两个执行流能同时访问同一份内存，并发就存在。在 xv6 里，它有三个来源：
+来源一：多核（SMP）。 kernel/param.h 中定义了 NCPU 8，即最多 8 个 hart（CPU 核）可以同时运行内核代码。它们共享同一片物理内存，也共享同一批外设（virtio 磁盘、uart）。两个核同时修改同一个内存地址，就是一次数据竞争。
+来源二：中断与抢占。 内核代码随时可能被中断打断，而中断处理程序与被中断的代码共享数据结构。最典型的例子在 kernel/console.c 里：键盘中断处理程序 consoleintr() 往输入缓冲区写字符，进程通过 consread() 从同一个缓冲区读字符，两者靠同一把 cons.lock 保护。
+来源三：进程切换。 多个进程通过系统调用共享文件、管道、inode 和页表。struct file 的引用计数、pipe 的环形缓冲区、inode 的引用计数，都会被多个进程并发访问。
+这三个来源有一个共同点：它们都会打断一段正在运行的代码。因此临界区里的代码必须假设&#34;我随时可能被打断，并且被打断后别人也在改同样的数据&#34;。
+1.2 没有同步会发生什么 竞态条件：结果依赖执行顺序 看 kernel/kalloc.c 里分配物理页的代码：
+void * kalloc(void) { struct run *r; acquire(&amp;kmem.lock); r = kmem.freelist; if (r) { kmem.freelist = r-&gt;next; } release(&amp;kmem.lock); if (r) memset((char *)r, 5, PGSIZE); // fill with junk return (void *)r; } 假设去掉 acquire/release。CPU0 和 CPU1 同时进入临界区，可能读到同一个 r：
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-26 11:55:00 +0800 CST'>October 26, 2026</span>&nbsp;·&nbsp;<span>8 min</span>&nbsp;·&nbsp;<span>1577 words</span></footer>
+  <a class="entry-link" aria-label="post link to 再探xv6: 并发篇" href="http://localhost:1313/posts/xv6-03/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">再探xv6: 内存篇
     </h2>
   </header>
@@ -431,23 +454,6 @@ Unix/Linux 提供了多种 IPC 机制，包括：
 
 <span title='2026-10-22 15:27:57 +0800 CST'>October 22, 2026</span>&nbsp;·&nbsp;<span>4 min</span>&nbsp;·&nbsp;<span>737 words</span></footer>
   <a class="entry-link" aria-label="post link to [翻译]BSD Socket编程入门" href="http://localhost:1313/posts/unix-socket/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">一生一芯-E3阶段笔记
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>课程主要介绍了Linux的使用和一些实用工具的展示，就不过多叙述了。
-讲义笔记 1. 环境配置 PA0网址：https://ysyx.oscc.cc/docs/ics-pa/PA0.html
-我的开发机器为MacBook Pro M4，使用Docker运行x86版本的Ubuntu2404（Rosetta2进行指令翻译）。我的开发机器为WSL上的Ubuntu2404，在其中安装所需的软件：
-apt-get update apt-get install build-essential # build-essential packages, include binary utilities, gcc, make, and so on apt-get install man # on-line reference manual apt-get install gcc-doc # on-line reference manual for gcc apt-get install gdb # GNU debugger apt-get install git # revision control system apt-get install libreadline-dev # a library used later apt-get install libsdl2-dev # a library used later # 生成sshkey $ ssh-keygen -t ed25519 -C &#34;your_email@example.com&#34; # 获取公钥 $ cat ~/.ssh/id_ed25519.pub # 在github中添加公钥 # 测试连接 $ ssh -T git@github.com Hi xxxxxx! You&#39;ve successfully authenticated, but GitHub does not provide shell access. ...</p>
-  </div>
-  <footer class="entry-footer">
-
-<span title='2026-10-20 22:46:13 +0800 CST'>October 20, 2026</span>&nbsp;·&nbsp;<span>4 min</span>&nbsp;·&nbsp;<span>683 words</span></footer>
-  <a class="entry-link" aria-label="post link to 一生一芯-E3阶段笔记" href="http://localhost:1313/posts/ysyx-e3/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">

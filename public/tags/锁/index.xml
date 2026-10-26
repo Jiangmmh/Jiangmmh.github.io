@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>锁 on Minghan的博客</title>
+    <link>http://localhost:1313/tags/%E9%94%81/</link>
+    <description>Recent content in 锁 on Minghan的博客</description>
+    <generator>Hugo</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Mon, 26 Oct 2026 11:55:00 +0800</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/%E9%94%81/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>再探xv6: 并发篇</title>
+      <link>http://localhost:1313/posts/xv6-03/</link>
+      <pubDate>Mon, 26 Oct 2026 11:55:00 +0800</pubDate>
+      <guid>http://localhost:1313/posts/xv6-03/</guid>
+      <description>&lt;p&gt;上一篇讲的是内存，这一篇讲并发。并发是 xv6 里最容易写出 bug、也最难调试的部分：对多核的支持让两个 CPU 同时修改同一份数据，中断让内核代码在任意时刻被打断，进程切换又让同一个数据结构被不同的进程轮流访问。&lt;/p&gt;
+&lt;p&gt;这一篇先回答&amp;quot;为什么需要锁&amp;quot;，再逐行拆解 xv6 里的两种锁（Spinlock 和 Sleeplock），最后对照 Linux 的并发机制，看看一个通用操作系统为了应付更复杂的场景，做了哪些 xv6 没做的设计。&lt;/p&gt;
+&lt;h1 id=&#34;一为什么要提供并发机制&#34;&gt;一、为什么要提供并发机制？&lt;/h1&gt;
+&lt;h2 id=&#34;11-并发的三个来源&#34;&gt;1.1 并发的三个来源&lt;/h2&gt;
+&lt;p&gt;并发不等于&amp;quot;多核&amp;quot;。只要存在两个执行流能同时访问同一份内存，并发就存在。在 xv6 里，它有三个来源：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;来源一：多核（SMP）。&lt;/strong&gt; &lt;code&gt;kernel/param.h&lt;/code&gt; 中定义了 &lt;code&gt;NCPU 8&lt;/code&gt;，即最多 8 个 hart（CPU 核）可以同时运行内核代码。它们共享同一片物理内存，也共享同一批外设（virtio 磁盘、uart）。两个核同时修改同一个内存地址，就是一次数据竞争。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;来源二：中断与抢占。&lt;/strong&gt; 内核代码随时可能被中断打断，而中断处理程序与被中断的代码共享数据结构。最典型的例子在 &lt;code&gt;kernel/console.c&lt;/code&gt; 里：键盘中断处理程序 &lt;code&gt;consoleintr()&lt;/code&gt; 往输入缓冲区写字符，进程通过 &lt;code&gt;consread()&lt;/code&gt; 从同一个缓冲区读字符，两者靠同一把 &lt;code&gt;cons.lock&lt;/code&gt; 保护。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;来源三：进程切换。&lt;/strong&gt; 多个进程通过系统调用共享文件、管道、inode 和页表。&lt;code&gt;struct file&lt;/code&gt; 的引用计数、pipe 的环形缓冲区、inode 的引用计数，都会被多个进程并发访问。&lt;/p&gt;
+&lt;p&gt;这三个来源有一个共同点：&lt;strong&gt;它们都会打断一段正在运行的代码&lt;/strong&gt;。因此临界区里的代码必须假设&amp;quot;我随时可能被打断，并且被打断后别人也在改同样的数据&amp;quot;。&lt;/p&gt;
+&lt;h2 id=&#34;12-没有同步会发生什么&#34;&gt;1.2 没有同步会发生什么&lt;/h2&gt;
+&lt;h3 id=&#34;竞态条件结果依赖执行顺序&#34;&gt;竞态条件：结果依赖执行顺序&lt;/h3&gt;
+&lt;p&gt;看 &lt;code&gt;kernel/kalloc.c&lt;/code&gt; 里分配物理页的代码：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;void&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nf&#34;&gt;kalloc&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;void&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;k&#34;&gt;struct&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;run&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;r&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;nf&#34;&gt;acquire&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;kmem&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;lock&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;n&#34;&gt;r&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;kmem&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;freelist&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;k&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;r&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;kmem&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;freelist&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;r&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;next&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;nf&#34;&gt;release&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;kmem&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;lock&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;k&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;r&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nf&#34;&gt;memset&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;((&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;char&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;r&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;5&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;PGSIZE&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt; &lt;span class=&#34;c1&#34;&gt;// fill with junk
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;void&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;r&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;假设去掉 &lt;code&gt;acquire/release&lt;/code&gt;。CPU0 和 CPU1 同时进入临界区，可能读到同一个 &lt;code&gt;r&lt;/code&gt;：&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>
