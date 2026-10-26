@@ -205,6 +205,24 @@
 
 <article class="post-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">埃拉托色尼筛法（Sieve of Eratosthenes）
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>埃拉托色尼筛法是一种古老而高效的求素数算法，由古希腊数学家埃拉托色尼（Eratosthenes，约公元前276—前194年）提出。
+核心思想非常直观：素数的倍数一定不是素数。因此，从最小的素数 2 开始，把它的所有倍数&#34;筛掉&#34;（标记为合数），然后找到下一个未被筛掉的数（它一定是素数），再筛掉它的倍数……如此反复，最后剩下的就是素数。
+算法步骤：
+以求 n = 30 以内的素数为例： 列出 2 到 n 的所有整数。 从 2 开始，2 是素数，划掉所有 2 的倍数（4, 6, 8, …, 30）。 找到下一个未划掉的数 3，它是素数，划掉所有 3 的倍数（6, 9, 12, …, 30）。 下一个未划掉的数是 5，划掉 5 的倍数（10, 15, 20, 25, 30）。 下一个是 7，划掉 7 的倍数（14, 21, 28）。 下一个是 11，但 11² = 121 &gt; 30，停止（见下方优化说明）。 剩下未被划掉的数即为素数：2, 3, 5, 7, 11, 13, 17, 19, 23, 29。 优化：
+只需筛到 √n：若 i * i &gt; n，则 i 之后的合数必然已被更小的素数筛掉，无需继续。 从 i² 开始筛：筛素数 i 的倍数时，可以从 ii 开始，因为小于 ii 的 i 的倍数（如 i2, i3, …）已经被比 i 小的素数筛掉了。 只处理奇数（可选）：除 2 以外，偶数都不是素数，可以只对奇数进行筛选，节省一半空间和时间。 </p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-26 17:25:46 +0800 CST'>October 26, 2026</span>&nbsp;·&nbsp;<span>1 min</span>&nbsp;·&nbsp;<span>93 words</span></footer>
+  <a class="entry-link" aria-label="post link to 埃拉托色尼筛法（Sieve of Eratosthenes）" href="http://localhost:1313/posts/sieve/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">再探xv6: 并发篇
     </h2>
   </header>
@@ -409,29 +427,6 @@ Unix/Linux 提供了多种 IPC 机制，包括：
 
 <span title='2026-10-22 15:33:34 +0800 CST'>October 22, 2026</span>&nbsp;·&nbsp;<span>14 min</span>&nbsp;·&nbsp;<span>2960 words</span></footer>
   <a class="entry-link" aria-label="post link to Unix/Linux 进程间通信" href="http://localhost:1313/posts/unix-linux-ipc/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">[翻译]BSD Socket编程入门
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p> 本文是一篇基于 BSD Socket 基本概念整理的原创中文教程，参考了 Jim Frost 的 BSD Sockets: A Quick And Dirty Primer，并结合现代 POSIX/Linux 编程实践重新组织内容。
-原文：BSD Sockets: A Quick And Dirty Primer
-原文版权信息：Jim Frost，Copyright © 1988, 1994，All Rights Reserved。本文不构成原文的逐字翻译或全文转载。
-一、什么是 Socket？ Socket（套接字）是操作系统提供的一种通信接口，允许两个进程交换数据。
-两个进程可以运行在同一台机器上，也可以运行在通过网络连接的不同机器上。应用程序通过 Socket API 与操作系统交互，由操作系统负责底层的网络通信。
-可以把 Socket 理解为通信的端点：
-应用程序通过 Socket 发送和接收数据。 操作系统负责协议处理、数据传输和连接管理。 TCP、UDP 等传输协议决定数据传输的语义。 在 Linux 中，Socket 通常由一个文件描述符表示，因此可以使用 read()、write() 和 close() 等文件 I/O 接口操作它。
-不过，Socket 并不完全等同于普通文件：网络通信存在连接建立、数据分段、传输失败、对端关闭和超时等特殊问题。
-1.1 两种常见的 Socket 类型 最常见的两种 Internet Socket 是 TCP Socket 和 UDP Socket。
-...</p>
-  </div>
-  <footer class="entry-footer">
-
-<span title='2026-10-22 15:27:57 +0800 CST'>October 22, 2026</span>&nbsp;·&nbsp;<span>4 min</span>&nbsp;·&nbsp;<span>737 words</span></footer>
-  <a class="entry-link" aria-label="post link to [翻译]BSD Socket编程入门" href="http://localhost:1313/posts/unix-socket/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">
