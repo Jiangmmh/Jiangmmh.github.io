@@ -1,4 +1,110 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>操作系统 on Minghan的博客</title><link>https://Jiangmmh.github.io/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/</link><description>Recent content in 操作系统 on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Mon, 26 Oct 2026 11:55:00 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/index.xml" rel="self" type="application/rss+xml"/><item><title>再探xv6: 并发篇</title><link>https://Jiangmmh.github.io/posts/xv6-03/</link><pubDate>Mon, 26 Oct 2026 11:55:00 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/xv6-03/</guid><description>&lt;p>上一篇讲的是内存，这一篇讲并发。并发是 xv6 里最容易写出 bug、也最难调试的部分：对多核的支持让两个 CPU 同时修改同一份数据，中断让内核代码在任意时刻被打断，进程切换又让同一个数据结构被不同的进程轮流访问。&lt;/p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>操作系统 on Minghan的博客</title><link>https://Jiangmmh.github.io/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/</link><description>Recent content in 操作系统 on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Tue, 27 Oct 2026 11:14:45 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/index.xml" rel="self" type="application/rss+xml"/><item><title>再探xv6: 异常控制流篇</title><link>https://Jiangmmh.github.io/posts/xv6-04/</link><pubDate>Tue, 27 Oct 2026 11:14:45 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/xv6-04/</guid><description>&lt;h1 id="一何为异常控制流">一、何为异常控制流&lt;/h1>
+&lt;h2 id="1-从普通控制流到异常控制流">1. 从普通控制流到异常控制流&lt;/h2>
+&lt;p>在学习操作系统之前，我们通常通过函数调用、条件分支、循环等机制理解程序的执行过程。
+例如：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-c" data-lang="c">&lt;span class="line">&lt;span class="cl">&lt;span class="kt">int&lt;/span> &lt;span class="nf">add&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="kt">int&lt;/span> &lt;span class="n">a&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="kt">int&lt;/span> &lt;span class="n">b&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">a&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="n">b&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="kt">int&lt;/span> &lt;span class="nf">main&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="kt">void&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kt">int&lt;/span> &lt;span class="n">result&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nf">add&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">1&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">2&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">result&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>程序从 &lt;code>main()&lt;/code> 开始执行，调用 &lt;code>add()&lt;/code>，然后返回调用者。这种执行过程主要由程序自身的指令决定，我们可以称之为&lt;strong>普通控制流&lt;/strong>。&lt;/p>
+&lt;p>然而，操作系统需要处理更多复杂的事件：&lt;/p>
+&lt;ul>
+&lt;li>用户程序希望读取文件，需要请求内核提供服务。&lt;/li>
+&lt;li>网卡收到网络数据，需要通知 CPU 处理。&lt;/li>
+&lt;li>磁盘完成 I/O 操作，需要唤醒等待中的进程。&lt;/li>
+&lt;li>程序访问非法地址，需要由内核处理异常。&lt;/li>
+&lt;li>定时器触发，需要操作系统获得运行机会，进行调度。&lt;/li>
+&lt;/ul>
+&lt;p>这些事件可能发生在程序执行过程中的任意时刻，不能完全依赖当前程序主动调用函数来处理。&lt;/p>
+&lt;p>因此，计算机提供了一套特殊的控制流转移机制：当特定事件发生时，CPU 暂停当前执行路径，转而进入相应的处理程序。处理完成后，CPU 可以恢复原来的执行过程，也可能终止当前程序或切换到其他进程。&lt;/p>
+&lt;p>这种由异常、陷入和中断等事件引发的控制流转移，称为&lt;strong>异常控制流（Exceptional Control Flow，ECF）&lt;/strong>。&lt;/p>
+&lt;p>理解异常控制流，需要回答三个问题：&lt;/p>
+&lt;ol>
+&lt;li>什么事件触发了控制流转移？&lt;/li>
+&lt;li>CPU 如何找到处理程序，并切换到适当的执行环境？&lt;/li>
+&lt;li>处理完成后，如何恢复原来的执行过程？&lt;/li>
+&lt;/ol>
+&lt;p>在 xv6 中，系统调用和中断是理解这些机制的两个重要切入点。&lt;/p>
+&lt;h2 id="2-异常陷入与中断">2. 异常、陷入与中断&lt;/h2>
+&lt;p>严格来说，异常控制流是一个广义概念。RISC-V 架构使用 &lt;em>trap&lt;/em> 描述导致控制权转移到更高特权级处理程序的一类事件，主要包括同步异常和中断。&lt;/p>
+&lt;h3 id="21-同步异常">2.1 同步异常&lt;/h3>
+&lt;p>同步异常由当前正在执行的指令直接引起，因此与程序执行位置存在明确的因果关系。&lt;/p>
+&lt;p>例如：&lt;/p>
+&lt;ul>
+&lt;li>执行 &lt;code>ecall&lt;/code>，主动请求操作系统服务。&lt;/li>
+&lt;li>执行非法指令。&lt;/li>
+&lt;li>访问未映射的虚拟地址。&lt;/li>
+&lt;li>违反内存访问权限。&lt;/li>
+&lt;/ul>
+&lt;p>同步异常的特点是：如果程序以相同状态重复执行到同一条指令，并且环境没有发生变化，那么通常会再次触发相同事件。&lt;/p>
+&lt;p>系统调用是其中一种特殊情况。用户程序执行 &lt;code>ecall&lt;/code> 指令，主动请求从用户态进入内核态，因此也常被称为&lt;strong>主动陷入&lt;/strong>。&lt;/p>
+&lt;h3 id="22-中断">2.2 中断&lt;/h3>
+&lt;p>中断通常由当前指令执行之外的事件引起，例如外部设备发出的中断请求。&lt;/p>
+&lt;p>典型场景包括：&lt;/p>
+&lt;ul>
+&lt;li>UART 接收到新的输入数据。&lt;/li>
+&lt;li>磁盘控制器完成一次 I/O 操作。&lt;/li>
+&lt;li>网卡收到数据包。&lt;/li>
+&lt;li>定时器到期。&lt;/li>
+&lt;/ul>
+&lt;p>中断的特点是：它通常与 CPU 当前执行的指令没有直接因果关系。即使 CPU 正在执行完全无关的计算，外部设备仍然可能产生中断。&lt;/p></description></item><item><title>MIT6.1810: Lab3 Pagetable</title><link>https://Jiangmmh.github.io/posts/xv6-lab3-pgtbl/</link><pubDate>Tue, 27 Oct 2026 11:01:51 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/xv6-lab3-pgtbl/</guid><description>&lt;h1 id="一inspect-a-user-process-page-tableeasy">一、&lt;strong>Inspect a user-process page table (easy)&lt;/strong>·&lt;/h1>
+&lt;p>xv6提供了一个用户程序pgtbltest.c，其中调用print_pgtbl()打印了页表的前10个页面和后10页的页表项，因为页表属于内核管理的数据结构，所以想要获取页表项就必须通过系统调用才行。在该lab中xv6额外提供了几个系统调用，其中的pgpte()的作用就是根据虚拟地址va，得到其对应的PTE。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-c" data-lang="c">&lt;span class="line">&lt;span class="cl">&lt;span class="kt">int&lt;/span> &lt;span class="nf">ugetpid&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="kt">void&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">uint64&lt;/span> &lt;span class="nf">pgpte&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="kt">void&lt;/span> &lt;span class="o">*&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="kt">void&lt;/span> &lt;span class="nf">vmprint&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="kt">void&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="kt">int&lt;/span> &lt;span class="nf">pgaccess&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="kt">void&lt;/span> &lt;span class="o">*&lt;/span>&lt;span class="n">base&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="kt">int&lt;/span> &lt;span class="n">len&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="kt">void&lt;/span> &lt;span class="o">*&lt;/span>&lt;span class="n">mask&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="kt">int&lt;/span> &lt;span class="nf">ksupernpte&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">uint64&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">uint64&lt;/span> &lt;span class="o">*&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-c" data-lang="c">&lt;span class="line">&lt;span class="cl">&lt;span class="kt">void&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nf">print_pgtbl&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">printf&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;print_pgtbl starting&lt;/span>&lt;span class="se">\n&lt;/span>&lt;span class="s">&amp;#34;&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">for&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">uint64&lt;/span> &lt;span class="n">i&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="n">i&lt;/span> &lt;span class="o">&amp;lt;&lt;/span> &lt;span class="mi">10&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="n">i&lt;/span>&lt;span class="o">++&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">print_pte&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">i&lt;/span> &lt;span class="o">*&lt;/span> &lt;span class="n">PGSIZE&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">uint64&lt;/span> &lt;span class="n">top&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">MAXVA&lt;/span> &lt;span class="o">/&lt;/span> &lt;span class="n">PGSIZE&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">for&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">uint64&lt;/span> &lt;span class="n">i&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">top&lt;/span> &lt;span class="o">-&lt;/span> &lt;span class="mi">10&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="n">i&lt;/span> &lt;span class="o">&amp;lt;&lt;/span> &lt;span class="n">top&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="n">i&lt;/span>&lt;span class="o">++&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">print_pte&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">i&lt;/span> &lt;span class="o">*&lt;/span> &lt;span class="n">PGSIZE&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">printf&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;print_pgtbl: OK&lt;/span>&lt;span class="se">\n&lt;/span>&lt;span class="s">&amp;#34;&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>启动xv6，运行程序pgtbltest打印页表：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">xv6 kernel is booting
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">hart &lt;span class="m">1&lt;/span> starting
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">hart &lt;span class="m">2&lt;/span> starting
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">init: starting sh
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">$ pgtbltest
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">print_pgtbl starting
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">va 0x0 pte 0x21FC885B pa 0x87F22000 perm 0x5B
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">va 0x1000 pte 0x21FC7C17 pa 0x87F1F000 perm 0x17
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">va 0x2000 pte 0x21FC7807 pa 0x87F1E000 perm 0x7
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">va 0x3000 pte 0x21FC74D7 pa 0x87F1D000 perm 0xD7
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">va 0x4000 pte 0x0 pa 0x0 perm 0x0
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">va 0x5000 pte 0x0 pa 0x0 perm 0x0
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">va 0x6000 pte 0x0 pa 0x0 perm 0x0
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">va 0x7000 pte 0x0 pa 0x0 perm 0x0
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">va 0x8000 pte 0x0 pa 0x0 perm 0x0
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">va 0x9000 pte 0x0 pa 0x0 perm 0x0
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">va 0x3FFFFF6000 pte 0x0 pa 0x0 perm 0x0
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">va 0x3FFFFF7000 pte 0x0 pa 0x0 perm 0x0
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">va 0x3FFFFF8000 pte 0x0 pa 0x0 perm 0x0
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">va 0x3FFFFF9000 pte 0x0 pa 0x0 perm 0x0
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">va 0x3FFFFFA000 pte 0x0 pa 0x0 perm 0x0
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">va 0x3FFFFFB000 pte 0x0 pa 0x0 perm 0x0
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">va 0x3FFFFFC000 pte 0x0 pa 0x0 perm 0x0
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">va 0x3FFFFFD000 pte 0x0 pa 0x0 perm 0x0
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">va 0x3FFFFFE000 pte 0x21FD08C7 pa 0x87F42000 perm 0xC7
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">va 0x3FFFFFF000 pte 0x2000184B pa 0x80006000 perm 0x4B
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">print_pgtbl: OK
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">vmprint_test starting
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">vmprint_test: &lt;span class="k">done&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">pgaccess_test starting
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">pgtbltest: pgaccess_test failed: incorrect access bits set, &lt;span class="nv">pid&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="m">3&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>这个页表和用户进程的地址空间正好能对应上：&lt;/p></description></item><item><title>再探xv6: 并发篇</title><link>https://Jiangmmh.github.io/posts/xv6-03/</link><pubDate>Mon, 26 Oct 2026 11:55:00 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/xv6-03/</guid><description>&lt;p>上一篇讲的是内存，这一篇讲并发。并发是 xv6 里最容易写出 bug、也最难调试的部分：对多核的支持让两个 CPU 同时修改同一份数据，中断让内核代码在任意时刻被打断，进程切换又让同一个数据结构被不同的进程轮流访问。&lt;/p>
 &lt;p>这一篇先回答&amp;quot;为什么需要锁&amp;quot;，再逐行拆解 xv6 里的两种锁（Spinlock 和 Sleeplock），最后对照 Linux 的并发机制，看看一个通用操作系统为了应付更复杂的场景，做了哪些 xv6 没做的设计。&lt;/p>
 &lt;h1 id="一为什么要提供并发机制">一、为什么要提供并发机制？&lt;/h1>
 &lt;h2 id="11-并发的三个来源">1.1 并发的三个来源&lt;/h2>
