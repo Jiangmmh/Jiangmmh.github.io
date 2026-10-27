@@ -6,18 +6,133 @@
     <description>Recent content in Posts on Minghan的博客</description>
     <generator>Hugo</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Mon, 26 Oct 2026 17:25:46 +0800</lastBuildDate>
+    <lastBuildDate>Tue, 27 Oct 2026 11:14:45 +0800</lastBuildDate>
     <atom:link href="http://localhost:1313/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>再探xv6: 异常控制流篇</title>
+      <link>http://localhost:1313/posts/xv6-04/</link>
+      <pubDate>Tue, 27 Oct 2026 11:14:45 +0800</pubDate>
+      <guid>http://localhost:1313/posts/xv6-04/</guid>
+      <description>&lt;hr&gt;
+&lt;h2 id=&#34;categories-xv6&#34;&gt;title: &amp;ldquo;再探 xv6：异常控制流篇&amp;rdquo;
+date: &amp;lsquo;2026-10-27T11:14:45+08:00&amp;rsquo;
+draft: false
+tags: [操作系统, xv6, MIT6.1810, 并发, 锁]
+categories: [xv6]&lt;/h2&gt;
+&lt;h1 id=&#34;一何为异常控制流&#34;&gt;一、何为异常控制流&lt;/h1&gt;
+&lt;h2 id=&#34;1-从普通控制流到异常控制流&#34;&gt;1. 从普通控制流到异常控制流&lt;/h2&gt;
+&lt;p&gt;在学习操作系统之前，我们通常通过函数调用、条件分支、循环等机制理解程序的执行过程。&lt;/p&gt;
+&lt;p&gt;例如：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;add&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;a&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;b&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;a&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;+&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;b&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;main&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;void&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;result&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;add&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;2&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;result&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;程序从 &lt;code&gt;main()&lt;/code&gt; 开始执行，调用 &lt;code&gt;add()&lt;/code&gt;，然后返回调用者。这种执行过程主要由程序自身的指令决定，我们可以称之为&lt;strong&gt;普通控制流&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;然而，操作系统需要处理更多复杂的事件：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;用户程序希望读取文件，需要请求内核提供服务。&lt;/li&gt;
+&lt;li&gt;网卡收到网络数据，需要通知 CPU 处理。&lt;/li&gt;
+&lt;li&gt;磁盘完成 I/O 操作，需要唤醒等待中的进程。&lt;/li&gt;
+&lt;li&gt;程序访问非法地址，需要由内核处理异常。&lt;/li&gt;
+&lt;li&gt;定时器触发，需要操作系统获得运行机会，进行调度。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这些事件可能发生在程序执行过程中的任意时刻，不能完全依赖当前程序主动调用函数来处理。&lt;/p&gt;
+&lt;p&gt;因此，计算机提供了一套特殊的控制流转移机制：当特定事件发生时，CPU 暂停当前执行路径，转而进入相应的处理程序。处理完成后，CPU 可以恢复原来的执行过程，也可能终止当前程序或切换到其他进程。&lt;/p&gt;
+&lt;p&gt;这种由异常、陷入和中断等事件引发的控制流转移，称为&lt;strong&gt;异常控制流（Exceptional Control Flow，ECF）&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;理解异常控制流，需要回答三个问题：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;什么事件触发了控制流转移？&lt;/li&gt;
+&lt;li&gt;CPU 如何找到处理程序，并切换到适当的执行环境？&lt;/li&gt;
+&lt;li&gt;处理完成后，如何恢复原来的执行过程？&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;在 xv6 中，系统调用和中断是理解这些机制的两个重要切入点。&lt;/p&gt;
+&lt;h2 id=&#34;2-异常陷入与中断&#34;&gt;2. 异常、陷入与中断&lt;/h2&gt;
+&lt;p&gt;严格来说，异常控制流是一个广义概念。RISC-V 架构使用 &lt;em&gt;trap&lt;/em&gt; 描述导致控制权转移到更高特权级处理程序的一类事件，主要包括同步异常和中断。&lt;/p&gt;
+&lt;h3 id=&#34;21-同步异常&#34;&gt;2.1 同步异常&lt;/h3&gt;
+&lt;p&gt;同步异常由当前正在执行的指令直接引起，因此与程序执行位置存在明确的因果关系。&lt;/p&gt;
+&lt;p&gt;例如：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;执行 &lt;code&gt;ecall&lt;/code&gt;，主动请求操作系统服务。&lt;/li&gt;
+&lt;li&gt;执行非法指令。&lt;/li&gt;
+&lt;li&gt;访问未映射的虚拟地址。&lt;/li&gt;
+&lt;li&gt;违反内存访问权限。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;同步异常的特点是：如果程序以相同状态重复执行到同一条指令，并且环境没有发生变化，那么通常会再次触发相同事件。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>MIT6.1810: Lab3 Pagetable</title>
+      <link>http://localhost:1313/posts/xv6-lab3-pgtbl/</link>
+      <pubDate>Tue, 27 Oct 2026 11:01:51 +0800</pubDate>
+      <guid>http://localhost:1313/posts/xv6-lab3-pgtbl/</guid>
+      <description>&lt;h1 id=&#34;一inspect-a-user-process-page-tableeasy&#34;&gt;一、&lt;strong&gt;Inspect a user-process page table (easy)&lt;/strong&gt;·&lt;/h1&gt;
+&lt;p&gt;xv6提供了一个用户程序pgtbltest.c，其中调用print_pgtbl()打印了页表的前10个页面和后10页的页表项，因为页表属于内核管理的数据结构，所以想要获取页表项就必须通过系统调用才行。在该lab中xv6额外提供了几个系统调用，其中的pgpte()的作用就是根据虚拟地址va，得到其对应的PTE。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;ugetpid&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;void&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;uint64&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;pgpte&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;void&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;void&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;vmprint&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;void&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;pgaccess&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;void&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;base&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;len&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;void&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;mask&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;ksupernpte&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;uint64&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;uint64&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;void&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nf&#34;&gt;print_pgtbl&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;nf&#34;&gt;printf&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;print_pgtbl starting&lt;/span&gt;&lt;span class=&#34;se&#34;&gt;\n&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;k&#34;&gt;for&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;uint64&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;i&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;i&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;10&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;i&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;++&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nf&#34;&gt;print_pte&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;i&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;PGSIZE&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;n&#34;&gt;uint64&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;top&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;MAXVA&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;/&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;PGSIZE&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;k&#34;&gt;for&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;uint64&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;i&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;top&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;-&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;10&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;i&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;top&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;i&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;++&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nf&#34;&gt;print_pte&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;i&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;PGSIZE&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;nf&#34;&gt;printf&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;print_pgtbl: OK&lt;/span&gt;&lt;span class=&#34;se&#34;&gt;\n&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;启动xv6，运行程序pgtbltest打印页表：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;xv6 kernel is booting
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;hart &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt; starting
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;hart &lt;span class=&#34;m&#34;&gt;2&lt;/span&gt; starting
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;init: starting sh
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ pgtbltest
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;print_pgtbl starting
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;va 0x0 pte 0x21FC885B pa 0x87F22000 perm 0x5B
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;va 0x1000 pte 0x21FC7C17 pa 0x87F1F000 perm 0x17
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;va 0x2000 pte 0x21FC7807 pa 0x87F1E000 perm 0x7
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;va 0x3000 pte 0x21FC74D7 pa 0x87F1D000 perm 0xD7
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;va 0x4000 pte 0x0 pa 0x0 perm 0x0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;va 0x5000 pte 0x0 pa 0x0 perm 0x0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;va 0x6000 pte 0x0 pa 0x0 perm 0x0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;va 0x7000 pte 0x0 pa 0x0 perm 0x0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;va 0x8000 pte 0x0 pa 0x0 perm 0x0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;va 0x9000 pte 0x0 pa 0x0 perm 0x0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;va 0x3FFFFF6000 pte 0x0 pa 0x0 perm 0x0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;va 0x3FFFFF7000 pte 0x0 pa 0x0 perm 0x0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;va 0x3FFFFF8000 pte 0x0 pa 0x0 perm 0x0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;va 0x3FFFFF9000 pte 0x0 pa 0x0 perm 0x0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;va 0x3FFFFFA000 pte 0x0 pa 0x0 perm 0x0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;va 0x3FFFFFB000 pte 0x0 pa 0x0 perm 0x0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;va 0x3FFFFFC000 pte 0x0 pa 0x0 perm 0x0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;va 0x3FFFFFD000 pte 0x0 pa 0x0 perm 0x0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;va 0x3FFFFFE000 pte 0x21FD08C7 pa 0x87F42000 perm 0xC7
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;va 0x3FFFFFF000 pte 0x2000184B pa 0x80006000 perm 0x4B
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;print_pgtbl: OK
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;vmprint_test starting
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;vmprint_test: &lt;span class=&#34;k&#34;&gt;done&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;pgaccess_test starting
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;pgtbltest: pgaccess_test failed: incorrect access bits set, &lt;span class=&#34;nv&#34;&gt;pid&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;m&#34;&gt;3&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;这个页表和用户进程的地址空间正好能对应上：&lt;/p&gt;</description>
+    </item>
     <item>
       <title>埃拉托色尼筛法（Sieve of Eratosthenes）</title>
       <link>http://localhost:1313/posts/sieve/</link>
       <pubDate>Mon, 26 Oct 2026 17:25:46 +0800</pubDate>
       <guid>http://localhost:1313/posts/sieve/</guid>
-      <description>&lt;p&gt;埃拉托色尼筛法是一种古老而高效的求素数算法，由古希腊数学家埃拉托色尼（Eratosthenes，约公元前276—前194年）提出。&lt;/p&gt;
-&lt;p&gt;核心思想非常直观：&lt;strong&gt;素数的倍数一定不是素数&lt;/strong&gt;。因此，从最小的素数 2 开始，把它的所有倍数&amp;quot;筛掉&amp;quot;（标记为合数），然后找到下一个未被筛掉的数（它一定是素数），再筛掉它的倍数……如此反复，最后剩下的就是素数。&lt;/p&gt;
-&lt;p&gt;算法步骤：&lt;/p&gt;
+      <description>&lt;h1 id=&#34;一原理&#34;&gt;一、原理&lt;/h1&gt;
+&lt;p&gt;埃拉托色尼筛法是一种古老而高效的求素数算法，由古希腊数学家埃拉托色尼（Eratosthenes，约公元前276—前194年）提出。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;核心思想&lt;/strong&gt;：&lt;strong&gt;素数的倍数一定不是素数&lt;/strong&gt;。因此，从最小的素数 2 开始，把它的所有倍数&amp;quot;筛掉&amp;quot;（标记为合数），然后找到下一个未被筛掉的数（它一定是素数），再筛掉它的倍数……如此反复，最后剩下的就是素数。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;算法步骤&lt;/strong&gt;：以求 n = 30 以内的素数为例&lt;/p&gt;
 &lt;ol&gt;
-&lt;li&gt;以求 n = 30 以内的素数为例：&lt;/li&gt;
 &lt;li&gt;列出 2 到 n 的所有整数。&lt;/li&gt;
 &lt;li&gt;从 2 开始，2 是素数，划掉所有 2 的倍数（4, 6, 8, …, 30）。&lt;/li&gt;
 &lt;li&gt;找到下一个未划掉的数 3，它是素数，划掉所有 3 的倍数（6, 9, 12, …, 30）。&lt;/li&gt;
@@ -26,12 +141,14 @@
 &lt;li&gt;下一个是 11，但 11² = 121 &amp;gt; 30，停止（见下方优化说明）。&lt;/li&gt;
 &lt;li&gt;剩下未被划掉的数即为素数：2, 3, 5, 7, 11, 13, 17, 19, 23, 29。&lt;/li&gt;
 &lt;/ol&gt;
-&lt;p&gt;优化：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;进一步优化&lt;/strong&gt;&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;只需筛到 √n：若 i * i &amp;gt; n，则 i 之后的合数必然已被更小的素数筛掉，无需继续。&lt;/li&gt;
-&lt;li&gt;从 i² 开始筛：筛素数 i 的倍数时，可以从 i&lt;em&gt;i 开始，因为小于 i&lt;/em&gt;i 的 i 的倍数（如 i&lt;em&gt;2, i&lt;/em&gt;3, …）已经被比 i 小的素数筛掉了。&lt;/li&gt;
+&lt;li&gt;只需筛到 √n：若 &lt;code&gt;i * i &amp;gt; n&lt;/code&gt;，则 i 之后的合数必然已被更小的素数筛掉，无需继续。&lt;/li&gt;
+&lt;li&gt;从 &lt;code&gt;i²&lt;/code&gt; 开始筛：筛素数 i 的倍数时，可以从 &lt;code&gt;i*i&lt;/code&gt; 开始，因为小于 &lt;code&gt;i*i&lt;/code&gt; 的 i 的倍数（如 i&lt;em&gt;2, i&lt;/em&gt;3, …）已经被比 i 小的素数筛掉了。&lt;/li&gt;
 &lt;li&gt;只处理奇数（可选）：除 2 以外，偶数都不是素数，可以只对奇数进行筛选，节省一半空间和时间。&lt;/li&gt;
-&lt;/ul&gt;</description>
+&lt;/ul&gt;
+&lt;h1 id=&#34;二实现&#34;&gt;二、实现&lt;/h1&gt;
+&lt;p&gt;Python实现：&lt;/p&gt;</description>
     </item>
     <item>
       <title>再探xv6: 并发篇</title>
@@ -1569,125 +1686,6 @@
 &lt;h3 id=&#34;22-创建博客&#34;&gt;2.2 创建博客&lt;/h3&gt;
 &lt;h4 id=&#34;第一步安装-hugo&#34;&gt;第一步：安装 Hugo&lt;/h4&gt;
 &lt;p&gt;Hugo 是一个使用 Go 编写的静态网站生成器。本文以 macOS 为例，使用 Homebrew 安装：&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title></title>
-      <link>http://localhost:1313/posts/lab-syscall-404c4e932614806791f9f56aefa199e3/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/lab-syscall-404c4e932614806791f9f56aefa199e3/</guid>
-      <description>&lt;h1 id=&#34;lab-syscall&#34;&gt;Lab syscall&lt;/h1&gt;
-&lt;p&gt;在这个lab中我们将深入理解xv6（其他系统也差不多）的系统调用是如何实现的，并尝试根据功能需求实现自己的系统调用。&lt;/p&gt;
-&lt;p&gt;关于xv6的概述和系统调用的逻辑可以看&lt;a href=&#34;https://jiangmmh.github.io/posts/xv6-01/&#34;&gt;这篇文章&lt;/a&gt;，后面就不过多介绍了。&lt;/p&gt;
-&lt;h1 id=&#34;一using-gdbeasy&#34;&gt;一、&lt;strong&gt;Using gdb (easy)&lt;/strong&gt;&lt;/h1&gt;
-&lt;p&gt;这部分内容主要是介绍gdb的使用方法，略。&lt;/p&gt;
-&lt;h1 id=&#34;二sandbox-a-commandmoderate&#34;&gt;二、&lt;strong&gt;Sandbox a command(moderate)&lt;/strong&gt;&lt;/h1&gt;
-&lt;p&gt;题目要求实现一个系统调用interpose，其接受两个参数：一个整数掩码和一个路径，前者指定了要屏蔽哪些系统调用，后者暂时不用管。如果要使用interpose屏蔽当前进程的open系统调用，用法如下：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nf&#34;&gt;interpose&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;SYS_open&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;#34;-&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;现在开始实现该系统调用，首先是用户侧：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;在 user/user.h 中添加 interpose() 的声明 。
-&lt;ul&gt;
-&lt;li&gt;int interpose(int, const char *);&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;在 user/usys.pl 中添加一行内容用于生成系统调用入口函数的实现。
-&lt;ul&gt;
-&lt;li&gt;entry(&amp;ldquo;interpose&amp;rdquo;);&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;题目提供了两个程序sandbox.c和sbtest.c，我们需要在Makefile中将其加入编译：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-makefile&#34; data-lang=&#34;makefile&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nv&#34;&gt;UPROGS&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;se&#34;&gt;\
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;	......
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;	&lt;span class=&#34;nv&#34;&gt;$U&lt;/span&gt;/_sandbox&lt;span class=&#34;se&#34;&gt;\
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;	&lt;span class=&#34;nv&#34;&gt;$U&lt;/span&gt;/_sbtest&lt;span class=&#34;se&#34;&gt;\
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;在内核侧：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;在 kernel/syscall.h 中添加 interpose 的系统调用号宏定义&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;#define SYS_interpose   23&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;在 kernel/proc.h 的proc结构体中添加一个interpose_mask，记录屏蔽字&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;int interpose_mask;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;在 kernel/sysproc.c 中添加函数 sys_interpose() 处理interpose系统调用&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;uint64&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nf&#34;&gt;sys_interpose&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;void&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;interpose_mask&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;nf&#34;&gt;argint&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;interpose_mask&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;nf&#34;&gt;myproc&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;interpose_mask&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;interpose_mask&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;为了使子进程能够继承父进程的屏蔽字，需要在创建子进程时拷贝interpose_mask，在 kernel/proc.c 中的 kfork() 函数的末尾添加 interpose_mask 的拷贝。&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title></title>
-      <link>http://localhost:1313/posts/%E5%86%8D%E6%8E%A2xv6-%E5%86%85%E5%AD%98%E7%AF%87-405c4e932614803a8085c8bcbf7cff1f/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/%E5%86%8D%E6%8E%A2xv6-%E5%86%85%E5%AD%98%E7%AF%87-405c4e932614803a8085c8bcbf7cff1f/</guid>
-      <description>&lt;h1 id=&#34;再探xv6-内存篇&#34;&gt;再探xv6: 内存篇&lt;/h1&gt;
-&lt;h1 id=&#34;一简介&#34;&gt;一、简介&lt;/h1&gt;
-&lt;h2 id=&#34;risc-v的支持&#34;&gt;RISC-V的支持&lt;/h2&gt;
-&lt;p&gt;RISC-V 指令（包括用户指令和内核指令）操作的是虚拟地址。而机器的RAM则需要使用物理地址来访问。&lt;strong&gt;RISC-V 页表硬件通过将每个虚拟地址映射到一个物理地址，将这两种地址连接起来&lt;/strong&gt;。&lt;/p&gt;
-&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;%E5%86%8D%E6%8E%A2xv6%20%E5%86%85%E5%AD%98%E7%AF%87/image.png&#34;&gt;&lt;/p&gt;
-&lt;p&gt;xv6使用RISC-V的Sv39模式，其仅使用64位虚拟地址中低39位。在该设置下：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;每个页面为4KB，使用低12位地址索引&lt;/li&gt;
-&lt;li&gt;采用三级页表，每级页表使用9位，共剩余27位进行索引&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;%E5%86%8D%E6%8E%A2xv6%20%E5%86%85%E5%AD%98%E7%AF%87/image%201.png&#34;&gt;&lt;/p&gt;
-&lt;p&gt;RISC-V 的设计为虚拟地址和物理地址的扩展都预留了空间。如果需要更多虚拟地址空间，RISC-V 支持 Sv48 模式，即 48 位虚拟地址。&lt;/p&gt;
-&lt;p&gt;下面是页表项的构成，包括了上述的39位物理地址和低10位的标志位。&lt;/p&gt;
-&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;%E5%86%8D%E6%8E%A2xv6%20%E5%86%85%E5%AD%98%E7%AF%87/image%202.png&#34;&gt;&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;PTE_V：指示了该PTE是否存在&lt;/li&gt;
-&lt;li&gt;PTE_R、PTE_W、PTE_X：指示可读、可写和可执行权限&lt;/li&gt;
-&lt;li&gt;PTE_U：控制该页面是否可以被用户程序访问&lt;/li&gt;
-&lt;li&gt;PTE_G、PTE_A：暂时未使用&lt;/li&gt;
-&lt;li&gt;RSW：还剩下两个保留位，可以根据需要来使用&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;每当执行RISC-V的访存指令时，就需要执行上述地址转换过程。在xv6的进程被调度上CPU时，会将进程根页目录表的地址存放到当前CPU的控制寄存器 satp 中。&lt;/p&gt;
-&lt;p&gt;多级页表虽然节省内存，但是访问某个页面中的数据需要多次访问内存，为了尽可能避免从虚拟地址到物理地址转换过程中的访存开销，RISC-V硬件提供了TLB（&lt;em&gt;Translation Look-aside Buffer&lt;/em&gt;）来缓存部分虚拟地址到物理地址到映射，其思想和Cache类似，都是通过局部性原理构建。&lt;/p&gt;
-&lt;h2 id=&#34;内核地址空间&#34;&gt;内核地址空间&lt;/h2&gt;
-&lt;p&gt;xv6 启动时会创建一个单页表，用于描述内核的地址空间，具体的布局定义见kernel/memlayout.h。&lt;/p&gt;
-&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;%E5%86%8D%E6%8E%A2xv6%20%E5%86%85%E5%AD%98%E7%AF%87/image%203.png&#34;&gt;&lt;/p&gt;
-&lt;p&gt;QEMU 模拟一台计算机，该计算机包含从物理地址0x80000000开始，直至0x88000000 。&lt;/p&gt;
-&lt;p&gt;其中大部分页面都采用对等映射（对等映射）实现（虚拟地址 == 物理地址），只有少数几个内核虚拟页面没有直接映射：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;跳转页（Trampoline）。它被映射到虚拟地址空间的顶部；用户页表也具有相同的映射关系。一个物理页（包含跳转代码）在内核的虚拟地址空间中被映射了两次：一次在虚拟地址空间的顶部，另一次是直接映射。&lt;/li&gt;
-&lt;li&gt;内核栈保护页。每个进程都有自己的内核栈，它映射到较高的内核虚拟地址，这样 xv6 可以在其下方留下一个未映射的保护页。&lt;strong&gt;保护页的页表项 (PTE) 无效（即&lt;code&gt;PTE_V&lt;/code&gt;未设置），因此如果内核栈溢出，很可能会导致缺页错误&lt;/strong&gt;，内核崩溃。如果没有保护页，溢出的栈会覆盖其他内核内存，导致运行异常。崩溃崩溃是更可取的。&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h1 id=&#34;二物理内存源码分析&#34;&gt;二、物理内存源码分析&lt;/h1&gt;
-&lt;h2 id=&#34;物理内存的初始化&#34;&gt;物理内存的初始化&lt;/h2&gt;
-&lt;p&gt;在main()函数中，调用了kinit()函数来初始化物理内存子模块：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;void&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nf&#34;&gt;kinit&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;nf&#34;&gt;initlock&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;kmem&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;lock&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;#34;kmem&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;nf&#34;&gt;freerange&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;end&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;void&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;PHYSTOP&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;其中调用了freerange()函数，传入两个参数end和PHYSTOP，前者在链接脚本中被定义，位于 .text, .rodata, .data, .bss段之后的位置。后者的值为0x88000000，表示物理地址顶部。&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;void&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nf&#34;&gt;freerange&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;void&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;pa_start&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;void&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;pa_end&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;kt&#34;&gt;char&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;p&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;n&#34;&gt;p&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;char&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;PGROUNDUP&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;((&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;uint64&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;pa_start&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;k&#34;&gt;for&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;p&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;+&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;PGSIZE&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;lt;=&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;char&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;pa_end&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;p&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;+=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;PGSIZE&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nf&#34;&gt;kfree&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;p&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;其中通过反复调用kfree()构造出一个存储4KB物理页帧的freelist。&lt;/p&gt;</description>
     </item>
   </channel>
 </rss>

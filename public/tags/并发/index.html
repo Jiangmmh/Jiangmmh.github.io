@@ -195,6 +195,33 @@
 
 <article class="post-entry tag-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">再探xv6: 异常控制流篇
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p> title: “再探 xv6：异常控制流篇” date: ‘2026-10-27T11:14:45&#43;08:00’ draft: false tags: [操作系统, xv6, MIT6.1810, 并发, 锁] categories: [xv6] 一、何为异常控制流 1. 从普通控制流到异常控制流 在学习操作系统之前，我们通常通过函数调用、条件分支、循环等机制理解程序的执行过程。
+例如：
+int add(int a, int b) { return a &#43; b; } int main(void) { int result = add(1, 2); return result; } 程序从 main() 开始执行，调用 add()，然后返回调用者。这种执行过程主要由程序自身的指令决定，我们可以称之为普通控制流。
+然而，操作系统需要处理更多复杂的事件：
+用户程序希望读取文件，需要请求内核提供服务。 网卡收到网络数据，需要通知 CPU 处理。 磁盘完成 I/O 操作，需要唤醒等待中的进程。 程序访问非法地址，需要由内核处理异常。 定时器触发，需要操作系统获得运行机会，进行调度。 这些事件可能发生在程序执行过程中的任意时刻，不能完全依赖当前程序主动调用函数来处理。
+因此，计算机提供了一套特殊的控制流转移机制：当特定事件发生时，CPU 暂停当前执行路径，转而进入相应的处理程序。处理完成后，CPU 可以恢复原来的执行过程，也可能终止当前程序或切换到其他进程。
+这种由异常、陷入和中断等事件引发的控制流转移，称为异常控制流（Exceptional Control Flow，ECF）。
+理解异常控制流，需要回答三个问题：
+什么事件触发了控制流转移？ CPU 如何找到处理程序，并切换到适当的执行环境？ 处理完成后，如何恢复原来的执行过程？ 在 xv6 中，系统调用和中断是理解这些机制的两个重要切入点。
+2. 异常、陷入与中断 严格来说，异常控制流是一个广义概念。RISC-V 架构使用 trap 描述导致控制权转移到更高特权级处理程序的一类事件，主要包括同步异常和中断。
+2.1 同步异常 同步异常由当前正在执行的指令直接引起，因此与程序执行位置存在明确的因果关系。
+例如：
+执行 ecall，主动请求操作系统服务。 执行非法指令。 访问未映射的虚拟地址。 违反内存访问权限。 同步异常的特点是：如果程序以相同状态重复执行到同一条指令，并且环境没有发生变化，那么通常会再次触发相同事件。
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-27 11:14:45 +0800 CST'>October 27, 2026</span>&nbsp;·&nbsp;<span>7 min</span>&nbsp;·&nbsp;<span>1376 words</span></footer>
+  <a class="entry-link" aria-label="post link to 再探xv6: 异常控制流篇" href="http://localhost:1313/posts/xv6-04/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">再探xv6: 并发篇
     </h2>
   </header>

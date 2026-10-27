@@ -27,29 +27,7 @@
 只处理奇数（可选）：除 2 以外，偶数都不是素数，可以只对奇数进行筛选，节省一半空间和时间。
 
 二、实现
-def primes(n):
-    &#34;&#34;&#34;
-    Compute all the primes up to (but not including) n via sieve of Eratosthenes.
-    
-    Input:
-        n: integer
-    Output:
-        list of primes up to (not including) n
-    &#34;&#34;&#34;
-
-    if n &lt; 2:
-      return []
-    is_prime = [True] * n
-    is_prime[0] = is_prime[1] = False
-
-    i = 2
-    while i * i &lt; n:
-      if is_prime[i]:
-        for j in range(i*i, n, i):
-          is_prime[j] = False
-        i &#43;= 1
-    return [x for x in range(n) if is_prime[x]]
-测试一下：">
+Python实现：">
 <meta name="author" content="">
 <link rel="canonical" href="http://localhost:1313/posts/sieve/">
 <link crossorigin="anonymous" href="/assets/css/stylesheet.f9490c4bd2e7d3fd9e21909b0bc528878329710db51c69d38b7057b37e889c1d.css" integrity="sha256-&#43;UkMS9Ln0/2eIZCbC8Uoh4MpcQ21HGnTi3BXs36InB0=" rel="preload stylesheet" as="style">
@@ -141,7 +119,7 @@ def primes(n):
 核心思想：素数的倍数一定不是素数。因此，从最小的素数 2 开始，把它的所有倍数&#34;筛掉&#34;（标记为合数），然后找到下一个未被筛掉的数（它一定是素数），再筛掉它的倍数……如此反复，最后剩下的就是素数。
 算法步骤：以求 n = 30 以内的素数为例
 列出 2 到 n 的所有整数。 从 2 开始，2 是素数，划掉所有 2 的倍数（4, 6, 8, …, 30）。 找到下一个未划掉的数 3，它是素数，划掉所有 3 的倍数（6, 9, 12, …, 30）。 下一个未划掉的数是 5，划掉 5 的倍数（10, 15, 20, 25, 30）。 下一个是 7，划掉 7 的倍数（14, 21, 28）。 下一个是 11，但 11² = 121 &gt; 30，停止（见下方优化说明）。 剩下未被划掉的数即为素数：2, 3, 5, 7, 11, 13, 17, 19, 23, 29。 进一步优化
-只需筛到 √n：若 i * i &gt; n，则 i 之后的合数必然已被更小的素数筛掉，无需继续。 从 i² 开始筛：筛素数 i 的倍数时，可以从 i*i 开始，因为小于 i*i 的 i 的倍数（如 i2, i3, …）已经被比 i 小的素数筛掉了。 只处理奇数（可选）：除 2 以外，偶数都不是素数，可以只对奇数进行筛选，节省一半空间和时间。 二、实现 def primes(n): &#34;&#34;&#34; Compute all the primes up to (but not including) n via sieve of Eratosthenes. Input: n: integer Output: list of primes up to (not including) n &#34;&#34;&#34; if n &lt; 2: return [] is_prime = [True] * n is_prime[0] = is_prime[1] = False i = 2 while i * i &lt; n: if is_prime[i]: for j in range(i*i, n, i): is_prime[j] = False i &#43;= 1 return [x for x in range(n) if is_prime[x]] 测试一下：">
+只需筛到 √n：若 i * i &gt; n，则 i 之后的合数必然已被更小的素数筛掉，无需继续。 从 i² 开始筛：筛素数 i 的倍数时，可以从 i*i 开始，因为小于 i*i 的 i 的倍数（如 i2, i3, …）已经被比 i 小的素数筛掉了。 只处理奇数（可选）：除 2 以外，偶数都不是素数，可以只对奇数进行筛选，节省一半空间和时间。 二、实现 Python实现：">
   <meta property="og:locale" content="zh_CN">
   <meta property="og:type" content="article">
     <meta property="article:section" content="posts">
@@ -154,7 +132,7 @@ def primes(n):
 核心思想：素数的倍数一定不是素数。因此，从最小的素数 2 开始，把它的所有倍数&#34;筛掉&#34;（标记为合数），然后找到下一个未被筛掉的数（它一定是素数），再筛掉它的倍数……如此反复，最后剩下的就是素数。
 算法步骤：以求 n = 30 以内的素数为例
 列出 2 到 n 的所有整数。 从 2 开始，2 是素数，划掉所有 2 的倍数（4, 6, 8, …, 30）。 找到下一个未划掉的数 3，它是素数，划掉所有 3 的倍数（6, 9, 12, …, 30）。 下一个未划掉的数是 5，划掉 5 的倍数（10, 15, 20, 25, 30）。 下一个是 7，划掉 7 的倍数（14, 21, 28）。 下一个是 11，但 11² = 121 &gt; 30，停止（见下方优化说明）。 剩下未被划掉的数即为素数：2, 3, 5, 7, 11, 13, 17, 19, 23, 29。 进一步优化
-只需筛到 √n：若 i * i &gt; n，则 i 之后的合数必然已被更小的素数筛掉，无需继续。 从 i² 开始筛：筛素数 i 的倍数时，可以从 i*i 开始，因为小于 i*i 的 i 的倍数（如 i2, i3, …）已经被比 i 小的素数筛掉了。 只处理奇数（可选）：除 2 以外，偶数都不是素数，可以只对奇数进行筛选，节省一半空间和时间。 二、实现 def primes(n): &#34;&#34;&#34; Compute all the primes up to (but not including) n via sieve of Eratosthenes. Input: n: integer Output: list of primes up to (not including) n &#34;&#34;&#34; if n &lt; 2: return [] is_prime = [True] * n is_prime[0] = is_prime[1] = False i = 2 while i * i &lt; n: if is_prime[i]: for j in range(i*i, n, i): is_prime[j] = False i &#43;= 1 return [x for x in range(n) if is_prime[x]] 测试一下：">
+只需筛到 √n：若 i * i &gt; n，则 i 之后的合数必然已被更小的素数筛掉，无需继续。 从 i² 开始筛：筛素数 i 的倍数时，可以从 i*i 开始，因为小于 i*i 的 i 的倍数（如 i2, i3, …）已经被比 i 小的素数筛掉了。 只处理奇数（可选）：除 2 以外，偶数都不是素数，可以只对奇数进行筛选，节省一半空间和时间。 二、实现 Python实现：">
 
 
 <script type="application/ld+json">
@@ -183,12 +161,12 @@ def primes(n):
   "@type": "BlogPosting",
   "headline": "埃拉托色尼筛法（Sieve of Eratosthenes）",
   "name": "埃拉托色尼筛法（Sieve of Eratosthenes）",
-  "description": "一、原理 埃拉托色尼筛法是一种古老而高效的求素数算法，由古希腊数学家埃拉托色尼（Eratosthenes，约公元前276—前194年）提出。\n核心思想：素数的倍数一定不是素数。因此，从最小的素数 2 开始，把它的所有倍数\u0026quot;筛掉\u0026quot;（标记为合数），然后找到下一个未被筛掉的数（它一定是素数），再筛掉它的倍数……如此反复，最后剩下的就是素数。\n算法步骤：以求 n = 30 以内的素数为例\n列出 2 到 n 的所有整数。 从 2 开始，2 是素数，划掉所有 2 的倍数（4, 6, 8, …, 30）。 找到下一个未划掉的数 3，它是素数，划掉所有 3 的倍数（6, 9, 12, …, 30）。 下一个未划掉的数是 5，划掉 5 的倍数（10, 15, 20, 25, 30）。 下一个是 7，划掉 7 的倍数（14, 21, 28）。 下一个是 11，但 11² = 121 \u0026gt; 30，停止（见下方优化说明）。 剩下未被划掉的数即为素数：2, 3, 5, 7, 11, 13, 17, 19, 23, 29。 进一步优化\n只需筛到 √n：若 i * i \u0026gt; n，则 i 之后的合数必然已被更小的素数筛掉，无需继续。 从 i² 开始筛：筛素数 i 的倍数时，可以从 i*i 开始，因为小于 i*i 的 i 的倍数（如 i2, i3, …）已经被比 i 小的素数筛掉了。 只处理奇数（可选）：除 2 以外，偶数都不是素数，可以只对奇数进行筛选，节省一半空间和时间。 二、实现 def primes(n): \u0026#34;\u0026#34;\u0026#34; Compute all the primes up to (but not including) n via sieve of Eratosthenes. Input: n: integer Output: list of primes up to (not including) n \u0026#34;\u0026#34;\u0026#34; if n \u0026lt; 2: return [] is_prime = [True] * n is_prime[0] = is_prime[1] = False i = 2 while i * i \u0026lt; n: if is_prime[i]: for j in range(i*i, n, i): is_prime[j] = False i += 1 return [x for x in range(n) if is_prime[x]] 测试一下：\n",
+  "description": "一、原理 埃拉托色尼筛法是一种古老而高效的求素数算法，由古希腊数学家埃拉托色尼（Eratosthenes，约公元前276—前194年）提出。\n核心思想：素数的倍数一定不是素数。因此，从最小的素数 2 开始，把它的所有倍数\u0026quot;筛掉\u0026quot;（标记为合数），然后找到下一个未被筛掉的数（它一定是素数），再筛掉它的倍数……如此反复，最后剩下的就是素数。\n算法步骤：以求 n = 30 以内的素数为例\n列出 2 到 n 的所有整数。 从 2 开始，2 是素数，划掉所有 2 的倍数（4, 6, 8, …, 30）。 找到下一个未划掉的数 3，它是素数，划掉所有 3 的倍数（6, 9, 12, …, 30）。 下一个未划掉的数是 5，划掉 5 的倍数（10, 15, 20, 25, 30）。 下一个是 7，划掉 7 的倍数（14, 21, 28）。 下一个是 11，但 11² = 121 \u0026gt; 30，停止（见下方优化说明）。 剩下未被划掉的数即为素数：2, 3, 5, 7, 11, 13, 17, 19, 23, 29。 进一步优化\n只需筛到 √n：若 i * i \u0026gt; n，则 i 之后的合数必然已被更小的素数筛掉，无需继续。 从 i² 开始筛：筛素数 i 的倍数时，可以从 i*i 开始，因为小于 i*i 的 i 的倍数（如 i2, i3, …）已经被比 i 小的素数筛掉了。 只处理奇数（可选）：除 2 以外，偶数都不是素数，可以只对奇数进行筛选，节省一半空间和时间。 二、实现 Python实现：\n",
   "keywords": [
     
   ],
-  "articleBody": "一、原理 埃拉托色尼筛法是一种古老而高效的求素数算法，由古希腊数学家埃拉托色尼（Eratosthenes，约公元前276—前194年）提出。\n核心思想：素数的倍数一定不是素数。因此，从最小的素数 2 开始，把它的所有倍数\"筛掉\"（标记为合数），然后找到下一个未被筛掉的数（它一定是素数），再筛掉它的倍数……如此反复，最后剩下的就是素数。\n算法步骤：以求 n = 30 以内的素数为例\n列出 2 到 n 的所有整数。 从 2 开始，2 是素数，划掉所有 2 的倍数（4, 6, 8, …, 30）。 找到下一个未划掉的数 3，它是素数，划掉所有 3 的倍数（6, 9, 12, …, 30）。 下一个未划掉的数是 5，划掉 5 的倍数（10, 15, 20, 25, 30）。 下一个是 7，划掉 7 的倍数（14, 21, 28）。 下一个是 11，但 11² = 121 \u003e 30，停止（见下方优化说明）。 剩下未被划掉的数即为素数：2, 3, 5, 7, 11, 13, 17, 19, 23, 29。 进一步优化\n只需筛到 √n：若 i * i \u003e n，则 i 之后的合数必然已被更小的素数筛掉，无需继续。 从 i² 开始筛：筛素数 i 的倍数时，可以从 i*i 开始，因为小于 i*i 的 i 的倍数（如 i2, i3, …）已经被比 i 小的素数筛掉了。 只处理奇数（可选）：除 2 以外，偶数都不是素数，可以只对奇数进行筛选，节省一半空间和时间。 二、实现 def primes(n): \"\"\" Compute all the primes up to (but not including) n via sieve of Eratosthenes. Input: n: integer Output: list of primes up to (not including) n \"\"\" if n \u003c 2: return [] is_prime = [True] * n is_prime[0] = is_prime[1] = False i = 2 while i * i \u003c n: if is_prime[i]: for j in range(i*i, n, i): is_prime[j] = False i += 1 return [x for x in range(n) if is_prime[x]] 测试一下：\n",
-  "wordCount" : "172",
+  "articleBody": "一、原理 埃拉托色尼筛法是一种古老而高效的求素数算法，由古希腊数学家埃拉托色尼（Eratosthenes，约公元前276—前194年）提出。\n核心思想：素数的倍数一定不是素数。因此，从最小的素数 2 开始，把它的所有倍数\"筛掉\"（标记为合数），然后找到下一个未被筛掉的数（它一定是素数），再筛掉它的倍数……如此反复，最后剩下的就是素数。\n算法步骤：以求 n = 30 以内的素数为例\n列出 2 到 n 的所有整数。 从 2 开始，2 是素数，划掉所有 2 的倍数（4, 6, 8, …, 30）。 找到下一个未划掉的数 3，它是素数，划掉所有 3 的倍数（6, 9, 12, …, 30）。 下一个未划掉的数是 5，划掉 5 的倍数（10, 15, 20, 25, 30）。 下一个是 7，划掉 7 的倍数（14, 21, 28）。 下一个是 11，但 11² = 121 \u003e 30，停止（见下方优化说明）。 剩下未被划掉的数即为素数：2, 3, 5, 7, 11, 13, 17, 19, 23, 29。 进一步优化\n只需筛到 √n：若 i * i \u003e n，则 i 之后的合数必然已被更小的素数筛掉，无需继续。 从 i² 开始筛：筛素数 i 的倍数时，可以从 i*i 开始，因为小于 i*i 的 i 的倍数（如 i2, i3, …）已经被比 i 小的素数筛掉了。 只处理奇数（可选）：除 2 以外，偶数都不是素数，可以只对奇数进行筛选，节省一半空间和时间。 二、实现 Python实现：\ndef primes(n): \"\"\" Compute all the primes up to (but not including) n via sieve of Eratosthenes. Input: n: integer Output: list of primes up to (not including) n \"\"\" if n \u003c 2: return [] is_prime = [True] * n is_prime[0] = is_prime[1] = False i = 2 while i * i \u003c n: if is_prime[i]: for j in range(i*i, n, i): is_prime[j] = False i += 1 return [x for x in range(n) if is_prime[x]] C++实现：\n#include using namespace std; vector\u003cint\u003e sieve(int n) { vector\u003cbool\u003e is_prime(n + 1, true); is_prime[0] = is_prime[1] = false; for (int i = 2; (long long)i * i \u003c= n; i++) { if (is_prime[i]) { for (long long j = (long long)i * i; j \u003c= n; j += i) is_prime[j] = false; } } vector\u003cint\u003e primes; for (int i = 2; i \u003c= n; i++) if (is_prime[i]) primes.push_back(i); return primes; } ",
+  "wordCount" : "245",
   "inLanguage": "en",
   "datePublished": "2026-10-26T17:25:46+08:00",
   "dateModified": "2026-10-26T17:25:46+08:00",
@@ -300,7 +278,7 @@ def primes(n):
     </h1>
     <div class="post-meta">
 
-<span title='2026-10-26 17:25:46 +0800 CST'>October 26, 2026</span>&nbsp;·&nbsp;<span>1 min</span>&nbsp;·&nbsp;<span>172 words</span>
+<span title='2026-10-26 17:25:46 +0800 CST'>October 26, 2026</span>&nbsp;·&nbsp;<span>2 min</span>&nbsp;·&nbsp;<span>245 words</span>
 
 </div>
   </header> <details class="toc"  open>
@@ -338,6 +316,7 @@ def primes(n):
 <li>只处理奇数（可选）：除 2 以外，偶数都不是素数，可以只对奇数进行筛选，节省一半空间和时间。</li>
 </ul>
 <h1 id="二实现">二、实现<a hidden class="anchor" aria-hidden="true" href="#二实现">#</a></h1>
+<p>Python实现：</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">primes</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
 </span></span><span class="line"><span class="cl">    <span class="s2">&#34;&#34;&#34;
 </span></span></span><span class="line"><span class="cl"><span class="s2">    Compute all the primes up to (but not including) n via sieve of Eratosthenes.
@@ -360,8 +339,25 @@ def primes(n):
 </span></span><span class="line"><span class="cl">          <span class="n">is_prime</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
 </span></span><span class="line"><span class="cl">        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
 </span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="k">if</span> <span class="n">is_prime</span><span class="p">[</span><span class="n">x</span><span class="p">]]</span>
-</span></span></code></pre></div><p>测试一下：</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"></code></pre></div>
+</span></span></code></pre></div><p>C++实现：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;vector&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">sieve</span><span class="p">(</span><span class="kt">int</span> <span class="n">n</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">vector</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span> <span class="n">is_prime</span><span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">true</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">is_prime</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">is_prime</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span> <span class="p">(</span><span class="kt">long</span> <span class="kt">long</span><span class="p">)</span><span class="n">i</span> <span class="o">*</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">n</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">is_prime</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">for</span> <span class="p">(</span><span class="kt">long</span> <span class="kt">long</span> <span class="n">j</span> <span class="o">=</span> <span class="p">(</span><span class="kt">long</span> <span class="kt">long</span><span class="p">)</span><span class="n">i</span> <span class="o">*</span> <span class="n">i</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;=</span> <span class="n">n</span><span class="p">;</span> <span class="n">j</span> <span class="o">+=</span> <span class="n">i</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                <span class="n">is_prime</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">primes</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">n</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">is_prime</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="n">primes</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">primes</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div>
 
   </div>
 
@@ -369,6 +365,10 @@ def primes(n):
     <ul class="post-tags">
     </ul>
 <nav class="paginav">
+  <a class="prev" href="http://localhost:1313/posts/xv6-lab3-pgtbl/">
+    <span class="title">« Prev</span>
+    <span>MIT6.1810: Lab3 Pagetable</span>
+  </a>
   <a class="next" href="http://localhost:1313/posts/xv6-03/">
     <span class="title">Next »</span>
     <span>再探xv6: 并发篇</span>

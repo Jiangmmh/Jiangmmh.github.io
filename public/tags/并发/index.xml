@@ -6,8 +6,63 @@
     <description>Recent content in 并发 on Minghan的博客</description>
     <generator>Hugo</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Mon, 26 Oct 2026 11:55:00 +0800</lastBuildDate>
+    <lastBuildDate>Tue, 27 Oct 2026 11:14:45 +0800</lastBuildDate>
     <atom:link href="http://localhost:1313/tags/%E5%B9%B6%E5%8F%91/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>再探xv6: 异常控制流篇</title>
+      <link>http://localhost:1313/posts/xv6-04/</link>
+      <pubDate>Tue, 27 Oct 2026 11:14:45 +0800</pubDate>
+      <guid>http://localhost:1313/posts/xv6-04/</guid>
+      <description>&lt;hr&gt;
+&lt;h2 id=&#34;categories-xv6&#34;&gt;title: &amp;ldquo;再探 xv6：异常控制流篇&amp;rdquo;
+date: &amp;lsquo;2026-10-27T11:14:45+08:00&amp;rsquo;
+draft: false
+tags: [操作系统, xv6, MIT6.1810, 并发, 锁]
+categories: [xv6]&lt;/h2&gt;
+&lt;h1 id=&#34;一何为异常控制流&#34;&gt;一、何为异常控制流&lt;/h1&gt;
+&lt;h2 id=&#34;1-从普通控制流到异常控制流&#34;&gt;1. 从普通控制流到异常控制流&lt;/h2&gt;
+&lt;p&gt;在学习操作系统之前，我们通常通过函数调用、条件分支、循环等机制理解程序的执行过程。&lt;/p&gt;
+&lt;p&gt;例如：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;add&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;a&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;b&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;a&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;+&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;b&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;main&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;void&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;result&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;add&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;2&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;result&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;程序从 &lt;code&gt;main()&lt;/code&gt; 开始执行，调用 &lt;code&gt;add()&lt;/code&gt;，然后返回调用者。这种执行过程主要由程序自身的指令决定，我们可以称之为&lt;strong&gt;普通控制流&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;然而，操作系统需要处理更多复杂的事件：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;用户程序希望读取文件，需要请求内核提供服务。&lt;/li&gt;
+&lt;li&gt;网卡收到网络数据，需要通知 CPU 处理。&lt;/li&gt;
+&lt;li&gt;磁盘完成 I/O 操作，需要唤醒等待中的进程。&lt;/li&gt;
+&lt;li&gt;程序访问非法地址，需要由内核处理异常。&lt;/li&gt;
+&lt;li&gt;定时器触发，需要操作系统获得运行机会，进行调度。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这些事件可能发生在程序执行过程中的任意时刻，不能完全依赖当前程序主动调用函数来处理。&lt;/p&gt;
+&lt;p&gt;因此，计算机提供了一套特殊的控制流转移机制：当特定事件发生时，CPU 暂停当前执行路径，转而进入相应的处理程序。处理完成后，CPU 可以恢复原来的执行过程，也可能终止当前程序或切换到其他进程。&lt;/p&gt;
+&lt;p&gt;这种由异常、陷入和中断等事件引发的控制流转移，称为&lt;strong&gt;异常控制流（Exceptional Control Flow，ECF）&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;理解异常控制流，需要回答三个问题：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;什么事件触发了控制流转移？&lt;/li&gt;
+&lt;li&gt;CPU 如何找到处理程序，并切换到适当的执行环境？&lt;/li&gt;
+&lt;li&gt;处理完成后，如何恢复原来的执行过程？&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;在 xv6 中，系统调用和中断是理解这些机制的两个重要切入点。&lt;/p&gt;
+&lt;h2 id=&#34;2-异常陷入与中断&#34;&gt;2. 异常、陷入与中断&lt;/h2&gt;
+&lt;p&gt;严格来说，异常控制流是一个广义概念。RISC-V 架构使用 &lt;em&gt;trap&lt;/em&gt; 描述导致控制权转移到更高特权级处理程序的一类事件，主要包括同步异常和中断。&lt;/p&gt;
+&lt;h3 id=&#34;21-同步异常&#34;&gt;2.1 同步异常&lt;/h3&gt;
+&lt;p&gt;同步异常由当前正在执行的指令直接引起，因此与程序执行位置存在明确的因果关系。&lt;/p&gt;
+&lt;p&gt;例如：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;执行 &lt;code&gt;ecall&lt;/code&gt;，主动请求操作系统服务。&lt;/li&gt;
+&lt;li&gt;执行非法指令。&lt;/li&gt;
+&lt;li&gt;访问未映射的虚拟地址。&lt;/li&gt;
+&lt;li&gt;违反内存访问权限。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;同步异常的特点是：如果程序以相同状态重复执行到同一条指令，并且环境没有发生变化，那么通常会再次触发相同事件。&lt;/p&gt;</description>
+    </item>
     <item>
       <title>再探xv6: 并发篇</title>
       <link>http://localhost:1313/posts/xv6-03/</link>

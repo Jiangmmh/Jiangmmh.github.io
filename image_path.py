@@ -7,7 +7,7 @@ import re
 import sys
 from pathlib import Path
 
-TARGET_PREFIX = "/images/posts/xv6-mem/"
+TARGET_PREFIX = "/images/posts/xv6-pgtbl/"
 
 def convert(md_text: str) -> str:
     # 匹配 ![alt](path) 或 ![alt](path "title")

@@ -227,6 +227,53 @@
 
 <article class="post-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">再探xv6: 异常控制流篇
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>一、何为异常控制流 1. 从普通控制流到异常控制流 在学习操作系统之前，我们通常通过函数调用、条件分支、循环等机制理解程序的执行过程。 例如：
+int add(int a, int b) { return a &#43; b; } int main(void) { int result = add(1, 2); return result; } 程序从 main() 开始执行，调用 add()，然后返回调用者。这种执行过程主要由程序自身的指令决定，我们可以称之为普通控制流。
+然而，操作系统需要处理更多复杂的事件：
+用户程序希望读取文件，需要请求内核提供服务。 网卡收到网络数据，需要通知 CPU 处理。 磁盘完成 I/O 操作，需要唤醒等待中的进程。 程序访问非法地址，需要由内核处理异常。 定时器触发，需要操作系统获得运行机会，进行调度。 这些事件可能发生在程序执行过程中的任意时刻，不能完全依赖当前程序主动调用函数来处理。
+因此，计算机提供了一套特殊的控制流转移机制：当特定事件发生时，CPU 暂停当前执行路径，转而进入相应的处理程序。处理完成后，CPU 可以恢复原来的执行过程，也可能终止当前程序或切换到其他进程。
+这种由异常、陷入和中断等事件引发的控制流转移，称为异常控制流（Exceptional Control Flow，ECF）。
+理解异常控制流，需要回答三个问题：
+什么事件触发了控制流转移？ CPU 如何找到处理程序，并切换到适当的执行环境？ 处理完成后，如何恢复原来的执行过程？ 在 xv6 中，系统调用和中断是理解这些机制的两个重要切入点。
+2. 异常、陷入与中断 严格来说，异常控制流是一个广义概念。RISC-V 架构使用 trap 描述导致控制权转移到更高特权级处理程序的一类事件，主要包括同步异常和中断。
+2.1 同步异常 同步异常由当前正在执行的指令直接引起，因此与程序执行位置存在明确的因果关系。
+例如：
+执行 ecall，主动请求操作系统服务。 执行非法指令。 访问未映射的虚拟地址。 违反内存访问权限。 同步异常的特点是：如果程序以相同状态重复执行到同一条指令，并且环境没有发生变化，那么通常会再次触发相同事件。
+系统调用是其中一种特殊情况。用户程序执行 ecall 指令，主动请求从用户态进入内核态，因此也常被称为主动陷入。
+2.2 中断 中断通常由当前指令执行之外的事件引起，例如外部设备发出的中断请求。
+典型场景包括：
+UART 接收到新的输入数据。 磁盘控制器完成一次 I/O 操作。 网卡收到数据包。 定时器到期。 中断的特点是：它通常与 CPU 当前执行的指令没有直接因果关系。即使 CPU 正在执行完全无关的计算，外部设备仍然可能产生中断。
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-27 11:14:45 +0800 CST'>October 27, 2026</span>&nbsp;·&nbsp;<span>7 min</span>&nbsp;·&nbsp;<span>1361 words</span></footer>
+  <a class="entry-link" aria-label="post link to 再探xv6: 异常控制流篇" href="http://localhost:1313/posts/xv6-04/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">MIT6.1810: Lab3 Pagetable
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>一、Inspect a user-process page table (easy)· xv6提供了一个用户程序pgtbltest.c，其中调用print_pgtbl()打印了页表的前10个页面和后10页的页表项，因为页表属于内核管理的数据结构，所以想要获取页表项就必须通过系统调用才行。在该lab中xv6额外提供了几个系统调用，其中的pgpte()的作用就是根据虚拟地址va，得到其对应的PTE。
+int ugetpid(void); uint64 pgpte(void *); void vmprint(void); int pgaccess(void *base, int len, void *mask); int ksupernpte(uint64*, uint64 *); void print_pgtbl() { printf(&#34;print_pgtbl starting\n&#34;); for (uint64 i = 0; i &lt; 10; i&#43;&#43;) { print_pte(i * PGSIZE); } uint64 top = MAXVA / PGSIZE; for (uint64 i = top - 10; i &lt; top; i&#43;&#43;) { print_pte(i * PGSIZE); } printf(&#34;print_pgtbl: OK\n&#34;); } 启动xv6，运行程序pgtbltest打印页表：
+xv6 kernel is booting hart 1 starting hart 2 starting init: starting sh $ pgtbltest print_pgtbl starting va 0x0 pte 0x21FC885B pa 0x87F22000 perm 0x5B va 0x1000 pte 0x21FC7C17 pa 0x87F1F000 perm 0x17 va 0x2000 pte 0x21FC7807 pa 0x87F1E000 perm 0x7 va 0x3000 pte 0x21FC74D7 pa 0x87F1D000 perm 0xD7 va 0x4000 pte 0x0 pa 0x0 perm 0x0 va 0x5000 pte 0x0 pa 0x0 perm 0x0 va 0x6000 pte 0x0 pa 0x0 perm 0x0 va 0x7000 pte 0x0 pa 0x0 perm 0x0 va 0x8000 pte 0x0 pa 0x0 perm 0x0 va 0x9000 pte 0x0 pa 0x0 perm 0x0 va 0x3FFFFF6000 pte 0x0 pa 0x0 perm 0x0 va 0x3FFFFF7000 pte 0x0 pa 0x0 perm 0x0 va 0x3FFFFF8000 pte 0x0 pa 0x0 perm 0x0 va 0x3FFFFF9000 pte 0x0 pa 0x0 perm 0x0 va 0x3FFFFFA000 pte 0x0 pa 0x0 perm 0x0 va 0x3FFFFFB000 pte 0x0 pa 0x0 perm 0x0 va 0x3FFFFFC000 pte 0x0 pa 0x0 perm 0x0 va 0x3FFFFFD000 pte 0x0 pa 0x0 perm 0x0 va 0x3FFFFFE000 pte 0x21FD08C7 pa 0x87F42000 perm 0xC7 va 0x3FFFFFF000 pte 0x2000184B pa 0x80006000 perm 0x4B print_pgtbl: OK vmprint_test starting vmprint_test: done pgaccess_test starting pgtbltest: pgaccess_test failed: incorrect access bits set, pid=3 这个页表和用户进程的地址空间正好能对应上：
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-27 11:01:51 +0800 CST'>October 27, 2026</span>&nbsp;·&nbsp;<span>9 min</span>&nbsp;·&nbsp;<span>1733 words</span></footer>
+  <a class="entry-link" aria-label="post link to MIT6.1810: Lab3 Pagetable" href="http://localhost:1313/posts/xv6-lab3-pgtbl/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">埃拉托色尼筛法（Sieve of Eratosthenes）
     </h2>
   </header>
@@ -235,12 +282,12 @@
 核心思想：素数的倍数一定不是素数。因此，从最小的素数 2 开始，把它的所有倍数&#34;筛掉&#34;（标记为合数），然后找到下一个未被筛掉的数（它一定是素数），再筛掉它的倍数……如此反复，最后剩下的就是素数。
 算法步骤：以求 n = 30 以内的素数为例
 列出 2 到 n 的所有整数。 从 2 开始，2 是素数，划掉所有 2 的倍数（4, 6, 8, …, 30）。 找到下一个未划掉的数 3，它是素数，划掉所有 3 的倍数（6, 9, 12, …, 30）。 下一个未划掉的数是 5，划掉 5 的倍数（10, 15, 20, 25, 30）。 下一个是 7，划掉 7 的倍数（14, 21, 28）。 下一个是 11，但 11² = 121 &gt; 30，停止（见下方优化说明）。 剩下未被划掉的数即为素数：2, 3, 5, 7, 11, 13, 17, 19, 23, 29。 进一步优化
-只需筛到 √n：若 i * i &gt; n，则 i 之后的合数必然已被更小的素数筛掉，无需继续。 从 i² 开始筛：筛素数 i 的倍数时，可以从 i*i 开始，因为小于 i*i 的 i 的倍数（如 i2, i3, …）已经被比 i 小的素数筛掉了。 只处理奇数（可选）：除 2 以外，偶数都不是素数，可以只对奇数进行筛选，节省一半空间和时间。 二、实现 def primes(n): &#34;&#34;&#34; Compute all the primes up to (but not including) n via sieve of Eratosthenes. Input: n: integer Output: list of primes up to (not including) n &#34;&#34;&#34; if n &lt; 2: return [] is_prime = [True] * n is_prime[0] = is_prime[1] = False i = 2 while i * i &lt; n: if is_prime[i]: for j in range(i*i, n, i): is_prime[j] = False i &#43;= 1 return [x for x in range(n) if is_prime[x]] 测试一下：
+只需筛到 √n：若 i * i &gt; n，则 i 之后的合数必然已被更小的素数筛掉，无需继续。 从 i² 开始筛：筛素数 i 的倍数时，可以从 i*i 开始，因为小于 i*i 的 i 的倍数（如 i2, i3, …）已经被比 i 小的素数筛掉了。 只处理奇数（可选）：除 2 以外，偶数都不是素数，可以只对奇数进行筛选，节省一半空间和时间。 二、实现 Python实现：
 ...</p>
   </div>
   <footer class="entry-footer">
 
-<span title='2026-10-26 17:25:46 +0800 CST'>October 26, 2026</span>&nbsp;·&nbsp;<span>1 min</span>&nbsp;·&nbsp;<span>172 words</span></footer>
+<span title='2026-10-26 17:25:46 +0800 CST'>October 26, 2026</span>&nbsp;·&nbsp;<span>2 min</span>&nbsp;·&nbsp;<span>245 words</span></footer>
   <a class="entry-link" aria-label="post link to 埃拉托色尼筛法（Sieve of Eratosthenes）" href="http://localhost:1313/posts/sieve/"></a>
 </article>
 
@@ -404,52 +451,6 @@ Unix 系统调用接口已通过可移植操作系统接口 (POSIX) 标准进行
 
 <span title='2026-10-23 13:39:42 +0800 CST'>October 23, 2026</span>&nbsp;·&nbsp;<span>13 min</span>&nbsp;·&nbsp;<span>2611 words</span></footer>
   <a class="entry-link" aria-label="post link to 再探xv6: 概述" href="http://localhost:1313/posts/xv6-01/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">Leetecode 二叉树(三)
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>一、有递有归 49. 把二叉搜索树转换为累加树 这道题目要求将BST右侧的节点之和加到当前节点。
-使用一个全局变量s记录当前和，按右-中-左的顺序遍历BST，将s加到当前节点中。
-class Solution { public: TreeNode* convertBST(TreeNode* root) { int s = 0; // 返回子树之和 auto dfs = [&amp;](auto&amp;&amp; self, TreeNode* node) { if (!node) return ; self(self, node-&gt;right); s &#43;= node-&gt;val; node-&gt;val = s; self(self, node-&gt;left); }; dfs(dfs, root); return root; } }; 50. 具有所有最深节点的最小子树 二叉树深度和高度的区别：深度指从根节点到某个节点的路径长度（边数），或节点层数（根为第1层时）。高度指从某个节点到其最远叶子节点的路径长度（边数）。
-这道题目的题目描述有点stupid，翻译一下：找最深节点的最近公共祖先（LCA）。
-我们可以使用DFS递归实现，在递的过程中记录当前层次的深度，并通过全局变量max_depth记录最大深度，在归的过程中如果发现左右子树的深度相同且等于全局最大深度，当前节点就是满足条件的子树。
-class Solution { public: TreeNode* subtreeWithAllDeepest(TreeNode* root) { // 在递的过程中计算最大深度，在归的过程中找最深叶子的LCA int max_depth = -1; TreeNode* ans; // 返回左右子树中叶子的最大 auto dfs = [&amp;](auto&amp;&amp; self, TreeNode* node, int depth) -&gt; int { if (!node) { // max_depth会记录全部叶子中的最大深度 max_depth = max(max_depth, depth); return depth; } int l = self(self, node-&gt;left, depth&#43;1); int r = self(self, node-&gt;right, depth&#43;1); if (l == r &amp;&amp; l == max_depth) ans = node; return max(l, r); }; dfs(dfs, root, 0); return ans; } }; 51. 根到叶路径上的不足节点 思路：“递”计算路径和，“归”判断不足节点并删除
-在“递”的过程中：不断用limit减去当前节点的值（等价于计算从根到叶子的路径和）。 在“归”的过程中： 当遇到叶子时判断limit是否大于0，如果是表示当前路径和小于limit，是需要被删除的不足节点，返回nullptr；否则不需要被删除，返回当前节点。 对于非叶子节点，如果只有其左右子树均被删除时才选择将其删除 class Solution { public: TreeNode* sufficientSubset(TreeNode* root, int limit) { if (!root) return nullptr; limit -= root-&gt;val; if (!root-&gt;left &amp;&amp; !root-&gt;right) { return limit &gt; 0 ? nullptr : root; } root-&gt;left = sufficientSubset(root-&gt;left, limit); root-&gt;right = sufficientSubset(root-&gt;right, limit); // 只有左右子树均是不足节点才删除 return root-&gt;left || root-&gt;right ? root : nullptr; } }; 二、二叉树的直径 52. 二叉树的直径 思路：自底向上DFS遍历二叉树，先求出左右子树的最大高度，用两者之和（直径）更新ans，最后返回当前子树的最大高度，即左右子树高度较大者 &#43; 1。
-...</p>
-  </div>
-  <footer class="entry-footer">
-
-<span title='2026-10-22 16:17:04 +0800 CST'>October 22, 2026</span>&nbsp;·&nbsp;<span>10 min</span>&nbsp;·&nbsp;<span>2127 words</span></footer>
-  <a class="entry-link" aria-label="post link to Leetecode 二叉树(三)" href="http://localhost:1313/posts/leetecode-tree03/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">Unix/Linux 进程间通信
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p> 本文是基于经典 BSD 进程间通信教程所涉及的概念重新编写的中文学习笔记，并非原文的逐字翻译。
-参考原文： Stuart Sechrest, An Introductory 4.4BSD Interprocess Communication Tutorial 。原文属于 4.4BSD 文档档案。
-一、为什么需要进程间通信？ 现代操作系统通常同时运行大量进程。例如文本编辑器、浏览器、数据库、网络服务、编译器以及系统后台服务，都可能由多个进程协同完成工作。
-进程之间拥有相对独立的地址空间。一个进程中的普通指针通常不能直接访问另一个进程的内存，因此，进程不能像同一个程序中的两个函数那样，直接通过共享变量交换数据。
-例如，一个网络服务器可能将工作划分为多个部分：
-主进程负责监听连接和接收客户端请求。 工作进程负责处理具体请求。 日志进程负责收集并写入日志。 其他辅助进程负责缓存、配置更新或后台任务。 这些进程需要交换数据、传递任务、同步状态，甚至协调资源的使用。这就需要进程间通信机制，即 IPC（Inter-Process Communication）。
-Unix/Linux 提供了多种 IPC 机制，包括：
-匿名管道（Pipe） 命名管道（FIFO） socketpair() Unix Domain Socket TCP Socket UDP Socket 共享内存 消息队列 信号量与其他同步机制 这些机制并不是彼此完全独立的技术。它们反映了操作系统设计中的几个核心问题：
-通信双方如何找到彼此？ 内核如何在两个进程之间传递数据？ 通信是否需要可靠、有序地交付数据？ 通信双方是否必须存在于同一台机器？ 数据是否具有明确的消息边界？ 当一方退出、崩溃或停止读取时，另一方会发生什么？ 理解这些问题，比单纯记住系统调用更重要。
-本文主要围绕 Berkeley Unix 4.4BSD 的经典 IPC 教程所涉及的机制展开，并使用现代 Linux/POSIX C 接口编写示例。原始手册是理解 Unix IPC 设计的重要历史材料，但部分环境细节和接口习惯具有时代特征，因此本文会区分通用概念与现代 Linux 实践。
-二、Unix IPC 的基本设计思想 2.1 将通信抽象为 I/O Unix 的一个重要设计思想是：尽可能使用统一的接口操作不同类型的资源。
-...</p>
-  </div>
-  <footer class="entry-footer">
-
-<span title='2026-10-22 15:33:34 +0800 CST'>October 22, 2026</span>&nbsp;·&nbsp;<span>14 min</span>&nbsp;·&nbsp;<span>2960 words</span></footer>
-  <a class="entry-link" aria-label="post link to Unix/Linux 进程间通信" href="http://localhost:1313/posts/unix-linux-ipc/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">

@@ -195,6 +195,23 @@
 
 <article class="post-entry tag-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">MIT6.1810: Lab3 Pagetable
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>一、Inspect a user-process page table (easy)· xv6提供了一个用户程序pgtbltest.c，其中调用print_pgtbl()打印了页表的前10个页面和后10页的页表项，因为页表属于内核管理的数据结构，所以想要获取页表项就必须通过系统调用才行。在该lab中xv6额外提供了几个系统调用，其中的pgpte()的作用就是根据虚拟地址va，得到其对应的PTE。
+int ugetpid(void); uint64 pgpte(void *); void vmprint(void); int pgaccess(void *base, int len, void *mask); int ksupernpte(uint64*, uint64 *); void print_pgtbl() { printf(&#34;print_pgtbl starting\n&#34;); for (uint64 i = 0; i &lt; 10; i&#43;&#43;) { print_pte(i * PGSIZE); } uint64 top = MAXVA / PGSIZE; for (uint64 i = top - 10; i &lt; top; i&#43;&#43;) { print_pte(i * PGSIZE); } printf(&#34;print_pgtbl: OK\n&#34;); } 启动xv6，运行程序pgtbltest打印页表：
+xv6 kernel is booting hart 1 starting hart 2 starting init: starting sh $ pgtbltest print_pgtbl starting va 0x0 pte 0x21FC885B pa 0x87F22000 perm 0x5B va 0x1000 pte 0x21FC7C17 pa 0x87F1F000 perm 0x17 va 0x2000 pte 0x21FC7807 pa 0x87F1E000 perm 0x7 va 0x3000 pte 0x21FC74D7 pa 0x87F1D000 perm 0xD7 va 0x4000 pte 0x0 pa 0x0 perm 0x0 va 0x5000 pte 0x0 pa 0x0 perm 0x0 va 0x6000 pte 0x0 pa 0x0 perm 0x0 va 0x7000 pte 0x0 pa 0x0 perm 0x0 va 0x8000 pte 0x0 pa 0x0 perm 0x0 va 0x9000 pte 0x0 pa 0x0 perm 0x0 va 0x3FFFFF6000 pte 0x0 pa 0x0 perm 0x0 va 0x3FFFFF7000 pte 0x0 pa 0x0 perm 0x0 va 0x3FFFFF8000 pte 0x0 pa 0x0 perm 0x0 va 0x3FFFFF9000 pte 0x0 pa 0x0 perm 0x0 va 0x3FFFFFA000 pte 0x0 pa 0x0 perm 0x0 va 0x3FFFFFB000 pte 0x0 pa 0x0 perm 0x0 va 0x3FFFFFC000 pte 0x0 pa 0x0 perm 0x0 va 0x3FFFFFD000 pte 0x0 pa 0x0 perm 0x0 va 0x3FFFFFE000 pte 0x21FD08C7 pa 0x87F42000 perm 0xC7 va 0x3FFFFFF000 pte 0x2000184B pa 0x80006000 perm 0x4B print_pgtbl: OK vmprint_test starting vmprint_test: done pgaccess_test starting pgtbltest: pgaccess_test failed: incorrect access bits set, pid=3 这个页表和用户进程的地址空间正好能对应上：
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-27 11:01:51 +0800 CST'>October 27, 2026</span>&nbsp;·&nbsp;<span>9 min</span>&nbsp;·&nbsp;<span>1733 words</span></footer>
+  <a class="entry-link" aria-label="post link to MIT6.1810: Lab3 Pagetable" href="http://localhost:1313/posts/xv6-lab3-pgtbl/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">MIT6.1810: Lab2 Syscall
     </h2>
   </header>
