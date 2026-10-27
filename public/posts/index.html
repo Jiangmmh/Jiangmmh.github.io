@@ -205,6 +205,32 @@
 
 <article class="post-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">一生一芯-E5阶段笔记
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>在E4阶段中，我先使用Chisel（Verilog）实现了sISA，得到了sCPU，并在NVboard上进行了测试。然后为了提高调试效率，使用C/C&#43;&#43;实现了一个sISA的模拟器sEMU，并以sCPU为DUT，以sEMU为REF，进行了Differential Test。
+在这个阶段的内容中，我将实现一个仅支持8条指令（实际上是13条指令），但功能完备的RISC-V处理器（通过编译的方式使其模拟40条指令），它可以运行更多程序。
+在开始之前先总结一下处理器开发的思路：
+第一步：认真看手册！ 寄存器文件有多少个寄存器？位宽是多少？它们的功能？ 支持哪些指令？指令的格式与功能？ 第二步：画出处理器的结构图 画出架构图，描述清楚处理器各模块之间如何交互 第三步：使用Verilog/Chisel实现各组件 第四步：根据结构图将各组件连接起来 一、迷你RISC-V指令集 RV32I共有42条指令, 通过实现RV32I, 处理器已经足够完成绝大部分的计算工作。不过为了进一步降低开发的工作量, 我们提出了一个**“迷你RISC-V&#34;指令集minirv**, 从RV32I中选出了8条指令, 用它们来替代其他RV32I指令的功能, 使得RV32I能完成的工作, minirv也能完成。 这样, 我们就不必实现完整的42条RV32I指令, 也能让处理器运行更复杂的程序了。
+查看RISC-V手册，回答如下问题：
+RV32I 包含 40 条独特的指令，但一个简单的实现可能只需一条始终捕获异常的 SYSTEM 硬件指令即可涵盖 ECALL/EBREAK 指令，并且可能将 FENCE 指令实现为 NOP 指令，从而将基本指令总数减少到 38 条。
+问题一：PC寄存器的位宽是多少？
+RV32I有32 个x寄存器，均为 32 位宽，即XLEN=32。 寄存器的x0所有位均硬连线为 0。 通用寄存器x1-x31保存的值会被各种指令解释为布尔值集合、二进制补码有符号整数或无符号二进制整数。 还有一个额外的非特权寄存器：程序计数器pc 保存下一条指令的地址。
+回答：RV32I中的PC寄存器位宽为32。
+问题二：GPR共有多少个? 每个GPR的位宽是多少?
+回答：RV32I包含32个GPR（x0～x31），位宽均为32位。
+问题三：R[0]和sISA的R[0]有什么不同之处?
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-27 23:30:27 +0800 CST'>October 27, 2026</span>&nbsp;·&nbsp;<span>37 min</span>&nbsp;·&nbsp;<span>7718 words</span></footer>
+  <a class="entry-link" aria-label="post link to 一生一芯-E5阶段笔记" href="http://localhost:1313/posts/ysyx-e5/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">一生一芯-E4阶段笔记
     </h2>
   </header>
@@ -400,35 +426,6 @@ $ make qemu riscv64-unknown-elf-gcc -c -o kernel/entry.o kernel/entry.S riscv64-
 
 <span title='2026-10-23 21:36:30 +0800 CST'>October 23, 2026</span>&nbsp;·&nbsp;<span>9 min</span>&nbsp;·&nbsp;<span>1768 words</span></footer>
   <a class="entry-link" aria-label="post link to 从目标文件到运行时装载：深入理解链接" href="http://localhost:1313/posts/link/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">关于C&#43;&#43;智能指针
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>一、简介 动态内存管理 在 C&#43;&#43; 中，内存管理一直是一个重要而又容易出错的问题。理解智能指针之前，我们需要先回答一个问题：为什么程序需要动态内存？
-为什么需要动态内存？ 在程序中，我们经常需要创建对象。对于生命周期和数量都能够提前确定的对象，可以直接使用局部变量、全局变量或其他具有适当存储期的对象。然而，在很多实际场景中，程序无法在编译时确定所需对象的数量、具体类型，甚至无法确定对象应该在什么时候销毁。
-动态内存管理正是为了解决这些问题而存在的。
-1. 程序不知道自己需要多少对象
-考虑一个读取用户输入并处理数据的程序：
-#include &lt;iostream&gt; #include &lt;vector&gt; int main() { int n; std::cin &gt;&gt; n; std::vector&lt;int&gt; data(n); for (int i = 0; i &lt; n; &#43;&#43;i) { std::cin &gt;&gt; data[i]; } // 处理数据 } 程序在运行之前并不知道用户会输入多少个整数。数据量取决于运行时的输入，因此程序需要在运行时管理相应的存储空间。
-这里使用 std::vector，它能够根据需要管理动态分配的内存。我们不必手动申请和释放底层存储空间。
-需要注意的是，动态内存并不意味着必须显式调用 new。标准容器、字符串以及其他资源管理类型已经封装了大量动态内存管理工作。
-2. 程序不知道所需对象的准确类型
-在面向对象程序中，我们可能需要根据运行时的信息创建不同类型的对象。
-例如，一个图形程序需要处理圆形和矩形：
-#include &lt;memory&gt; struct Shape { virtual ~Shape() = default; virtual void draw() = 0; }; struct Circle : Shape { void draw() override { // 绘制圆形 } }; struct Rectangle : Shape { void draw() override { // 绘制矩形 } }; std::unique_ptr&lt;Shape&gt; createShape(bool isCircle) { if (isCircle) { return std::make_unique&lt;Circle&gt;(); } return std::make_unique&lt;Rectangle&gt;(); } 调用者只需要知道自己获得了一个 Shape 对象，而不必提前确定其具体类型。
-这类设计广泛存在于插件系统、图形界面、游戏引擎和各种基于多态的程序中。
-不过，动态分配并不是实现多态的必要条件。这里使用动态对象，主要是为了让不同派生类型能够以统一的接口返回，并具有独立的生命周期。
-3. 程序需要在多个对象之间共享数据
-...</p>
-  </div>
-  <footer class="entry-footer">
-
-<span title='2026-10-23 16:41:27 +0800 CST'>October 23, 2026</span>&nbsp;·&nbsp;<span>11 min</span>&nbsp;·&nbsp;<span>2154 words</span></footer>
-  <a class="entry-link" aria-label="post link to 关于C&#43;&#43;智能指针" href="http://localhost:1313/posts/cpp-smart-ptr/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">

@@ -195,6 +195,32 @@
 
 <article class="post-entry tag-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">一生一芯-E5阶段笔记
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>在E4阶段中，我先使用Chisel（Verilog）实现了sISA，得到了sCPU，并在NVboard上进行了测试。然后为了提高调试效率，使用C/C&#43;&#43;实现了一个sISA的模拟器sEMU，并以sCPU为DUT，以sEMU为REF，进行了Differential Test。
+在这个阶段的内容中，我将实现一个仅支持8条指令（实际上是13条指令），但功能完备的RISC-V处理器（通过编译的方式使其模拟40条指令），它可以运行更多程序。
+在开始之前先总结一下处理器开发的思路：
+第一步：认真看手册！ 寄存器文件有多少个寄存器？位宽是多少？它们的功能？ 支持哪些指令？指令的格式与功能？ 第二步：画出处理器的结构图 画出架构图，描述清楚处理器各模块之间如何交互 第三步：使用Verilog/Chisel实现各组件 第四步：根据结构图将各组件连接起来 一、迷你RISC-V指令集 RV32I共有42条指令, 通过实现RV32I, 处理器已经足够完成绝大部分的计算工作。不过为了进一步降低开发的工作量, 我们提出了一个**“迷你RISC-V&#34;指令集minirv**, 从RV32I中选出了8条指令, 用它们来替代其他RV32I指令的功能, 使得RV32I能完成的工作, minirv也能完成。 这样, 我们就不必实现完整的42条RV32I指令, 也能让处理器运行更复杂的程序了。
+查看RISC-V手册，回答如下问题：
+RV32I 包含 40 条独特的指令，但一个简单的实现可能只需一条始终捕获异常的 SYSTEM 硬件指令即可涵盖 ECALL/EBREAK 指令，并且可能将 FENCE 指令实现为 NOP 指令，从而将基本指令总数减少到 38 条。
+问题一：PC寄存器的位宽是多少？
+RV32I有32 个x寄存器，均为 32 位宽，即XLEN=32。 寄存器的x0所有位均硬连线为 0。 通用寄存器x1-x31保存的值会被各种指令解释为布尔值集合、二进制补码有符号整数或无符号二进制整数。 还有一个额外的非特权寄存器：程序计数器pc 保存下一条指令的地址。
+回答：RV32I中的PC寄存器位宽为32。
+问题二：GPR共有多少个? 每个GPR的位宽是多少?
+回答：RV32I包含32个GPR（x0～x31），位宽均为32位。
+问题三：R[0]和sISA的R[0]有什么不同之处?
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-27 23:30:27 +0800 CST'>October 27, 2026</span>&nbsp;·&nbsp;<span>37 min</span>&nbsp;·&nbsp;<span>7718 words</span></footer>
+  <a class="entry-link" aria-label="post link to 一生一芯-E5阶段笔记" href="http://localhost:1313/posts/ysyx-e5/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">一生一芯-E4阶段笔记
     </h2>
   </header>
@@ -210,7 +236,7 @@ Verilator 的“Verilating”过程，本质是把硬件描述转换成软件程
   </div>
   <footer class="entry-footer">
 
-<span title='2026-10-27 14:19:56 +0800 CST'>October 27, 2026</span>&nbsp;·&nbsp;<span>38 min</span>&nbsp;·&nbsp;<span>8006 words</span></footer>
+<span title='2026-10-27 14:19:56 +0800 CST'>October 27, 2026</span>&nbsp;·&nbsp;<span>38 min</span>&nbsp;·&nbsp;<span>8005 words</span></footer>
   <a class="entry-link" aria-label="post link to 一生一芯-E4阶段笔记" href="http://localhost:1313/posts/ysyx-e4/"></a>
 </article>
 

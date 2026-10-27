@@ -195,6 +195,32 @@
 
 <article class="post-entry tag-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">一生一芯-E5阶段笔记
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>在E4阶段中，我先使用Chisel（Verilog）实现了sISA，得到了sCPU，并在NVboard上进行了测试。然后为了提高调试效率，使用C/C&#43;&#43;实现了一个sISA的模拟器sEMU，并以sCPU为DUT，以sEMU为REF，进行了Differential Test。
+在这个阶段的内容中，我将实现一个仅支持8条指令（实际上是13条指令），但功能完备的RISC-V处理器（通过编译的方式使其模拟40条指令），它可以运行更多程序。
+在开始之前先总结一下处理器开发的思路：
+第一步：认真看手册！ 寄存器文件有多少个寄存器？位宽是多少？它们的功能？ 支持哪些指令？指令的格式与功能？ 第二步：画出处理器的结构图 画出架构图，描述清楚处理器各模块之间如何交互 第三步：使用Verilog/Chisel实现各组件 第四步：根据结构图将各组件连接起来 一、迷你RISC-V指令集 RV32I共有42条指令, 通过实现RV32I, 处理器已经足够完成绝大部分的计算工作。不过为了进一步降低开发的工作量, 我们提出了一个**“迷你RISC-V&#34;指令集minirv**, 从RV32I中选出了8条指令, 用它们来替代其他RV32I指令的功能, 使得RV32I能完成的工作, minirv也能完成。 这样, 我们就不必实现完整的42条RV32I指令, 也能让处理器运行更复杂的程序了。
+查看RISC-V手册，回答如下问题：
+RV32I 包含 40 条独特的指令，但一个简单的实现可能只需一条始终捕获异常的 SYSTEM 硬件指令即可涵盖 ECALL/EBREAK 指令，并且可能将 FENCE 指令实现为 NOP 指令，从而将基本指令总数减少到 38 条。
+问题一：PC寄存器的位宽是多少？
+RV32I有32 个x寄存器，均为 32 位宽，即XLEN=32。 寄存器的x0所有位均硬连线为 0。 通用寄存器x1-x31保存的值会被各种指令解释为布尔值集合、二进制补码有符号整数或无符号二进制整数。 还有一个额外的非特权寄存器：程序计数器pc 保存下一条指令的地址。
+回答：RV32I中的PC寄存器位宽为32。
+问题二：GPR共有多少个? 每个GPR的位宽是多少?
+回答：RV32I包含32个GPR（x0～x31），位宽均为32位。
+问题三：R[0]和sISA的R[0]有什么不同之处?
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-27 23:30:27 +0800 CST'>October 27, 2026</span>&nbsp;·&nbsp;<span>37 min</span>&nbsp;·&nbsp;<span>7718 words</span></footer>
+  <a class="entry-link" aria-label="post link to 一生一芯-E5阶段笔记" href="http://localhost:1313/posts/ysyx-e5/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">一生一芯-E4阶段笔记
     </h2>
   </header>
@@ -210,7 +236,7 @@ Verilator 的“Verilating”过程，本质是把硬件描述转换成软件程
   </div>
   <footer class="entry-footer">
 
-<span title='2026-10-27 14:19:56 +0800 CST'>October 27, 2026</span>&nbsp;·&nbsp;<span>38 min</span>&nbsp;·&nbsp;<span>8006 words</span></footer>
+<span title='2026-10-27 14:19:56 +0800 CST'>October 27, 2026</span>&nbsp;·&nbsp;<span>38 min</span>&nbsp;·&nbsp;<span>8005 words</span></footer>
   <a class="entry-link" aria-label="post link to 一生一芯-E4阶段笔记" href="http://localhost:1313/posts/ysyx-e4/"></a>
 </article>
 
@@ -421,38 +447,12 @@ Ligisim的下载 通过Github的Release页面可以下载最新的Logisim-evolut
 <span title='2026-10-17 13:14:43 +0800 CST'>October 17, 2026</span>&nbsp;·&nbsp;<span>1 min</span>&nbsp;·&nbsp;<span>23 words</span></footer>
   <a class="entry-link" aria-label="post link to 一生一芯-F2阶段笔记" href="http://localhost:1313/posts/ysyx-f2/"></a>
 </article>
-
-<article class="post-entry tag-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">一生一芯-F1阶段笔记
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>一生一芯概述 “一生一芯”是由中国科学院大学于2019年发起的一项大规模、公益性芯片人才培养计划，核心目标是让参与的学生亲手设计并流片（试生产）自己的处理器芯片，带着实体芯片毕业。
-该计划由中国科学院计算技术研究所副所长包云岗研究员推动。传统芯片人才培养周期长，学生往往缺乏从设计到流片的完整工程实践。包云岗提出“让本科生也能做处理器芯片”，旨在通过“做中学”的方式，缩短人才从校园到产业一线的距离，弥补我国处理器芯片设计人才的缺口。
-项目主页：https://ysyx.oscc.cc/
-项目特点：
-完整全链条实践：学员需要经历从处理器设计、验证，到基于开源工具链进行物理设计，最终流片并运行操作系统的全过程，而非仅停留在理论或仿真阶段。 开放与公益性：报名不限学校、专业、年级，零基础亦可参与，且全程免费。对于符合条件的国内在校生，项目还提供免费流片机会，极大降低了芯片设计的门槛。 依托开源生态：教学与实践主要基于 RISC-V 开源指令集以及开源 EDA 工具，避免了商业授权限制，便于学生学习和创新。 一生一芯有多个版本的讲义，我选择的是26.07版本的讲义。
-讲义笔记 1. 给 AI 时代的“一生一芯”初学者的一封信 文章链接：https://fa45epzd9c7.feishu.cn/wiki/AOXwwtY0EiCXZykBPTtcIVfWn6f?from=from_copylink
-关键问题：既然 AI 已经这么强了，我们为什么还要亲手写代码、看波形、查手册、改 bug，去完成这样一个需要大量手动训练和反复调试的项目？
-回答：AI 的出现没有降低基础训练的价值，反而让基础训练变得更加重要。未来更重要的能力，不是和 AI 比谁写得更快，而是知道如何提出问题、判断答案、验证结论，并把工具真正变成自己的能力。在 AI 时代，拥有更强的，驾驭 AI 的能力，是我们希望你得到的。
-1.1 AI 很强，但它不能替你完成成长 如果只是得到一个能运行的结果，AI 也许可以帮你很快走到终点；但如果你不知道这个结果为什么对，不知道哪里可能错，不知道出了问题该如何缩小范围、如何设计实验、如何确认结论，那么这个终点并没有真正变成你的能力。
-“一生一芯”的讲义之所以有价值，不只是因为它提供了很多资料和步骤，更因为它把学习过程设计成了一条需要你主动思考、动手实践、不断遇到问题并解决问题的路径。
-你在其中经历的很多细节：一次看不懂的报错，一段反复读不明白的手册，一条异常的波形，一个改了很久才定位到的 bug，这些，是训练真正进行的地方。
-正是这种直面各种问题的煎熬，让你开始建立工程师最重要的能力：面对复杂系统时，稳定不慌张，愿意一点点定位、验证、修正、重新理解，直到解决问题。
-1.2 “一生一芯”训练的，是驾驭复杂系统的能力 一生一芯训练的是一种系统性的工程能力，你会不断遇到这样的时刻：
-现象和预期不一致，需要你判断问题出在代码、环境、理解，还是测试方式上。 一个小 bug 牵出一串背景知识，需要你回到原理层面重新确认。 别人给了一个答案，但你仍然要判断它是否适用于自己的场景。 一个功能终于跑通了，但你还需要解释它为什么能跑通。 因为 AI 会让“得到一个答案”变得越来越容易，但也会让“判断一个答案是否可靠”变得越来越重要。
-1.3 细节不是负担，而是深入理解系统的开始 在短期里，跳过细节似乎能更快完成任务。但在长期里，细节往往决定你是否真的理解了系统。
-处理器、编译、操作系统、仿真环境、调试工具，这些内容彼此连接。一个看似微小的现象，背后可能牵着接口约定、时序关系、状态更新、指令语义或工具链行为。你愿意停下来追问一个细节，常常就会打开一整片新的理解。
-“一生一芯”不是希望你把每一个细节都背下来，而是希望你逐渐形成一种习惯：当现象出现时，先观察能否稳定复现，再逐步定位问题；在定位过程中，逐步产生判断，找到证据；在找到答案后，尝试修复并验证，最后复盘总结。
-1.4 如何使用AI？ 真正的问题不是“能不能用 AI”，而是“怎样用 AI”。
-...</p>
-  </div>
-  <footer class="entry-footer">
-
-<span title='2026-10-17 11:22:27 +0800 CST'>October 17, 2026</span>&nbsp;·&nbsp;<span>1 min</span>&nbsp;·&nbsp;<span>124 words</span></footer>
-  <a class="entry-link" aria-label="post link to 一生一芯-F1阶段笔记" href="http://localhost:1313/posts/ysyx-f1/"></a>
-</article>
+<footer class="page-footer">
+  <nav class="pagination">
+    <a class="next" href="http://localhost:1313/categories/%E4%B8%80%E7%94%9F%E4%B8%80%E8%8A%AF/page/2/">Next&nbsp;&nbsp;»
+    </a>
+  </nav>
+</footer>
     </main>
     
 <footer class="footer">
