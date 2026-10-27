@@ -1,4 +1,34 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Posts on Minghan的博客</title><link>https://Jiangmmh.github.io/posts/</link><description>Recent content in Posts on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Tue, 27 Oct 2026 11:14:45 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>再探xv6: 异常控制流篇</title><link>https://Jiangmmh.github.io/posts/xv6-04/</link><pubDate>Tue, 27 Oct 2026 11:14:45 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/xv6-04/</guid><description>&lt;h1 id="一何为异常控制流">一、何为异常控制流&lt;/h1>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Posts on Minghan的博客</title><link>https://Jiangmmh.github.io/posts/</link><description>Recent content in Posts on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Tue, 27 Oct 2026 14:19:56 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>一生一芯-E4阶段笔记</title><link>https://Jiangmmh.github.io/posts/ysyx-e4/</link><pubDate>Tue, 27 Oct 2026 14:19:56 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/ysyx-e4/</guid><description>&lt;p>在前面阶段的学习中，我已经成功使用Logisim开发了一个简单的处理器sCPU，并学习了使用RTL语言（Verilog）设计电路，现在我要更进一步使用现代工具开发真实的处理器。&lt;/p>
+&lt;p>在本文中，我将介绍如何搭建Verilator仿真环境和使用Verilator进行电路仿真的方法，然后使用RTL（Verilog）和Chisel（敏捷开发语言）实现sCPU，并开发一个模拟器sEMU作为Reference，进行DiffTest。&lt;/p>
+&lt;h1 id="讲义笔记">讲义笔记&lt;/h1>
+&lt;h2 id="1-使用verilator进行仿真">1. 使用Verilator进行仿真&lt;/h2>
+&lt;h3 id="11-何为仿真">1.1 何为仿真？&lt;/h3>
+&lt;p>在Linux中进行RTL代码的开发并不困难, 创建一个RTL文件并在其中编写代码即可。但在完成RTL代码的开发工作后, 我们还需要一款仿真器来验证RTL代码所描述的电路是否符合预期。&lt;/p>
+&lt;blockquote>
+&lt;p>&lt;strong>仿真：在写好的硬件代码（RTL代码）被转换成具体的电路门之前，先用软件模拟的方式，检查它的逻辑功能是否符合你的设计意图。&lt;/strong>&lt;/p>&lt;/blockquote>
+&lt;ul>
+&lt;li>&lt;strong>RTL仿真（前仿真）&lt;/strong>：发生在综合之前。基于RTL代码，在理想条件下验证功能是否正确。&lt;/li>
+&lt;li>&lt;strong>综合&lt;/strong>：把RTL代码翻译成由逻辑门组成的网表。&lt;/li>
+&lt;li>&lt;strong>门级仿真&lt;/strong>：综合之后，用带延迟信息的门电路网表再仿真一次，确认综合结果无误。&lt;/li>
+&lt;/ul>
+&lt;h3 id="12-verilator是什么">1.2 Verilator是什么？&lt;/h3>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="https://Jiangmmh.github.io/images/posts/ysyx-e4/image.png">&lt;/p>
+&lt;p>&lt;strong>Verilator是一个编译器&lt;/strong>，它把可综合的 Verilog/SystemVerilog 代码“编译”成经过高度优化的 C++ 或 SystemC 模型，再借助本机 C++ 编译器生成最终的可执行文件来运行仿真。&lt;/p>
+&lt;p>&lt;strong>Verilator 的“Verilating”过程，本质是把硬件描述转换成软件程序：&lt;/strong>&lt;/p>
+&lt;ol>
+&lt;li>&lt;strong>读取与检查&lt;/strong>：读取 Verilog/SystemVerilog 源码，进行语法和 Lint 检查。&lt;/li>
+&lt;li>&lt;strong>转换与优化&lt;/strong>：将 HDL 转换成内部的抽象语法树（AST），然后执行一系列优化 pass，最终生成&lt;strong>多线程的 C++ 或 SystemC 源代码&lt;/strong>（&lt;code>.cpp&lt;/code> 和 &lt;code>.h&lt;/code> 文件）。&lt;/li>
+&lt;li>&lt;strong>用户封装&lt;/strong>：你需要自己写一个 C++ 的 &lt;code>main()&lt;/code> 函数（wrapper），在里面实例化 Verilator 生成的模型对象，并编写激励逻辑。&lt;/li>
+&lt;li>&lt;strong>编译链接&lt;/strong>：用 C++ 编译器（如 GCC/Clang）把 Verilator 生成的代码、你的 wrapper 以及 Verilator 运行时库一起编译，得到一个&lt;strong>原生可执行文件&lt;/strong>。运行这个文件，就是在跑仿真。&lt;/li>
+&lt;/ol>
+&lt;p>&lt;strong>Verilator 的速度优势&lt;/strong>（通常比解释型仿真器快 10-100 倍）源于几个核心设计：&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>周期精确，而非事件驱动&lt;/strong>：它不模拟信号变化的每个细微事件，而是按&lt;strong>时钟周期&lt;/strong>推进。这牺牲了门级延迟和毛刺的精度，但换来了巨大的速度提升。它主要处理“0”和“1”，对“X”和“Z”的处理有限且特殊。&lt;/li>
+&lt;li>&lt;strong>激进优化&lt;/strong>：在生成 C++ 之前，Verilator 会对设计做大量优化，比如常量传播、死代码消除、将组合逻辑转换为数据流图进行化简，甚至把 &lt;code>case&lt;/code> 语句转换成更高效的 &lt;code>if&lt;/code> 结构。&lt;/li>
+&lt;li>&lt;strong>多线程与缓存友好&lt;/strong>：它可以把设计&lt;strong>分区&lt;/strong>成多个“宏任务”，静态分配到不同线程上并行执行。更关键的是，它会调整变量在内存中的布局，让同一个任务访问的变量在内存里挨在一起，以提高 CPU 缓存命中率。&lt;/li>
+&lt;/ul>
+&lt;h3 id="13-搭建verilator环境">1.3 搭建Verilator环境&lt;/h3>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="https://Jiangmmh.github.io/images/posts/ysyx-e4/image%201.png">&lt;/p></description></item><item><title>再探xv6: 异常控制流篇</title><link>https://Jiangmmh.github.io/posts/xv6-04/</link><pubDate>Tue, 27 Oct 2026 11:14:45 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/xv6-04/</guid><description>&lt;h1 id="一何为异常控制流">一、何为异常控制流&lt;/h1>
 &lt;h2 id="1-从普通控制流到异常控制流">1. 从普通控制流到异常控制流&lt;/h2>
 &lt;p>在学习操作系统之前，我们通常通过函数调用、条件分支、循环等机制理解程序的执行过程。
 例如：&lt;/p>
@@ -1407,4 +1437,35 @@
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">GitHub Actions 自动部署
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> ↓
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">GitHub Pages 发布网站
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>完成初始化后，日常写作只需要编辑 Markdown 文件并推送到 GitHub，剩余的构建与部署工作就可以交给 GitHub Actions 自动完成。&lt;/p></description></item></channel></rss>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>完成初始化后，日常写作只需要编辑 Markdown 文件并推送到 GitHub，剩余的构建与部署工作就可以交给 GitHub Actions 自动完成。&lt;/p></description></item><item><title/><link>https://Jiangmmh.github.io/posts/e4-%E5%A4%84%E7%90%86%E5%99%A8%E7%9A%84%E4%BB%BF%E7%9C%9F%E5%92%8C%E9%AA%8C%E8%AF%81-3cfc4e9326148044881ad369c7121139/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://Jiangmmh.github.io/posts/e4-%E5%A4%84%E7%90%86%E5%99%A8%E7%9A%84%E4%BB%BF%E7%9C%9F%E5%92%8C%E9%AA%8C%E8%AF%81-3cfc4e9326148044881ad369c7121139/</guid><description>&lt;h1 id="e4-处理器的仿真和验证">E4 处理器的仿真和验证&lt;/h1>
+&lt;p>在前面阶段的学习中，我已经成功使用Logisim开发了一个简单的处理器sCPU，并学习了使用RTL语言（Verilog）设计电路，现在我要更进一步使用现代工具开发真实的处理器。&lt;/p>
+&lt;p>在本文中，我将介绍如何搭建Verilator仿真环境和使用Verilator进行电路仿真的方法，然后使用RTL（Verilog）和Chisel（敏捷开发语言）实现sCPU，并开发一个模拟器sEMU作为Reference，进行DiffTest。&lt;/p>
+&lt;h1 id="讲义笔记">讲义笔记&lt;/h1>
+&lt;h2 id="1-使用verilator进行仿真">1. 使用Verilator进行仿真&lt;/h2>
+&lt;h3 id="11-何为仿真">1.1 何为仿真？&lt;/h3>
+&lt;p>在Linux中进行RTL代码的开发并不困难, 创建一个RTL文件并在其中编写代码即可。但在完成RTL代码的开发工作后, 我们还需要一款仿真器来验证RTL代码所描述的电路是否符合预期。&lt;/p>
+&lt;blockquote>
+&lt;p>&lt;strong>仿真：在写好的硬件代码（RTL代码）被转换成具体的电路门之前，先用软件模拟的方式，检查它的逻辑功能是否符合你的设计意图。&lt;/strong>&lt;/p>&lt;/blockquote>
+&lt;ul>
+&lt;li>&lt;strong>RTL仿真（前仿真）&lt;/strong>：发生在综合之前。基于RTL代码，在理想条件下验证功能是否正确。&lt;/li>
+&lt;li>&lt;strong>综合&lt;/strong>：把RTL代码翻译成由逻辑门组成的网表。&lt;/li>
+&lt;li>&lt;strong>门级仿真&lt;/strong>：综合之后，用带延迟信息的门电路网表再仿真一次，确认综合结果无误。&lt;/li>
+&lt;/ul>
+&lt;h3 id="12-verilator是什么">1.2 Verilator是什么？&lt;/h3>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="E4%20%E5%A4%84%E7%90%86%E5%99%A8%E7%9A%84%E4%BB%BF%E7%9C%9F%E5%92%8C%E9%AA%8C%E8%AF%81/image.png">&lt;/p>
+&lt;p>&lt;strong>Verilator是一个编译器&lt;/strong>，它把可综合的 Verilog/SystemVerilog 代码“编译”成经过高度优化的 C++ 或 SystemC 模型，再借助本机 C++ 编译器生成最终的可执行文件来运行仿真。&lt;/p>
+&lt;p>&lt;strong>Verilator 的“Verilating”过程，本质是把硬件描述转换成软件程序：&lt;/strong>&lt;/p>
+&lt;ol>
+&lt;li>&lt;strong>读取与检查&lt;/strong>：读取 Verilog/SystemVerilog 源码，进行语法和 Lint 检查。&lt;/li>
+&lt;li>&lt;strong>转换与优化&lt;/strong>：将 HDL 转换成内部的抽象语法树（AST），然后执行一系列优化 pass，最终生成&lt;strong>多线程的 C++ 或 SystemC 源代码&lt;/strong>（&lt;code>.cpp&lt;/code> 和 &lt;code>.h&lt;/code> 文件）。&lt;/li>
+&lt;li>&lt;strong>用户封装&lt;/strong>：你需要自己写一个 C++ 的 &lt;code>main()&lt;/code> 函数（wrapper），在里面实例化 Verilator 生成的模型对象，并编写激励逻辑。&lt;/li>
+&lt;li>&lt;strong>编译链接&lt;/strong>：用 C++ 编译器（如 GCC/Clang）把 Verilator 生成的代码、你的 wrapper 以及 Verilator 运行时库一起编译，得到一个&lt;strong>原生可执行文件&lt;/strong>。运行这个文件，就是在跑仿真。&lt;/li>
+&lt;/ol>
+&lt;p>&lt;strong>Verilator 的速度优势&lt;/strong>（通常比解释型仿真器快 10-100 倍）源于几个核心设计：&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>周期精确，而非事件驱动&lt;/strong>：它不模拟信号变化的每个细微事件，而是按&lt;strong>时钟周期&lt;/strong>推进。这牺牲了门级延迟和毛刺的精度，但换来了巨大的速度提升。它主要处理“0”和“1”，对“X”和“Z”的处理有限且特殊。&lt;/li>
+&lt;li>&lt;strong>激进优化&lt;/strong>：在生成 C++ 之前，Verilator 会对设计做大量优化，比如常量传播、死代码消除、将组合逻辑转换为数据流图进行化简，甚至把 &lt;code>case&lt;/code> 语句转换成更高效的 &lt;code>if&lt;/code> 结构。&lt;/li>
+&lt;li>&lt;strong>多线程与缓存友好&lt;/strong>：它可以把设计&lt;strong>分区&lt;/strong>成多个“宏任务”，静态分配到不同线程上并行执行。更关键的是，它会调整变量在内存中的布局，让同一个任务访问的变量在内存里挨在一起，以提高 CPU 缓存命中率。&lt;/li>
+&lt;/ul>
+&lt;h3 id="13-搭建verilator环境">1.3 搭建Verilator环境&lt;/h3>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="E4%20%E5%A4%84%E7%90%86%E5%99%A8%E7%9A%84%E4%BB%BF%E7%9C%9F%E5%92%8C%E9%AA%8C%E8%AF%81/image%201.png">&lt;/p></description></item></channel></rss>
