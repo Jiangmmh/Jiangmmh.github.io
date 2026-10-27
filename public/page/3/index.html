@@ -193,6 +193,28 @@
 
 <article class="post-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">一生一芯-F6阶段笔记
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>这篇文章的内容：
+改进前面所设计的sISA，新增一条io指令，用于与外部设备进行IO。 对 li 和 bne0这两条指令进行增强，并使用LED条和16进制数码管检查新sISA的实现。 讲义笔记 1. sISA的局限性 在前面的我们成功地根据sISA设计出了简单处理器sCPU，并在其上运行了数列求和程序。但是sISA提供的指令有着局限性：
+li指令中的立即数用4bits表示，仅能装入立即数0～15到寄存器。 bner0指令按绝对地址跳转，地址字段也是4bits，因此跳转目标范围也只有0～15。 当前的sISA不支持IO指令，要检查程序运行的结果只能手动查看寄存器的值，不方便。 2. 增强li和bner0 对li指令和bner0指令进行改进：
+3. 添加io指令 4. 迈向现代化的处理器设计 讲义笔记 1. 改进后的sISA 首先增强 li 和 bner0 指令。然后再添加一条新的指令 io，用于寄存器与外部设备的I/O，得到的新sISA：
+add指令的行为和之前相同 io指令根据方向位i/o进行输入或输出: 当i/o=0时, 表示输入操作, 从编号为idx的设备中读出8位数据, 输入到R[rd]中 当i/o=1时, 表示输出操作, 将R[rd]中的8位数据, 输出到编号为idx的设备中 li指令和之前相比有所不同, 它通过s和imm的组合来表示一个更大的立即数. 上文的&lt;&lt;表示左移运算符, 如果你不太熟悉这个运算符, 可以从另一个角度来理解li指令的行为: s表示将2位的imm放置在8位数据中的哪一段位置。 2. 增强li和bner0 修改立即数生成器，使其能获取更新后的sISA所需的立即数：
+修改ALU中将立即数计算的部分，引入移位运算：
+在PC逻辑中添加PC相对寻址的电路：PC = PC &#43; sign_ext(offset)
+重新编写数列求和程序：
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-19 16:00:30 +0800 CST'>October 19, 2026</span>&nbsp;·&nbsp;<span>2 min</span>&nbsp;·&nbsp;<span>422 words</span></footer>
+  <a class="entry-link" aria-label="post link to 一生一芯-F6阶段笔记" href="http://localhost:1313/posts/ysyx-f6/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">一生一芯-F5阶段笔记
     </h2>
   </header>
@@ -440,30 +462,6 @@ class Solution { public: vector&lt;int&gt; preorderTraversal(TreeNode* root) { v
 
 <span title='2026-10-14 22:02:01 +0800 CST'>October 14, 2026</span>&nbsp;·&nbsp;<span>8 min</span>&nbsp;·&nbsp;<span>1582 words</span></footer>
   <a class="entry-link" aria-label="post link to Leetecode 二叉树(一)" href="http://localhost:1313/posts/leetecode-tree01/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">Leetecode 链表
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>这篇文章记录了链表相关的重点算法题 （共51道），使用C&#43;&#43;实现。
-题目链接见灵神的题单：链表题单。
-一、遍历链表 1. 二进制链表转整数 链表元素均为0或1，整个链表表示一个二进制数（最高位在链表头部），将该链表转换为该二进制数的十进制值。
-思路：将ans初始化为0，遍历该链表，每遇到一个节点就将ans左移一位并加上当前节点的值。
-时间复杂度为：O(n)，n为链表长度
-class Solution { public: int getDecimalValue(ListNode* head) { int ans = 0; for (auto cur = head; cur; cur = cur-&gt;next) { ans = (ans &lt;&lt; 1) &#43; cur-&gt;val; } return ans; } }; 2. 找出临界点之间的最小和最大距 临界点就是极值点（严格大于或小于两侧元素）。
-我的思路：先遍历链表，找出全部的临界点，再遍历找出的临界点数组，得到最大和最小临界点距离。
-编写函数findLocalMinMax，找出全部临界点，并返回临界点的下标数组localMinMax 最大临界点距离就是localMinMax第一个元素与最后一个元素之差 最小临界点距离就是localMinMax中相邻元素之差的最小值 时间复杂度：O(n), n为输入链表的长度
-空间复杂度：O(n)
-class Solution { vector&lt;int&gt; findLocalMinMax(ListNode *head) { vector&lt;int&gt; ans; if (!head || !head-&gt;next) return ans; auto prev = head; int idx = 1; for (auto cur = head-&gt;next; cur-&gt;next; cur = cur-&gt;next) { // 取出前驱和后继的值 int p = prev-&gt;val, q = cur-&gt;next-&gt;val; int x = cur-&gt;val; if ((p &lt; x &amp;&amp; q &lt; x) || (p &gt; x &amp;&amp; q &gt; x)) { ans.push_back(idx); } prev = cur; idx&#43;&#43;; } return ans; } public: vector&lt;int&gt; nodesBetweenCriticalPoints(ListNode* head) { // 找到全部的临界点 vector&lt;int&gt; localMinMax = findLocalMinMax(head); int n = localMinMax.size(); // 临界点数量少于两个，直接返回 {-1, -1} if (n &lt; 2) return {-1, -1}; int maxDistance = localMinMax[n-1] - localMinMax[0]; int minDistance = INT_MAX; for (int i = 1; i &lt; n; i&#43;&#43;) { minDistance = min(minDistance, localMinMax[i] - localMinMax[i-1]); } return {minDistance, maxDistance}; } }; 优化：可以在遍历链表的过程中，记录第一个临界点的位置和记录前一个临界点的位置，来得到最大和最小临界点距离，将空间复杂度降为O(1)。
-...</p>
-  </div>
-  <footer class="entry-footer">
-
-<span title='2026-10-14 21:14:25 +0800 CST'>October 14, 2026</span>&nbsp;·&nbsp;<span>25 min</span>&nbsp;·&nbsp;<span>5134 words</span></footer>
-  <a class="entry-link" aria-label="post link to Leetecode 链表" href="http://localhost:1313/posts/leetecode-linkedlist/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">

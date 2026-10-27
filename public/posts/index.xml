@@ -6,23 +6,55 @@
     <description>Recent content in Posts on Minghan的博客</description>
     <generator>Hugo</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Tue, 27 Oct 2026 11:14:45 +0800</lastBuildDate>
+    <lastBuildDate>Tue, 27 Oct 2026 14:19:56 +0800</lastBuildDate>
     <atom:link href="http://localhost:1313/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>一生一芯-E4阶段笔记</title>
+      <link>http://localhost:1313/posts/ysyx-e4/</link>
+      <pubDate>Tue, 27 Oct 2026 14:19:56 +0800</pubDate>
+      <guid>http://localhost:1313/posts/ysyx-e4/</guid>
+      <description>&lt;p&gt;在前面阶段的学习中，我已经成功使用Logisim开发了一个简单的处理器sCPU，并学习了使用RTL语言（Verilog）设计电路，现在我要更进一步使用现代工具开发真实的处理器。&lt;/p&gt;
+&lt;p&gt;在本文中，我将介绍如何搭建Verilator仿真环境和使用Verilator进行电路仿真的方法，然后使用RTL（Verilog）和Chisel（敏捷开发语言）实现sCPU，并开发一个模拟器sEMU作为Reference，进行DiffTest。&lt;/p&gt;
+&lt;h1 id=&#34;讲义笔记&#34;&gt;讲义笔记&lt;/h1&gt;
+&lt;h2 id=&#34;1-使用verilator进行仿真&#34;&gt;1. 使用Verilator进行仿真&lt;/h2&gt;
+&lt;h3 id=&#34;11-何为仿真&#34;&gt;1.1 何为仿真？&lt;/h3&gt;
+&lt;p&gt;在Linux中进行RTL代码的开发并不困难, 创建一个RTL文件并在其中编写代码即可。但在完成RTL代码的开发工作后, 我们还需要一款仿真器来验证RTL代码所描述的电路是否符合预期。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;仿真：在写好的硬件代码（RTL代码）被转换成具体的电路门之前，先用软件模拟的方式，检查它的逻辑功能是否符合你的设计意图。&lt;/strong&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;RTL仿真（前仿真）&lt;/strong&gt;：发生在综合之前。基于RTL代码，在理想条件下验证功能是否正确。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;综合&lt;/strong&gt;：把RTL代码翻译成由逻辑门组成的网表。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;门级仿真&lt;/strong&gt;：综合之后，用带延迟信息的门电路网表再仿真一次，确认综合结果无误。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;12-verilator是什么&#34;&gt;1.2 Verilator是什么？&lt;/h3&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-e4/image.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Verilator是一个编译器&lt;/strong&gt;，它把可综合的 Verilog/SystemVerilog 代码“编译”成经过高度优化的 C++ 或 SystemC 模型，再借助本机 C++ 编译器生成最终的可执行文件来运行仿真。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Verilator 的“Verilating”过程，本质是把硬件描述转换成软件程序：&lt;/strong&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;读取与检查&lt;/strong&gt;：读取 Verilog/SystemVerilog 源码，进行语法和 Lint 检查。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;转换与优化&lt;/strong&gt;：将 HDL 转换成内部的抽象语法树（AST），然后执行一系列优化 pass，最终生成&lt;strong&gt;多线程的 C++ 或 SystemC 源代码&lt;/strong&gt;（&lt;code&gt;.cpp&lt;/code&gt; 和 &lt;code&gt;.h&lt;/code&gt; 文件）。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;用户封装&lt;/strong&gt;：你需要自己写一个 C++ 的 &lt;code&gt;main()&lt;/code&gt; 函数（wrapper），在里面实例化 Verilator 生成的模型对象，并编写激励逻辑。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;编译链接&lt;/strong&gt;：用 C++ 编译器（如 GCC/Clang）把 Verilator 生成的代码、你的 wrapper 以及 Verilator 运行时库一起编译，得到一个&lt;strong&gt;原生可执行文件&lt;/strong&gt;。运行这个文件，就是在跑仿真。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;strong&gt;Verilator 的速度优势&lt;/strong&gt;（通常比解释型仿真器快 10-100 倍）源于几个核心设计：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;周期精确，而非事件驱动&lt;/strong&gt;：它不模拟信号变化的每个细微事件，而是按&lt;strong&gt;时钟周期&lt;/strong&gt;推进。这牺牲了门级延迟和毛刺的精度，但换来了巨大的速度提升。它主要处理“0”和“1”，对“X”和“Z”的处理有限且特殊。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;激进优化&lt;/strong&gt;：在生成 C++ 之前，Verilator 会对设计做大量优化，比如常量传播、死代码消除、将组合逻辑转换为数据流图进行化简，甚至把 &lt;code&gt;case&lt;/code&gt; 语句转换成更高效的 &lt;code&gt;if&lt;/code&gt; 结构。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;多线程与缓存友好&lt;/strong&gt;：它可以把设计&lt;strong&gt;分区&lt;/strong&gt;成多个“宏任务”，静态分配到不同线程上并行执行。更关键的是，它会调整变量在内存中的布局，让同一个任务访问的变量在内存里挨在一起，以提高 CPU 缓存命中率。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;13-搭建verilator环境&#34;&gt;1.3 搭建Verilator环境&lt;/h3&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-e4/image%201.png&#34;&gt;&lt;/p&gt;</description>
+    </item>
     <item>
       <title>再探xv6: 异常控制流篇</title>
       <link>http://localhost:1313/posts/xv6-04/</link>
       <pubDate>Tue, 27 Oct 2026 11:14:45 +0800</pubDate>
       <guid>http://localhost:1313/posts/xv6-04/</guid>
-      <description>&lt;hr&gt;
-&lt;h2 id=&#34;categories-xv6&#34;&gt;title: &amp;ldquo;再探 xv6：异常控制流篇&amp;rdquo;
-date: &amp;lsquo;2026-10-27T11:14:45+08:00&amp;rsquo;
-draft: false
-tags: [操作系统, xv6, MIT6.1810, 并发, 锁]
-categories: [xv6]&lt;/h2&gt;
-&lt;h1 id=&#34;一何为异常控制流&#34;&gt;一、何为异常控制流&lt;/h1&gt;
+      <description>&lt;h1 id=&#34;一何为异常控制流&#34;&gt;一、何为异常控制流&lt;/h1&gt;
 &lt;h2 id=&#34;1-从普通控制流到异常控制流&#34;&gt;1. 从普通控制流到异常控制流&lt;/h2&gt;
-&lt;p&gt;在学习操作系统之前，我们通常通过函数调用、条件分支、循环等机制理解程序的执行过程。&lt;/p&gt;
-&lt;p&gt;例如：&lt;/p&gt;
+&lt;p&gt;在学习操作系统之前，我们通常通过函数调用、条件分支、循环等机制理解程序的执行过程。
+例如：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;add&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;a&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;b&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;a&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;+&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;b&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
@@ -61,7 +93,18 @@ categories: [xv6]&lt;/h2&gt;
 &lt;li&gt;访问未映射的虚拟地址。&lt;/li&gt;
 &lt;li&gt;违反内存访问权限。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;同步异常的特点是：如果程序以相同状态重复执行到同一条指令，并且环境没有发生变化，那么通常会再次触发相同事件。&lt;/p&gt;</description>
+&lt;p&gt;同步异常的特点是：如果程序以相同状态重复执行到同一条指令，并且环境没有发生变化，那么通常会再次触发相同事件。&lt;/p&gt;
+&lt;p&gt;系统调用是其中一种特殊情况。用户程序执行 &lt;code&gt;ecall&lt;/code&gt; 指令，主动请求从用户态进入内核态，因此也常被称为&lt;strong&gt;主动陷入&lt;/strong&gt;。&lt;/p&gt;
+&lt;h3 id=&#34;22-中断&#34;&gt;2.2 中断&lt;/h3&gt;
+&lt;p&gt;中断通常由当前指令执行之外的事件引起，例如外部设备发出的中断请求。&lt;/p&gt;
+&lt;p&gt;典型场景包括：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;UART 接收到新的输入数据。&lt;/li&gt;
+&lt;li&gt;磁盘控制器完成一次 I/O 操作。&lt;/li&gt;
+&lt;li&gt;网卡收到数据包。&lt;/li&gt;
+&lt;li&gt;定时器到期。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;中断的特点是：它通常与 CPU 当前执行的指令没有直接因果关系。即使 CPU 正在执行完全无关的计算，外部设备仍然可能产生中断。&lt;/p&gt;</description>
     </item>
     <item>
       <title>MIT6.1810: Lab3 Pagetable</title>
@@ -1686,6 +1729,45 @@ categories: [xv6]&lt;/h2&gt;
 &lt;h3 id=&#34;22-创建博客&#34;&gt;2.2 创建博客&lt;/h3&gt;
 &lt;h4 id=&#34;第一步安装-hugo&#34;&gt;第一步：安装 Hugo&lt;/h4&gt;
 &lt;p&gt;Hugo 是一个使用 Go 编写的静态网站生成器。本文以 macOS 为例，使用 Homebrew 安装：&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title></title>
+      <link>http://localhost:1313/posts/e4-%E5%A4%84%E7%90%86%E5%99%A8%E7%9A%84%E4%BB%BF%E7%9C%9F%E5%92%8C%E9%AA%8C%E8%AF%81-3cfc4e9326148044881ad369c7121139/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/e4-%E5%A4%84%E7%90%86%E5%99%A8%E7%9A%84%E4%BB%BF%E7%9C%9F%E5%92%8C%E9%AA%8C%E8%AF%81-3cfc4e9326148044881ad369c7121139/</guid>
+      <description>&lt;h1 id=&#34;e4-处理器的仿真和验证&#34;&gt;E4 处理器的仿真和验证&lt;/h1&gt;
+&lt;p&gt;在前面阶段的学习中，我已经成功使用Logisim开发了一个简单的处理器sCPU，并学习了使用RTL语言（Verilog）设计电路，现在我要更进一步使用现代工具开发真实的处理器。&lt;/p&gt;
+&lt;p&gt;在本文中，我将介绍如何搭建Verilator仿真环境和使用Verilator进行电路仿真的方法，然后使用RTL（Verilog）和Chisel（敏捷开发语言）实现sCPU，并开发一个模拟器sEMU作为Reference，进行DiffTest。&lt;/p&gt;
+&lt;h1 id=&#34;讲义笔记&#34;&gt;讲义笔记&lt;/h1&gt;
+&lt;h2 id=&#34;1-使用verilator进行仿真&#34;&gt;1. 使用Verilator进行仿真&lt;/h2&gt;
+&lt;h3 id=&#34;11-何为仿真&#34;&gt;1.1 何为仿真？&lt;/h3&gt;
+&lt;p&gt;在Linux中进行RTL代码的开发并不困难, 创建一个RTL文件并在其中编写代码即可。但在完成RTL代码的开发工作后, 我们还需要一款仿真器来验证RTL代码所描述的电路是否符合预期。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;仿真：在写好的硬件代码（RTL代码）被转换成具体的电路门之前，先用软件模拟的方式，检查它的逻辑功能是否符合你的设计意图。&lt;/strong&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;RTL仿真（前仿真）&lt;/strong&gt;：发生在综合之前。基于RTL代码，在理想条件下验证功能是否正确。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;综合&lt;/strong&gt;：把RTL代码翻译成由逻辑门组成的网表。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;门级仿真&lt;/strong&gt;：综合之后，用带延迟信息的门电路网表再仿真一次，确认综合结果无误。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;12-verilator是什么&#34;&gt;1.2 Verilator是什么？&lt;/h3&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;E4%20%E5%A4%84%E7%90%86%E5%99%A8%E7%9A%84%E4%BB%BF%E7%9C%9F%E5%92%8C%E9%AA%8C%E8%AF%81/image.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Verilator是一个编译器&lt;/strong&gt;，它把可综合的 Verilog/SystemVerilog 代码“编译”成经过高度优化的 C++ 或 SystemC 模型，再借助本机 C++ 编译器生成最终的可执行文件来运行仿真。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Verilator 的“Verilating”过程，本质是把硬件描述转换成软件程序：&lt;/strong&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;读取与检查&lt;/strong&gt;：读取 Verilog/SystemVerilog 源码，进行语法和 Lint 检查。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;转换与优化&lt;/strong&gt;：将 HDL 转换成内部的抽象语法树（AST），然后执行一系列优化 pass，最终生成&lt;strong&gt;多线程的 C++ 或 SystemC 源代码&lt;/strong&gt;（&lt;code&gt;.cpp&lt;/code&gt; 和 &lt;code&gt;.h&lt;/code&gt; 文件）。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;用户封装&lt;/strong&gt;：你需要自己写一个 C++ 的 &lt;code&gt;main()&lt;/code&gt; 函数（wrapper），在里面实例化 Verilator 生成的模型对象，并编写激励逻辑。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;编译链接&lt;/strong&gt;：用 C++ 编译器（如 GCC/Clang）把 Verilator 生成的代码、你的 wrapper 以及 Verilator 运行时库一起编译，得到一个&lt;strong&gt;原生可执行文件&lt;/strong&gt;。运行这个文件，就是在跑仿真。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;strong&gt;Verilator 的速度优势&lt;/strong&gt;（通常比解释型仿真器快 10-100 倍）源于几个核心设计：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;周期精确，而非事件驱动&lt;/strong&gt;：它不模拟信号变化的每个细微事件，而是按&lt;strong&gt;时钟周期&lt;/strong&gt;推进。这牺牲了门级延迟和毛刺的精度，但换来了巨大的速度提升。它主要处理“0”和“1”，对“X”和“Z”的处理有限且特殊。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;激进优化&lt;/strong&gt;：在生成 C++ 之前，Verilator 会对设计做大量优化，比如常量传播、死代码消除、将组合逻辑转换为数据流图进行化简，甚至把 &lt;code&gt;case&lt;/code&gt; 语句转换成更高效的 &lt;code&gt;if&lt;/code&gt; 结构。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;多线程与缓存友好&lt;/strong&gt;：它可以把设计&lt;strong&gt;分区&lt;/strong&gt;成多个“宏任务”，静态分配到不同线程上并行执行。更关键的是，它会调整变量在内存中的布局，让同一个任务访问的变量在内存里挨在一起，以提高 CPU 缓存命中率。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;13-搭建verilator环境&#34;&gt;1.3 搭建Verilator环境&lt;/h3&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;E4%20%E5%A4%84%E7%90%86%E5%99%A8%E7%9A%84%E4%BB%BF%E7%9C%9F%E5%92%8C%E9%AA%8C%E8%AF%81/image%201.png&#34;&gt;&lt;/p&gt;</description>
     </item>
   </channel>
 </rss>

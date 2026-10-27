@@ -13,16 +13,10 @@
       <link>http://localhost:1313/posts/xv6-04/</link>
       <pubDate>Tue, 27 Oct 2026 11:14:45 +0800</pubDate>
       <guid>http://localhost:1313/posts/xv6-04/</guid>
-      <description>&lt;hr&gt;
-&lt;h2 id=&#34;categories-xv6&#34;&gt;title: &amp;ldquo;再探 xv6：异常控制流篇&amp;rdquo;
-date: &amp;lsquo;2026-10-27T11:14:45+08:00&amp;rsquo;
-draft: false
-tags: [操作系统, xv6, MIT6.1810, 并发, 锁]
-categories: [xv6]&lt;/h2&gt;
-&lt;h1 id=&#34;一何为异常控制流&#34;&gt;一、何为异常控制流&lt;/h1&gt;
+      <description>&lt;h1 id=&#34;一何为异常控制流&#34;&gt;一、何为异常控制流&lt;/h1&gt;
 &lt;h2 id=&#34;1-从普通控制流到异常控制流&#34;&gt;1. 从普通控制流到异常控制流&lt;/h2&gt;
-&lt;p&gt;在学习操作系统之前，我们通常通过函数调用、条件分支、循环等机制理解程序的执行过程。&lt;/p&gt;
-&lt;p&gt;例如：&lt;/p&gt;
+&lt;p&gt;在学习操作系统之前，我们通常通过函数调用、条件分支、循环等机制理解程序的执行过程。
+例如：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;add&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;a&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;b&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;a&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;+&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;b&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
@@ -61,7 +55,18 @@ categories: [xv6]&lt;/h2&gt;
 &lt;li&gt;访问未映射的虚拟地址。&lt;/li&gt;
 &lt;li&gt;违反内存访问权限。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;同步异常的特点是：如果程序以相同状态重复执行到同一条指令，并且环境没有发生变化，那么通常会再次触发相同事件。&lt;/p&gt;</description>
+&lt;p&gt;同步异常的特点是：如果程序以相同状态重复执行到同一条指令，并且环境没有发生变化，那么通常会再次触发相同事件。&lt;/p&gt;
+&lt;p&gt;系统调用是其中一种特殊情况。用户程序执行 &lt;code&gt;ecall&lt;/code&gt; 指令，主动请求从用户态进入内核态，因此也常被称为&lt;strong&gt;主动陷入&lt;/strong&gt;。&lt;/p&gt;
+&lt;h3 id=&#34;22-中断&#34;&gt;2.2 中断&lt;/h3&gt;
+&lt;p&gt;中断通常由当前指令执行之外的事件引起，例如外部设备发出的中断请求。&lt;/p&gt;
+&lt;p&gt;典型场景包括：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;UART 接收到新的输入数据。&lt;/li&gt;
+&lt;li&gt;磁盘控制器完成一次 I/O 操作。&lt;/li&gt;
+&lt;li&gt;网卡收到数据包。&lt;/li&gt;
+&lt;li&gt;定时器到期。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;中断的特点是：它通常与 CPU 当前执行的指令没有直接因果关系。即使 CPU 正在执行完全无关的计算，外部设备仍然可能产生中断。&lt;/p&gt;</description>
     </item>
     <item>
       <title>再探xv6: 并发篇</title>

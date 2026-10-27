@@ -205,12 +205,32 @@
 
 <article class="post-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">一生一芯-E4阶段笔记
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>在前面阶段的学习中，我已经成功使用Logisim开发了一个简单的处理器sCPU，并学习了使用RTL语言（Verilog）设计电路，现在我要更进一步使用现代工具开发真实的处理器。
+在本文中，我将介绍如何搭建Verilator仿真环境和使用Verilator进行电路仿真的方法，然后使用RTL（Verilog）和Chisel（敏捷开发语言）实现sCPU，并开发一个模拟器sEMU作为Reference，进行DiffTest。
+讲义笔记 1. 使用Verilator进行仿真 1.1 何为仿真？ 在Linux中进行RTL代码的开发并不困难, 创建一个RTL文件并在其中编写代码即可。但在完成RTL代码的开发工作后, 我们还需要一款仿真器来验证RTL代码所描述的电路是否符合预期。
+仿真：在写好的硬件代码（RTL代码）被转换成具体的电路门之前，先用软件模拟的方式，检查它的逻辑功能是否符合你的设计意图。
+RTL仿真（前仿真）：发生在综合之前。基于RTL代码，在理想条件下验证功能是否正确。 综合：把RTL代码翻译成由逻辑门组成的网表。 门级仿真：综合之后，用带延迟信息的门电路网表再仿真一次，确认综合结果无误。 1.2 Verilator是什么？ Verilator是一个编译器，它把可综合的 Verilog/SystemVerilog 代码“编译”成经过高度优化的 C&#43;&#43; 或 SystemC 模型，再借助本机 C&#43;&#43; 编译器生成最终的可执行文件来运行仿真。
+Verilator 的“Verilating”过程，本质是把硬件描述转换成软件程序：
+读取与检查：读取 Verilog/SystemVerilog 源码，进行语法和 Lint 检查。 转换与优化：将 HDL 转换成内部的抽象语法树（AST），然后执行一系列优化 pass，最终生成多线程的 C&#43;&#43; 或 SystemC 源代码（.cpp 和 .h 文件）。 用户封装：你需要自己写一个 C&#43;&#43; 的 main() 函数（wrapper），在里面实例化 Verilator 生成的模型对象，并编写激励逻辑。 编译链接：用 C&#43;&#43; 编译器（如 GCC/Clang）把 Verilator 生成的代码、你的 wrapper 以及 Verilator 运行时库一起编译，得到一个原生可执行文件。运行这个文件，就是在跑仿真。 Verilator 的速度优势（通常比解释型仿真器快 10-100 倍）源于几个核心设计：
+周期精确，而非事件驱动：它不模拟信号变化的每个细微事件，而是按时钟周期推进。这牺牲了门级延迟和毛刺的精度，但换来了巨大的速度提升。它主要处理“0”和“1”，对“X”和“Z”的处理有限且特殊。 激进优化：在生成 C&#43;&#43; 之前，Verilator 会对设计做大量优化，比如常量传播、死代码消除、将组合逻辑转换为数据流图进行化简，甚至把 case 语句转换成更高效的 if 结构。 多线程与缓存友好：它可以把设计分区成多个“宏任务”，静态分配到不同线程上并行执行。更关键的是，它会调整变量在内存中的布局，让同一个任务访问的变量在内存里挨在一起，以提高 CPU 缓存命中率。 1.3 搭建Verilator环境 ...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-27 14:19:56 +0800 CST'>October 27, 2026</span>&nbsp;·&nbsp;<span>38 min</span>&nbsp;·&nbsp;<span>8005 words</span></footer>
+  <a class="entry-link" aria-label="post link to 一生一芯-E4阶段笔记" href="http://localhost:1313/posts/ysyx-e4/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">再探xv6: 异常控制流篇
     </h2>
   </header>
   <div class="entry-content">
-    <p> title: “再探 xv6：异常控制流篇” date: ‘2026-10-27T11:14:45&#43;08:00’ draft: false tags: [操作系统, xv6, MIT6.1810, 并发, 锁] categories: [xv6] 一、何为异常控制流 1. 从普通控制流到异常控制流 在学习操作系统之前，我们通常通过函数调用、条件分支、循环等机制理解程序的执行过程。
-例如：
+    <p>一、何为异常控制流 1. 从普通控制流到异常控制流 在学习操作系统之前，我们通常通过函数调用、条件分支、循环等机制理解程序的执行过程。 例如：
 int add(int a, int b) { return a &#43; b; } int main(void) { int result = add(1, 2); return result; } 程序从 main() 开始执行，调用 add()，然后返回调用者。这种执行过程主要由程序自身的指令决定，我们可以称之为普通控制流。
 然而，操作系统需要处理更多复杂的事件：
 用户程序希望读取文件，需要请求内核提供服务。 网卡收到网络数据，需要通知 CPU 处理。 磁盘完成 I/O 操作，需要唤醒等待中的进程。 程序访问非法地址，需要由内核处理异常。 定时器触发，需要操作系统获得运行机会，进行调度。 这些事件可能发生在程序执行过程中的任意时刻，不能完全依赖当前程序主动调用函数来处理。
@@ -222,11 +242,15 @@ int add(int a, int b) { return a &#43; b; } int main(void) { int result = add(1,
 2.1 同步异常 同步异常由当前正在执行的指令直接引起，因此与程序执行位置存在明确的因果关系。
 例如：
 执行 ecall，主动请求操作系统服务。 执行非法指令。 访问未映射的虚拟地址。 违反内存访问权限。 同步异常的特点是：如果程序以相同状态重复执行到同一条指令，并且环境没有发生变化，那么通常会再次触发相同事件。
+系统调用是其中一种特殊情况。用户程序执行 ecall 指令，主动请求从用户态进入内核态，因此也常被称为主动陷入。
+2.2 中断 中断通常由当前指令执行之外的事件引起，例如外部设备发出的中断请求。
+典型场景包括：
+UART 接收到新的输入数据。 磁盘控制器完成一次 I/O 操作。 网卡收到数据包。 定时器到期。 中断的特点是：它通常与 CPU 当前执行的指令没有直接因果关系。即使 CPU 正在执行完全无关的计算，外部设备仍然可能产生中断。
 ...</p>
   </div>
   <footer class="entry-footer">
 
-<span title='2026-10-27 11:14:45 +0800 CST'>October 27, 2026</span>&nbsp;·&nbsp;<span>7 min</span>&nbsp;·&nbsp;<span>1376 words</span></footer>
+<span title='2026-10-27 11:14:45 +0800 CST'>October 27, 2026</span>&nbsp;·&nbsp;<span>7 min</span>&nbsp;·&nbsp;<span>1361 words</span></footer>
   <a class="entry-link" aria-label="post link to 再探xv6: 异常控制流篇" href="http://localhost:1313/posts/xv6-04/"></a>
 </article>
 
@@ -405,27 +429,6 @@ $ make qemu riscv64-unknown-elf-gcc -c -o kernel/entry.o kernel/entry.S riscv64-
 
 <span title='2026-10-23 16:41:27 +0800 CST'>October 23, 2026</span>&nbsp;·&nbsp;<span>11 min</span>&nbsp;·&nbsp;<span>2154 words</span></footer>
   <a class="entry-link" aria-label="post link to 关于C&#43;&#43;智能指针" href="http://localhost:1313/posts/cpp-smart-ptr/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">再探xv6: 概述
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>1. xv6简介 xv6 以 Dennis Ritchie 和 Ken Thompson 的 Unix version 6 (v6) 为蓝本 。xv6 大致遵循 Unix v6 的结构和风格，但它是使用ANSI C语言为多核RISC-V 架构实现的。
-MIT的操作系统课程6.1810就是以xv6为例，具体阐述操作系统概念。它不仅提供了 Ken Thompson 和 Dennis Ritchie 的 Unix 操作系统所引入的基本接口，还模仿了 Unix 的内部设计。Unix 提供了一个功能较为单一但机制组合良好的接口，从而展现出令人惊讶的通用性。该接口非常成功，以至于现代操作系统——BSD、Linux、macOS、Solaris，甚至在某种程度上也包括 Microsoft Windows——都采用了类似 Unix 的接口。理解 xv6 是理解这些系统以及许多其他系统的良好开端。
-xv6提供了若干功能模块：
-进程管理 内存管理（物理内存和虚拟内存） I/O和文件描述符 文件系统 IPC机制（管道） 与Unix一样，xv6通过系统调用为应用程序提供服务，下面是xv6支持的22个系统调用：
-xv6与现实世界的操作系统有些不同：
-Unix 将“标准的”文件描述符、管道以及便捷的 shell 语法相结合，用于对它们进行操作，这在编写通用可重用程序方面是一项重大进步。这一理念催生了 “软件工具”文化 ，而这正是 Unix 强大功能和流行度的重要原因。Shell 则是第一个所谓的“脚本语言”。Unix 系统调用接口至今仍然在 BSD、Linux 和 macOS 等系统中沿用。
-Unix 系统调用接口已通过可移植操作系统接口 (POSIX) 标准进行了标准化。xv6不符合 POSIX 标准：它缺少许多系统调用（包括一些基本调用lseek），而且它提供的许多系统调用也与标准有所不同。我们设计 xv6 的主要目标是在提供简单易用的类 Unix 系统调用接口的同时，保持简洁性和清晰度。一些人已经扩展了 xv6，添加了一些系统调用和一个简单的 C 库，以便运行基本的 Unix 程序。然而，现代内核提供的系统调用和内核服务种类远超 xv6。例如，它们支持网络、窗口系统、用户级线程、多种设备的驱动程序等等。现代内核不断发展且日新月异，并提供了许多超出 POSIX 标准的功能。
-...</p>
-  </div>
-  <footer class="entry-footer">
-
-<span title='2026-10-23 13:39:42 +0800 CST'>October 23, 2026</span>&nbsp;·&nbsp;<span>13 min</span>&nbsp;·&nbsp;<span>2611 words</span></footer>
-  <a class="entry-link" aria-label="post link to 再探xv6: 概述" href="http://localhost:1313/posts/xv6-01/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">

@@ -195,6 +195,27 @@
 
 <article class="post-entry tag-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">一生一芯-E4阶段笔记
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>在前面阶段的学习中，我已经成功使用Logisim开发了一个简单的处理器sCPU，并学习了使用RTL语言（Verilog）设计电路，现在我要更进一步使用现代工具开发真实的处理器。
+在本文中，我将介绍如何搭建Verilator仿真环境和使用Verilator进行电路仿真的方法，然后使用RTL（Verilog）和Chisel（敏捷开发语言）实现sCPU，并开发一个模拟器sEMU作为Reference，进行DiffTest。
+讲义笔记 1. 使用Verilator进行仿真 1.1 何为仿真？ 在Linux中进行RTL代码的开发并不困难, 创建一个RTL文件并在其中编写代码即可。但在完成RTL代码的开发工作后, 我们还需要一款仿真器来验证RTL代码所描述的电路是否符合预期。
+仿真：在写好的硬件代码（RTL代码）被转换成具体的电路门之前，先用软件模拟的方式，检查它的逻辑功能是否符合你的设计意图。
+RTL仿真（前仿真）：发生在综合之前。基于RTL代码，在理想条件下验证功能是否正确。 综合：把RTL代码翻译成由逻辑门组成的网表。 门级仿真：综合之后，用带延迟信息的门电路网表再仿真一次，确认综合结果无误。 1.2 Verilator是什么？ Verilator是一个编译器，它把可综合的 Verilog/SystemVerilog 代码“编译”成经过高度优化的 C&#43;&#43; 或 SystemC 模型，再借助本机 C&#43;&#43; 编译器生成最终的可执行文件来运行仿真。
+Verilator 的“Verilating”过程，本质是把硬件描述转换成软件程序：
+读取与检查：读取 Verilog/SystemVerilog 源码，进行语法和 Lint 检查。 转换与优化：将 HDL 转换成内部的抽象语法树（AST），然后执行一系列优化 pass，最终生成多线程的 C&#43;&#43; 或 SystemC 源代码（.cpp 和 .h 文件）。 用户封装：你需要自己写一个 C&#43;&#43; 的 main() 函数（wrapper），在里面实例化 Verilator 生成的模型对象，并编写激励逻辑。 编译链接：用 C&#43;&#43; 编译器（如 GCC/Clang）把 Verilator 生成的代码、你的 wrapper 以及 Verilator 运行时库一起编译，得到一个原生可执行文件。运行这个文件，就是在跑仿真。 Verilator 的速度优势（通常比解释型仿真器快 10-100 倍）源于几个核心设计：
+周期精确，而非事件驱动：它不模拟信号变化的每个细微事件，而是按时钟周期推进。这牺牲了门级延迟和毛刺的精度，但换来了巨大的速度提升。它主要处理“0”和“1”，对“X”和“Z”的处理有限且特殊。 激进优化：在生成 C&#43;&#43; 之前，Verilator 会对设计做大量优化，比如常量传播、死代码消除、将组合逻辑转换为数据流图进行化简，甚至把 case 语句转换成更高效的 if 结构。 多线程与缓存友好：它可以把设计分区成多个“宏任务”，静态分配到不同线程上并行执行。更关键的是，它会调整变量在内存中的布局，让同一个任务访问的变量在内存里挨在一起，以提高 CPU 缓存命中率。 1.3 搭建Verilator环境 ...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-27 14:19:56 +0800 CST'>October 27, 2026</span>&nbsp;·&nbsp;<span>38 min</span>&nbsp;·&nbsp;<span>8006 words</span></footer>
+  <a class="entry-link" aria-label="post link to 一生一芯-E4阶段笔记" href="http://localhost:1313/posts/ysyx-e4/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">一生一芯-E3阶段笔记
     </h2>
   </header>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Chisel on Minghan的博客</title>
+    <link>http://localhost:1313/tags/chisel/</link>
+    <description>Recent content in Chisel on Minghan的博客</description>
+    <generator>Hugo</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Tue, 27 Oct 2026 14:19:56 +0800</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/chisel/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>一生一芯-E4阶段笔记</title>
+      <link>http://localhost:1313/posts/ysyx-e4/</link>
+      <pubDate>Tue, 27 Oct 2026 14:19:56 +0800</pubDate>
+      <guid>http://localhost:1313/posts/ysyx-e4/</guid>
+      <description>&lt;p&gt;在前面阶段的学习中，我已经成功使用Logisim开发了一个简单的处理器sCPU，并学习了使用RTL语言（Verilog）设计电路，现在我要更进一步使用现代工具开发真实的处理器。&lt;/p&gt;
+&lt;p&gt;在本文中，我将介绍如何搭建Verilator仿真环境和使用Verilator进行电路仿真的方法，然后使用RTL（Verilog）和Chisel（敏捷开发语言）实现sCPU，并开发一个模拟器sEMU作为Reference，进行DiffTest。&lt;/p&gt;
+&lt;h1 id=&#34;讲义笔记&#34;&gt;讲义笔记&lt;/h1&gt;
+&lt;h2 id=&#34;1-使用verilator进行仿真&#34;&gt;1. 使用Verilator进行仿真&lt;/h2&gt;
+&lt;h3 id=&#34;11-何为仿真&#34;&gt;1.1 何为仿真？&lt;/h3&gt;
+&lt;p&gt;在Linux中进行RTL代码的开发并不困难, 创建一个RTL文件并在其中编写代码即可。但在完成RTL代码的开发工作后, 我们还需要一款仿真器来验证RTL代码所描述的电路是否符合预期。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;仿真：在写好的硬件代码（RTL代码）被转换成具体的电路门之前，先用软件模拟的方式，检查它的逻辑功能是否符合你的设计意图。&lt;/strong&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;RTL仿真（前仿真）&lt;/strong&gt;：发生在综合之前。基于RTL代码，在理想条件下验证功能是否正确。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;综合&lt;/strong&gt;：把RTL代码翻译成由逻辑门组成的网表。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;门级仿真&lt;/strong&gt;：综合之后，用带延迟信息的门电路网表再仿真一次，确认综合结果无误。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;12-verilator是什么&#34;&gt;1.2 Verilator是什么？&lt;/h3&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-e4/image.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Verilator是一个编译器&lt;/strong&gt;，它把可综合的 Verilog/SystemVerilog 代码“编译”成经过高度优化的 C++ 或 SystemC 模型，再借助本机 C++ 编译器生成最终的可执行文件来运行仿真。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Verilator 的“Verilating”过程，本质是把硬件描述转换成软件程序：&lt;/strong&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;读取与检查&lt;/strong&gt;：读取 Verilog/SystemVerilog 源码，进行语法和 Lint 检查。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;转换与优化&lt;/strong&gt;：将 HDL 转换成内部的抽象语法树（AST），然后执行一系列优化 pass，最终生成&lt;strong&gt;多线程的 C++ 或 SystemC 源代码&lt;/strong&gt;（&lt;code&gt;.cpp&lt;/code&gt; 和 &lt;code&gt;.h&lt;/code&gt; 文件）。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;用户封装&lt;/strong&gt;：你需要自己写一个 C++ 的 &lt;code&gt;main()&lt;/code&gt; 函数（wrapper），在里面实例化 Verilator 生成的模型对象，并编写激励逻辑。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;编译链接&lt;/strong&gt;：用 C++ 编译器（如 GCC/Clang）把 Verilator 生成的代码、你的 wrapper 以及 Verilator 运行时库一起编译，得到一个&lt;strong&gt;原生可执行文件&lt;/strong&gt;。运行这个文件，就是在跑仿真。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;strong&gt;Verilator 的速度优势&lt;/strong&gt;（通常比解释型仿真器快 10-100 倍）源于几个核心设计：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;周期精确，而非事件驱动&lt;/strong&gt;：它不模拟信号变化的每个细微事件，而是按&lt;strong&gt;时钟周期&lt;/strong&gt;推进。这牺牲了门级延迟和毛刺的精度，但换来了巨大的速度提升。它主要处理“0”和“1”，对“X”和“Z”的处理有限且特殊。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;激进优化&lt;/strong&gt;：在生成 C++ 之前，Verilator 会对设计做大量优化，比如常量传播、死代码消除、将组合逻辑转换为数据流图进行化简，甚至把 &lt;code&gt;case&lt;/code&gt; 语句转换成更高效的 &lt;code&gt;if&lt;/code&gt; 结构。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;多线程与缓存友好&lt;/strong&gt;：它可以把设计&lt;strong&gt;分区&lt;/strong&gt;成多个“宏任务”，静态分配到不同线程上并行执行。更关键的是，它会调整变量在内存中的布局，让同一个任务访问的变量在内存里挨在一起，以提高 CPU 缓存命中率。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;13-搭建verilator环境&#34;&gt;1.3 搭建Verilator环境&lt;/h3&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-e4/image%201.png&#34;&gt;&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

@@ -205,6 +205,27 @@
 
 <article class="post-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">再探xv6: 概述
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>1. xv6简介 xv6 以 Dennis Ritchie 和 Ken Thompson 的 Unix version 6 (v6) 为蓝本 。xv6 大致遵循 Unix v6 的结构和风格，但它是使用ANSI C语言为多核RISC-V 架构实现的。
+MIT的操作系统课程6.1810就是以xv6为例，具体阐述操作系统概念。它不仅提供了 Ken Thompson 和 Dennis Ritchie 的 Unix 操作系统所引入的基本接口，还模仿了 Unix 的内部设计。Unix 提供了一个功能较为单一但机制组合良好的接口，从而展现出令人惊讶的通用性。该接口非常成功，以至于现代操作系统——BSD、Linux、macOS、Solaris，甚至在某种程度上也包括 Microsoft Windows——都采用了类似 Unix 的接口。理解 xv6 是理解这些系统以及许多其他系统的良好开端。
+xv6提供了若干功能模块：
+进程管理 内存管理（物理内存和虚拟内存） I/O和文件描述符 文件系统 IPC机制（管道） 与Unix一样，xv6通过系统调用为应用程序提供服务，下面是xv6支持的22个系统调用：
+xv6与现实世界的操作系统有些不同：
+Unix 将“标准的”文件描述符、管道以及便捷的 shell 语法相结合，用于对它们进行操作，这在编写通用可重用程序方面是一项重大进步。这一理念催生了 “软件工具”文化 ，而这正是 Unix 强大功能和流行度的重要原因。Shell 则是第一个所谓的“脚本语言”。Unix 系统调用接口至今仍然在 BSD、Linux 和 macOS 等系统中沿用。
+Unix 系统调用接口已通过可移植操作系统接口 (POSIX) 标准进行了标准化。xv6不符合 POSIX 标准：它缺少许多系统调用（包括一些基本调用lseek），而且它提供的许多系统调用也与标准有所不同。我们设计 xv6 的主要目标是在提供简单易用的类 Unix 系统调用接口的同时，保持简洁性和清晰度。一些人已经扩展了 xv6，添加了一些系统调用和一个简单的 C 库，以便运行基本的 Unix 程序。然而，现代内核提供的系统调用和内核服务种类远超 xv6。例如，它们支持网络、窗口系统、用户级线程、多种设备的驱动程序等等。现代内核不断发展且日新月异，并提供了许多超出 POSIX 标准的功能。
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-23 13:39:42 +0800 CST'>October 23, 2026</span>&nbsp;·&nbsp;<span>13 min</span>&nbsp;·&nbsp;<span>2611 words</span></footer>
+  <a class="entry-link" aria-label="post link to 再探xv6: 概述" href="http://localhost:1313/posts/xv6-01/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">Leetecode 二叉树(三)
     </h2>
   </header>
@@ -438,28 +459,6 @@ module top_module( input in, output out ); assign out = in; endmodule Wire4 Crea
 
 <span title='2026-10-19 16:11:46 +0800 CST'>October 19, 2026</span>&nbsp;·&nbsp;<span>44 min</span>&nbsp;·&nbsp;<span>9260 words</span></footer>
   <a class="entry-link" aria-label="post link to 一生一芯-E1阶段笔记" href="http://localhost:1313/posts/ysyx-e1/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">一生一芯-F6阶段笔记
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>这篇文章的内容：
-改进前面所设计的sISA，新增一条io指令，用于与外部设备进行IO。 对 li 和 bne0这两条指令进行增强，并使用LED条和16进制数码管检查新sISA的实现。 讲义笔记 1. sISA的局限性 在前面的我们成功地根据sISA设计出了简单处理器sCPU，并在其上运行了数列求和程序。但是sISA提供的指令有着局限性：
-li指令中的立即数用4bits表示，仅能装入立即数0～15到寄存器。 bner0指令按绝对地址跳转，地址字段也是4bits，因此跳转目标范围也只有0～15。 当前的sISA不支持IO指令，要检查程序运行的结果只能手动查看寄存器的值，不方便。 2. 增强li和bner0 对li指令和bner0指令进行改进：
-3. 添加io指令 4. 迈向现代化的处理器设计 讲义笔记 1. 改进后的sISA 首先增强 li 和 bner0 指令。然后再添加一条新的指令 io，用于寄存器与外部设备的I/O，得到的新sISA：
-add指令的行为和之前相同 io指令根据方向位i/o进行输入或输出: 当i/o=0时, 表示输入操作, 从编号为idx的设备中读出8位数据, 输入到R[rd]中 当i/o=1时, 表示输出操作, 将R[rd]中的8位数据, 输出到编号为idx的设备中 li指令和之前相比有所不同, 它通过s和imm的组合来表示一个更大的立即数. 上文的&lt;&lt;表示左移运算符, 如果你不太熟悉这个运算符, 可以从另一个角度来理解li指令的行为: s表示将2位的imm放置在8位数据中的哪一段位置。 2. 增强li和bner0 修改立即数生成器，使其能获取更新后的sISA所需的立即数：
-修改ALU中将立即数计算的部分，引入移位运算：
-在PC逻辑中添加PC相对寻址的电路：PC = PC &#43; sign_ext(offset)
-重新编写数列求和程序：
-...</p>
-  </div>
-  <footer class="entry-footer">
-
-<span title='2026-10-19 16:00:30 +0800 CST'>October 19, 2026</span>&nbsp;·&nbsp;<span>2 min</span>&nbsp;·&nbsp;<span>422 words</span></footer>
-  <a class="entry-link" aria-label="post link to 一生一芯-F6阶段笔记" href="http://localhost:1313/posts/ysyx-f6/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">
