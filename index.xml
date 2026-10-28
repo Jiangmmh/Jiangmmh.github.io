@@ -1,4 +1,36 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Minghan的博客</title><link>https://Jiangmmh.github.io/</link><description>Recent content on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Tue, 27 Oct 2026 23:30:27 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/index.xml" rel="self" type="application/rss+xml"/><item><title>一生一芯-E5阶段笔记</title><link>https://Jiangmmh.github.io/posts/ysyx-e5/</link><pubDate>Tue, 27 Oct 2026 23:30:27 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/ysyx-e5/</guid><description>&lt;p>在E4阶段中，我先使用Chisel（&lt;del>Verilog&lt;/del>）实现了sISA，得到了sCPU，并在NVboard上进行了测试。然后为了提高调试效率，使用C/C++实现了一个sISA的模拟器sEMU，并以sCPU为DUT，以sEMU为REF，进行了Differential Test。&lt;/p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Minghan的博客</title><link>https://Jiangmmh.github.io/</link><description>Recent content on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Wed, 28 Oct 2026 22:18:08 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/index.xml" rel="self" type="application/rss+xml"/><item><title>一生一芯-E6阶段笔记</title><link>https://Jiangmmh.github.io/posts/ysyx-e6/</link><pubDate>Wed, 28 Oct 2026 22:18:08 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/ysyx-e6/</guid><description>&lt;h1 id="一体验am">&lt;strong>一、体验AM&lt;/strong>&lt;/h1>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="https://Jiangmmh.github.io/images/posts/ysyx-e6/image.png">&lt;/p>
+&lt;p>先来阅读以下PA1中第一节的内容：&lt;/p>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="https://Jiangmmh.github.io/images/posts/ysyx-e6/image%201.png">&lt;/p>
+&lt;blockquote>
+&lt;p>一定要刻意训练自己针对问题，自行探索和学习基本原理，思考解决方案并落地解决问题的全流程能力。不要偷懒，等待别人的答案。&lt;/p>&lt;/blockquote>
+&lt;p>PA的目的是要实现NEMU, 一款经过简化的&lt;strong>全系统模拟器&lt;/strong>。所谓全系统模拟器就是其可以模拟完整的硬件，例如x86处理器、RISC-V处理器或红白机硬件。&lt;/p>
+&lt;p>AM的设计非常巧妙，我们可以通过提供不同的&lt;code>ARCH&lt;/code>参数, 来让同一个程序编译到不同的平台上. 例如, &lt;code>ARCH=native&lt;/code>表示将程序编译到Linux本地。&lt;/p>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="https://Jiangmmh.github.io/images/posts/ysyx-e6/image%202.png">&lt;/p>
+&lt;p>运行红白机模拟器，检查画面、按键和声音，没有问题。&lt;/p>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="https://Jiangmmh.github.io/images/posts/ysyx-e6/image%203.png">&lt;/p>
+&lt;p>NEMU模拟了一个硬件的世界, 我们可以在这个硬件世界中执行程序。换句话说, 我们将要在PA中编写一个用来执行其它程序的程序! &lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl"> +---------------------+ +---------------------+
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">|&lt;/span> NES Game &lt;span class="p">|&lt;/span> &lt;span class="p">|&lt;/span> &lt;span class="s2">&amp;#34;Hello World&amp;#34;&lt;/span> &lt;span class="p">|&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> +---------------------+ +---------------------+
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">|&lt;/span> Simulated NES &lt;span class="p">|&lt;/span> &lt;span class="p">|&lt;/span> Simulated &lt;span class="p">|&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">|&lt;/span> hardware &lt;span class="p">|&lt;/span> &lt;span class="p">|&lt;/span> hardware &lt;span class="p">|&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">+---------------------+ +---------------------+ +---------------------+
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">|&lt;/span> &lt;span class="s2">&amp;#34;Hello World&amp;#34;&lt;/span> &lt;span class="p">|&lt;/span> &lt;span class="p">|&lt;/span> NES Emulator &lt;span class="p">|&lt;/span> &lt;span class="p">|&lt;/span> NEMU &lt;span class="p">|&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">+---------------------+ +---------------------+ +---------------------+
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">|&lt;/span> GNU/Linux &lt;span class="p">|&lt;/span> &lt;span class="p">|&lt;/span> GNU/Linux &lt;span class="p">|&lt;/span> &lt;span class="p">|&lt;/span> GNU/Linux &lt;span class="p">|&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">+---------------------+ +---------------------+ +---------------------+
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">|&lt;/span> Real hardware &lt;span class="p">|&lt;/span> &lt;span class="p">|&lt;/span> Real hardware &lt;span class="p">|&lt;/span> &lt;span class="p">|&lt;/span> Real hardware &lt;span class="p">|&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">+---------------------+ +---------------------+ +---------------------+
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">(&lt;/span>a&lt;span class="o">)&lt;/span> &lt;span class="o">(&lt;/span>b&lt;span class="o">)&lt;/span> &lt;span class="o">(&lt;/span>c&lt;span class="o">)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>(a) 直接在GNU/Linux中运行Hello World程序&lt;/li>
+&lt;li>(b) 在GNU/Linux中通过红白机模拟器，运行红白机游戏&lt;/li>
+&lt;li>(c) 在GNU/Linux中通过NEMU模拟其他硬件，并运行Hello World程序&lt;/li>
+&lt;/ul>
+&lt;h1 id="二运行第一个编译的程序">&lt;strong>二、运行第一个编译的程序&lt;/strong>&lt;/h1>
+&lt;blockquote>
+&lt;p>关键问题：为什么需要AM？&lt;/p></description></item><item><title>一生一芯-E5阶段笔记</title><link>https://Jiangmmh.github.io/posts/ysyx-e5/</link><pubDate>Tue, 27 Oct 2026 23:30:27 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/ysyx-e5/</guid><description>&lt;p>在E4阶段中，我先使用Chisel（&lt;del>Verilog&lt;/del>）实现了sISA，得到了sCPU，并在NVboard上进行了测试。然后为了提高调试效率，使用C/C++实现了一个sISA的模拟器sEMU，并以sCPU为DUT，以sEMU为REF，进行了Differential Test。&lt;/p>
 &lt;p>在这个阶段的内容中，我将实现一个仅支持8条指令（实际上是13条指令），但功能完备的RISC-V处理器（通过编译的方式使其模拟40条指令），它可以运行更多程序。&lt;/p>
 &lt;p>&lt;strong>在开始之前先总结一下处理器开发的思路：&lt;/strong>&lt;/p>
 &lt;ul>
@@ -168,12 +200,7 @@
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">vmprint_test: &lt;span class="k">done&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">pgaccess_test starting
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">pgtbltest: pgaccess_test failed: incorrect access bits set, &lt;span class="nv">pid&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="m">3&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>这个页表和用户进程的地址空间正好能对应上：&lt;/p></description></item><item><title>Today</title><link>https://Jiangmmh.github.io/moments/2026-10-27/</link><pubDate>Tue, 27 Oct 2026 10:20:00 +0800</pubDate><guid>https://Jiangmmh.github.io/moments/2026-10-27/</guid><description>&lt;p>今日任务：&lt;/p>
-&lt;ul>
-&lt;li>&lt;input disabled="" type="checkbox"> Leetecode 单调栈全部题目&lt;/li>
-&lt;li>&lt;input disabled="" type="checkbox"> 完成 ysyx-E 阶段的复习&lt;/li>
-&lt;li>&lt;input disabled="" type="checkbox"> 《现代操作系统》第五章&lt;/li>
-&lt;/ul></description></item><item><title>埃拉托色尼筛法（Sieve of Eratosthenes）</title><link>https://Jiangmmh.github.io/posts/sieve/</link><pubDate>Mon, 26 Oct 2026 17:25:46 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/sieve/</guid><description>&lt;h1 id="一原理">一、原理&lt;/h1>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>这个页表和用户进程的地址空间正好能对应上：&lt;/p></description></item><item><title>埃拉托色尼筛法（Sieve of Eratosthenes）</title><link>https://Jiangmmh.github.io/posts/sieve/</link><pubDate>Mon, 26 Oct 2026 17:25:46 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/sieve/</guid><description>&lt;h1 id="一原理">一、原理&lt;/h1>
 &lt;p>埃拉托色尼筛法是一种古老而高效的求素数算法，由古希腊数学家埃拉托色尼（Eratosthenes，约公元前276—前194年）提出。&lt;/p>
 &lt;p>&lt;strong>核心思想&lt;/strong>：&lt;strong>素数的倍数一定不是素数&lt;/strong>。因此，从最小的素数 2 开始，把它的所有倍数&amp;quot;筛掉&amp;quot;（标记为合数），然后找到下一个未被筛掉的数（它一定是素数），再筛掉它的倍数……如此反复，最后剩下的就是素数。&lt;/p>
 &lt;p>&lt;strong>算法步骤&lt;/strong>：以求 n = 30 以内的素数为例&lt;/p>
@@ -1539,39 +1566,37 @@
 &lt;p>持续学习，深入原理，动手实践。&lt;/p></description></item><item><title>照片墙</title><link>https://Jiangmmh.github.io/photos/</link><pubDate>Wed, 14 Oct 2026 00:00:00 +0000</pubDate><guid>https://Jiangmmh.github.io/photos/</guid><description>记录生活中的风景与瞬间</description></item><item><title>关于记录</title><link>https://Jiangmmh.github.io/moments/2026-10-13/</link><pubDate>Tue, 13 Oct 2026 16:30:00 +0800</pubDate><guid>https://Jiangmmh.github.io/moments/2026-10-13/</guid><description>&lt;p>最近在折腾自己的博客。&lt;/p>
 &lt;p>比起每次都花很长时间写一篇完整的文章，
 我更希望能有一个地方，随时记录学习过程中的想法。&lt;/p>
-&lt;p>有些事情不一定要等到想明白之后才开始记录。&lt;/p></description></item><item><title>曾国藩传</title><link>https://Jiangmmh.github.io/books/zeng-guo-fan/</link><pubDate>Fri, 11 Sep 2026 00:00:00 +0000</pubDate><guid>https://Jiangmmh.github.io/books/zeng-guo-fan/</guid><description>曾国藩，没有显赫的家世，天赋堪称晚清同时代大人物当中最差，却官至两江总督、直隶总督、武英殿大学士，在复杂的时代变局中超越众人，成就最大，被誉为大清“中兴第一名臣”，且最后全身而退。他的人生经历，无论是过去还是现在都给人以特别的启示。</description></item><item><title>蒋廷黻回忆录</title><link>https://Jiangmmh.github.io/books/jiang-bi-ting/</link><pubDate>Fri, 11 Sep 2026 00:00:00 +0000</pubDate><guid>https://Jiangmmh.github.io/books/jiang-bi-ting/</guid><description>蒋廷黻（1895—1965）湖南宝庆人。1911年由教会资助赴美求学，就读于派克学院、哥伦比亚大学研究院，攻读历史获哲学博士学位。1923年回国先后任南开大学、清华大学教授，清华大学文学院院长、历史系主任。他主张兼重中外历史，在研究中国近代外交史过程中，形成了一套对近代中外关系变化如何影响中国历史发展的看法。1935年以非国民党员的学者身份参加国民政府，任行政院政务处长，从此离开清华大学从事外交事务，1945年被任命为中国驻联合国常任代表。1961年改任中國驻美大使。</description></item><item><title>黄仁勋:英伟达之芯</title><link>https://Jiangmmh.github.io/books/nvidia/</link><pubDate>Fri, 11 Sep 2026 00:00:00 +0000</pubDate><guid>https://Jiangmmh.github.io/books/nvidia/</guid><description>本书不仅是一部科技企业家的传记，更是一部关于如何在全球科技舞台上取得成功的范本。跨越30年的科技发展历程，我们可以看到人工智能技术是如何发展的，人工智能将会如何影响到我们每一个人，技术发展的速度和进展是怎么样的。在这场技术的发展过程中，英伟达是一个缩影。通过对技术发展历程的洞察，我们将更清晰的看到未来，企业家可以了解到科技行业的复杂性，以及如何在快速变化的市场中保持领先。这本书适合所有对科技、创新和企业家精神感兴趣的读者，无论你是相关行业的专业人士，还是对其充满好奇的普通读者，都能从黄仁勋的故事中获得启发和动力。</description></item><item><title/><link>https://Jiangmmh.github.io/posts/e5-%E5%8A%9F%E8%83%BD%E5%AE%8C%E5%A4%87%E7%9A%84%E8%BF%B7%E4%BD%A0risc-v%E5%A4%84%E7%90%86%E5%99%A8-3dbc4e932614800985a7f752a64d88fa/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://Jiangmmh.github.io/posts/e5-%E5%8A%9F%E8%83%BD%E5%AE%8C%E5%A4%87%E7%9A%84%E8%BF%B7%E4%BD%A0risc-v%E5%A4%84%E7%90%86%E5%99%A8-3dbc4e932614800985a7f752a64d88fa/</guid><description>&lt;h1 id="e5-功能完备的迷你risc-v处理器">E5 功能完备的迷你RISC-V处理器&lt;/h1>
-&lt;p>在E4阶段中，我先使用Chisel（&lt;del>Verilog&lt;/del>）实现了sISA，得到了sCPU，并在NVboard上进行了测试。然后为了提高调试效率，使用C/C++实现了一个sISA的模拟器sEMU，并以sCPU为DUT，以sEMU为REF，进行了Differential Test。&lt;/p>
-&lt;p>在这个阶段的内容中，我将实现一个仅支持8条指令（实际上是13条指令），但功能完备的RISC-V处理器（通过编译的方式使其模拟40条指令），它可以运行更多程序。&lt;/p>
-&lt;p>&lt;strong>在开始之前先总结一下处理器开发的思路：&lt;/strong>&lt;/p>
-&lt;ul>
-&lt;li>第一步：认真看手册！
-&lt;ul>
-&lt;li>寄存器文件有多少个寄存器？位宽是多少？它们的功能？&lt;/li>
-&lt;li>支持哪些指令？指令的格式与功能？&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;li>第二步：画出处理器的结构图
-&lt;ul>
-&lt;li>画出架构图，描述清楚处理器各模块之间如何交互&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;li>第三步：使用Verilog/Chisel实现各组件&lt;/li>
-&lt;li>第四步：根据结构图将各组件连接起来&lt;/li>
-&lt;/ul>
-&lt;h1 id="一迷你risc-v指令集">&lt;strong>一、迷你RISC-V指令集&lt;/strong>&lt;/h1>
+&lt;p>有些事情不一定要等到想明白之后才开始记录。&lt;/p></description></item><item><title>曾国藩传</title><link>https://Jiangmmh.github.io/books/zeng-guo-fan/</link><pubDate>Fri, 11 Sep 2026 00:00:00 +0000</pubDate><guid>https://Jiangmmh.github.io/books/zeng-guo-fan/</guid><description>曾国藩，没有显赫的家世，天赋堪称晚清同时代大人物当中最差，却官至两江总督、直隶总督、武英殿大学士，在复杂的时代变局中超越众人，成就最大，被誉为大清“中兴第一名臣”，且最后全身而退。他的人生经历，无论是过去还是现在都给人以特别的启示。</description></item><item><title>蒋廷黻回忆录</title><link>https://Jiangmmh.github.io/books/jiang-bi-ting/</link><pubDate>Fri, 11 Sep 2026 00:00:00 +0000</pubDate><guid>https://Jiangmmh.github.io/books/jiang-bi-ting/</guid><description>蒋廷黻（1895—1965）湖南宝庆人。1911年由教会资助赴美求学，就读于派克学院、哥伦比亚大学研究院，攻读历史获哲学博士学位。1923年回国先后任南开大学、清华大学教授，清华大学文学院院长、历史系主任。他主张兼重中外历史，在研究中国近代外交史过程中，形成了一套对近代中外关系变化如何影响中国历史发展的看法。1935年以非国民党员的学者身份参加国民政府，任行政院政务处长，从此离开清华大学从事外交事务，1945年被任命为中国驻联合国常任代表。1961年改任中國驻美大使。</description></item><item><title>黄仁勋:英伟达之芯</title><link>https://Jiangmmh.github.io/books/nvidia/</link><pubDate>Fri, 11 Sep 2026 00:00:00 +0000</pubDate><guid>https://Jiangmmh.github.io/books/nvidia/</guid><description>本书不仅是一部科技企业家的传记，更是一部关于如何在全球科技舞台上取得成功的范本。跨越30年的科技发展历程，我们可以看到人工智能技术是如何发展的，人工智能将会如何影响到我们每一个人，技术发展的速度和进展是怎么样的。在这场技术的发展过程中，英伟达是一个缩影。通过对技术发展历程的洞察，我们将更清晰的看到未来，企业家可以了解到科技行业的复杂性，以及如何在快速变化的市场中保持领先。这本书适合所有对科技、创新和企业家精神感兴趣的读者，无论你是相关行业的专业人士，还是对其充满好奇的普通读者，都能从黄仁勋的故事中获得启发和动力。</description></item><item><title/><link>https://Jiangmmh.github.io/posts/e6-%E7%AE%80%E6%98%93%E8%BF%90%E8%A1%8C%E6%97%B6%E7%8E%AF%E5%A2%83-3ddc4e932614802480d0e9bbb998fe66/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://Jiangmmh.github.io/posts/e6-%E7%AE%80%E6%98%93%E8%BF%90%E8%A1%8C%E6%97%B6%E7%8E%AF%E5%A2%83-3ddc4e932614802480d0e9bbb998fe66/</guid><description>&lt;h1 id="e6-简易运行时环境">E6 简易运行时环境&lt;/h1>
+&lt;h1 id="一体验am">&lt;strong>一、体验AM&lt;/strong>&lt;/h1>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="E6%20%E7%AE%80%E6%98%93%E8%BF%90%E8%A1%8C%E6%97%B6%E7%8E%AF%E5%A2%83/image.png">&lt;/p>
+&lt;p>先来阅读以下PA1中第一节的内容：&lt;/p>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="E6%20%E7%AE%80%E6%98%93%E8%BF%90%E8%A1%8C%E6%97%B6%E7%8E%AF%E5%A2%83/image%201.png">&lt;/p>
 &lt;blockquote>
-&lt;p>&lt;strong>RV32I共有42条指令&lt;/strong>, 通过实现RV32I, 处理器已经足够完成绝大部分的计算工作。不过为了进一步降低开发的工作量, 我们提出了一个**&amp;ldquo;迷你RISC-V&amp;quot;指令集minirv**, 从RV32I中选出了&lt;strong>8条指令&lt;/strong>, 用它们来替代其他RV32I指令的功能, &lt;strong>使得RV32I能完成的工作, minirv也能完成&lt;/strong>。 这样, 我们就不必实现完整的42条RV32I指令, 也能让处理器运行更复杂的程序了。&lt;/p>&lt;/blockquote>
-&lt;p>查看RISC-V手册，回答如下问题：&lt;/p>
-&lt;p>&lt;img alt="image.png" loading="lazy" src="E5%20%E5%8A%9F%E8%83%BD%E5%AE%8C%E5%A4%87%E7%9A%84%E8%BF%B7%E4%BD%A0RISC-V%E5%A4%84%E7%90%86%E5%99%A8/image.png">&lt;/p>
+&lt;p>一定要刻意训练自己针对问题，自行探索和学习基本原理，思考解决方案并落地解决问题的全流程能力。不要偷懒，等待别人的答案。&lt;/p>&lt;/blockquote>
+&lt;p>PA的目的是要实现NEMU, 一款经过简化的&lt;strong>全系统模拟器&lt;/strong>。所谓全系统模拟器就是其可以模拟完整的硬件，例如x86处理器、RISC-V处理器或红白机硬件。&lt;/p>
+&lt;p>AM的设计非常巧妙，我们可以通过提供不同的&lt;code>ARCH&lt;/code>参数, 来让同一个程序编译到不同的平台上. 例如, &lt;code>ARCH=native&lt;/code>表示将程序编译到Linux本地。&lt;/p>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="E6%20%E7%AE%80%E6%98%93%E8%BF%90%E8%A1%8C%E6%97%B6%E7%8E%AF%E5%A2%83/image%202.png">&lt;/p>
+&lt;p>运行红白机模拟器，检查画面、按键和声音，没有问题。&lt;/p>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="E6%20%E7%AE%80%E6%98%93%E8%BF%90%E8%A1%8C%E6%97%B6%E7%8E%AF%E5%A2%83/image%203.png">&lt;/p>
+&lt;p>NEMU模拟了一个硬件的世界, 我们可以在这个硬件世界中执行程序。换句话说, 我们将要在PA中编写一个用来执行其它程序的程序! &lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl"> +---------------------+ +---------------------+
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">|&lt;/span> NES Game &lt;span class="p">|&lt;/span> &lt;span class="p">|&lt;/span> &lt;span class="s2">&amp;#34;Hello World&amp;#34;&lt;/span> &lt;span class="p">|&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> +---------------------+ +---------------------+
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">|&lt;/span> Simulated NES &lt;span class="p">|&lt;/span> &lt;span class="p">|&lt;/span> Simulated &lt;span class="p">|&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">|&lt;/span> hardware &lt;span class="p">|&lt;/span> &lt;span class="p">|&lt;/span> hardware &lt;span class="p">|&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">+---------------------+ +---------------------+ +---------------------+
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">|&lt;/span> &lt;span class="s2">&amp;#34;Hello World&amp;#34;&lt;/span> &lt;span class="p">|&lt;/span> &lt;span class="p">|&lt;/span> NES Emulator &lt;span class="p">|&lt;/span> &lt;span class="p">|&lt;/span> NEMU &lt;span class="p">|&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">+---------------------+ +---------------------+ +---------------------+
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">|&lt;/span> GNU/Linux &lt;span class="p">|&lt;/span> &lt;span class="p">|&lt;/span> GNU/Linux &lt;span class="p">|&lt;/span> &lt;span class="p">|&lt;/span> GNU/Linux &lt;span class="p">|&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">+---------------------+ +---------------------+ +---------------------+
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">|&lt;/span> Real hardware &lt;span class="p">|&lt;/span> &lt;span class="p">|&lt;/span> Real hardware &lt;span class="p">|&lt;/span> &lt;span class="p">|&lt;/span> Real hardware &lt;span class="p">|&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">+---------------------+ +---------------------+ +---------------------+
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">(&lt;/span>a&lt;span class="o">)&lt;/span> &lt;span class="o">(&lt;/span>b&lt;span class="o">)&lt;/span> &lt;span class="o">(&lt;/span>c&lt;span class="o">)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>(a) 直接在GNU/Linux中运行Hello World程序&lt;/li>
+&lt;li>(b) 在GNU/Linux中通过红白机模拟器，运行红白机游戏&lt;/li>
+&lt;li>(c) 在GNU/Linux中通过NEMU模拟其他硬件，并运行Hello World程序&lt;/li>
+&lt;/ul>
+&lt;h1 id="二运行第一个编译的程序">&lt;strong>二、运行第一个编译的程序&lt;/strong>&lt;/h1>
 &lt;blockquote>
-&lt;p>&lt;strong>RV32I&lt;/strong> 包含 &lt;strong>40 条独特的指令&lt;/strong>，但一个简单的实现可能只需一条始终捕获异常的 SYSTEM 硬件指令即可涵盖 ECALL/EBREAK 指令，并且可能将 FENCE 指令实现为 NOP 指令，从而将基本指令总数减少到 38 条。&lt;/p>&lt;/blockquote>
-&lt;p>&lt;strong>问题一：PC寄存器的位宽是多少？&lt;/strong>&lt;/p>
-&lt;blockquote>
-&lt;p>RV32I有32 个x寄存器，均为 32 位宽，即XLEN=32。 寄存器的x0所有位均&lt;strong>硬连线&lt;/strong>为 0。 通用寄存器x1-x31保存的值会被各种指令解释为布尔值集合、二进制补码有符号整数或无符号二进制整数。
-还有一个额外的非特权寄存器：程序计数器pc 保存下一条指令的地址。&lt;/p>&lt;/blockquote>
-&lt;!-- raw HTML omitted -->
-&lt;p>回答：RV32I中的PC寄存器位宽为32。&lt;/p>
-&lt;!-- raw HTML omitted -->
-&lt;p>&lt;strong>问题二：GPR共有多少个? 每个GPR的位宽是多少?&lt;/strong>&lt;/p>
-&lt;!-- raw HTML omitted -->
-&lt;p>回答：RV32I包含32个GPR（x0～x31），位宽均为32位。&lt;/p></description></item></channel></rss>
+&lt;p>关键问题：为什么需要AM？&lt;/p></description></item></channel></rss>
