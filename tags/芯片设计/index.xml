@@ -1,4 +1,38 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>芯片设计 on Minghan的博客</title><link>https://Jiangmmh.github.io/tags/%E8%8A%AF%E7%89%87%E8%AE%BE%E8%AE%A1/</link><description>Recent content in 芯片设计 on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Tue, 27 Oct 2026 14:19:56 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/tags/%E8%8A%AF%E7%89%87%E8%AE%BE%E8%AE%A1/index.xml" rel="self" type="application/rss+xml"/><item><title>一生一芯-E4阶段笔记</title><link>https://Jiangmmh.github.io/posts/ysyx-e4/</link><pubDate>Tue, 27 Oct 2026 14:19:56 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/ysyx-e4/</guid><description>&lt;p>在前面阶段的学习中，我已经成功使用Logisim开发了一个简单的处理器sCPU，并学习了使用RTL语言（Verilog）设计电路，现在我要更进一步使用现代工具开发真实的处理器。&lt;/p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>芯片设计 on Minghan的博客</title><link>https://Jiangmmh.github.io/tags/%E8%8A%AF%E7%89%87%E8%AE%BE%E8%AE%A1/</link><description>Recent content in 芯片设计 on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Tue, 27 Oct 2026 23:30:27 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/tags/%E8%8A%AF%E7%89%87%E8%AE%BE%E8%AE%A1/index.xml" rel="self" type="application/rss+xml"/><item><title>一生一芯-E5阶段笔记</title><link>https://Jiangmmh.github.io/posts/ysyx-e5/</link><pubDate>Tue, 27 Oct 2026 23:30:27 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/ysyx-e5/</guid><description>&lt;p>在E4阶段中，我先使用Chisel（&lt;del>Verilog&lt;/del>）实现了sISA，得到了sCPU，并在NVboard上进行了测试。然后为了提高调试效率，使用C/C++实现了一个sISA的模拟器sEMU，并以sCPU为DUT，以sEMU为REF，进行了Differential Test。&lt;/p>
+&lt;p>在这个阶段的内容中，我将实现一个仅支持8条指令（实际上是13条指令），但功能完备的RISC-V处理器（通过编译的方式使其模拟40条指令），它可以运行更多程序。&lt;/p>
+&lt;p>&lt;strong>在开始之前先总结一下处理器开发的思路：&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>第一步：认真看手册！
+&lt;ul>
+&lt;li>寄存器文件有多少个寄存器？位宽是多少？它们的功能？&lt;/li>
+&lt;li>支持哪些指令？指令的格式与功能？&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>第二步：画出处理器的结构图
+&lt;ul>
+&lt;li>画出架构图，描述清楚处理器各模块之间如何交互&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>第三步：使用Verilog/Chisel实现各组件&lt;/li>
+&lt;li>第四步：根据结构图将各组件连接起来&lt;/li>
+&lt;/ul>
+&lt;h1 id="一迷你risc-v指令集">&lt;strong>一、迷你RISC-V指令集&lt;/strong>&lt;/h1>
+&lt;blockquote>
+&lt;p>&lt;strong>RV32I共有42条指令&lt;/strong>, 通过实现RV32I, 处理器已经足够完成绝大部分的计算工作。不过为了进一步降低开发的工作量, 我们提出了一个**&amp;ldquo;迷你RISC-V&amp;quot;指令集minirv**, 从RV32I中选出了&lt;strong>8条指令&lt;/strong>, 用它们来替代其他RV32I指令的功能, &lt;strong>使得RV32I能完成的工作, minirv也能完成&lt;/strong>。 这样, 我们就不必实现完整的42条RV32I指令, 也能让处理器运行更复杂的程序了。&lt;/p>&lt;/blockquote>
+&lt;p>查看RISC-V手册，回答如下问题：&lt;/p>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="https://Jiangmmh.github.io/images/posts/ysyx-e5/image.png">&lt;/p>
+&lt;blockquote>
+&lt;p>&lt;strong>RV32I&lt;/strong> 包含 &lt;strong>40 条独特的指令&lt;/strong>，但一个简单的实现可能只需一条始终捕获异常的 SYSTEM 硬件指令即可涵盖 ECALL/EBREAK 指令，并且可能将 FENCE 指令实现为 NOP 指令，从而将基本指令总数减少到 38 条。&lt;/p>&lt;/blockquote>
+&lt;p>&lt;strong>问题一：PC寄存器的位宽是多少？&lt;/strong>&lt;/p>
+&lt;blockquote>
+&lt;p>RV32I有32 个x寄存器，均为 32 位宽，即XLEN=32。 寄存器的x0所有位均&lt;strong>硬连线&lt;/strong>为 0。 通用寄存器x1-x31保存的值会被各种指令解释为布尔值集合、二进制补码有符号整数或无符号二进制整数。
+还有一个额外的非特权寄存器：程序计数器pc 保存下一条指令的地址。&lt;/p>&lt;/blockquote>
+&lt;!-- raw HTML omitted -->
+&lt;p>回答：RV32I中的PC寄存器位宽为32。&lt;/p>
+&lt;!-- raw HTML omitted -->
+&lt;p>&lt;strong>问题二：GPR共有多少个? 每个GPR的位宽是多少?&lt;/strong>&lt;/p>
+&lt;!-- raw HTML omitted -->
+&lt;p>回答：RV32I包含32个GPR（x0～x31），位宽均为32位。&lt;/p></description></item><item><title>一生一芯-E4阶段笔记</title><link>https://Jiangmmh.github.io/posts/ysyx-e4/</link><pubDate>Tue, 27 Oct 2026 14:19:56 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/ysyx-e4/</guid><description>&lt;p>在前面阶段的学习中，我已经成功使用Logisim开发了一个简单的处理器sCPU，并学习了使用RTL语言（Verilog）设计电路，现在我要更进一步使用现代工具开发真实的处理器。&lt;/p>
 &lt;p>在本文中，我将介绍如何搭建Verilator仿真环境和使用Verilator进行电路仿真的方法，然后使用RTL（Verilog）和Chisel（敏捷开发语言）实现sCPU，并开发一个模拟器sEMU作为Reference，进行DiffTest。&lt;/p>
 &lt;h1 id="讲义笔记">讲义笔记&lt;/h1>
 &lt;h2 id="1-使用verilator进行仿真">1. 使用Verilator进行仿真&lt;/h2>
