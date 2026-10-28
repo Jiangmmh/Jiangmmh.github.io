@@ -6,20 +6,8 @@
     <description>Recent content in 日常 on Minghan的博客</description>
     <generator>Hugo</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Tue, 27 Oct 2026 10:20:00 +0800</lastBuildDate>
+    <lastBuildDate>Thu, 22 Oct 2026 15:20:00 +0800</lastBuildDate>
     <atom:link href="http://localhost:1313/tags/%E6%97%A5%E5%B8%B8/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>Today</title>
-      <link>http://localhost:1313/moments/2026-10-27/</link>
-      <pubDate>Tue, 27 Oct 2026 10:20:00 +0800</pubDate>
-      <guid>http://localhost:1313/moments/2026-10-27/</guid>
-      <description>&lt;p&gt;今日任务：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;input disabled=&#34;&#34; type=&#34;checkbox&#34;&gt; Leetecode 单调栈全部题目&lt;/li&gt;
-&lt;li&gt;&lt;input disabled=&#34;&#34; type=&#34;checkbox&#34;&gt; 完成 ysyx-E 阶段的复习&lt;/li&gt;
-&lt;li&gt;&lt;input disabled=&#34;&#34; type=&#34;checkbox&#34;&gt; 《现代操作系统》第五章&lt;/li&gt;
-&lt;/ul&gt;</description>
-    </item>
     <item>
       <title>何为学习？</title>
       <link>http://localhost:1313/moments/2026-10-22/</link>

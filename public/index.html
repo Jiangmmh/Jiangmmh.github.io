@@ -227,6 +227,26 @@
 
 <article class="post-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">一生一芯-E6阶段笔记
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>一、体验AM 先来阅读以下PA1中第一节的内容：
+一定要刻意训练自己针对问题，自行探索和学习基本原理，思考解决方案并落地解决问题的全流程能力。不要偷懒，等待别人的答案。
+PA的目的是要实现NEMU, 一款经过简化的全系统模拟器。所谓全系统模拟器就是其可以模拟完整的硬件，例如x86处理器、RISC-V处理器或红白机硬件。
+AM的设计非常巧妙，我们可以通过提供不同的ARCH参数, 来让同一个程序编译到不同的平台上. 例如, ARCH=native表示将程序编译到Linux本地。
+运行红白机模拟器，检查画面、按键和声音，没有问题。
+NEMU模拟了一个硬件的世界, 我们可以在这个硬件世界中执行程序。换句话说, 我们将要在PA中编写一个用来执行其它程序的程序! &#43;---------------------&#43; &#43;---------------------&#43; | NES Game | | &#34;Hello World&#34; | &#43;---------------------&#43; &#43;---------------------&#43; | Simulated NES | | Simulated | | hardware | | hardware | &#43;---------------------&#43; &#43;---------------------&#43; &#43;---------------------&#43; | &#34;Hello World&#34; | | NES Emulator | | NEMU | &#43;---------------------&#43; &#43;---------------------&#43; &#43;---------------------&#43; | GNU/Linux | | GNU/Linux | | GNU/Linux | &#43;---------------------&#43; &#43;---------------------&#43; &#43;---------------------&#43; | Real hardware | | Real hardware | | Real hardware | &#43;---------------------&#43; &#43;---------------------&#43; &#43;---------------------&#43; (a) (b) (c) (a) 直接在GNU/Linux中运行Hello World程序 (b) 在GNU/Linux中通过红白机模拟器，运行红白机游戏 (c) 在GNU/Linux中通过NEMU模拟其他硬件，并运行Hello World程序 二、运行第一个编译的程序 关键问题：为什么需要AM？
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-28 22:18:08 +0800 CST'>October 28, 2026</span>&nbsp;·&nbsp;<span>49 min</span>&nbsp;·&nbsp;<span>10410 words</span></footer>
+  <a class="entry-link" aria-label="post link to 一生一芯-E6阶段笔记" href="http://localhost:1313/posts/ysyx-e6/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">一生一芯-E5阶段笔记
     </h2>
   </header>
@@ -247,7 +267,7 @@ RV32I有32 个x寄存器，均为 32 位宽，即XLEN=32。 寄存器的x0所�
   </div>
   <footer class="entry-footer">
 
-<span title='2026-10-27 23:30:27 +0800 CST'>October 27, 2026</span>&nbsp;·&nbsp;<span>37 min</span>&nbsp;·&nbsp;<span>7718 words</span></footer>
+<span title='2026-10-27 23:30:27 +0800 CST'>October 27, 2026</span>&nbsp;·&nbsp;<span>38 min</span>&nbsp;·&nbsp;<span>7978 words</span></footer>
   <a class="entry-link" aria-label="post link to 一生一芯-E5阶段笔记" href="http://localhost:1313/posts/ysyx-e5/"></a>
 </article>
 
@@ -429,25 +449,6 @@ $ make qemu riscv64-unknown-elf-gcc -c -o kernel/entry.o kernel/entry.S riscv64-
 
 <span title='2026-10-25 15:12:01 +0800 CST'>October 25, 2026</span>&nbsp;·&nbsp;<span>8 min</span>&nbsp;·&nbsp;<span>1668 words</span></footer>
   <a class="entry-link" aria-label="post link to MIT6.1810: Lab1 Utils" href="http://localhost:1313/posts/xv6-lab1-util/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">从目标文件到运行时装载：深入理解链接
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>1. 链接的历史：为什么需要链接器？ 1.1 从一个源文件到一个完整的程序 当我们编写一个 C 程序时，通常会经历以下过程：
-源代码 │ ▼ 预处理（Preprocessing） │ ▼ 编译（Compilation） │ ▼ 汇编（Assembly） │ ▼ 目标文件（Object File） │ ▼ 链接（Linking） │ ▼ 可执行文件（Executable） │ ▼ 装载与执行（Loading &amp; Execution） 初学编程时，我们可能会认为，编译器只需要把源代码翻译成机器指令，再将这些指令交给处理器执行即可。但当软件规模扩大到数十万行、数百万行甚至更多时，问题就变得复杂起来。
-假设我们有这样一个程序：
-// main.c #include &lt;stdio.h&gt; int add(int a, int b); int main(void) { int result = add(10, 20); printf(&#34;%d\n&#34;, result); return 0; } 函数 add() 的实现位于另一个文件：
-// add.c int add(int a, int b) { return a &#43; b; } 我们可以分别编译这两个源文件：
-...</p>
-  </div>
-  <footer class="entry-footer">
-
-<span title='2026-10-23 21:36:30 +0800 CST'>October 23, 2026</span>&nbsp;·&nbsp;<span>9 min</span>&nbsp;·&nbsp;<span>1768 words</span></footer>
-  <a class="entry-link" aria-label="post link to 从目标文件到运行时装载：深入理解链接" href="http://localhost:1313/posts/link/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">

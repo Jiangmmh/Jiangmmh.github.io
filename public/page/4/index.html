@@ -193,6 +193,35 @@
 
 <article class="post-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">UCLA Computer Architecture Lec1
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>最近在尝试自己实现一个RISC-V处理器，在实现的过程中遇到了一些问题，不得其解。
+遂找到了这门UCLA的计算机体系结构课，该课程正好是以RISC-V作为目标来讲解的，并且包含完整的Lectures、Slides、Homework和Programming Assignment。
+1. 课程介绍 课程网址：Computer Systems Architecture Fall 2025
+课程介绍：
+本课程旨在学习现代微处理器的基础知识及其与其他单元的交互，例如存储层次结构、GPU和I/O。在高层面上，计算机体系结构是选择和互连硬件组件以创建满足功能、性能和成本目标的计算机的科学与工程。更具体地说，在本课程中，你将学习架构计算机的基本原理和技术，包括设计指令集体系结构（ISA）、流水线和指令级并行。 你将通过使用C/C&#43;&#43;为一个简单的RISC ISA设计和实现一个多级流水线超标量处理器，来更详细地学习这些主题。此外，你将学习现代处理器设计中使用的各种体系结构技术，包括超标量设计、乱序执行、GPU体系结构和缓存层次结构。
+2. Why this course？ 两点重要原因:
+所有计算机科学家和工程师都需要知道：软件与底层硬件是如何交互的？ 系统设计非常非常非常重要！ 思考下面这两个问题？
+为什么机器学习的能力越来越强？ 为什么20年无法发明GPT？ 这张图中的三个要素解释了这一点:
+算力：并行计算硬件的发展为机器学习计算提供了“动力” 大数据：移动互联网/物联网的发展带来了海量数据 算法：深度学习算法的创新和发展 其中，正是计算硬件的性能提高，使得海量数据与算法创新能够真正地落地。
+Neural Scaling Law：Larger the model → better the performance.
+这条定律表达的是模型越大，能力越强。
+那么大模型的主要需求是什么？
+更快的算力 更大的内存 关键问题：How did we make hardware better?
+更多晶体管：往芯片中塞入更多的 transistor（晶体管） 支持更多的特性：包括流水线、乱序执行、缓存等 硬件专门化：为常用任务设计专门等硬件，例如矩阵运算 3. Course Workload 这门课将关注RISC-V ISA，包括RISC-V标准、微架构（实现）、实现策略（流水线、预测、并行）、存储的设计（缓存和主存）、多核设计（一致性）。 课程材料包括：
+Lectures，视频&#43;slides Homewokrs，5个书面作业 Projects，3个编程作业 CA1：使用C/C&#43;&#43;实现一个模拟器，模拟支持13条指令的单周期RISC-V处理器 CA2：设计一个branch predictor CA3：设计并实现一个模拟器，模拟支持out-of-order (OoO) 的超标量处理器 4. 软件工程已死？ 大模型和Agent的发展，使得软件开发的工作岗位正在逐渐减少。
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-15 15:53:21 +0800 CST'>October 15, 2026</span>&nbsp;·&nbsp;<span>1 min</span>&nbsp;·&nbsp;<span>84 words</span></footer>
+  <a class="entry-link" aria-label="post link to UCLA Computer Architecture Lec1" href="http://localhost:1313/posts/ucla-ca-01/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">Leetecode 二叉树(一)
     </h2>
   </header>
@@ -266,23 +295,18 @@ class Solution { vector&lt;int&gt; findLocalMinMax(ListNode *head) { vector&lt;i
     </h2>
   </header>
   <div class="entry-content">
-    <p>E5 功能完备的迷你RISC-V处理器 在E4阶段中，我先使用Chisel（Verilog）实现了sISA，得到了sCPU，并在NVboard上进行了测试。然后为了提高调试效率，使用C/C&#43;&#43;实现了一个sISA的模拟器sEMU，并以sCPU为DUT，以sEMU为REF，进行了Differential Test。
-在这个阶段的内容中，我将实现一个仅支持8条指令（实际上是13条指令），但功能完备的RISC-V处理器（通过编译的方式使其模拟40条指令），它可以运行更多程序。
-在开始之前先总结一下处理器开发的思路：
-第一步：认真看手册！ 寄存器文件有多少个寄存器？位宽是多少？它们的功能？ 支持哪些指令？指令的格式与功能？ 第二步：画出处理器的结构图 画出架构图，描述清楚处理器各模块之间如何交互 第三步：使用Verilog/Chisel实现各组件 第四步：根据结构图将各组件连接起来 一、迷你RISC-V指令集 RV32I共有42条指令, 通过实现RV32I, 处理器已经足够完成绝大部分的计算工作。不过为了进一步降低开发的工作量, 我们提出了一个**“迷你RISC-V&#34;指令集minirv**, 从RV32I中选出了8条指令, 用它们来替代其他RV32I指令的功能, 使得RV32I能完成的工作, minirv也能完成。 这样, 我们就不必实现完整的42条RV32I指令, 也能让处理器运行更复杂的程序了。
-查看RISC-V手册，回答如下问题：
-RV32I 包含 40 条独特的指令，但一个简单的实现可能只需一条始终捕获异常的 SYSTEM 硬件指令即可涵盖 ECALL/EBREAK 指令，并且可能将 FENCE 指令实现为 NOP 指令，从而将基本指令总数减少到 38 条。
-问题一：PC寄存器的位宽是多少？
-RV32I有32 个x寄存器，均为 32 位宽，即XLEN=32。 寄存器的x0所有位均硬连线为 0。 通用寄存器x1-x31保存的值会被各种指令解释为布尔值集合、二进制补码有符号整数或无符号二进制整数。 还有一个额外的非特权寄存器：程序计数器pc 保存下一条指令的地址。
-回答：RV32I中的PC寄存器位宽为32。
-问题二：GPR共有多少个? 每个GPR的位宽是多少?
-回答：RV32I包含32个GPR（x0～x31），位宽均为32位。
+    <p>E6 简易运行时环境 一、体验AM 先来阅读以下PA1中第一节的内容：
+一定要刻意训练自己针对问题，自行探索和学习基本原理，思考解决方案并落地解决问题的全流程能力。不要偷懒，等待别人的答案。
+PA的目的是要实现NEMU, 一款经过简化的全系统模拟器。所谓全系统模拟器就是其可以模拟完整的硬件，例如x86处理器、RISC-V处理器或红白机硬件。
+AM的设计非常巧妙，我们可以通过提供不同的ARCH参数, 来让同一个程序编译到不同的平台上. 例如, ARCH=native表示将程序编译到Linux本地。
+运行红白机模拟器，检查画面、按键和声音，没有问题。
+NEMU模拟了一个硬件的世界, 我们可以在这个硬件世界中执行程序。换句话说, 我们将要在PA中编写一个用来执行其它程序的程序! &#43;---------------------&#43; &#43;---------------------&#43; | NES Game | | &#34;Hello World&#34; | &#43;---------------------&#43; &#43;---------------------&#43; | Simulated NES | | Simulated | | hardware | | hardware | &#43;---------------------&#43; &#43;---------------------&#43; &#43;---------------------&#43; | &#34;Hello World&#34; | | NES Emulator | | NEMU | &#43;---------------------&#43; &#43;---------------------&#43; &#43;---------------------&#43; | GNU/Linux | | GNU/Linux | | GNU/Linux | &#43;---------------------&#43; &#43;---------------------&#43; &#43;---------------------&#43; | Real hardware | | Real hardware | | Real hardware | &#43;---------------------&#43; &#43;---------------------&#43; &#43;---------------------&#43; (a) (b) (c) (a) 直接在GNU/Linux中运行Hello World程序 (b) 在GNU/Linux中通过红白机模拟器，运行红白机游戏 (c) 在GNU/Linux中通过NEMU模拟其他硬件，并运行Hello World程序 二、运行第一个编译的程序 关键问题：为什么需要AM？
 ...</p>
   </div>
   <footer class="entry-footer">
 
-<span>37 min</span>&nbsp;·&nbsp;<span>7720 words</span></footer>
-  <a class="entry-link" aria-label="post link to " href="http://localhost:1313/posts/e5-%E5%8A%9F%E8%83%BD%E5%AE%8C%E5%A4%87%E7%9A%84%E8%BF%B7%E4%BD%A0risc-v%E5%A4%84%E7%90%86%E5%99%A8-3dbc4e932614800985a7f752a64d88fa/"></a>
+<span>49 min</span>&nbsp;·&nbsp;<span>10403 words</span></footer>
+  <a class="entry-link" aria-label="post link to " href="http://localhost:1313/posts/e6-%E7%AE%80%E6%98%93%E8%BF%90%E8%A1%8C%E6%97%B6%E7%8E%AF%E5%A2%83-3ddc4e932614802480d0e9bbb998fe66/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">

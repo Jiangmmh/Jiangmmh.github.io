@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Klib on Minghan的博客</title>
+    <link>http://localhost:1313/tags/klib/</link>
+    <description>Recent content in Klib on Minghan的博客</description>
+    <generator>Hugo</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Wed, 28 Oct 2026 22:18:08 +0800</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/klib/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>一生一芯-E6阶段笔记</title>
+      <link>http://localhost:1313/posts/ysyx-e6/</link>
+      <pubDate>Wed, 28 Oct 2026 22:18:08 +0800</pubDate>
+      <guid>http://localhost:1313/posts/ysyx-e6/</guid>
+      <description>&lt;h1 id=&#34;一体验am&#34;&gt;&lt;strong&gt;一、体验AM&lt;/strong&gt;&lt;/h1&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-e6/image.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;先来阅读以下PA1中第一节的内容：&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-e6/image%201.png&#34;&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;一定要刻意训练自己针对问题，自行探索和学习基本原理，思考解决方案并落地解决问题的全流程能力。不要偷懒，等待别人的答案。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;PA的目的是要实现NEMU, 一款经过简化的&lt;strong&gt;全系统模拟器&lt;/strong&gt;。所谓全系统模拟器就是其可以模拟完整的硬件，例如x86处理器、RISC-V处理器或红白机硬件。&lt;/p&gt;
+&lt;p&gt;AM的设计非常巧妙，我们可以通过提供不同的&lt;code&gt;ARCH&lt;/code&gt;参数, 来让同一个程序编译到不同的平台上. 例如, &lt;code&gt;ARCH=native&lt;/code&gt;表示将程序编译到Linux本地。&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-e6/image%202.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;运行红白机模拟器，检查画面、按键和声音，没有问题。&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-e6/image%203.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;NEMU模拟了一个硬件的世界, 我们可以在这个硬件世界中执行程序。换句话说, 我们将要在PA中编写一个用来执行其它程序的程序! &lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                         +---------------------+  +---------------------+
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                         &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;       NES Game      &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;  &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;    &lt;span class=&#34;s2&#34;&gt;&amp;#34;Hello World&amp;#34;&lt;/span&gt;    &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                         +---------------------+  +---------------------+
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                         &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;    Simulated NES    &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;  &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;      Simulated      &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                         &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;       hardware      &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;  &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;       hardware      &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;+---------------------+  +---------------------+  +---------------------+
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;    &lt;span class=&#34;s2&#34;&gt;&amp;#34;Hello World&amp;#34;&lt;/span&gt;    &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;  &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;     NES Emulator    &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;  &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;        NEMU         &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;+---------------------+  +---------------------+  +---------------------+
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;      GNU/Linux      &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;  &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;      GNU/Linux      &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;  &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;      GNU/Linux      &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;+---------------------+  +---------------------+  +---------------------+
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;    Real hardware    &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;  &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;    Real hardware    &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;  &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;    Real hardware    &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;+---------------------+  +---------------------+  +---------------------+
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;          &lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;a&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;                      &lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;b&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;                     &lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;c&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;(a) 直接在GNU/Linux中运行Hello World程序&lt;/li&gt;
+&lt;li&gt;(b) 在GNU/Linux中通过红白机模拟器，运行红白机游戏&lt;/li&gt;
+&lt;li&gt;(c) 在GNU/Linux中通过NEMU模拟其他硬件，并运行Hello World程序&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;二运行第一个编译的程序&#34;&gt;&lt;strong&gt;二、运行第一个编译的程序&lt;/strong&gt;&lt;/h1&gt;
+&lt;blockquote&gt;
+&lt;p&gt;关键问题：为什么需要AM？&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

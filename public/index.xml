@@ -6,8 +6,48 @@
     <description>Recent content on Minghan的博客</description>
     <generator>Hugo</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Tue, 27 Oct 2026 23:30:27 +0800</lastBuildDate>
+    <lastBuildDate>Wed, 28 Oct 2026 22:18:08 +0800</lastBuildDate>
     <atom:link href="http://localhost:1313/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>一生一芯-E6阶段笔记</title>
+      <link>http://localhost:1313/posts/ysyx-e6/</link>
+      <pubDate>Wed, 28 Oct 2026 22:18:08 +0800</pubDate>
+      <guid>http://localhost:1313/posts/ysyx-e6/</guid>
+      <description>&lt;h1 id=&#34;一体验am&#34;&gt;&lt;strong&gt;一、体验AM&lt;/strong&gt;&lt;/h1&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-e6/image.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;先来阅读以下PA1中第一节的内容：&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-e6/image%201.png&#34;&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;一定要刻意训练自己针对问题，自行探索和学习基本原理，思考解决方案并落地解决问题的全流程能力。不要偷懒，等待别人的答案。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;PA的目的是要实现NEMU, 一款经过简化的&lt;strong&gt;全系统模拟器&lt;/strong&gt;。所谓全系统模拟器就是其可以模拟完整的硬件，例如x86处理器、RISC-V处理器或红白机硬件。&lt;/p&gt;
+&lt;p&gt;AM的设计非常巧妙，我们可以通过提供不同的&lt;code&gt;ARCH&lt;/code&gt;参数, 来让同一个程序编译到不同的平台上. 例如, &lt;code&gt;ARCH=native&lt;/code&gt;表示将程序编译到Linux本地。&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-e6/image%202.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;运行红白机模拟器，检查画面、按键和声音，没有问题。&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/ysyx-e6/image%203.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;NEMU模拟了一个硬件的世界, 我们可以在这个硬件世界中执行程序。换句话说, 我们将要在PA中编写一个用来执行其它程序的程序! &lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                         +---------------------+  +---------------------+
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                         &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;       NES Game      &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;  &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;    &lt;span class=&#34;s2&#34;&gt;&amp;#34;Hello World&amp;#34;&lt;/span&gt;    &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                         +---------------------+  +---------------------+
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                         &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;    Simulated NES    &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;  &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;      Simulated      &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                         &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;       hardware      &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;  &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;       hardware      &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;+---------------------+  +---------------------+  +---------------------+
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;    &lt;span class=&#34;s2&#34;&gt;&amp;#34;Hello World&amp;#34;&lt;/span&gt;    &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;  &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;     NES Emulator    &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;  &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;        NEMU         &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;+---------------------+  +---------------------+  +---------------------+
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;      GNU/Linux      &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;  &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;      GNU/Linux      &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;  &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;      GNU/Linux      &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;+---------------------+  +---------------------+  +---------------------+
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;    Real hardware    &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;  &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;    Real hardware    &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;  &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;    Real hardware    &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;+---------------------+  +---------------------+  +---------------------+
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;          &lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;a&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;                      &lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;b&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;                     &lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;c&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;(a) 直接在GNU/Linux中运行Hello World程序&lt;/li&gt;
+&lt;li&gt;(b) 在GNU/Linux中通过红白机模拟器，运行红白机游戏&lt;/li&gt;
+&lt;li&gt;(c) 在GNU/Linux中通过NEMU模拟其他硬件，并运行Hello World程序&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;二运行第一个编译的程序&#34;&gt;&lt;strong&gt;二、运行第一个编译的程序&lt;/strong&gt;&lt;/h1&gt;
+&lt;blockquote&gt;
+&lt;p&gt;关键问题：为什么需要AM？&lt;/p&gt;</description>
+    </item>
     <item>
       <title>一生一芯-E5阶段笔记</title>
       <link>http://localhost:1313/posts/ysyx-e5/</link>
@@ -211,18 +251,6 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;pgaccess_test starting
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;pgtbltest: pgaccess_test failed: incorrect access bits set, &lt;span class=&#34;nv&#34;&gt;pid&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;m&#34;&gt;3&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;这个页表和用户进程的地址空间正好能对应上：&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>Today</title>
-      <link>http://localhost:1313/moments/2026-10-27/</link>
-      <pubDate>Tue, 27 Oct 2026 10:20:00 +0800</pubDate>
-      <guid>http://localhost:1313/moments/2026-10-27/</guid>
-      <description>&lt;p&gt;今日任务：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;input disabled=&#34;&#34; type=&#34;checkbox&#34;&gt; Leetecode 单调栈全部题目&lt;/li&gt;
-&lt;li&gt;&lt;input disabled=&#34;&#34; type=&#34;checkbox&#34;&gt; 完成 ysyx-E 阶段的复习&lt;/li&gt;
-&lt;li&gt;&lt;input disabled=&#34;&#34; type=&#34;checkbox&#34;&gt; 《现代操作系统》第五章&lt;/li&gt;
-&lt;/ul&gt;</description>
     </item>
     <item>
       <title>埃拉托色尼筛法（Sieve of Eratosthenes）</title>
@@ -1923,48 +1951,44 @@
     </item>
     <item>
       <title></title>
-      <link>http://localhost:1313/posts/e5-%E5%8A%9F%E8%83%BD%E5%AE%8C%E5%A4%87%E7%9A%84%E8%BF%B7%E4%BD%A0risc-v%E5%A4%84%E7%90%86%E5%99%A8-3dbc4e932614800985a7f752a64d88fa/</link>
+      <link>http://localhost:1313/posts/e6-%E7%AE%80%E6%98%93%E8%BF%90%E8%A1%8C%E6%97%B6%E7%8E%AF%E5%A2%83-3ddc4e932614802480d0e9bbb998fe66/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/e5-%E5%8A%9F%E8%83%BD%E5%AE%8C%E5%A4%87%E7%9A%84%E8%BF%B7%E4%BD%A0risc-v%E5%A4%84%E7%90%86%E5%99%A8-3dbc4e932614800985a7f752a64d88fa/</guid>
-      <description>&lt;h1 id=&#34;e5-功能完备的迷你risc-v处理器&#34;&gt;E5 功能完备的迷你RISC-V处理器&lt;/h1&gt;
-&lt;p&gt;在E4阶段中，我先使用Chisel（&lt;del&gt;Verilog&lt;/del&gt;）实现了sISA，得到了sCPU，并在NVboard上进行了测试。然后为了提高调试效率，使用C/C++实现了一个sISA的模拟器sEMU，并以sCPU为DUT，以sEMU为REF，进行了Differential Test。&lt;/p&gt;
-&lt;p&gt;在这个阶段的内容中，我将实现一个仅支持8条指令（实际上是13条指令），但功能完备的RISC-V处理器（通过编译的方式使其模拟40条指令），它可以运行更多程序。&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;在开始之前先总结一下处理器开发的思路：&lt;/strong&gt;&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;第一步：认真看手册！
-&lt;ul&gt;
-&lt;li&gt;寄存器文件有多少个寄存器？位宽是多少？它们的功能？&lt;/li&gt;
-&lt;li&gt;支持哪些指令？指令的格式与功能？&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;第二步：画出处理器的结构图
-&lt;ul&gt;
-&lt;li&gt;画出架构图，描述清楚处理器各模块之间如何交互&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;第三步：使用Verilog/Chisel实现各组件&lt;/li&gt;
-&lt;li&gt;第四步：根据结构图将各组件连接起来&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h1 id=&#34;一迷你risc-v指令集&#34;&gt;&lt;strong&gt;一、迷你RISC-V指令集&lt;/strong&gt;&lt;/h1&gt;
+      <guid>http://localhost:1313/posts/e6-%E7%AE%80%E6%98%93%E8%BF%90%E8%A1%8C%E6%97%B6%E7%8E%AF%E5%A2%83-3ddc4e932614802480d0e9bbb998fe66/</guid>
+      <description>&lt;h1 id=&#34;e6-简易运行时环境&#34;&gt;E6 简易运行时环境&lt;/h1&gt;
+&lt;h1 id=&#34;一体验am&#34;&gt;&lt;strong&gt;一、体验AM&lt;/strong&gt;&lt;/h1&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;E6%20%E7%AE%80%E6%98%93%E8%BF%90%E8%A1%8C%E6%97%B6%E7%8E%AF%E5%A2%83/image.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;先来阅读以下PA1中第一节的内容：&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;E6%20%E7%AE%80%E6%98%93%E8%BF%90%E8%A1%8C%E6%97%B6%E7%8E%AF%E5%A2%83/image%201.png&#34;&gt;&lt;/p&gt;
 &lt;blockquote&gt;
-&lt;p&gt;&lt;strong&gt;RV32I共有42条指令&lt;/strong&gt;, 通过实现RV32I, 处理器已经足够完成绝大部分的计算工作。不过为了进一步降低开发的工作量, 我们提出了一个**&amp;ldquo;迷你RISC-V&amp;quot;指令集minirv**, 从RV32I中选出了&lt;strong&gt;8条指令&lt;/strong&gt;, 用它们来替代其他RV32I指令的功能, &lt;strong&gt;使得RV32I能完成的工作, minirv也能完成&lt;/strong&gt;。 这样, 我们就不必实现完整的42条RV32I指令, 也能让处理器运行更复杂的程序了。&lt;/p&gt;
+&lt;p&gt;一定要刻意训练自己针对问题，自行探索和学习基本原理，思考解决方案并落地解决问题的全流程能力。不要偷懒，等待别人的答案。&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;查看RISC-V手册，回答如下问题：&lt;/p&gt;
-&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;E5%20%E5%8A%9F%E8%83%BD%E5%AE%8C%E5%A4%87%E7%9A%84%E8%BF%B7%E4%BD%A0RISC-V%E5%A4%84%E7%90%86%E5%99%A8/image.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;PA的目的是要实现NEMU, 一款经过简化的&lt;strong&gt;全系统模拟器&lt;/strong&gt;。所谓全系统模拟器就是其可以模拟完整的硬件，例如x86处理器、RISC-V处理器或红白机硬件。&lt;/p&gt;
+&lt;p&gt;AM的设计非常巧妙，我们可以通过提供不同的&lt;code&gt;ARCH&lt;/code&gt;参数, 来让同一个程序编译到不同的平台上. 例如, &lt;code&gt;ARCH=native&lt;/code&gt;表示将程序编译到Linux本地。&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;E6%20%E7%AE%80%E6%98%93%E8%BF%90%E8%A1%8C%E6%97%B6%E7%8E%AF%E5%A2%83/image%202.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;运行红白机模拟器，检查画面、按键和声音，没有问题。&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;E6%20%E7%AE%80%E6%98%93%E8%BF%90%E8%A1%8C%E6%97%B6%E7%8E%AF%E5%A2%83/image%203.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;NEMU模拟了一个硬件的世界, 我们可以在这个硬件世界中执行程序。换句话说, 我们将要在PA中编写一个用来执行其它程序的程序! &lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                         +---------------------+  +---------------------+
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                         &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;       NES Game      &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;  &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;    &lt;span class=&#34;s2&#34;&gt;&amp;#34;Hello World&amp;#34;&lt;/span&gt;    &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                         +---------------------+  +---------------------+
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                         &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;    Simulated NES    &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;  &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;      Simulated      &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                         &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;       hardware      &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;  &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;       hardware      &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;+---------------------+  +---------------------+  +---------------------+
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;    &lt;span class=&#34;s2&#34;&gt;&amp;#34;Hello World&amp;#34;&lt;/span&gt;    &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;  &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;     NES Emulator    &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;  &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;        NEMU         &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;+---------------------+  +---------------------+  +---------------------+
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;      GNU/Linux      &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;  &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;      GNU/Linux      &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;  &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;      GNU/Linux      &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;+---------------------+  +---------------------+  +---------------------+
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;    Real hardware    &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;  &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;    Real hardware    &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;  &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;    Real hardware    &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;+---------------------+  +---------------------+  +---------------------+
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;          &lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;a&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;                      &lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;b&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;                     &lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;c&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;(a) 直接在GNU/Linux中运行Hello World程序&lt;/li&gt;
+&lt;li&gt;(b) 在GNU/Linux中通过红白机模拟器，运行红白机游戏&lt;/li&gt;
+&lt;li&gt;(c) 在GNU/Linux中通过NEMU模拟其他硬件，并运行Hello World程序&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;二运行第一个编译的程序&#34;&gt;&lt;strong&gt;二、运行第一个编译的程序&lt;/strong&gt;&lt;/h1&gt;
 &lt;blockquote&gt;
-&lt;p&gt;&lt;strong&gt;RV32I&lt;/strong&gt; 包含 &lt;strong&gt;40 条独特的指令&lt;/strong&gt;，但一个简单的实现可能只需一条始终捕获异常的 SYSTEM 硬件指令即可涵盖 ECALL/EBREAK 指令，并且可能将 FENCE 指令实现为 NOP 指令，从而将基本指令总数减少到 38 条。&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;&lt;strong&gt;问题一：PC寄存器的位宽是多少？&lt;/strong&gt;&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;RV32I有32 个x寄存器，均为 32 位宽，即XLEN=32。 寄存器的x0所有位均&lt;strong&gt;硬连线&lt;/strong&gt;为 0。 通用寄存器x1-x31保存的值会被各种指令解释为布尔值集合、二进制补码有符号整数或无符号二进制整数。
-还有一个额外的非特权寄存器：程序计数器pc 保存下一条指令的地址。&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;!-- raw HTML omitted --&gt;
-&lt;p&gt;回答：RV32I中的PC寄存器位宽为32。&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
-&lt;p&gt;&lt;strong&gt;问题二：GPR共有多少个? 每个GPR的位宽是多少?&lt;/strong&gt;&lt;/p&gt;
-&lt;!-- raw HTML omitted --&gt;
-&lt;p&gt;回答：RV32I包含32个GPR（x0～x31），位宽均为32位。&lt;/p&gt;</description>
+&lt;p&gt;关键问题：为什么需要AM？&lt;/p&gt;</description>
     </item>
   </channel>
 </rss>
