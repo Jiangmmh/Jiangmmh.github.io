@@ -1503,37 +1503,4 @@
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">GitHub Actions 自动部署
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> ↓
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">GitHub Pages 发布网站
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>完成初始化后，日常写作只需要编辑 Markdown 文件并推送到 GitHub，剩余的构建与部署工作就可以交给 GitHub Actions 自动完成。&lt;/p></description></item><item><title/><link>https://Jiangmmh.github.io/posts/e6-%E7%AE%80%E6%98%93%E8%BF%90%E8%A1%8C%E6%97%B6%E7%8E%AF%E5%A2%83-3ddc4e932614802480d0e9bbb998fe66/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://Jiangmmh.github.io/posts/e6-%E7%AE%80%E6%98%93%E8%BF%90%E8%A1%8C%E6%97%B6%E7%8E%AF%E5%A2%83-3ddc4e932614802480d0e9bbb998fe66/</guid><description>&lt;h1 id="e6-简易运行时环境">E6 简易运行时环境&lt;/h1>
-&lt;h1 id="一体验am">&lt;strong>一、体验AM&lt;/strong>&lt;/h1>
-&lt;p>&lt;img alt="image.png" loading="lazy" src="E6%20%E7%AE%80%E6%98%93%E8%BF%90%E8%A1%8C%E6%97%B6%E7%8E%AF%E5%A2%83/image.png">&lt;/p>
-&lt;p>先来阅读以下PA1中第一节的内容：&lt;/p>
-&lt;p>&lt;img alt="image.png" loading="lazy" src="E6%20%E7%AE%80%E6%98%93%E8%BF%90%E8%A1%8C%E6%97%B6%E7%8E%AF%E5%A2%83/image%201.png">&lt;/p>
-&lt;blockquote>
-&lt;p>一定要刻意训练自己针对问题，自行探索和学习基本原理，思考解决方案并落地解决问题的全流程能力。不要偷懒，等待别人的答案。&lt;/p>&lt;/blockquote>
-&lt;p>PA的目的是要实现NEMU, 一款经过简化的&lt;strong>全系统模拟器&lt;/strong>。所谓全系统模拟器就是其可以模拟完整的硬件，例如x86处理器、RISC-V处理器或红白机硬件。&lt;/p>
-&lt;p>AM的设计非常巧妙，我们可以通过提供不同的&lt;code>ARCH&lt;/code>参数, 来让同一个程序编译到不同的平台上. 例如, &lt;code>ARCH=native&lt;/code>表示将程序编译到Linux本地。&lt;/p>
-&lt;p>&lt;img alt="image.png" loading="lazy" src="E6%20%E7%AE%80%E6%98%93%E8%BF%90%E8%A1%8C%E6%97%B6%E7%8E%AF%E5%A2%83/image%202.png">&lt;/p>
-&lt;p>运行红白机模拟器，检查画面、按键和声音，没有问题。&lt;/p>
-&lt;p>&lt;img alt="image.png" loading="lazy" src="E6%20%E7%AE%80%E6%98%93%E8%BF%90%E8%A1%8C%E6%97%B6%E7%8E%AF%E5%A2%83/image%203.png">&lt;/p>
-&lt;p>NEMU模拟了一个硬件的世界, 我们可以在这个硬件世界中执行程序。换句话说, 我们将要在PA中编写一个用来执行其它程序的程序! &lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl"> +---------------------+ +---------------------+
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">|&lt;/span> NES Game &lt;span class="p">|&lt;/span> &lt;span class="p">|&lt;/span> &lt;span class="s2">&amp;#34;Hello World&amp;#34;&lt;/span> &lt;span class="p">|&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> +---------------------+ +---------------------+
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">|&lt;/span> Simulated NES &lt;span class="p">|&lt;/span> &lt;span class="p">|&lt;/span> Simulated &lt;span class="p">|&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">|&lt;/span> hardware &lt;span class="p">|&lt;/span> &lt;span class="p">|&lt;/span> hardware &lt;span class="p">|&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">+---------------------+ +---------------------+ +---------------------+
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">|&lt;/span> &lt;span class="s2">&amp;#34;Hello World&amp;#34;&lt;/span> &lt;span class="p">|&lt;/span> &lt;span class="p">|&lt;/span> NES Emulator &lt;span class="p">|&lt;/span> &lt;span class="p">|&lt;/span> NEMU &lt;span class="p">|&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">+---------------------+ +---------------------+ +---------------------+
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">|&lt;/span> GNU/Linux &lt;span class="p">|&lt;/span> &lt;span class="p">|&lt;/span> GNU/Linux &lt;span class="p">|&lt;/span> &lt;span class="p">|&lt;/span> GNU/Linux &lt;span class="p">|&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">+---------------------+ +---------------------+ +---------------------+
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">|&lt;/span> Real hardware &lt;span class="p">|&lt;/span> &lt;span class="p">|&lt;/span> Real hardware &lt;span class="p">|&lt;/span> &lt;span class="p">|&lt;/span> Real hardware &lt;span class="p">|&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">+---------------------+ +---------------------+ +---------------------+
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">(&lt;/span>a&lt;span class="o">)&lt;/span> &lt;span class="o">(&lt;/span>b&lt;span class="o">)&lt;/span> &lt;span class="o">(&lt;/span>c&lt;span class="o">)&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
-&lt;li>(a) 直接在GNU/Linux中运行Hello World程序&lt;/li>
-&lt;li>(b) 在GNU/Linux中通过红白机模拟器，运行红白机游戏&lt;/li>
-&lt;li>(c) 在GNU/Linux中通过NEMU模拟其他硬件，并运行Hello World程序&lt;/li>
-&lt;/ul>
-&lt;h1 id="二运行第一个编译的程序">&lt;strong>二、运行第一个编译的程序&lt;/strong>&lt;/h1>
-&lt;blockquote>
-&lt;p>关键问题：为什么需要AM？&lt;/p></description></item></channel></rss>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>完成初始化后，日常写作只需要编辑 Markdown 文件并推送到 GitHub，剩余的构建与部署工作就可以交给 GitHub Actions 自动完成。&lt;/p></description></item></channel></rss>
