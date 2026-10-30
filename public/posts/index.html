@@ -205,6 +205,24 @@
 
 <article class="post-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">15441-Liso-CP1
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>项目介绍 该是卡耐基梅隆大学（CMU）的计算机网络课程（15441: Networking and the Internet）的第一个项目。
+The purpose of this project is to give you experience in developing concurrent network applications.
+在这个项目中我们将使用Berkeley Socket API编写Web服务器，支持：
+部分HTTP1.1 协议，细节见文档 RFC2616 HTTPS（via TLS）协议，细节见文档 RFC2818 CGI（Common Gateway Interface），细节见文档 RFC 3875 your Liso web server will be fully functional and capable of running interactive web applications via its CGI interface. At the end of the project the final test will be running a simple web blog written using the Python Flask microframework。
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-30 16:20:00 +0800 CST'>October 30, 2026</span>&nbsp;·&nbsp;<span>7 min</span>&nbsp;·&nbsp;<span>1420 words</span></footer>
+  <a class="entry-link" aria-label="post link to 15441-Liso-CP1" href="http://localhost:1313/posts/liso-cp1/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">Computer Networks P&amp;D 阅读笔记 Ch1
     </h2>
   </header>
@@ -427,31 +445,6 @@ struct run { struct run *next; }; struct { struct spinlock lock; struct run *fre
 
 <span title='2026-10-26 10:42:45 +0800 CST'>October 26, 2026</span>&nbsp;·&nbsp;<span>5 min</span>&nbsp;·&nbsp;<span>1016 words</span></footer>
   <a class="entry-link" aria-label="post link to 再探xv6: 内存篇" href="http://localhost:1313/posts/xv6-02/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">MIT6.1810: Lab2 Syscall
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>在这个lab中我们将深入理解xv6（其他系统也差不多）的系统调用是如何实现的，并尝试根据功能需求实现自己的系统调用。
-关于xv6的概述和系统调用的逻辑可以看这篇文章，后面就不过多介绍了。
-一、Using gdb (easy) 这部分内容主要是介绍gdb的使用方法，略。
-二、Sandbox a command(moderate) 题目要求实现一个系统调用interpose，其接受两个参数：一个整数掩码和一个路径，前者指定了要屏蔽哪些系统调用，后者暂时不用管。如果要使用interpose屏蔽当前进程的open系统调用，用法如下：
-interpose(1 &lt;&lt; SYS_open, &#34;-&#34;) 现在开始实现该系统调用，首先是用户侧：
-在 user/user.h 中添加 interpose() 的声明 。 int interpose(int, const char *); 在 user/usys.pl 中添加一行内容用于生成系统调用入口函数的实现。 entry(“interpose”); 题目提供了两个程序sandbox.c和sbtest.c，我们需要在Makefile中将其加入编译：
-UPROGS=\ ...... $U/_sandbox\ $U/_sbtest\ 在内核侧：
-在 kernel/syscall.h 中添加 interpose 的系统调用号宏定义
-#define SYS_interpose 23 在 kernel/proc.h 的proc结构体中添加一个interpose_mask，记录屏蔽字
-int interpose_mask; 在 kernel/sysproc.c 中添加函数 sys_interpose() 处理interpose系统调用
-uint64 sys_interpose(void) { int interpose_mask; argint(0, &amp;interpose_mask); myproc()-&gt;interpose_mask = interpose_mask; return 0; } 为了使子进程能够继承父进程的屏蔽字，需要在创建子进程时拷贝interpose_mask，在 kernel/proc.c 中的 kfork() 函数的末尾添加 interpose_mask 的拷贝。
-...</p>
-  </div>
-  <footer class="entry-footer">
-
-<span title='2026-10-26 09:23:20 +0800 CST'>October 26, 2026</span>&nbsp;·&nbsp;<span>5 min</span>&nbsp;·&nbsp;<span>1044 words</span></footer>
-  <a class="entry-link" aria-label="post link to MIT6.1810: Lab2 Syscall" href="http://localhost:1313/posts/xv6-lab2-syscall/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">

@@ -6,8 +6,27 @@
     <description>Recent content on Minghan的博客</description>
     <generator>Hugo</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Fri, 30 Oct 2026 11:59:50 +0800</lastBuildDate>
+    <lastBuildDate>Fri, 30 Oct 2026 16:20:00 +0800</lastBuildDate>
     <atom:link href="http://localhost:1313/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>15441-Liso-CP1</title>
+      <link>http://localhost:1313/posts/liso-cp1/</link>
+      <pubDate>Fri, 30 Oct 2026 16:20:00 +0800</pubDate>
+      <guid>http://localhost:1313/posts/liso-cp1/</guid>
+      <description>&lt;h1 id=&#34;项目介绍&#34;&gt;项目介绍&lt;/h1&gt;
+&lt;p&gt;该是卡耐基梅隆大学（CMU）的计算机网络课程（&lt;a href=&#34;https://web2.qatar.cmu.edu/~kharras/courses/15441/#/&#34;&gt;&lt;strong&gt;15441: Networking and the Internet&lt;/strong&gt;&lt;/a&gt;）的第一个项目。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;The purpose of this project is to give you experience in developing concurrent network applications.&lt;/strong&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;在这个项目中我们将使用Berkeley Socket API编写Web服务器，支持：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;部分HTTP1.1 协议，细节见文档 &lt;a href=&#34;https://www.rfc-editor.org/info/rfc2616/&#34;&gt;RFC2616&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;HTTPS（via TLS）协议，细节见文档 &lt;a href=&#34;https://www.rfc-editor.org/info/rfc2818/&#34;&gt;RFC2818&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;CGI（Common Gateway Interface），细节见文档 &lt;a href=&#34;https://www.rfc-editor.org/info/rfc3875/&#34;&gt;RFC 3875&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;your &lt;strong&gt;Liso web server&lt;/strong&gt; will be fully functional and capable of &lt;strong&gt;running interactive web applications via its CGI interface&lt;/strong&gt;. At the end of the project the final test will be running a simple web blog written using the Python Flask microframework。&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Computer Networks P&amp;D 阅读笔记 Ch1</title>
       <link>http://localhost:1313/posts/net-sys1/</link>

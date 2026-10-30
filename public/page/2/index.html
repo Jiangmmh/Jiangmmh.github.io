@@ -193,6 +193,31 @@
 
 <article class="post-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">MIT6.1810: Lab2 Syscall
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>在这个lab中我们将深入理解xv6（其他系统也差不多）的系统调用是如何实现的，并尝试根据功能需求实现自己的系统调用。
+关于xv6的概述和系统调用的逻辑可以看这篇文章，后面就不过多介绍了。
+一、Using gdb (easy) 这部分内容主要是介绍gdb的使用方法，略。
+二、Sandbox a command(moderate) 题目要求实现一个系统调用interpose，其接受两个参数：一个整数掩码和一个路径，前者指定了要屏蔽哪些系统调用，后者暂时不用管。如果要使用interpose屏蔽当前进程的open系统调用，用法如下：
+interpose(1 &lt;&lt; SYS_open, &#34;-&#34;) 现在开始实现该系统调用，首先是用户侧：
+在 user/user.h 中添加 interpose() 的声明 。 int interpose(int, const char *); 在 user/usys.pl 中添加一行内容用于生成系统调用入口函数的实现。 entry(“interpose”); 题目提供了两个程序sandbox.c和sbtest.c，我们需要在Makefile中将其加入编译：
+UPROGS=\ ...... $U/_sandbox\ $U/_sbtest\ 在内核侧：
+在 kernel/syscall.h 中添加 interpose 的系统调用号宏定义
+#define SYS_interpose 23 在 kernel/proc.h 的proc结构体中添加一个interpose_mask，记录屏蔽字
+int interpose_mask; 在 kernel/sysproc.c 中添加函数 sys_interpose() 处理interpose系统调用
+uint64 sys_interpose(void) { int interpose_mask; argint(0, &amp;interpose_mask); myproc()-&gt;interpose_mask = interpose_mask; return 0; } 为了使子进程能够继承父进程的屏蔽字，需要在创建子进程时拷贝interpose_mask，在 kernel/proc.c 中的 kfork() 函数的末尾添加 interpose_mask 的拷贝。
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-26 09:23:20 +0800 CST'>October 26, 2026</span>&nbsp;·&nbsp;<span>5 min</span>&nbsp;·&nbsp;<span>1044 words</span></footer>
+  <a class="entry-link" aria-label="post link to MIT6.1810: Lab2 Syscall" href="http://localhost:1313/posts/xv6-lab2-syscall/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">MIT6.1810: Lab1 Utils
     </h2>
   </header>
@@ -398,48 +423,6 @@ Linux是一种开源的操作系统，你有任何疑问都可以从源代码和
 
 <span title='2026-10-20 18:23:11 +0800 CST'>October 20, 2026</span>&nbsp;·&nbsp;<span>22 min</span>&nbsp;·&nbsp;<span>4643 words</span></footer>
   <a class="entry-link" aria-label="post link to 一生一芯-E2阶段笔记" href="http://localhost:1313/posts/ysyx-e2/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">CS161 Computer Security Lec1
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>我的学习结合了26sping和26fall的材料，即slides看26sp，课程视频看26fa。
-教材阅读笔记 这是教材第一章内容的笔记，主要介绍了13个安全原则。
-1. 了解你的威胁模型 威胁模型（threat model） 是对攻击者身份及其所拥有资源的描述。
-攻击者攻击系统的原因多种多样，可能是金钱、政治、娱乐等等。有些攻击者毫无逻辑可言——他们只是想看世界毁灭。以你自身的人身安全为例。了解你的威胁模型，就意味着了解谁会以及为什么会攻击你
-我们通常会对攻击者给出如下常见的假设：
-攻击者可以在无人察觉的情况下与您的系统进行交互，这意味着您可能无法总能在攻击者发动攻击之前检测到他们篡改您的系统。 攻击者掌握了一些关于您系统的基本信息，例如操作系统、任何潜在的软件漏洞等等。 攻击者坚持不懈，而且运气不错（不要有侥幸心理）；例如，如果一次攻击成功的概率是百万分之一，那么攻击者就会尝试一百万次。 攻击者愿意投入时间和资源进行攻击。 攻击者可以协调跨多个系统的复杂攻击。攻击者不仅限于攻击单个设备，还可以同时攻击整个网络，或将多个攻击串联起来。 任何系统都可能成为攻击目标。例如，一家赌场曾遭到黑客攻击，原因是其网络中的一个鱼缸温度计被入侵。 2. 考虑人为因素 安全系统必须方便普通用户使用，因此在设计时必须考虑到人为因素。
-如果一个安全系统不好用、不人性化，无论它多么安全，最终都会无人问津。
-如果某种方法能让用户的更方便使用，那他们总会找到办法来规避安全系统。
-3. 安全即经济学 经济学是一门研究人们如何在资源有限的情况下做出选择的社会科学。
-安全其实与经济学类似。没有任何系统能够完全抵御所有攻击，更高级别的安全通常需要投入更多资金，因此防御措施的预期收益应该与攻击的预期成本成正比。
-这条原则的推论是：你应该集中精力加固最薄弱的环节。安全就像一条链条：一个系统的安全性取决于它最薄弱的环节。攻击者会选择阻力最小的路径，他们会攻击系统最薄弱的地方。在纱门上安装昂贵的高档防盗锁毫无意义；攻击者不会费力去撬锁，他们可以直接拆掉纱门走进去。
-4. 如果无法预防，请进行检测 预防是指阻止攻击发生，检测是指获悉攻击已经发生，而响应是指对攻击采取应对措施。
-如果无法阻止攻击发生，至少应该能够知道攻击已经发生。一旦知道攻击已经发生，就应该找到应对方法，因为没有响应的检测毫无意义。
-5. 纵深防御 纵深防御的关键思想是将多种类型的防御措施分层叠加，这样攻击者就必须突破所有防御才能成功攻击系统。
-纵深防御的一个例子是通过探测器的组合。假设你有两个探测器，D1和D2这两个探测器都有一定的误报率（并非实际安全漏洞的警报）和漏报率（未触发任何警报的安全漏洞）。一种使用方法是将这两个探测器并联，即任何一个探测器发出警报都会触发响应。这样可以提高误报率，降低漏报率。另一种方法是将探测器串联，即两个探测器都必须发出警报才能触发响应。在这种情况下，误报率会降低，而漏报率会升高。
-6. 最小权限原则 为了确保最佳安全，任何一方都应仅拥有履行其职责所需的最小权限。
-程序拥有的权限越少，即使将来遭受缓冲区溢出攻击，造成的损害也越小。
-Unix 在最小权限原则方面做得如何？答案是：非常糟糕。每个程序都会获得调用它的用户的所有权限。 Windows表现如何？答案：同样糟糕。 移动设备在这方面做得更好。每个应用程序都运行在沙盒环境中，通常无法访问其他应用程序的数据。 7. 责任分离 分散权限，避免任何个人或程序拥有绝对权力。要求在授予访问权限前必须获得多方批准。
-如果你需要保护一项高度敏感的行动，就应该要求多方合作来执行该行动，因为单方恶意行事的可能性比所有参与方都恶意行事并相互勾结的可能性要大得多。
-8. 确保完全中介（Ensure Complete Mediation） 每一次对受保护资源的访问，都必须经过权限检查。
-执行访问控制策略时，必须检查对每一个对象的每一次访问。
-这里有两个关键词：
-Every access（每一次访问）：不能只在登录时检查，也不能只检查第一次访问。读取、修改、删除等操作，都必须受到适当的访问控制。 Every object（每一个对象）：不能只保护部分资源。文件、数据库记录、账户、API 资源等，都要纳入相应的权限控制范围。 9. 香农定律 香农格言指出，攻击者了解他们正在攻击的系统。
-“隐蔽式安全”指的是依靠系统设计、算法或源代码的保密性来保障安全的系统。
-我们不应该依赖隐蔽性来保障安全，要始终假设攻击者了解你所使用系统的每一个细节。
-与此密切相关的原则是柯克霍夫原则，该原则指出，即使攻击者掌握了系统的所有内部细节，密码系统也应该保持安全。
-10. 使用故障安全默认值 选择具有“故障安全”功能的默认设置，在系统宕机时兼顾安全性和可用性。确保即使安全机制失效或崩溃，系统仍会默认采用安全行为，而不是不安全行为。
-11. 从一开始就将安全性融入设计 在设计系统的开始就将安全性考虑到设计中。
-...</p>
-  </div>
-  <footer class="entry-footer">
-
-<span title='2026-10-20 10:34:06 +0800 CST'>October 20, 2026</span>&nbsp;·&nbsp;<span>2 min</span>&nbsp;·&nbsp;<span>265 words</span></footer>
-  <a class="entry-link" aria-label="post link to CS161 Computer Security Lec1" href="http://localhost:1313/posts/cs161-lec1/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">

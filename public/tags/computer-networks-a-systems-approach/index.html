@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Computer Networks a Systems Approach | Minghan的博客</title>
+<meta name="keywords" content="">
+<meta name="description" content="">
+<meta name="author" content="">
+<link rel="canonical" href="http://localhost:1313/tags/computer-networks-a-systems-approach/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.f9490c4bd2e7d3fd9e21909b0bc528878329710db51c69d38b7057b37e889c1d.css" integrity="sha256-&#43;UkMS9Ln0/2eIZCbC8Uoh4MpcQ21HGnTi3BXs36InB0=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" type="application/rss+xml" href="http://localhost:1313/tags/computer-networks-a-systems-approach/index.xml" title="rss">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/tags/computer-networks-a-systems-approach/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css"
+>
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/contrib/auto-render.min.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    if (typeof renderMathInElement !== "function") {
+      console.error("KaTeX auto-render 加载失败");
+      return;
+    }
+
+    document.querySelectorAll(".post-content, .book-content").forEach(function (element) {
+      renderMathInElement(element, {
+        delimiters: [
+          { left: "$$", right: "$$", display: true },
+          { left: "\\[", right: "\\]", display: true },
+          { left: "\\(", right: "\\)", display: false }
+        ],
+        throwOnError: false
+      });
+    });
+  });
+</script>
+<meta property="og:url" content="http://localhost:1313/tags/computer-networks-a-systems-approach/">
+  <meta property="og:site_name" content="Minghan的博客">
+  <meta property="og:title" content="Computer Networks a Systems Approach">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:type" content="website">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Computer Networks a Systems Approach">
+
+</head>
+<body class="list" id="top">
+    <header class="header">
+    <nav class="header-nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="Minghan的博客 (Alt + H)">Minghan的博客</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" class="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg class="sun" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu" class="menu">
+            <li>
+                <a href="http://localhost:1313/posts/" title="文章">
+                    <span>文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/archives/" title="归档">
+                    <span>归档</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/categories/" title="分类">
+                    <span>分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="标签">
+                    <span>标签</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/moments/" title="随记">
+                    <span>随记</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/photos/" title="照片墙">
+                    <span>照片墙</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/books/" title="阅读">
+                    <span>阅读</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/about/" title="关于">
+                    <span>关于</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main"> 
+<header class="page-header"><nav class="breadcrumbs" role="navigation" aria-label="Breadcrumb">
+            <a href="/">Home</a>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+            <a href="/tags/">Tags</a>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+        <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+</nav>
+  <h1>
+    Computer Networks a Systems Approach
+  </h1>
+</header>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Computer Networks P&amp;D 阅读笔记 Ch1
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>这是一本关于计算机网络的开源书籍，写得非常好。
+Preface “系统方法” 指的是计算机系统设计和实现领域的一个概念。计算机科学研究人员和从业者通常使用这个术语来研究构建复杂计算系统（例如操作系统、网络、分布式应用程序等）时出现的问题。
+系统方法的关键在于“全局观”：你需要关注系统的各个组件如何相互作用以实现整体结果，而不是仅仅优化每个组件。
+在网络领域，这通常意味着要超越传统的分层视角，思考如何以可能涉及多个层面的方式来最佳地解决问题。拥塞控制就是一个很好的例子，它涉及多个层面，并影响终端系统和网络设备。我们将拥塞这一系统级问题单独成章进行讨论，而不是试图将其硬塞进传输层等其他层级。
+1. 问题：如何构建计算机网络？ 假设让你来构建一个计算机网络，你会如何设计它？
+如果我们要构造一个未来可能扩展到全球规模，并支持远程会议、视频点播、电子商务、分布式计算和数字图书馆等各种应用的网络。
+有哪些现有技术可以作为底层构建模块？ 你会设计什么样的软件架构来将这些构建模块集成到一个高效的通信服务中？ 本书的主要目标就是回答这个问题：介绍现有的网络技术，并展示如何利用它们从零开始构建网络。
+计算机网络与其他类型的网络有何区别？
+计算机网络最重要的特性或许在于其通用性。其主要由通用可编程硬件（CPU）构建，并非针对特定应用。它们能够承载多种不同类型的数据，并支持广泛且不断增长的应用。
+2. 应用 计算机网络的应用包括：例如万维网、电子邮件、社交媒体、流媒体音乐或电影、视频会议、即时通讯、文件共享等等。
+使用计算机网络的群体：
+网络应用开发者 网络运维管理者 网络协议的设计和构建者 3. 要求 我们为自己设定了一个雄心勃勃的目标：从零开始构建计算机网络。
+为了实现这一目标，我们将从基本原理入手，然后提出在构建实际网络时自然会遇到的问题。
+计算机网络的要求如下：
+可扩展链接 高效的资源共享 支持通用服务 可管理性好 网络共享的基本概念：多路复用。
+时分多路复用，将时间分割成大小相等的量子，并以轮询的方式让每个数据流有机会通过物理链路发送数据。 频分多路复用，使用不同的频率通过物理链路传输每个数据流 如果其中一个流（主机对）没有数据要发送，那么它所占用的物理链路份额——即时间片或频率——就会处于空闲状态，即使其他流有数据要发送 统计复用，按需从每个数据流发送的，而不是在预定的时隙内发送。 为了保证每个数据流都能获得使用链路发送数据的机会，统计复用为每个数据流在给定时间允许传输的数据块大小设定了一个上限。这个大小受限的数据块通常被称为数据包，以区别于应用程序可能想要传输的任意大小的消息。 核心思想：按Packet发送数据，而不是任意长度 源端可能需要将消息分割成多个数据包，接收端再将这些数据包重新组装成原始消息。 4. 计算机网络的架构 抽象——即将实现细节隐藏在定义良好的接口之后——是系统设计者用来管理复杂性的基本工具。
+为了应对设计计算机网络系统的复杂性，网络设计者提出了网络架构的概念来指导网络的设计与实现。主要的计算机网络架构包括：
+OSI七层模型 TCP/IP四层模型 抽象自然而然地导致了分层，尤其是在网络系统中。其基本思路是，从底层硬件提供的服务入手，然后添加一系列层，每一层都提供更高（更抽象）的服务级别。高层提供的服务是根据底层提供的服务来实现的。
+分层提供了两个实用功能：
+将构建网络的问题分解成更易于管理的组件。与其实现一个包罗万象的单体软件，不如实现多个层，每个层解决问题的一部分。 提供了一种更模块化的设计。如果您决定添加一些新服务，可能只需要修改其中一层的功能，即可重用其他层提供的函数。 很多时候，系统的任何同一层级中提供了多种抽象，每种抽象都为更高层级提供不同的服务，但都基于相同的底层抽象，例如传输层的TCP和UDP协议，都以IP协议的服务为基础，但对上层提供不同的传输服务。
+构成网络系统各层的抽象对象称为协议。协议提供了一种通信服务，供更高层的对象（例如应用程序进程，或者更高层级的协议）交换消息。
+每个协议都定义了两个不同的接口：
+服务接口（纵向）*，*供同一台计算机上其他想要使用其通信服务的对象使用。 协议定义了与另一台机器上的对应节点（对等节点）之间的接口（横向）。 协议规定了如何在同层的对等节点之间传输数据，如何体现？本质就是在发送数据之前在其前面加上一个首部（Header），对等节点在收到数据后根据协议解析该首部，然后取出其中的数据发往上层。
+当我们说底层协议不解释它从高层协议接收到的消息时，指的是它不知道如何从消息中包含的数据中提取任何含义。
+当然，有时底层协议会对接收到的数据进行一些简单的转换，例如压缩或加密。
+多路复用与解多路复用
+因为计算机网络是多层的，且每层可能包含不止一种协议，因此在底层的首部中还要包含一个字段，用来表示该数据所属的上层协议。 几乎所有协议都实现了这种机制。 下面是OSI七层模型和TCP四层模型的架构图：
+虽然现在TCP四层模型成为了实际上的标准，但是OSI七层模型仍有其价值，因为会话层和表示层在开发应用软件时仍需要考虑到。
+会话层提供了一个命名空间，用于将构成单个应用程序的不同传输流连接起来。例如，它可以管理在远程会议应用程序中组合的音频流和视频流。 表示层，它负责处理对等方之间交换的数据格式。 5. 软件 了解如何实现网络软件是理解计算机网络的重要组成部分。虽然你不太可能被委派去实现像 IP 这样的底层协议，但你很有可能会遇到需要实现应用层协议的情况——这种梦寐以求的“杀手级应用”能为你带来难以想象的名利双收。
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-30 11:59:50 +0800 CST'>October 30, 2026</span>&nbsp;·&nbsp;<span>3 min</span>&nbsp;·&nbsp;<span>519 words</span></footer>
+  <a class="entry-link" aria-label="post link to Computer Networks P&D 阅读笔记 Ch1" href="http://localhost:1313/posts/net-sys1/"></a>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="http://localhost:1313/">Minghan的博客</a></span> · 
+
+    
+    
+    <span>
+        Powered by
+        <a href="https://gohugo.io/?utm_source=papermod" rel="noopener" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" id="top-link" class="top-link hidden" aria-label="go to top" title="Go to Top (Alt + G)" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevrons-up">
+        <polyline points="17 11 12 6 7 11"></polyline>
+        <polyline points="17 18 12 13 7 18"></polyline>
+    </svg>
+</a><script src="/js/toc-scrollspy.js" defer></script>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var toplink = document.getElementById("top-link");
+    window.onscroll = function () {
+        const scrollThreshold = window.innerHeight;
+        if (document.body.scrollTop > scrollThreshold || document.documentElement.scrollTop > scrollThreshold) {
+            toplink.classList.remove("hidden");
+        } else {
+            toplink.classList.add("hidden");
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

@@ -2,8 +2,8 @@
 title: "Computer Networks P&D 阅读笔记 Ch1"
 date: '2026-10-30T11:59:50+08:00'
 draft: false
-tags: [计算机网络, TCP/IP]
-categories: [Computer Networks A Systems Approach]
+tags: [TCP/IP, Computer Networks A Systems Approach]
+categories: [计算机网络]
 ---
 这是一本关于计算机网络的[开源书籍](https://book.systemsapproach.org/index.html)，写得非常好。
 
