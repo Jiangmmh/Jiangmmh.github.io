@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>计算机网络 on Minghan的博客</title>
+    <link>http://localhost:1313/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/</link>
+    <description>Recent content in 计算机网络 on Minghan的博客</description>
+    <generator>Hugo</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Fri, 30 Oct 2026 16:20:00 +0800</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>15441-Liso-CP1</title>
+      <link>http://localhost:1313/posts/liso-cp1/</link>
+      <pubDate>Fri, 30 Oct 2026 16:20:00 +0800</pubDate>
+      <guid>http://localhost:1313/posts/liso-cp1/</guid>
+      <description>&lt;h1 id=&#34;项目介绍&#34;&gt;项目介绍&lt;/h1&gt;
+&lt;p&gt;该是卡耐基梅隆大学（CMU）的计算机网络课程（&lt;a href=&#34;https://web2.qatar.cmu.edu/~kharras/courses/15441/#/&#34;&gt;&lt;strong&gt;15441: Networking and the Internet&lt;/strong&gt;&lt;/a&gt;）的第一个项目。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;The purpose of this project is to give you experience in developing concurrent network applications.&lt;/strong&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;在这个项目中我们将使用Berkeley Socket API编写Web服务器，支持：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;部分HTTP1.1 协议，细节见文档 &lt;a href=&#34;https://www.rfc-editor.org/info/rfc2616/&#34;&gt;RFC2616&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;HTTPS（via TLS）协议，细节见文档 &lt;a href=&#34;https://www.rfc-editor.org/info/rfc2818/&#34;&gt;RFC2818&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;CGI（Common Gateway Interface），细节见文档 &lt;a href=&#34;https://www.rfc-editor.org/info/rfc3875/&#34;&gt;RFC 3875&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;your &lt;strong&gt;Liso web server&lt;/strong&gt; will be fully functional and capable of &lt;strong&gt;running interactive web applications via its CGI interface&lt;/strong&gt;. At the end of the project the final test will be running a simple web blog written using the Python Flask microframework。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Computer Networks P&amp;D 阅读笔记 Ch1</title>
+      <link>http://localhost:1313/posts/net-sys1/</link>
+      <pubDate>Fri, 30 Oct 2026 11:59:50 +0800</pubDate>
+      <guid>http://localhost:1313/posts/net-sys1/</guid>
+      <description>&lt;p&gt;这是一本关于计算机网络的&lt;a href=&#34;https://book.systemsapproach.org/index.html&#34;&gt;开源书籍&lt;/a&gt;，写得非常好。&lt;/p&gt;
+&lt;h1 id=&#34;preface&#34;&gt;Preface&lt;/h1&gt;
+&lt;blockquote&gt;
+&lt;p&gt;“系统方法” 指的是计算机系统设计和实现领域的一个概念。计算机科学研究人员和从业者通常使用这个术语来研究构建复杂计算系统（例如操作系统、网络、分布式应用程序等）时出现的问题。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;系统方法的关键在于“全局观”&lt;/strong&gt;：你需要关注系统的各个组件如何相互作用以实现整体结果，而不是仅仅优化每个组件。&lt;/p&gt;
+&lt;p&gt;在网络领域，这通常意味着要&lt;strong&gt;超越传统的分层视角&lt;/strong&gt;，思考如何以可能涉及多个层面的方式来最佳地解决问题。拥塞控制就是一个很好的例子，它涉及多个层面，并影响终端系统和网络设备。我们将拥塞这一系统级问题单独成章进行讨论，而不是试图将其硬塞进传输层等其他层级。&lt;/p&gt;
+&lt;h1 id=&#34;1-问题如何构建计算机网络&#34;&gt;1. 问题：如何构建计算机网络？&lt;/h1&gt;
+&lt;blockquote&gt;
+&lt;p&gt;假设让你来构建一个计算机网络，你会如何设计它？&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;如果我们要构造一个未来可能扩展到全球规模，并支持远程会议、视频点播、电子商务、分布式计算和数字图书馆等各种应用的网络。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;有哪些&lt;strong&gt;现有技术&lt;/strong&gt;可以作为底层构建模块？&lt;/li&gt;
+&lt;li&gt;你会设计什么样的&lt;strong&gt;软件架构&lt;/strong&gt;来将这些构建模块集成到一个高效的通信服务中？&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;本书的主要目标就是回答这个问题：介绍现有的网络技术，并展示如何利用它们从零开始构建网络。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;计算机网络与其他类型的网络有何区别？&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;计算机网络最重要的特性或许在于其通用性。其主要由通用可编程硬件（CPU）构建，并非针对特定应用。它们能够承载多种不同类型的数据，并支持广泛且不断增长的应用。&lt;/p&gt;
+&lt;h1 id=&#34;2-应用&#34;&gt;2. 应用&lt;/h1&gt;
+&lt;p&gt;计算机网络的应用包括：例如万维网、电子邮件、社交媒体、流媒体音乐或电影、视频会议、即时通讯、文件共享等等。&lt;/p&gt;
+&lt;p&gt;使用计算机网络的群体：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;网络应用开发者&lt;/li&gt;
+&lt;li&gt;网络运维管理者&lt;/li&gt;
+&lt;li&gt;网络协议的设计和构建者&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;3-要求&#34;&gt;3. 要求&lt;/h1&gt;
+&lt;blockquote&gt;
+&lt;p&gt;我们为自己设定了一个雄心勃勃的目标：从零开始构建计算机网络。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;为了实现这一目标，我们将从基本原理入手，然后提出在构建实际网络时自然会遇到的问题。&lt;/p&gt;
+&lt;p&gt;计算机网络的要求如下：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;可扩展链接&lt;/li&gt;
+&lt;li&gt;高效的资源共享&lt;/li&gt;
+&lt;li&gt;支持通用服务&lt;/li&gt;
+&lt;li&gt;可管理性好&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;p&gt;&lt;strong&gt;网络共享的基本概念：多路复用。&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;时分多路复用，将时间分割成大小相等的量子，并以轮询的方式让每个数据流有机会通过物理链路发送数据。&lt;/li&gt;
+&lt;li&gt;频分多路复用，使用不同的频率通过物理链路传输每个数据流
+&lt;ul&gt;
+&lt;li&gt;如果其中一个流（主机对）没有数据要发送，那么它所占用的物理链路份额——即时间片或频率——就会处于空闲状态，即使其他流有数据要发送&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;统计复用，按需从每个数据流发送的，而不是在预定的时隙内发送。
+&lt;ul&gt;
+&lt;li&gt;为了保证每个数据流都能获得使用链路发送数据的机会，统计复用为每个数据流在给定时间允许传输的数据块大小设定了一个上限。这个大小受限的数据块通常被称为&lt;strong&gt;数据&lt;em&gt;包&lt;/em&gt;&lt;/strong&gt;，以区别于应用程序可能想要传输的任意大小的&lt;em&gt;消息&lt;/em&gt;。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;核心思想：按Packet发送数据，而不是任意长度&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;源端可能需要将消息分割成多个数据包，接收端再将这些数据包重新组装成原始消息。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;4-计算机网络的架构&#34;&gt;4. 计算机网络的架构&lt;/h1&gt;
+&lt;blockquote&gt;
+&lt;p&gt;抽象——即将实现细节隐藏在定义良好的接口之后——是系统设计者用来管理复杂性的基本工具。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;为了应对设计计算机网络系统的复杂性，网络设计者提出了网络架构的概念来指导网络的设计与实现。主要的计算机网络架构包括：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;OSI七层模型&lt;/li&gt;
+&lt;li&gt;TCP/IP四层模型&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;抽象自然而然地导致了分层，尤其是在网络系统中。其基本思路是，从底层硬件提供的服务入手，然后添加一系列层，每一层都提供更高（更抽象）的服务级别。高层提供的服务是根据底层提供的服务来实现的。&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/net-sys1/image.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;分层提供了两个实用功能：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;将构建网络的问题分解成更易于管理的组件。与其实现一个包罗万象的单体软件，不如实现多个层，每个层解决问题的一部分。&lt;/li&gt;
+&lt;li&gt;提供了一种更模块化的设计。如果您决定添加一些新服务，可能只需要修改其中一层的功能，即可重用其他层提供的函数。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;很多时候，系统的任何同一层级中提供了多种抽象，每种抽象都为更高层级提供不同的服务，但都基于相同的底层抽象，例如传输层的TCP和UDP协议，都以IP协议的服务为基础，但对上层提供不同的传输服务。&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/net-sys1/image%201.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;构成网络系统各层的抽象对象称为&lt;strong&gt;协议&lt;/strong&gt;。协议提供了一种通信服务，供更高层的对象（例如应用程序进程，或者更高层级的协议）交换消息。&lt;/p&gt;
+&lt;p&gt;每个协议都定义了两个不同的接口：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;服务接口（纵向）*，*供同一台计算机上其他想要使用其通信服务的对象使用。&lt;/li&gt;
+&lt;li&gt;协议定义了与另一台机器上的对应节点（对等节点）之间的接口（横向）。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/net-sys1/image%202.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;协议规定了如何在同层的对等节点之间传输数据，如何体现？本质就是在发送数据之前在其前面加上一个首部（Header），对等节点在收到数据后根据协议解析该首部，然后取出其中的数据发往上层。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;当我们说底层协议不解释它从高层协议接收到的消息时，指的是它不知道如何从消息中包含的数据中提取任何含义。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;当然，有时底层协议会对接收到的数据进行一些简单的转换，例如压缩或加密。&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/net-sys1/image%203.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;多路复用与解多路复用&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;因为计算机网络是多层的，且每层可能包含不止一种协议，因此在底层的首部中还要包含一个字段，用来表示该数据所属的上层协议。&lt;/li&gt;
+&lt;li&gt;几乎所有协议都实现了这种机制。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;下面是OSI七层模型和TCP四层模型的架构图：&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/net-sys1/image%204.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/net-sys1/image%205.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;虽然现在TCP四层模型成为了实际上的标准，但是OSI七层模型仍有其价值，因为会话层和表示层在开发应用软件时仍需要考虑到。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;会话层提供了一个命名空间，用于将构成单个应用程序的不同传输流连接起来。例如，它可以管理在远程会议应用程序中组合的音频流和视频流。&lt;/li&gt;
+&lt;li&gt;表示层，它负责处理对等方之间交换的数据格式。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;5-软件&#34;&gt;5. 软件&lt;/h1&gt;
+&lt;p&gt;了解如何实现网络软件是理解计算机网络的重要组成部分。虽然你不太可能被委派去实现像 IP 这样的底层协议，但你很有可能会遇到需要实现应用层协议的情况——这种梦寐以求的“杀手级应用”能为你带来难以想象的名利双收。&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

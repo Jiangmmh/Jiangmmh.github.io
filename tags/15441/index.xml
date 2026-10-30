@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>15441 on Minghan的博客</title><link>https://Jiangmmh.github.io/tags/15441/</link><description>Recent content in 15441 on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Fri, 30 Oct 2026 16:20:00 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/tags/15441/index.xml" rel="self" type="application/rss+xml"/><item><title>15441-Liso-CP1</title><link>https://Jiangmmh.github.io/posts/liso-cp1/</link><pubDate>Fri, 30 Oct 2026 16:20:00 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/liso-cp1/</guid><description>&lt;h1 id="项目介绍">项目介绍&lt;/h1>
+&lt;p>该是卡耐基梅隆大学（CMU）的计算机网络课程（&lt;a href="https://web2.qatar.cmu.edu/~kharras/courses/15441/#/">&lt;strong>15441: Networking and the Internet&lt;/strong>&lt;/a>）的第一个项目。&lt;/p>
+&lt;blockquote>
+&lt;p>&lt;strong>The purpose of this project is to give you experience in developing concurrent network applications.&lt;/strong>&lt;/p>&lt;/blockquote>
+&lt;p>在这个项目中我们将使用Berkeley Socket API编写Web服务器，支持：&lt;/p>
+&lt;ul>
+&lt;li>部分HTTP1.1 协议，细节见文档 &lt;a href="https://www.rfc-editor.org/info/rfc2616/">RFC2616&lt;/a>&lt;/li>
+&lt;li>HTTPS（via TLS）协议，细节见文档 &lt;a href="https://www.rfc-editor.org/info/rfc2818/">RFC2818&lt;/a>&lt;/li>
+&lt;li>CGI（Common Gateway Interface），细节见文档 &lt;a href="https://www.rfc-editor.org/info/rfc3875/">RFC 3875&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>your &lt;strong>Liso web server&lt;/strong> will be fully functional and capable of &lt;strong>running interactive web applications via its CGI interface&lt;/strong>. At the end of the project the final test will be running a simple web blog written using the Python Flask microframework。&lt;/p></description></item></channel></rss>

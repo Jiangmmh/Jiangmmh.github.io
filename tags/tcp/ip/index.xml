@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>TCP/IP on Minghan的博客</title><link>https://Jiangmmh.github.io/tags/tcp/ip/</link><description>Recent content in TCP/IP on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Fri, 30 Oct 2026 11:59:50 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/tags/tcp/ip/index.xml" rel="self" type="application/rss+xml"/><item><title>Computer Networks P&amp;D 阅读笔记 Ch1</title><link>https://Jiangmmh.github.io/posts/net-sys1/</link><pubDate>Fri, 30 Oct 2026 11:59:50 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/net-sys1/</guid><description>&lt;p>这是一本关于计算机网络的&lt;a href="https://book.systemsapproach.org/index.html">开源书籍&lt;/a>，写得非常好。&lt;/p>
+&lt;h1 id="preface">Preface&lt;/h1>
+&lt;blockquote>
+&lt;p>“系统方法” 指的是计算机系统设计和实现领域的一个概念。计算机科学研究人员和从业者通常使用这个术语来研究构建复杂计算系统（例如操作系统、网络、分布式应用程序等）时出现的问题。&lt;/p>&lt;/blockquote>
+&lt;p>&lt;strong>系统方法的关键在于“全局观”&lt;/strong>：你需要关注系统的各个组件如何相互作用以实现整体结果，而不是仅仅优化每个组件。&lt;/p>
+&lt;p>在网络领域，这通常意味着要&lt;strong>超越传统的分层视角&lt;/strong>，思考如何以可能涉及多个层面的方式来最佳地解决问题。拥塞控制就是一个很好的例子，它涉及多个层面，并影响终端系统和网络设备。我们将拥塞这一系统级问题单独成章进行讨论，而不是试图将其硬塞进传输层等其他层级。&lt;/p>
+&lt;h1 id="1-问题如何构建计算机网络">1. 问题：如何构建计算机网络？&lt;/h1>
+&lt;blockquote>
+&lt;p>假设让你来构建一个计算机网络，你会如何设计它？&lt;/p>&lt;/blockquote>
+&lt;p>如果我们要构造一个未来可能扩展到全球规模，并支持远程会议、视频点播、电子商务、分布式计算和数字图书馆等各种应用的网络。&lt;/p>
+&lt;ul>
+&lt;li>有哪些&lt;strong>现有技术&lt;/strong>可以作为底层构建模块？&lt;/li>
+&lt;li>你会设计什么样的&lt;strong>软件架构&lt;/strong>来将这些构建模块集成到一个高效的通信服务中？&lt;/li>
+&lt;/ul>
+&lt;p>本书的主要目标就是回答这个问题：介绍现有的网络技术，并展示如何利用它们从零开始构建网络。&lt;/p>
+&lt;blockquote>
+&lt;p>计算机网络与其他类型的网络有何区别？&lt;/p>&lt;/blockquote>
+&lt;p>计算机网络最重要的特性或许在于其通用性。其主要由通用可编程硬件（CPU）构建，并非针对特定应用。它们能够承载多种不同类型的数据，并支持广泛且不断增长的应用。&lt;/p>
+&lt;h1 id="2-应用">2. 应用&lt;/h1>
+&lt;p>计算机网络的应用包括：例如万维网、电子邮件、社交媒体、流媒体音乐或电影、视频会议、即时通讯、文件共享等等。&lt;/p>
+&lt;p>使用计算机网络的群体：&lt;/p>
+&lt;ul>
+&lt;li>网络应用开发者&lt;/li>
+&lt;li>网络运维管理者&lt;/li>
+&lt;li>网络协议的设计和构建者&lt;/li>
+&lt;/ul>
+&lt;h1 id="3-要求">3. 要求&lt;/h1>
+&lt;blockquote>
+&lt;p>我们为自己设定了一个雄心勃勃的目标：从零开始构建计算机网络。&lt;/p>&lt;/blockquote>
+&lt;p>为了实现这一目标，我们将从基本原理入手，然后提出在构建实际网络时自然会遇到的问题。&lt;/p>
+&lt;p>计算机网络的要求如下：&lt;/p>
+&lt;ul>
+&lt;li>可扩展链接&lt;/li>
+&lt;li>高效的资源共享&lt;/li>
+&lt;li>支持通用服务&lt;/li>
+&lt;li>可管理性好&lt;/li>
+&lt;/ul>
+&lt;hr>
+&lt;p>&lt;strong>网络共享的基本概念：多路复用。&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>时分多路复用，将时间分割成大小相等的量子，并以轮询的方式让每个数据流有机会通过物理链路发送数据。&lt;/li>
+&lt;li>频分多路复用，使用不同的频率通过物理链路传输每个数据流
+&lt;ul>
+&lt;li>如果其中一个流（主机对）没有数据要发送，那么它所占用的物理链路份额——即时间片或频率——就会处于空闲状态，即使其他流有数据要发送&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>统计复用，按需从每个数据流发送的，而不是在预定的时隙内发送。
+&lt;ul>
+&lt;li>为了保证每个数据流都能获得使用链路发送数据的机会，统计复用为每个数据流在给定时间允许传输的数据块大小设定了一个上限。这个大小受限的数据块通常被称为&lt;strong>数据&lt;em>包&lt;/em>&lt;/strong>，以区别于应用程序可能想要传输的任意大小的&lt;em>消息&lt;/em>。&lt;/li>
+&lt;li>&lt;strong>核心思想：按Packet发送数据，而不是任意长度&lt;/strong>&lt;/li>
+&lt;li>源端可能需要将消息分割成多个数据包，接收端再将这些数据包重新组装成原始消息。&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;h1 id="4-计算机网络的架构">4. 计算机网络的架构&lt;/h1>
+&lt;blockquote>
+&lt;p>抽象——即将实现细节隐藏在定义良好的接口之后——是系统设计者用来管理复杂性的基本工具。&lt;/p>&lt;/blockquote>
+&lt;p>为了应对设计计算机网络系统的复杂性，网络设计者提出了网络架构的概念来指导网络的设计与实现。主要的计算机网络架构包括：&lt;/p>
+&lt;ul>
+&lt;li>OSI七层模型&lt;/li>
+&lt;li>TCP/IP四层模型&lt;/li>
+&lt;/ul>
+&lt;p>抽象自然而然地导致了分层，尤其是在网络系统中。其基本思路是，从底层硬件提供的服务入手，然后添加一系列层，每一层都提供更高（更抽象）的服务级别。高层提供的服务是根据底层提供的服务来实现的。&lt;/p>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="https://Jiangmmh.github.io/images/posts/net-sys1/image.png">&lt;/p>
+&lt;p>分层提供了两个实用功能：&lt;/p>
+&lt;ol>
+&lt;li>将构建网络的问题分解成更易于管理的组件。与其实现一个包罗万象的单体软件，不如实现多个层，每个层解决问题的一部分。&lt;/li>
+&lt;li>提供了一种更模块化的设计。如果您决定添加一些新服务，可能只需要修改其中一层的功能，即可重用其他层提供的函数。&lt;/li>
+&lt;/ol>
+&lt;p>很多时候，系统的任何同一层级中提供了多种抽象，每种抽象都为更高层级提供不同的服务，但都基于相同的底层抽象，例如传输层的TCP和UDP协议，都以IP协议的服务为基础，但对上层提供不同的传输服务。&lt;/p>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="https://Jiangmmh.github.io/images/posts/net-sys1/image%201.png">&lt;/p>
+&lt;p>构成网络系统各层的抽象对象称为&lt;strong>协议&lt;/strong>。协议提供了一种通信服务，供更高层的对象（例如应用程序进程，或者更高层级的协议）交换消息。&lt;/p>
+&lt;p>每个协议都定义了两个不同的接口：&lt;/p>
+&lt;ul>
+&lt;li>服务接口（纵向）*，*供同一台计算机上其他想要使用其通信服务的对象使用。&lt;/li>
+&lt;li>协议定义了与另一台机器上的对应节点（对等节点）之间的接口（横向）。&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="https://Jiangmmh.github.io/images/posts/net-sys1/image%202.png">&lt;/p>
+&lt;p>协议规定了如何在同层的对等节点之间传输数据，如何体现？本质就是在发送数据之前在其前面加上一个首部（Header），对等节点在收到数据后根据协议解析该首部，然后取出其中的数据发往上层。&lt;/p>
+&lt;blockquote>
+&lt;p>当我们说底层协议不解释它从高层协议接收到的消息时，指的是它不知道如何从消息中包含的数据中提取任何含义。&lt;/p>&lt;/blockquote>
+&lt;p>当然，有时底层协议会对接收到的数据进行一些简单的转换，例如压缩或加密。&lt;/p>
+&lt;p>&lt;img alt="image.png" loading="lazy" src="https://Jiangmmh.github.io/images/posts/net-sys1/image%203.png">&lt;/p>
+&lt;p>&lt;strong>多路复用与解多路复用&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>因为计算机网络是多层的，且每层可能包含不止一种协议，因此在底层的首部中还要包含一个字段，用来表示该数据所属的上层协议。&lt;/li>
+&lt;li>几乎所有协议都实现了这种机制。&lt;/li>
+&lt;/ul>
+&lt;p>下面是OSI七层模型和TCP四层模型的架构图：&lt;/p></description></item></channel></rss>
