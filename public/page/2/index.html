@@ -193,6 +193,24 @@
 
 <article class="post-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">MIT6.1810: Lab1 Utils
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>一、环境准备 环境配置见文档，Linux和Mac皆可。
+拉取实验代码：
+$ git clone git://g.csail.mit.edu/xv6-labs-2026 Cloning into &#39;xv6-labs-2026&#39;... ... $ cd xv6-labs-2026 项目中已经提供了Makefile，直接构建并通过qemu启动即可：
+$ make qemu riscv64-unknown-elf-gcc -c -o kernel/entry.o kernel/entry.S riscv64-unknown-elf-gcc -Wall -Werror -O -fno-omit-frame-pointer -ggdb -DSOL_UTIL -MD -mcmodel=medany -ffreestanding -fno-common -nostdlib -mno-relax -I. -fno-stack-protector -fno-pie -no-pie -c -o kernel/start.o kernel/start.c ... riscv64-unknown-elf-ld -z max-page-size=4096 -N -e main -Ttext 0 -o user/_zombie user/zombie.o user/ulib.o user/usys.o user/printf.o user/umalloc.o riscv64-unknown-elf-objdump -S user/_zombie &gt; user/zombie.asm riscv64-unknown-elf-objdump -t user/_zombie | sed &#39;1,/SYMBOL TABLE/d; s/ .* / /; /^$/d&#39; &gt; user/zombie.sym mkfs/mkfs fs.img README user/xargstest.sh user/_cat user/_echo user/_forktest user/_grep user/_init user/_kill user/_ln user/_ls user/_mkdir user/_rm user/_sh user/_stressfs user/_usertests user/_grind user/_wc user/_zombie nmeta 46 (boot, super, log blocks 30 inode blocks 13, bitmap blocks 1) blocks 954 total 1000 balloc: first 591 blocks have been allocated balloc: write bitmap block at sector 45 qemu-system-riscv64 -machine virt -bios none -kernel kernel/kernel -m 128M -smp 3 -nographic -drive file=fs.img,if=none,format=raw,id=x0 -device virtio-blk-device,drive=x0,bus=virtio-mmio-bus.0 xv6 kernel is booting hart 2 starting hart 1 starting init: starting sh $ 关于xv6项目目录结构、构建流程和Boot细节，可以看我的这篇文章。
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-25 15:12:01 +0800 CST'>October 25, 2026</span>&nbsp;·&nbsp;<span>8 min</span>&nbsp;·&nbsp;<span>1668 words</span></footer>
+  <a class="entry-link" aria-label="post link to MIT6.1810: Lab1 Utils" href="http://localhost:1313/posts/xv6-lab1-util/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">从目标文件到运行时装载：深入理解链接
     </h2>
   </header>
@@ -422,23 +440,6 @@ Every access（每一次访问）：不能只在登录时检查，也不能只�
 
 <span title='2026-10-20 10:34:06 +0800 CST'>October 20, 2026</span>&nbsp;·&nbsp;<span>2 min</span>&nbsp;·&nbsp;<span>265 words</span></footer>
   <a class="entry-link" aria-label="post link to CS161 Computer Security Lec1" href="http://localhost:1313/posts/cs161-lec1/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">[转载]从硅片到智能：Jim Keller谈AI算力的未来
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p> 本文是对 Harvard Data Science Review 访谈文章 From Silicon to Intelligence: The Future of AI Compute 的中文阅读笔记与主题整理，并非逐字翻译。访谈嘉宾为芯片架构师、Tenstorrent CEO Jim Keller，访谈者为 Francesca Dominici 和 Harry Archerman。
-原文： From Silicon to Intelligence: The Future of AI Compute 作者： Jim Keller、Francesca Dominici、Harry Archerman 刊物： Harvard Data Science Review，Issue 8.2，Spring 2026 发表日期： 2026 年 7 月 9 日 许可： Creative Commons Attribution 4.0 International（CC BY 4.0） 本文为基于原文的归纳与改编，原文著作权及许可信息以原文页面为准。
-一、为什么值得读这篇访谈？ Jim Keller 是现代处理器设计领域具有代表性的工程师之一。他的职业经历横跨多个计算范式：从 DEC 的计算机系统，到 Apple 的移动处理器、AMD 的 Zen 架构、Tesla 的自动驾驶芯片，再到 Tenstorrent 的 AI 计算与 RISC-V 处理器。
-...</p>
-  </div>
-  <footer class="entry-footer">
-
-<span title='2026-10-19 23:09:45 +0800 CST'>October 19, 2026</span>&nbsp;·&nbsp;<span>3 min</span>&nbsp;·&nbsp;<span>581 words</span></footer>
-  <a class="entry-link" aria-label="post link to [转载]从硅片到智能：Jim Keller谈AI算力的未来" href="http://localhost:1313/posts/jim-keller-future-ai-compute/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">

@@ -2,10 +2,43 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>http://localhost:1313/tags/am/</loc>
-    <lastmod>2026-10-28T22:18:08+08:00</lastmod>
-  </url><url>
     <loc>http://localhost:1313/categories/</loc>
+    <lastmod>2026-10-30T11:59:50+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/categories/computer-networks-a-systems-approach/</loc>
+    <lastmod>2026-10-30T11:59:50+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/posts/net-sys1/</loc>
+    <lastmod>2026-10-30T11:59:50+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/</loc>
+    <lastmod>2026-10-30T11:59:50+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/posts/</loc>
+    <lastmod>2026-10-30T11:59:50+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/</loc>
+    <lastmod>2026-10-30T11:59:50+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/tcp/</loc>
+    <lastmod>2026-10-30T11:59:50+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/tcp/ip/</loc>
+    <lastmod>2026-10-30T11:59:50+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/</loc>
+    <lastmod>2026-10-30T11:59:50+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/moments/</loc>
+    <lastmod>2026-10-29T01:54:00+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/moments/2026-10-29/</loc>
+    <lastmod>2026-10-29T01:54:00+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/%E6%97%A5%E5%B8%B8/</loc>
+    <lastmod>2026-10-29T01:54:00+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/am/</loc>
     <lastmod>2026-10-28T22:18:08+08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/tags/chisel/</loc>
@@ -15,15 +48,6 @@
     <lastmod>2026-10-28T22:18:08+08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/tags/klib/</loc>
-    <lastmod>2026-10-28T22:18:08+08:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/</loc>
-    <lastmod>2026-10-28T22:18:08+08:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/posts/</loc>
-    <lastmod>2026-10-28T22:18:08+08:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/tags/</loc>
     <lastmod>2026-10-28T22:18:08+08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/tags/uart/</loc>
@@ -161,9 +185,6 @@
     <loc>http://localhost:1313/tags/socket/</loc>
     <lastmod>2026-10-22T15:33:34+08:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/tcp/</loc>
-    <lastmod>2026-10-22T15:33:34+08:00</lastmod>
-  </url><url>
     <loc>http://localhost:1313/tags/udp/</loc>
     <lastmod>2026-10-22T15:33:34+08:00</lastmod>
   </url><url>
@@ -179,13 +200,7 @@
     <loc>http://localhost:1313/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/</loc>
     <lastmod>2026-10-22T15:27:57+08:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/moments/</loc>
-    <lastmod>2026-10-22T15:20:00+08:00</lastmod>
-  </url><url>
     <loc>http://localhost:1313/moments/2026-10-22/</loc>
-    <lastmod>2026-10-22T15:20:00+08:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/tags/%E6%97%A5%E5%B8%B8/</loc>
     <lastmod>2026-10-22T15:20:00+08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/tags/linux%E7%8E%AF%E5%A2%83/</loc>
@@ -347,7 +362,7 @@
     <loc>http://localhost:1313/books/nvidia/</loc>
     <lastmod>2026-09-11T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/posts/e6-%E7%AE%80%E6%98%93%E8%BF%90%E8%A1%8C%E6%97%B6%E7%8E%AF%E5%A2%83-3ddc4e932614802480d0e9bbb998fe66/</loc>
+    <loc>http://localhost:1313/posts/networks-system-approach-409c4e932614808ca914c09dd53aa1c9/</loc>
   </url><url>
     <loc>http://localhost:1313/archives/</loc>
   </url>
