@@ -1,4 +1,55 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>MIT6.1810 on Minghan的博客</title><link>https://Jiangmmh.github.io/tags/mit6.1810/</link><description>Recent content in MIT6.1810 on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Tue, 27 Oct 2026 11:14:45 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/tags/mit6.1810/index.xml" rel="self" type="application/rss+xml"/><item><title>再探xv6: 异常控制流篇</title><link>https://Jiangmmh.github.io/posts/xv6-04/</link><pubDate>Tue, 27 Oct 2026 11:14:45 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/xv6-04/</guid><description>&lt;h1 id="一何为异常控制流">一、何为异常控制流&lt;/h1>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>MIT6.1810 on Minghan的博客</title><link>https://Jiangmmh.github.io/tags/mit6.1810/</link><description>Recent content in MIT6.1810 on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Sun, 01 Nov 2026 10:27:29 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/tags/mit6.1810/index.xml" rel="self" type="application/rss+xml"/><item><title>MIT6.1810: Lab4 Trap</title><link>https://Jiangmmh.github.io/posts/xv6-lab4-trap/</link><pubDate>Sun, 01 Nov 2026 10:27:29 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/xv6-lab4-trap/</guid><description>&lt;h1 id="一risc-v-assemblyeasy">一、&lt;strong>RISC-V assembly (easy)&lt;/strong>&lt;/h1>
+&lt;p>先来看一下 user/call.asm：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-c" data-lang="c">&lt;span class="line">&lt;span class="cl">&lt;span class="cp">#include&lt;/span> &lt;span class="cpf">&amp;#34;kernel/param.h&amp;#34;&lt;/span>&lt;span class="cp">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cp">#include&lt;/span> &lt;span class="cpf">&amp;#34;kernel/types.h&amp;#34;&lt;/span>&lt;span class="cp">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cp">#include&lt;/span> &lt;span class="cpf">&amp;#34;kernel/stat.h&amp;#34;&lt;/span>&lt;span class="cp">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cp">#include&lt;/span> &lt;span class="cpf">&amp;#34;user/user.h&amp;#34;&lt;/span>&lt;span class="cp">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cp">&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="kt">int&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nf">g&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="kt">int&lt;/span> &lt;span class="n">x&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">x&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="mi">3&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="kt">int&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nf">f&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="kt">int&lt;/span> &lt;span class="n">x&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="nf">g&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">x&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="kt">void&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nf">main&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="kt">void&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">printf&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;%d %d&lt;/span>&lt;span class="se">\n&lt;/span>&lt;span class="s">&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nf">f&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">8&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="mi">1&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">13&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">exit&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">0&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>Q1: 哪些寄存器存储着函数的参数？例如，在 main 函数调用printf时，哪个寄存器保存着参数 13 ？&lt;/p>&lt;/blockquote>
+&lt;p>根据RISC-V的Calling Convention，参数依次存放在a0, a1和a2中。&lt;/p>
+&lt;blockquote>
+&lt;p>Q2: main 函数的汇编代码中，函数f 的调用在哪里 ？函数g的调用在哪里？（提示：编译器可能会内联函数。）&lt;/p>&lt;/blockquote>
+&lt;p>下面是call.c对应的汇编代码，可以看到其中并没有调用函数f和函数g，因为对这两个函数的调用都被编译器内联了。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-nasm" data-lang="nasm">&lt;span class="line">&lt;span class="cl">&lt;span class="nf">void&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nf">main&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nv">void&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="err">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="err">24:&lt;/span> &lt;span class="err">1141&lt;/span> &lt;span class="nf">addi&lt;/span> &lt;span class="nb">sp&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="nb">sp&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="o">-&lt;/span>&lt;span class="mi">16&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="err">26:&lt;/span> &lt;span class="nf">e406&lt;/span> &lt;span class="nv">sd&lt;/span> &lt;span class="nv">ra&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mi">8&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nb">sp&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="err">28:&lt;/span> &lt;span class="nf">e022&lt;/span> &lt;span class="nv">sd&lt;/span> &lt;span class="nv">s0&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mi">0&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nb">sp&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="err">2&lt;/span>&lt;span class="nl">a:&lt;/span> &lt;span class="err">0800&lt;/span> &lt;span class="nf">addi&lt;/span> &lt;span class="nv">s0&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="nb">sp&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mi">16&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">printf&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;%d %d\n&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nv">f&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">8&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="mi">1&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">13&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="c1">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="err">2&lt;/span>&lt;span class="nl">c:&lt;/span> &lt;span class="err">4635&lt;/span> &lt;span class="nf">li&lt;/span> &lt;span class="nv">a2&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mi">13&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="err">2&lt;/span>&lt;span class="nl">e:&lt;/span> &lt;span class="err">45&lt;/span>&lt;span class="nf">b1&lt;/span> &lt;span class="nv">li&lt;/span> &lt;span class="nv">a1&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mi">12&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="err">30:&lt;/span> &lt;span class="err">00001517&lt;/span> &lt;span class="nf">auipc&lt;/span> &lt;span class="nv">a0&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mh">0x1&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="err">34:&lt;/span> &lt;span class="err">8&lt;/span>&lt;span class="nf">c050513&lt;/span> &lt;span class="nv">addi&lt;/span> &lt;span class="nv">a0&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="nv">a0&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="o">-&lt;/span>&lt;span class="mi">1856&lt;/span> &lt;span class="err">#&lt;/span> &lt;span class="mi">8&lt;/span>&lt;span class="nv">f0&lt;/span> &lt;span class="o">&amp;lt;&lt;/span>&lt;span class="nv">malloc&lt;/span>&lt;span class="o">+&lt;/span>&lt;span class="mh">0xf2&lt;/span>&lt;span class="o">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="err">38:&lt;/span> &lt;span class="err">70&lt;/span>&lt;span class="nf">e000ef&lt;/span> &lt;span class="nv">jal&lt;/span> &lt;span class="mi">746&lt;/span> &lt;span class="o">&amp;lt;&lt;/span>&lt;span class="nv">printf&lt;/span>&lt;span class="o">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">exit&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">0&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="c1">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="err">3&lt;/span>&lt;span class="nl">c:&lt;/span> &lt;span class="err">4501&lt;/span> &lt;span class="nf">li&lt;/span> &lt;span class="nv">a0&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mi">0&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="err">3&lt;/span>&lt;span class="nl">e:&lt;/span> &lt;span class="err">2&lt;/span>&lt;span class="nf">ba000ef&lt;/span> &lt;span class="nv">jal&lt;/span> &lt;span class="mi">2&lt;/span>&lt;span class="nv">f8&lt;/span> &lt;span class="o">&amp;lt;&lt;/span>&lt;span class="nv">exit&lt;/span>&lt;span class="o">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>Q3：printf 函数位于哪个地址？&lt;/p>&lt;/blockquote>
+&lt;p>printf位于地址0x746处。&lt;/p>
+&lt;blockquote>
+&lt;p>Q4：main 函数中printf函数调用jarl 之后， 寄存器ra的值是多少？&lt;/p></description></item><item><title>再探xv6: 异常控制流篇</title><link>https://Jiangmmh.github.io/posts/xv6-04/</link><pubDate>Tue, 27 Oct 2026 11:14:45 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/xv6-04/</guid><description>&lt;h1 id="一何为异常控制流">一、何为异常控制流&lt;/h1>
 &lt;h2 id="1-从普通控制流到异常控制流">1. 从普通控制流到异常控制流&lt;/h2>
 &lt;p>在学习操作系统之前，我们通常通过函数调用、条件分支、循环等机制理解程序的执行过程。
 例如：&lt;/p>
@@ -51,7 +102,60 @@
 &lt;li>网卡收到数据包。&lt;/li>
 &lt;li>定时器到期。&lt;/li>
 &lt;/ul>
-&lt;p>中断的特点是：它通常与 CPU 当前执行的指令没有直接因果关系。即使 CPU 正在执行完全无关的计算，外部设备仍然可能产生中断。&lt;/p></description></item><item><title>再探xv6: 并发篇</title><link>https://Jiangmmh.github.io/posts/xv6-03/</link><pubDate>Mon, 26 Oct 2026 11:55:00 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/xv6-03/</guid><description>&lt;p>上一篇讲的是内存，这一篇讲并发。并发是 xv6 里最容易写出 bug、也最难调试的部分：对多核的支持让两个 CPU 同时修改同一份数据，中断让内核代码在任意时刻被打断，进程切换又让同一个数据结构被不同的进程轮流访问。&lt;/p>
+&lt;p>中断的特点是：它通常与 CPU 当前执行的指令没有直接因果关系。即使 CPU 正在执行完全无关的计算，外部设备仍然可能产生中断。&lt;/p></description></item><item><title>MIT6.1810: Lab3 Pagetable</title><link>https://Jiangmmh.github.io/posts/xv6-lab3-pgtbl/</link><pubDate>Tue, 27 Oct 2026 11:01:51 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/xv6-lab3-pgtbl/</guid><description>&lt;h1 id="一inspect-a-user-process-page-tableeasy">一、&lt;strong>Inspect a user-process page table (easy)&lt;/strong>·&lt;/h1>
+&lt;p>xv6提供了一个用户程序pgtbltest.c，其中调用print_pgtbl()打印了页表的前10个页面和后10页的页表项，因为页表属于内核管理的数据结构，所以想要获取页表项就必须通过系统调用才行。在该lab中xv6额外提供了几个系统调用，其中的pgpte()的作用就是根据虚拟地址va，得到其对应的PTE。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-c" data-lang="c">&lt;span class="line">&lt;span class="cl">&lt;span class="kt">int&lt;/span> &lt;span class="nf">ugetpid&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="kt">void&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">uint64&lt;/span> &lt;span class="nf">pgpte&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="kt">void&lt;/span> &lt;span class="o">*&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="kt">void&lt;/span> &lt;span class="nf">vmprint&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="kt">void&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="kt">int&lt;/span> &lt;span class="nf">pgaccess&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="kt">void&lt;/span> &lt;span class="o">*&lt;/span>&lt;span class="n">base&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="kt">int&lt;/span> &lt;span class="n">len&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="kt">void&lt;/span> &lt;span class="o">*&lt;/span>&lt;span class="n">mask&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="kt">int&lt;/span> &lt;span class="nf">ksupernpte&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">uint64&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">uint64&lt;/span> &lt;span class="o">*&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-c" data-lang="c">&lt;span class="line">&lt;span class="cl">&lt;span class="kt">void&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nf">print_pgtbl&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">printf&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;print_pgtbl starting&lt;/span>&lt;span class="se">\n&lt;/span>&lt;span class="s">&amp;#34;&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">for&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">uint64&lt;/span> &lt;span class="n">i&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="n">i&lt;/span> &lt;span class="o">&amp;lt;&lt;/span> &lt;span class="mi">10&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="n">i&lt;/span>&lt;span class="o">++&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">print_pte&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">i&lt;/span> &lt;span class="o">*&lt;/span> &lt;span class="n">PGSIZE&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">uint64&lt;/span> &lt;span class="n">top&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">MAXVA&lt;/span> &lt;span class="o">/&lt;/span> &lt;span class="n">PGSIZE&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">for&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">uint64&lt;/span> &lt;span class="n">i&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">top&lt;/span> &lt;span class="o">-&lt;/span> &lt;span class="mi">10&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="n">i&lt;/span> &lt;span class="o">&amp;lt;&lt;/span> &lt;span class="n">top&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="n">i&lt;/span>&lt;span class="o">++&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">print_pte&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">i&lt;/span> &lt;span class="o">*&lt;/span> &lt;span class="n">PGSIZE&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">printf&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;print_pgtbl: OK&lt;/span>&lt;span class="se">\n&lt;/span>&lt;span class="s">&amp;#34;&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>启动xv6，运行程序pgtbltest打印页表：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">xv6 kernel is booting
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">hart &lt;span class="m">1&lt;/span> starting
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">hart &lt;span class="m">2&lt;/span> starting
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">init: starting sh
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">$ pgtbltest
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">print_pgtbl starting
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">va 0x0 pte 0x21FC885B pa 0x87F22000 perm 0x5B
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">va 0x1000 pte 0x21FC7C17 pa 0x87F1F000 perm 0x17
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">va 0x2000 pte 0x21FC7807 pa 0x87F1E000 perm 0x7
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">va 0x3000 pte 0x21FC74D7 pa 0x87F1D000 perm 0xD7
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">va 0x4000 pte 0x0 pa 0x0 perm 0x0
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">va 0x5000 pte 0x0 pa 0x0 perm 0x0
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">va 0x6000 pte 0x0 pa 0x0 perm 0x0
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">va 0x7000 pte 0x0 pa 0x0 perm 0x0
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">va 0x8000 pte 0x0 pa 0x0 perm 0x0
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">va 0x9000 pte 0x0 pa 0x0 perm 0x0
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">va 0x3FFFFF6000 pte 0x0 pa 0x0 perm 0x0
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">va 0x3FFFFF7000 pte 0x0 pa 0x0 perm 0x0
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">va 0x3FFFFF8000 pte 0x0 pa 0x0 perm 0x0
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">va 0x3FFFFF9000 pte 0x0 pa 0x0 perm 0x0
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">va 0x3FFFFFA000 pte 0x0 pa 0x0 perm 0x0
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">va 0x3FFFFFB000 pte 0x0 pa 0x0 perm 0x0
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">va 0x3FFFFFC000 pte 0x0 pa 0x0 perm 0x0
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">va 0x3FFFFFD000 pte 0x0 pa 0x0 perm 0x0
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">va 0x3FFFFFE000 pte 0x21FD08C7 pa 0x87F42000 perm 0xC7
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">va 0x3FFFFFF000 pte 0x2000184B pa 0x80006000 perm 0x4B
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">print_pgtbl: OK
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">vmprint_test starting
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">vmprint_test: &lt;span class="k">done&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">pgaccess_test starting
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">pgtbltest: pgaccess_test failed: incorrect access bits set, &lt;span class="nv">pid&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="m">3&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>这个页表和用户进程的地址空间正好能对应上：&lt;/p></description></item><item><title>再探xv6: 并发篇</title><link>https://Jiangmmh.github.io/posts/xv6-03/</link><pubDate>Mon, 26 Oct 2026 11:55:00 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/xv6-03/</guid><description>&lt;p>上一篇讲的是内存，这一篇讲并发。并发是 xv6 里最容易写出 bug、也最难调试的部分：对多核的支持让两个 CPU 同时修改同一份数据，中断让内核代码在任意时刻被打断，进程切换又让同一个数据结构被不同的进程轮流访问。&lt;/p>
 &lt;p>这一篇先回答&amp;quot;为什么需要锁&amp;quot;，再逐行拆解 xv6 里的两种锁（Spinlock 和 Sleeplock），最后对照 Linux 的并发机制，看看一个通用操作系统为了应付更复杂的场景，做了哪些 xv6 没做的设计。&lt;/p>
 &lt;h1 id="一为什么要提供并发机制">一、为什么要提供并发机制？&lt;/h1>
 &lt;h2 id="11-并发的三个来源">1.1 并发的三个来源&lt;/h2>
@@ -160,7 +264,87 @@
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">release&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">kmem&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">lock&lt;/span>&lt;span class="p">);&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="物理页面的分配和释放">物理页面的分配和释放&lt;/h2>
-&lt;p>释放前面已经解释了。当内核需要物理内存时，会通过调用kalloc()从kmem头部取出一个物理页帧返回。&lt;/p></description></item><item><title>再探xv6: 概述</title><link>https://Jiangmmh.github.io/posts/xv6-01/</link><pubDate>Fri, 23 Oct 2026 13:39:42 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/xv6-01/</guid><description>&lt;h1 id="1-xv6简介">1. xv6简介&lt;/h1>
+&lt;p>释放前面已经解释了。当内核需要物理内存时，会通过调用kalloc()从kmem头部取出一个物理页帧返回。&lt;/p></description></item><item><title>MIT6.1810: Lab2 Syscall</title><link>https://Jiangmmh.github.io/posts/xv6-lab2-syscall/</link><pubDate>Mon, 26 Oct 2026 09:23:20 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/xv6-lab2-syscall/</guid><description>&lt;p>在这个lab中我们将深入理解xv6（其他系统也差不多）的系统调用是如何实现的，并尝试根据功能需求实现自己的系统调用。&lt;/p>
+&lt;p>关于xv6的概述和系统调用的逻辑可以看&lt;a href="https://jiangmmh.github.io/posts/xv6-01/">这篇文章&lt;/a>，后面就不过多介绍了。&lt;/p>
+&lt;h1 id="一using-gdbeasy">一、&lt;strong>Using gdb (easy)&lt;/strong>&lt;/h1>
+&lt;p>这部分内容主要是介绍gdb的使用方法，略。&lt;/p>
+&lt;h1 id="二sandbox-a-commandmoderate">二、&lt;strong>Sandbox a command(moderate)&lt;/strong>&lt;/h1>
+&lt;p>题目要求实现一个系统调用interpose，其接受两个参数：一个整数掩码和一个路径，前者指定了要屏蔽哪些系统调用，后者暂时不用管。如果要使用interpose屏蔽当前进程的open系统调用，用法如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-c" data-lang="c">&lt;span class="line">&lt;span class="cl">&lt;span class="nf">interpose&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">1&lt;/span> &lt;span class="o">&amp;lt;&amp;lt;&lt;/span> &lt;span class="n">SYS_open&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s">&amp;#34;-&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>现在开始实现该系统调用，首先是用户侧：&lt;/p>
+&lt;ul>
+&lt;li>在 user/user.h 中添加 interpose() 的声明 。
+&lt;ul>
+&lt;li>int interpose(int, const char *);&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>在 user/usys.pl 中添加一行内容用于生成系统调用入口函数的实现。
+&lt;ul>
+&lt;li>entry(&amp;ldquo;interpose&amp;rdquo;);&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;p>题目提供了两个程序sandbox.c和sbtest.c，我们需要在Makefile中将其加入编译：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-makefile" data-lang="makefile">&lt;span class="line">&lt;span class="cl">&lt;span class="nv">UPROGS&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> ......
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nv">$U&lt;/span>/_sandbox&lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> &lt;span class="nv">$U&lt;/span>/_sbtest&lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在内核侧：&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>在 kernel/syscall.h 中添加 interpose 的系统调用号宏定义&lt;/p>
+&lt;ul>
+&lt;li>#define SYS_interpose 23&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>在 kernel/proc.h 的proc结构体中添加一个interpose_mask，记录屏蔽字&lt;/p>
+&lt;ul>
+&lt;li>int interpose_mask;&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>在 kernel/sysproc.c 中添加函数 sys_interpose() 处理interpose系统调用&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-c" data-lang="c">&lt;span class="line">&lt;span class="cl">&lt;span class="n">uint64&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nf">sys_interpose&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="kt">void&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kt">int&lt;/span> &lt;span class="n">interpose_mask&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">argint&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">0&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">interpose_mask&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">myproc&lt;/span>&lt;span class="p">()&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">interpose_mask&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">interpose_mask&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>为了使子进程能够继承父进程的屏蔽字，需要在创建子进程时拷贝interpose_mask，在 kernel/proc.c 中的 kfork() 函数的末尾添加 interpose_mask 的拷贝。&lt;/p></description></item><item><title>MIT6.1810: Lab1 Utils</title><link>https://Jiangmmh.github.io/posts/xv6-lab1-util/</link><pubDate>Sun, 25 Oct 2026 15:12:01 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/xv6-lab1-util/</guid><description>&lt;h1 id="一环境准备">一、环境准备&lt;/h1>
+&lt;p>环境配置见&lt;a href="https://pdos.csail.mit.edu/6.1810/2026/tools.html">文档&lt;/a>，Linux和Mac皆可。&lt;/p>
+&lt;p>拉取实验代码：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">$ git clone git://g.csail.mit.edu/xv6-labs-2026
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">Cloning into &lt;span class="s1">&amp;#39;xv6-labs-2026&amp;#39;&lt;/span>...
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">...
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">$ &lt;span class="nb">cd&lt;/span> xv6-labs-2026
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>项目中已经提供了Makefile，直接构建并通过qemu启动即可：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">$ make qemu
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">riscv64-unknown-elf-gcc -c -o kernel/entry.o kernel/entry.S
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">riscv64-unknown-elf-gcc -Wall -Werror -O -fno-omit-frame-pointer -ggdb -DSOL_UTIL -MD -mcmodel&lt;span class="o">=&lt;/span>medany -ffreestanding -fno-common -nostdlib -mno-relax -I. -fno-stack-protector -fno-pie -no-pie -c -o kernel/start.o kernel/start.c
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">...
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">riscv64-unknown-elf-ld -z max-page-size&lt;span class="o">=&lt;/span>&lt;span class="m">4096&lt;/span> -N -e main -Ttext &lt;span class="m">0&lt;/span> -o user/_zombie user/zombie.o user/ulib.o user/usys.o user/printf.o user/umalloc.o
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">riscv64-unknown-elf-objdump -S user/_zombie &amp;gt; user/zombie.asm
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">riscv64-unknown-elf-objdump -t user/_zombie &lt;span class="p">|&lt;/span> sed &lt;span class="s1">&amp;#39;1,/SYMBOL TABLE/d; s/ .* / /; /^$/d&amp;#39;&lt;/span> &amp;gt; user/zombie.sym
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">mkfs/mkfs fs.img README user/xargstest.sh user/_cat user/_echo user/_forktest user/_grep user/_init user/_kill user/_ln user/_ls user/_mkdir user/_rm user/_sh user/_stressfs user/_usertests user/_grind user/_wc user/_zombie
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">nmeta &lt;span class="m">46&lt;/span> &lt;span class="o">(&lt;/span>boot, super, log blocks &lt;span class="m">30&lt;/span> inode blocks 13, bitmap blocks 1&lt;span class="o">)&lt;/span> blocks &lt;span class="m">954&lt;/span> total &lt;span class="m">1000&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">balloc: first &lt;span class="m">591&lt;/span> blocks have been allocated
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">balloc: write bitmap block at sector &lt;span class="m">45&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">qemu-system-riscv64 -machine virt -bios none -kernel kernel/kernel -m 128M -smp &lt;span class="m">3&lt;/span> -nographic -drive &lt;span class="nv">file&lt;/span>&lt;span class="o">=&lt;/span>fs.img,if&lt;span class="o">=&lt;/span>none,format&lt;span class="o">=&lt;/span>raw,id&lt;span class="o">=&lt;/span>x0 -device virtio-blk-device,drive&lt;span class="o">=&lt;/span>x0,bus&lt;span class="o">=&lt;/span>virtio-mmio-bus.0
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">xv6 kernel is booting
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">hart &lt;span class="m">2&lt;/span> starting
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">hart &lt;span class="m">1&lt;/span> starting
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">init: starting sh
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">$
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>关于xv6项目目录结构、构建流程和Boot细节，可以看我的这篇&lt;a href="https://jiangmmh.github.io/posts/xv6-01/">文章&lt;/a>。&lt;/p></description></item><item><title>再探xv6: 概述</title><link>https://Jiangmmh.github.io/posts/xv6-01/</link><pubDate>Fri, 23 Oct 2026 13:39:42 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/xv6-01/</guid><description>&lt;h1 id="1-xv6简介">1. xv6简介&lt;/h1>
 &lt;p>xv6 以 Dennis Ritchie 和 Ken Thompson 的 Unix version 6 (v6) 为蓝本 。xv6 大致遵循 Unix v6 的结构和风格，但它是使用ANSI C语言为多核RISC-V 架构实现的。&lt;/p>
 &lt;p>MIT的操作系统课程6.1810就是以xv6为例，具体阐述操作系统概念。&lt;strong>它不仅提供了 Ken Thompson 和 Dennis Ritchie 的 Unix 操作系统所引入的基本接口，还模仿了 Unix 的内部设计。&lt;strong>Unix 提供了一个&lt;/strong>功能较为单一但机制组合良好的接口&lt;/strong>，从而展现出令人惊讶的通用性。该接口非常成功，以至于现代操作系统——BSD、Linux、macOS、Solaris，甚至在某种程度上也包括 Microsoft Windows——都采用了类似 Unix 的接口。理解 xv6 是理解这些系统以及许多其他系统的良好开端。&lt;/p>
 &lt;p>&lt;strong>xv6提供了若干功能模块：&lt;/strong>&lt;/p>

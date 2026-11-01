@@ -1,0 +1,270 @@
+<!doctype html><html lang=en dir=auto data-theme=auto><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=robots content="index, follow"><title>MIT6.1810: Lab4 Trap | Minghan的博客</title><meta name=keywords content="MIT6.1810,xv6,trap"><meta name=description content='一、RISC-V assembly (easy)
+先来看一下 user/call.asm：
+#include "kernel/param.h"
+#include "kernel/types.h"
+#include "kernel/stat.h"
+#include "user/user.h"
+
+int
+g(int x)
+{
+  return x + 3;
+}
+
+int
+f(int x)
+{
+  return g(x);
+}
+
+void
+main(void)
+{
+  printf("%d %d\n", f(8) + 1, 13);
+  exit(0);
+}
+
+Q1: 哪些寄存器存储着函数的参数？例如，在 main 函数调用printf时，哪个寄存器保存着参数 13 ？
+根据RISC-V的Calling Convention，参数依次存放在a0, a1和a2中。
+
+Q2: main 函数的汇编代码中，函数f 的调用在哪里 ？函数g的调用在哪里？（提示：编译器可能会内联函数。）
+下面是call.c对应的汇编代码，可以看到其中并没有调用函数f和函数g，因为对这两个函数的调用都被编译器内联了。
+void
+main(void)
+{
+  24:	1141                	addi	sp,sp,-16
+  26:	e406                	sd	ra,8(sp)
+  28:	e022                	sd	s0,0(sp)
+  2a:	0800                	addi	s0,sp,16
+  printf("%d %d\n", f(8) + 1, 13);
+  2c:	4635                	li	a2,13
+  2e:	45b1                	li	a1,12
+  30:	00001517          	auipc	a0,0x1
+  34:	8c050513          	addi	a0,a0,-1856 # 8f0 <malloc+0xf2>
+  38:	70e000ef          	jal	746 <printf>
+  exit(0);
+  3c:	4501                	li	a0,0
+  3e:	2ba000ef          	jal	2f8 <exit>
+
+Q3：printf 函数位于哪个地址？
+printf位于地址0x746处。
+
+Q4：main 函数中printf函数调用jarl 之后， 寄存器ra的值是多少？'><meta name=author content><link rel=canonical href=https://Jiangmmh.github.io/posts/xv6-lab4-trap/><link crossorigin=anonymous href=/assets/css/stylesheet.a130102b043e0442948a101d3a50a788218de8b3e9b0e092e90b92df5e8ad519.css integrity="sha256-oTAQKwQ+BEKUihAdOlCniCGN6LPpsOCS6QuS316K1Rk=" rel="preload stylesheet" as=style><link rel=icon href=https://Jiangmmh.github.io/favicon.ico><link rel=icon type=image/png sizes=16x16 href=https://Jiangmmh.github.io/favicon-16x16.png><link rel=icon type=image/png sizes=32x32 href=https://Jiangmmh.github.io/favicon-32x32.png><link rel=apple-touch-icon href=https://Jiangmmh.github.io/apple-touch-icon.png><link rel=mask-icon href=https://Jiangmmh.github.io/safari-pinned-tab.svg><meta name=theme-color content="#2e2e33"><meta name=msapplication-TileColor content="#2e2e33"><link rel=alternate hreflang=en href=https://Jiangmmh.github.io/posts/xv6-lab4-trap/><noscript><style>#theme-toggle,.top-link{display:none}</style><style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--code-block-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51);color-scheme:dark}.list{background:var(--theme)}.toc{background:var(--entry)}}</style></noscript><script>localStorage.getItem("pref-theme")==="dark"?document.querySelector("html").dataset.theme="dark":localStorage.getItem("pref-theme")==="light"?document.querySelector("html").dataset.theme="light":window.matchMedia("(prefers-color-scheme: dark)").matches?document.querySelector("html").dataset.theme="dark":document.querySelector("html").dataset.theme="light"</script><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css><script defer src=https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.js></script><script defer src=https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded",function(){if(typeof renderMathInElement!="function"){console.error("KaTeX auto-render 加载失败");return}document.querySelectorAll(".post-content, .book-content").forEach(function(e){renderMathInElement(e,{delimiters:[{left:"$$",right:"$$",display:!0},{left:"\\[",right:"\\]",display:!0},{left:"\\(",right:"\\)",display:!1}],throwOnError:!1})})})</script><meta property="og:url" content="https://Jiangmmh.github.io/posts/xv6-lab4-trap/"><meta property="og:site_name" content="Minghan的博客"><meta property="og:title" content="MIT6.1810: Lab4 Trap"><meta property="og:description" content='一、RISC-V assembly (easy) 先来看一下 user/call.asm：
+#include "kernel/param.h" #include "kernel/types.h" #include "kernel/stat.h" #include "user/user.h" int g(int x) { return x + 3; } int f(int x) { return g(x); } void main(void) { printf("%d %d\n", f(8) + 1, 13); exit(0); } Q1: 哪些寄存器存储着函数的参数？例如，在 main 函数调用printf时，哪个寄存器保存着参数 13 ？
+根据RISC-V的Calling Convention，参数依次存放在a0, a1和a2中。
+Q2: main 函数的汇编代码中，函数f 的调用在哪里 ？函数g的调用在哪里？（提示：编译器可能会内联函数。）
+下面是call.c对应的汇编代码，可以看到其中并没有调用函数f和函数g，因为对这两个函数的调用都被编译器内联了。
+void main(void) { 24:	1141 addi	sp,sp,-16 26:	e406 sd	ra,8(sp) 28:	e022 sd	s0,0(sp) 2a:	0800 addi	s0,sp,16 printf("%d %d\n", f(8) + 1, 13); 2c:	4635 li	a2,13 2e:	45b1 li	a1,12 30:	00001517 auipc	a0,0x1 34:	8c050513 addi	a0,a0,-1856 # 8f0 <malloc+0xf2> 38:	70e000ef jal	746 <printf> exit(0); 3c:	4501 li	a0,0 3e:	2ba000ef jal	2f8 <exit> Q3：printf 函数位于哪个地址？
+printf位于地址0x746处。
+Q4：main 函数中printf函数调用jarl 之后， 寄存器ra的值是多少？'><meta property="og:locale" content="en"><meta property="og:type" content="article"><meta property="article:section" content="posts"><meta property="article:published_time" content="2026-11-01T10:27:29+08:00"><meta property="article:modified_time" content="2026-11-01T10:27:29+08:00"><meta property="article:tag" content="MIT6.1810"><meta property="article:tag" content="Xv6"><meta property="article:tag" content="Trap"><meta name=twitter:card content="summary"><meta name=twitter:title content="MIT6.1810: Lab4 Trap"><meta name=twitter:description content='一、RISC-V assembly (easy) 先来看一下 user/call.asm：
+#include "kernel/param.h" #include "kernel/types.h" #include "kernel/stat.h" #include "user/user.h" int g(int x) { return x + 3; } int f(int x) { return g(x); } void main(void) { printf("%d %d\n", f(8) + 1, 13); exit(0); } Q1: 哪些寄存器存储着函数的参数？例如，在 main 函数调用printf时，哪个寄存器保存着参数 13 ？
+根据RISC-V的Calling Convention，参数依次存放在a0, a1和a2中。
+Q2: main 函数的汇编代码中，函数f 的调用在哪里 ？函数g的调用在哪里？（提示：编译器可能会内联函数。）
+下面是call.c对应的汇编代码，可以看到其中并没有调用函数f和函数g，因为对这两个函数的调用都被编译器内联了。
+void main(void) { 24:	1141 addi	sp,sp,-16 26:	e406 sd	ra,8(sp) 28:	e022 sd	s0,0(sp) 2a:	0800 addi	s0,sp,16 printf("%d %d\n", f(8) + 1, 13); 2c:	4635 li	a2,13 2e:	45b1 li	a1,12 30:	00001517 auipc	a0,0x1 34:	8c050513 addi	a0,a0,-1856 # 8f0 <malloc+0xf2> 38:	70e000ef jal	746 <printf> exit(0); 3c:	4501 li	a0,0 3e:	2ba000ef jal	2f8 <exit> Q3：printf 函数位于哪个地址？
+printf位于地址0x746处。
+Q4：main 函数中printf函数调用jarl 之后， 寄存器ra的值是多少？'><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Posts","item":"https://Jiangmmh.github.io/posts/"},{"@type":"ListItem","position":2,"name":"MIT6.1810: Lab4 Trap","item":"https://Jiangmmh.github.io/posts/xv6-lab4-trap/"}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"MIT6.1810: Lab4 Trap","name":"MIT6.1810: Lab4 Trap","description":"一、RISC-V assembly (easy) 先来看一下 user/call.asm：\n#include \u0026#34;kernel/param.h\u0026#34; #include \u0026#34;kernel/types.h\u0026#34; #include \u0026#34;kernel/stat.h\u0026#34; #include \u0026#34;user/user.h\u0026#34; int g(int x) { return x + 3; } int f(int x) { return g(x); } void main(void) { printf(\u0026#34;%d %d\\n\u0026#34;, f(8) + 1, 13); exit(0); } Q1: 哪些寄存器存储着函数的参数？例如，在 main 函数调用printf时，哪个寄存器保存着参数 13 ？\n根据RISC-V的Calling Convention，参数依次存放在a0, a1和a2中。\nQ2: main 函数的汇编代码中，函数f 的调用在哪里 ？函数g的调用在哪里？（提示：编译器可能会内联函数。）\n下面是call.c对应的汇编代码，可以看到其中并没有调用函数f和函数g，因为对这两个函数的调用都被编译器内联了。\nvoid main(void) { 24:\t1141 addi\tsp,sp,-16 26:\te406 sd\tra,8(sp) 28:\te022 sd\ts0,0(sp) 2a:\t0800 addi\ts0,sp,16 printf(\u0026#34;%d %d\\n\u0026#34;, f(8) + 1, 13); 2c:\t4635 li\ta2,13 2e:\t45b1 li\ta1,12 30:\t00001517 auipc\ta0,0x1 34:\t8c050513 addi\ta0,a0,-1856 # 8f0 \u0026lt;malloc+0xf2\u0026gt; 38:\t70e000ef jal\t746 \u0026lt;printf\u0026gt; exit(0); 3c:\t4501 li\ta0,0 3e:\t2ba000ef jal\t2f8 \u0026lt;exit\u0026gt; Q3：printf 函数位于哪个地址？\nprintf位于地址0x746处。\nQ4：main 函数中printf函数调用jarl 之后， 寄存器ra的值是多少？\n","keywords":["MIT6.1810","xv6","trap"],"articleBody":"一、RISC-V assembly (easy) 先来看一下 user/call.asm：\n#include \"kernel/param.h\" #include \"kernel/types.h\" #include \"kernel/stat.h\" #include \"user/user.h\" int g(int x) { return x + 3; } int f(int x) { return g(x); } void main(void) { printf(\"%d %d\\n\", f(8) + 1, 13); exit(0); } Q1: 哪些寄存器存储着函数的参数？例如，在 main 函数调用printf时，哪个寄存器保存着参数 13 ？\n根据RISC-V的Calling Convention，参数依次存放在a0, a1和a2中。\nQ2: main 函数的汇编代码中，函数f 的调用在哪里 ？函数g的调用在哪里？（提示：编译器可能会内联函数。）\n下面是call.c对应的汇编代码，可以看到其中并没有调用函数f和函数g，因为对这两个函数的调用都被编译器内联了。\nvoid main(void) { 24:\t1141 addi\tsp,sp,-16 26:\te406 sd\tra,8(sp) 28:\te022 sd\ts0,0(sp) 2a:\t0800 addi\ts0,sp,16 printf(\"%d %d\\n\", f(8) + 1, 13); 2c:\t4635 li\ta2,13 2e:\t45b1 li\ta1,12 30:\t00001517 auipc\ta0,0x1 34:\t8c050513 addi\ta0,a0,-1856 # 8f0 \u003cmalloc+0xf2\u003e 38:\t70e000ef jal\t746 \u003cprintf\u003e exit(0); 3c:\t4501 li\ta0,0 3e:\t2ba000ef jal\t2f8 \u003cexit\u003e Q3：printf 函数位于哪个地址？\nprintf位于地址0x746处。\nQ4：main 函数中printf函数调用jarl 之后， 寄存器ra的值是多少？\nprintf的返回值是成功打印输出等字符总数，如果出错则返回一个负数。\nQ5: 输出结果是什么？\n#include int main() { unsigned int i = 0x00646c72; printf(\"H%x Wo%s\", 57616, (char *) \u0026i); return 0; } 输出的是：“He110 World”。其实就是将i的底层位级表示根据ASCII码解释为字符。\nQ6：在以下代码中，问号之后会打印什么 'y='？为什么？\n#include int main() { printf(\"x=%dy=%d\\n\", 3); return 0; } 在我的Mac上输出的结果为：“x=3y=0”。\n根据RISC-V的Calling Convention，第三个参数应该存放在寄存器a2中，这里没有传入第三个参数，所以y的值取决于a2中残留的内容。\n二、Backtrace (moderate) 要求我们在 kernel/printk.c 中实现一个函数 backtrace() ，负责打印当前调用栈。\n文档给出了如下信息：\n调用栈的当前栈帧首地址 fp 存放在寄存器 s0 中。 (fp-8) 地址处存放着返回地址（上一层函数调用当前函数的地址）。 (fp-16) 地址处存放着上一个栈帧的首地址。 每个内核栈分配的内存都是一个单页对齐的页面，因此给定栈的所有栈帧都位于同一页面上。可以使用 PGROUNDDOWN(fp) 函数 来识别帧指针指向的页面。 再根据提示中给出的文档，可以知道栈的布局：\n现在 kernel/riscv.h 中添加函数 r_fp() 用于获取存储在寄存器s0中的当前栈帧首地址。\nstatic inline uint64 r_fp() { uint64 x; asm volatile(\"mv %0, s0\" : \"=r\" (x) ); return x; } 我的 backtrace() 实现如下：\nvoid backtrace() { uint64 fp = r_fp(); uint64 bottomOfPage = PGROUNDDOWN(fp); while (fp \u003e bottomOfPage) { printk(\"%p\\n\", (uint64*)*(uint64*)((char*)fp-8)); fp = (uint64)*(uint64*)((char*)fp-16); } } 将其写入 def.h 中：\nvoid backtrace(); 测试一下：\nxv6-labs-2026 ➜ make qemu xv6 kernel is booting hart 2 starting hart 1 starting init: starting sh $ bttest 0x0000000080001ef6 0x0000000080001daa 0x0000000080001b30 0x0000003ffffff09c $ QEMU: Terminated xv6-labs-2026 ➜ addr2line -e kernel/kernel 0x0000000080001ef6 0x0000000080001daa 0x0000000080001b30 0x0000003ffffff09c ./kernel/sysproc.c:79 ./kernel/syscall.c:146 (discriminator 1) ./kernel/trap.c:81 可以看到打印出的正好是调用栈，说明我们的backtrace正确地实现了。\n三、Alarm (hard) 我的实现思路如下：\n用户程序通过调用 sigalarm(interval, handler) 为当前进程绑定一个定时任务，每隔 interval 个 ticks 就调用一次 handler。 需要特别注意的是：handler本质上是一个用户态的函数，因为用户态和内核态的地址空间是不同的，所以我们无法在内核态执行该 handler，而是应该先返回用户态再执行该函数。 但问题在于，如何在返回用户态后让进程执行 handler，而不是 trap 进内核之前的代码？ 从源码中可以得知：内核态从用户态返回后执行哪条指令是由当前进程结构体的traframe中的epc来决定的，原本该字段存放的是trap进内核前用户进程要执行的下一条指令。 题目会保证所有传入的 handler 都会在执行完自己的功能后自行调用 sigreturn() 返回内核态。 经分析，我们可以在时钟中断出现，并且正好经过了 interval 个 ticks 时将当前进程的 trapframe-\u003eepc 的值置为 handler，然后让其返回。 这又引出了一个问题：如果将 trapframe-\u003eepc 置为 handler，那又如何返回trap前的用户程序继续执行呢？ 解决方案： 在当前进程结构体中额外存储一份trapframe的拷贝，在设置 trapframe-\u003eepc 之前，先将原来的 trapframe 拷贝过来。 在 sigreturn 中恢复到原来的 trapframe。 还需要注意正在 handler 执行过程中不能重复执行 handler，所以需要一个字段 inalarm 来标记当前是否正在执行 handler。 在用户侧添加如下内容：\n// user/usys.pl entry(\"sigalarm\"); entry(\"sigreturn\"); // user/user.h int sigalarm(int, void(*alarm_handler)()); int sigreturn(void); 在内核测添加如下内容：\n// kernel/proc.h struct proc { ...... int interval; // alarm间隔 int clock_passed; // 记录过了多久 int inalarm; // 标识是否正在alarm过程中 void (*alarm_handler)(); // alarm handler struct trapframe alarm_trapframe; // 记录当前用户程序的trapframe }; // kernel/syscall.h #define SYS_sigalarm 23 #define SYS_sigreturn 24 // kernel/syscall.c extern uint64 sys_sigalarm(void); extern uint64 sys_sigreturn(void); [SYS_sigalarm] = sys_sigalarm, [SYS_sigreturn] = sys_sigreturn, // kernel/sysproc.c uint64 sys_sigalarm(void) { struct proc* p = myproc(); argint(0, \u0026(p-\u003einterval)); p-\u003eclock_passed = 0; uint64 handler; argaddr(1, \u0026handler); p-\u003ealarm_handler = (void (*)())handler; return 0; } uint64 sys_sigreturn(void) { struct proc* p = myproc(); p-\u003einalarm = 0; memmove(p-\u003etrapframe, \u0026(p-\u003ealarm_trapframe), sizeof(*p-\u003etrapframe)); return p-\u003etrapframe-\u003ea0; } // kernel/usertrap uint64 usertrap(void) { ...... struct proc *p = myproc(); ...... if (killed(p)) kexit(-1); // give up the CPU if this is a timer interrupt. if (which_dev == 2) { if (p-\u003einterval != 0 \u0026\u0026 !p-\u003einalarm) { if (++(p-\u003eclock_passed) \u003e= p-\u003einterval) { p-\u003eclock_passed = 0; p-\u003einalarm = 1; alarm_store(); p-\u003etrapframe-\u003eepc = (uint64)p-\u003ealarm_handler; } } yield(); } ...... } 测试一下：\n== Test answers-traps.txt == answers-traps.txt: OK == Test backtrace test == $ make qemu-gdb backtrace test: OK (4.8s) == Test running alarmtest == $ make qemu-gdb (3.6s) == Test alarmtest: test0 == alarmtest: test0: OK == Test alarmtest: test1 == alarmtest: test1: OK == Test alarmtest: test2 == alarmtest: test2: OK == Test alarmtest: test3 == alarmtest: test3: OK == Test usertests == $ make qemu-gdb usertests: OK (39.6s) == Test time == time: OK Score: 95/95 ","wordCount":"575","inLanguage":"en","datePublished":"2026-11-01T10:27:29+08:00","dateModified":"2026-11-01T10:27:29+08:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://Jiangmmh.github.io/posts/xv6-lab4-trap/"},"publisher":{"@type":"Organization","name":"Minghan的博客","logo":{"@type":"ImageObject","url":"https://Jiangmmh.github.io/favicon.ico"}}}</script></head><body id=top><header class=header><nav class=header-nav><div class=logo><a href=https://Jiangmmh.github.io/ accesskey=h title="Minghan的博客 (Alt + H)">Minghan的博客</a><div class=logo-switches><button id=theme-toggle class=theme-toggle accesskey=t title="(Alt + T)" aria-label="Toggle theme">
+<svg class="moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+<svg class="sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button></div></div><ul id=menu class=menu><li><a href=https://Jiangmmh.github.io/posts/ title=文章><span>文章</span></a></li><li><a href=https://Jiangmmh.github.io/archives/ title=归档><span>归档</span></a></li><li><a href=https://Jiangmmh.github.io/categories/ title=分类><span>分类</span></a></li><li><a href=https://Jiangmmh.github.io/tags/ title=标签><span>标签</span></a></li><li><a href=https://Jiangmmh.github.io/moments/ title=随记><span>随记</span></a></li><li><a href=https://Jiangmmh.github.io/photos/ title=照片墙><span>照片墙</span></a></li><li><a href=https://Jiangmmh.github.io/books/ title=阅读><span>阅读</span></a></li><li><a href=https://Jiangmmh.github.io/about/ title=关于><span>关于</span></a></li></ul></nav></header><main class=main><article class=post-single><header class=post-header><nav class=breadcrumbs role=navigation aria-label=Breadcrumb><a href=/>Home</a>
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right"><polyline points="9 18 15 12 9 6"/></svg>
+<a href=/posts/>Posts</a>
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right"><polyline points="9 18 15 12 9 6"/></svg></nav><h1 class="post-title entry-hint-parent">MIT6.1810: Lab4 Trap</h1><div class=post-meta><span title='2026-11-01 10:27:29 +0800 +0800'>November 1, 2026</span>&nbsp;·&nbsp;<span>3 min</span>&nbsp;·&nbsp;<span>575 words</span></div></header><details class=toc open><summary accesskey=c title="(Alt + C)"><span class=title>Table of Contents</span></summary><div class=inner><ul><li><a href=#%e4%b8%80risc-v-assemblyeasy aria-label="一、RISC-V assembly (easy)">一、RISC-V assembly (easy)</a></li><li><a href=#%e4%ba%8cbacktracemoderate aria-label=二、Backtrace (moderate)>二、Backtrace (moderate)</a></li><li><a href=#%e4%b8%89alarmhard aria-label=三、Alarm (hard)>三、Alarm (hard)</a></li></ul></div></details><div class="post-content md-content"><h1 id=一risc-v-assemblyeasy>一、<strong>RISC-V assembly (easy)</strong><a hidden class=anchor aria-hidden=true href=#一risc-v-assemblyeasy>#</a></h1><p>先来看一下 user/call.asm：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&#34;kernel/param.h&#34;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&#34;kernel/types.h&#34;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&#34;kernel/stat.h&#34;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&#34;user/user.h&#34;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp></span>
+</span></span><span class=line><span class=cl><span class=kt>int</span>
+</span></span><span class=line><span class=cl><span class=nf>g</span><span class=p>(</span><span class=kt>int</span> <span class=n>x</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=k>return</span> <span class=n>x</span> <span class=o>+</span> <span class=mi>3</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kt>int</span>
+</span></span><span class=line><span class=cl><span class=nf>f</span><span class=p>(</span><span class=kt>int</span> <span class=n>x</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=k>return</span> <span class=nf>g</span><span class=p>(</span><span class=n>x</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kt>void</span>
+</span></span><span class=line><span class=cl><span class=nf>main</span><span class=p>(</span><span class=kt>void</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=nf>printf</span><span class=p>(</span><span class=s>&#34;%d %d</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span> <span class=nf>f</span><span class=p>(</span><span class=mi>8</span><span class=p>)</span> <span class=o>+</span> <span class=mi>1</span><span class=p>,</span> <span class=mi>13</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=nf>exit</span><span class=p>(</span><span class=mi>0</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><blockquote><p>Q1: 哪些寄存器存储着函数的参数？例如，在 main 函数调用printf时，哪个寄存器保存着参数 13 ？</p></blockquote><p>根据RISC-V的Calling Convention，参数依次存放在a0, a1和a2中。</p><blockquote><p>Q2: main 函数的汇编代码中，函数f 的调用在哪里 ？函数g的调用在哪里？（提示：编译器可能会内联函数。）</p></blockquote><p>下面是call.c对应的汇编代码，可以看到其中并没有调用函数f和函数g，因为对这两个函数的调用都被编译器内联了。</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-nasm data-lang=nasm><span class=line><span class=cl><span class=nf>void</span>
+</span></span><span class=line><span class=cl><span class=nf>main</span><span class=p>(</span><span class=nv>void</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=err>{</span>
+</span></span><span class=line><span class=cl>  <span class=err>24:</span>	<span class=err>1141</span>                	<span class=nf>addi</span>	<span class=nb>sp</span><span class=p>,</span><span class=nb>sp</span><span class=p>,</span><span class=o>-</span><span class=mi>16</span>
+</span></span><span class=line><span class=cl>  <span class=err>26:</span>	<span class=nf>e406</span>                	<span class=nv>sd</span>	<span class=nv>ra</span><span class=p>,</span><span class=mi>8</span><span class=p>(</span><span class=nb>sp</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>  <span class=err>28:</span>	<span class=nf>e022</span>                	<span class=nv>sd</span>	<span class=nv>s0</span><span class=p>,</span><span class=mi>0</span><span class=p>(</span><span class=nb>sp</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>  <span class=err>2</span><span class=nl>a:</span>	<span class=err>0800</span>                	<span class=nf>addi</span>	<span class=nv>s0</span><span class=p>,</span><span class=nb>sp</span><span class=p>,</span><span class=mi>16</span>
+</span></span><span class=line><span class=cl>  <span class=nf>printf</span><span class=p>(</span><span class=s>&#34;%d %d\n&#34;</span><span class=p>,</span> <span class=nv>f</span><span class=p>(</span><span class=mi>8</span><span class=p>)</span> <span class=o>+</span> <span class=mi>1</span><span class=p>,</span> <span class=mi>13</span><span class=p>)</span><span class=c1>;</span>
+</span></span><span class=line><span class=cl>  <span class=err>2</span><span class=nl>c:</span>	<span class=err>4635</span>                	<span class=nf>li</span>	<span class=nv>a2</span><span class=p>,</span><span class=mi>13</span>
+</span></span><span class=line><span class=cl>  <span class=err>2</span><span class=nl>e:</span>	<span class=err>45</span><span class=nf>b1</span>                	<span class=nv>li</span>	<span class=nv>a1</span><span class=p>,</span><span class=mi>12</span>
+</span></span><span class=line><span class=cl>  <span class=err>30:</span>	<span class=err>00001517</span>          	<span class=nf>auipc</span>	<span class=nv>a0</span><span class=p>,</span><span class=mh>0x1</span>
+</span></span><span class=line><span class=cl>  <span class=err>34:</span>	<span class=err>8</span><span class=nf>c050513</span>          	<span class=nv>addi</span>	<span class=nv>a0</span><span class=p>,</span><span class=nv>a0</span><span class=p>,</span><span class=o>-</span><span class=mi>1856</span> <span class=err>#</span> <span class=mi>8</span><span class=nv>f0</span> <span class=o>&lt;</span><span class=nv>malloc</span><span class=o>+</span><span class=mh>0xf2</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl>  <span class=err>38:</span>	<span class=err>70</span><span class=nf>e000ef</span>          	<span class=nv>jal</span>	<span class=mi>746</span> <span class=o>&lt;</span><span class=nv>printf</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl>  <span class=nf>exit</span><span class=p>(</span><span class=mi>0</span><span class=p>)</span><span class=c1>;</span>
+</span></span><span class=line><span class=cl>  <span class=err>3</span><span class=nl>c:</span>	<span class=err>4501</span>                	<span class=nf>li</span>	<span class=nv>a0</span><span class=p>,</span><span class=mi>0</span>
+</span></span><span class=line><span class=cl>  <span class=err>3</span><span class=nl>e:</span>	<span class=err>2</span><span class=nf>ba000ef</span>          	<span class=nv>jal</span>	<span class=mi>2</span><span class=nv>f8</span> <span class=o>&lt;</span><span class=nv>exit</span><span class=o>&gt;</span>
+</span></span></code></pre></div><blockquote><p>Q3：printf 函数位于哪个地址？</p></blockquote><p>printf位于地址0x746处。</p><blockquote><p>Q4：main 函数中printf函数调用jarl 之后， 寄存器ra的值是多少？</p></blockquote><p>printf的返回值是成功打印输出等字符总数，如果出错则返回一个负数。</p><blockquote><p>Q5: 输出结果是什么？</p></blockquote><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;cstdio&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp></span>
+</span></span><span class=line><span class=cl><span class=kt>int</span> <span class=nf>main</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=mh>0x00646c72</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=n>printf</span><span class=p>(</span><span class=s>&#34;H%x Wo%s&#34;</span><span class=p>,</span> <span class=mi>57616</span><span class=p>,</span> <span class=p>(</span><span class=kt>char</span> <span class=o>*</span><span class=p>)</span> <span class=o>&amp;</span><span class=n>i</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>	<span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><p>输出的是：“He110 World”。其实就是将i的底层位级表示根据ASCII码解释为字符。</p><blockquote><p>Q6：在以下代码中，问号之后会打印什么 <code>'y='</code>？为什么？</p></blockquote><div class=highlight><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;cstdio&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp></span>
+</span></span><span class=line><span class=cl><span class=kt>int</span> <span class=nf>main</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=n>printf</span><span class=p>(</span><span class=s>&#34;x=%dy=%d</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span> <span class=mi>3</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>	
+</span></span><span class=line><span class=cl>	<span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><p>在我的Mac上输出的结果为：“x=3y=0”。</p><p>根据RISC-V的Calling Convention，第三个参数应该存放在寄存器a2中，这里没有传入第三个参数，所以y的值取决于a2中残留的内容。</p><h1 id=二backtracemoderate>二、<strong>Backtrace (moderate)</strong><a hidden class=anchor aria-hidden=true href=#二backtracemoderate>#</a></h1><p>要求我们在 kernel/printk.c 中实现一个函数 backtrace() ，负责打印当前调用栈。</p><p>文档给出了如下信息：</p><ul><li>调用栈的当前栈帧首地址 fp 存放在寄存器 s0 中。</li><li>(fp-8) 地址处存放着返回地址（上一层函数调用当前函数的地址）。</li><li>(fp-16) 地址处存放着上一个栈帧的首地址。</li><li>每个内核栈分配的内存都是一个单页对齐的页面，因此给定栈的所有栈帧都位于同一页面上。可以使用 PGROUNDDOWN(fp) 函数 来识别帧指针指向的页面。</li></ul><p>再根据提示中给出的<a href="https://app.notion.com/p/Lab-trap-405c4e932614800dbc53ee864216c922?pvs=21">文档</a>，可以知道栈的布局：</p><p><img alt=image.png loading=lazy src=/images/posts/lab-trap/image.png></p><p>现在 kernel/riscv.h 中添加函数 r_fp() 用于获取存储在寄存器s0中的当前栈帧首地址。</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=k>static</span> <span class=kr>inline</span> <span class=n>uint64</span>
+</span></span><span class=line><span class=cl><span class=nf>r_fp</span><span class=p>()</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=n>uint64</span> <span class=n>x</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=k>asm</span> <span class=k>volatile</span><span class=p>(</span><span class=s>&#34;mv %0, s0&#34;</span> <span class=o>:</span> <span class=s>&#34;=r&#34;</span> <span class=p>(</span><span class=n>x</span><span class=p>)</span> <span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=k>return</span> <span class=n>x</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><p>我的 backtrace() 实现如下：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=kt>void</span> <span class=nf>backtrace</span><span class=p>()</span> 
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=n>uint64</span> <span class=n>fp</span> <span class=o>=</span> <span class=nf>r_fp</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>  <span class=n>uint64</span> <span class=n>bottomOfPage</span> <span class=o>=</span> <span class=nf>PGROUNDDOWN</span><span class=p>(</span><span class=n>fp</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=k>while</span> <span class=p>(</span><span class=n>fp</span> <span class=o>&gt;</span> <span class=n>bottomOfPage</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=nf>printk</span><span class=p>(</span><span class=s>&#34;%p</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span> <span class=p>(</span><span class=n>uint64</span><span class=o>*</span><span class=p>)</span><span class=o>*</span><span class=p>(</span><span class=n>uint64</span><span class=o>*</span><span class=p>)((</span><span class=kt>char</span><span class=o>*</span><span class=p>)</span><span class=n>fp</span><span class=o>-</span><span class=mi>8</span><span class=p>));</span>
+</span></span><span class=line><span class=cl>    <span class=n>fp</span> <span class=o>=</span> <span class=p>(</span><span class=n>uint64</span><span class=p>)</span><span class=o>*</span><span class=p>(</span><span class=n>uint64</span><span class=o>*</span><span class=p>)((</span><span class=kt>char</span><span class=o>*</span><span class=p>)</span><span class=n>fp</span><span class=o>-</span><span class=mi>16</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><p>将其写入 def.h 中：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=kt>void</span> <span class=nf>backtrace</span><span class=p>();</span>
+</span></span></code></pre></div><p>测试一下：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>xv6-labs-2026 ➜ make qemu                 
+</span></span><span class=line><span class=cl>xv6 kernel is booting
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>hart <span class=m>2</span> starting
+</span></span><span class=line><span class=cl>hart <span class=m>1</span> starting
+</span></span><span class=line><span class=cl>init: starting sh
+</span></span><span class=line><span class=cl>$ bttest
+</span></span><span class=line><span class=cl>0x0000000080001ef6
+</span></span><span class=line><span class=cl>0x0000000080001daa
+</span></span><span class=line><span class=cl>0x0000000080001b30
+</span></span><span class=line><span class=cl>0x0000003ffffff09c
+</span></span><span class=line><span class=cl>$ QEMU: Terminated
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>xv6-labs-2026 ➜ addr2line -e kernel/kernel
+</span></span><span class=line><span class=cl>0x0000000080001ef6
+</span></span><span class=line><span class=cl>0x0000000080001daa
+</span></span><span class=line><span class=cl>0x0000000080001b30
+</span></span><span class=line><span class=cl>0x0000003ffffff09c
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>./kernel/sysproc.c:79
+</span></span><span class=line><span class=cl>./kernel/syscall.c:146 <span class=o>(</span>discriminator 1<span class=o>)</span>
+</span></span><span class=line><span class=cl>./kernel/trap.c:81
+</span></span></code></pre></div><p>可以看到打印出的正好是调用栈，说明我们的backtrace正确地实现了。</p><h1 id=三alarmhard>三、<strong>Alarm (hard)</strong><a hidden class=anchor aria-hidden=true href=#三alarmhard>#</a></h1><p>我的实现思路如下：</p><ul><li>用户程序通过调用 sigalarm(interval, handler) 为当前进程绑定一个定时任务，每隔 interval 个 ticks 就调用一次 handler。<ul><li>需要特别注意的是：handler本质上是一个用户态的函数，因为用户态和内核态的地址空间是不同的，所以我们无法在内核态执行该 handler，而是应该先返回用户态再执行该函数。</li><li>但问题在于，如何在返回用户态后让进程执行 handler，而不是 trap 进内核之前的代码？</li><li>从源码中可以得知：内核态从用户态返回后执行哪条指令是由当前进程结构体的traframe中的epc来决定的，原本该字段存放的是trap进内核前用户进程要执行的下一条指令。</li><li>题目会保证所有传入的 handler 都会在执行完自己的功能后自行调用 sigreturn() 返回内核态。</li></ul></li><li>经分析，我们可以在时钟中断出现，并且正好经过了 interval 个 ticks 时将当前进程的 trapframe->epc 的值置为 handler，然后让其返回。<ul><li>这又引出了一个问题：如果将 trapframe->epc 置为 handler，那又如何返回trap前的用户程序继续执行呢？</li><li>解决方案：<ul><li>在当前进程结构体中额外存储一份trapframe的拷贝，在设置 trapframe->epc 之前，先将原来的 trapframe 拷贝过来。</li><li>在 sigreturn 中恢复到原来的 trapframe。</li></ul></li></ul></li><li>还需要注意正在 handler 执行过程中不能重复执行 handler，所以需要一个字段 inalarm 来标记当前是否正在执行 handler。</li></ul><p>在用户侧添加如下内容：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=c1>// user/usys.pl
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>entry</span><span class=p>(</span><span class=s>&#34;sigalarm&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=nf>entry</span><span class=p>(</span><span class=s>&#34;sigreturn&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// user/user.h
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=kt>int</span> <span class=nf>sigalarm</span><span class=p>(</span><span class=kt>int</span><span class=p>,</span> <span class=kt>void</span><span class=p>(</span><span class=o>*</span><span class=n>alarm_handler</span><span class=p>)());</span>
+</span></span><span class=line><span class=cl><span class=kt>int</span> <span class=nf>sigreturn</span><span class=p>(</span><span class=kt>void</span><span class=p>);</span>
+</span></span></code></pre></div><p>在内核测添加如下内容：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=c1>// kernel/proc.h
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=k>struct</span> <span class=n>proc</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=p>......</span>
+</span></span><span class=line><span class=cl>	
+</span></span><span class=line><span class=cl>  <span class=kt>int</span> <span class=n>interval</span><span class=p>;</span>            <span class=c1>// alarm间隔
+</span></span></span><span class=line><span class=cl><span class=c1></span>  <span class=kt>int</span> <span class=n>clock_passed</span><span class=p>;</span>        <span class=c1>// 记录过了多久
+</span></span></span><span class=line><span class=cl><span class=c1></span>  <span class=kt>int</span> <span class=n>inalarm</span><span class=p>;</span>             <span class=c1>// 标识是否正在alarm过程中
+</span></span></span><span class=line><span class=cl><span class=c1></span>  <span class=kt>void</span> <span class=p>(</span><span class=o>*</span><span class=n>alarm_handler</span><span class=p>)();</span> <span class=c1>// alarm handler       
+</span></span></span><span class=line><span class=cl><span class=c1></span>  <span class=k>struct</span> <span class=n>trapframe</span> <span class=n>alarm_trapframe</span><span class=p>;</span>  <span class=c1>// 记录当前用户程序的trapframe
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// kernel/syscall.h
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=cp>#define SYS_sigalarm  23
+</span></span></span><span class=line><span class=cl><span class=cp>#define SYS_sigreturn  24
+</span></span></span><span class=line><span class=cl><span class=cp></span>
+</span></span><span class=line><span class=cl><span class=c1>// kernel/syscall.c
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=k>extern</span> <span class=n>uint64</span> <span class=nf>sys_sigalarm</span><span class=p>(</span><span class=kt>void</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=k>extern</span> <span class=n>uint64</span> <span class=nf>sys_sigreturn</span><span class=p>(</span><span class=kt>void</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=p>[</span><span class=n>SYS_sigalarm</span><span class=p>]</span> <span class=o>=</span> <span class=n>sys_sigalarm</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>  <span class=p>[</span><span class=n>SYS_sigreturn</span><span class=p>]</span> <span class=o>=</span> <span class=n>sys_sigreturn</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// kernel/sysproc.c
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=n>uint64</span> 
+</span></span><span class=line><span class=cl><span class=nf>sys_sigalarm</span><span class=p>(</span><span class=kt>void</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=k>struct</span> <span class=n>proc</span><span class=o>*</span> <span class=n>p</span> <span class=o>=</span> <span class=nf>myproc</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>  <span class=nf>argint</span><span class=p>(</span><span class=mi>0</span><span class=p>,</span> <span class=o>&amp;</span><span class=p>(</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>interval</span><span class=p>));</span>
+</span></span><span class=line><span class=cl>  <span class=n>p</span><span class=o>-&gt;</span><span class=n>clock_passed</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=n>uint64</span> <span class=n>handler</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=nf>argaddr</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>handler</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=n>p</span><span class=o>-&gt;</span><span class=n>alarm_handler</span> <span class=o>=</span> <span class=p>(</span><span class=kt>void</span> <span class=p>(</span><span class=o>*</span><span class=p>)())</span><span class=n>handler</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>uint64</span> <span class=nf>sys_sigreturn</span><span class=p>(</span><span class=kt>void</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=k>struct</span> <span class=n>proc</span><span class=o>*</span> <span class=n>p</span> <span class=o>=</span> <span class=nf>myproc</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>  <span class=n>p</span><span class=o>-&gt;</span><span class=n>inalarm</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=nf>memmove</span><span class=p>(</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>trapframe</span><span class=p>,</span> <span class=o>&amp;</span><span class=p>(</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>alarm_trapframe</span><span class=p>),</span> <span class=k>sizeof</span><span class=p>(</span><span class=o>*</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>trapframe</span><span class=p>));</span>
+</span></span><span class=line><span class=cl>  <span class=k>return</span> <span class=n>p</span><span class=o>-&gt;</span><span class=n>trapframe</span><span class=o>-&gt;</span><span class=n>a0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// kernel/usertrap
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl><span class=n>uint64</span>
+</span></span><span class=line><span class=cl><span class=nf>usertrap</span><span class=p>(</span><span class=kt>void</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=p>......</span>
+</span></span><span class=line><span class=cl>  <span class=k>struct</span> <span class=n>proc</span> <span class=o>*</span><span class=n>p</span> <span class=o>=</span> <span class=nf>myproc</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=p>......</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=nf>killed</span><span class=p>(</span><span class=n>p</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>    <span class=nf>kexit</span><span class=p>(</span><span class=o>-</span><span class=mi>1</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=c1>// give up the CPU if this is a timer interrupt.
+</span></span></span><span class=line><span class=cl><span class=c1></span>  <span class=k>if</span> <span class=p>(</span><span class=n>which_dev</span> <span class=o>==</span> <span class=mi>2</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>interval</span> <span class=o>!=</span> <span class=mi>0</span> <span class=o>&amp;&amp;</span> <span class=o>!</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>inalarm</span><span class=p>)</span> <span class=p>{</span> 
+</span></span><span class=line><span class=cl>      <span class=k>if</span> <span class=p>(</span><span class=o>++</span><span class=p>(</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>clock_passed</span><span class=p>)</span> <span class=o>&gt;=</span> <span class=n>p</span><span class=o>-&gt;</span><span class=n>interval</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>p</span><span class=o>-&gt;</span><span class=n>clock_passed</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=n>p</span><span class=o>-&gt;</span><span class=n>inalarm</span> <span class=o>=</span> <span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=nf>alarm_store</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>        <span class=n>p</span><span class=o>-&gt;</span><span class=n>trapframe</span><span class=o>-&gt;</span><span class=n>epc</span> <span class=o>=</span> <span class=p>(</span><span class=n>uint64</span><span class=p>)</span><span class=n>p</span><span class=o>-&gt;</span><span class=n>alarm_handler</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>      <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=nf>yield</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=p>......</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><p>测试一下：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=o>==</span> Test answers-traps.txt <span class=o>==</span> 
+</span></span><span class=line><span class=cl>answers-traps.txt: <span class=nv>OK</span> 
+</span></span><span class=line><span class=cl><span class=o>==</span> Test backtrace <span class=nb>test</span> <span class=o>==</span> 
+</span></span><span class=line><span class=cl>$ make qemu-gdb
+</span></span><span class=line><span class=cl>backtrace test: OK <span class=o>(</span>4.8s<span class=o>)</span> 
+</span></span><span class=line><span class=cl><span class=o>==</span> Test running <span class=nv>alarmtest</span> <span class=o>==</span> 
+</span></span><span class=line><span class=cl>$ make qemu-gdb
+</span></span><span class=line><span class=cl><span class=o>(</span>3.6s<span class=o>)</span> 
+</span></span><span class=line><span class=cl><span class=o>==</span> Test   alarmtest: <span class=nv>test0</span> <span class=o>==</span> 
+</span></span><span class=line><span class=cl>  alarmtest: test0: <span class=nv>OK</span> 
+</span></span><span class=line><span class=cl><span class=o>==</span> Test   alarmtest: <span class=nv>test1</span> <span class=o>==</span> 
+</span></span><span class=line><span class=cl>  alarmtest: test1: <span class=nv>OK</span> 
+</span></span><span class=line><span class=cl><span class=o>==</span> Test   alarmtest: <span class=nv>test2</span> <span class=o>==</span> 
+</span></span><span class=line><span class=cl>  alarmtest: test2: <span class=nv>OK</span> 
+</span></span><span class=line><span class=cl><span class=o>==</span> Test   alarmtest: <span class=nv>test3</span> <span class=o>==</span> 
+</span></span><span class=line><span class=cl>  alarmtest: test3: <span class=nv>OK</span> 
+</span></span><span class=line><span class=cl><span class=o>==</span> Test <span class=nv>usertests</span> <span class=o>==</span> 
+</span></span><span class=line><span class=cl>$ make qemu-gdb
+</span></span><span class=line><span class=cl>usertests: OK <span class=o>(</span>39.6s<span class=o>)</span> 
+</span></span><span class=line><span class=cl><span class=o>==</span> Test <span class=nb>time</span> <span class=o>==</span> 
+</span></span><span class=line><span class=cl>time: OK 
+</span></span><span class=line><span class=cl>Score: 95/95
+</span></span></code></pre></div></div><footer class=post-footer><ul class=post-tags><li><a href=https://Jiangmmh.github.io/tags/mit6.1810/>MIT6.1810</a></li><li><a href=https://Jiangmmh.github.io/tags/xv6/>Xv6</a></li><li><a href=https://Jiangmmh.github.io/tags/trap/>Trap</a></li></ul><nav class=paginav><a class=next href=https://Jiangmmh.github.io/posts/liso-cp1/><span class=title>Next »</span>
+<span>15441-Liso-CP1</span></a></nav></footer></article></main><footer class=footer><span>&copy; 2026 <a href=https://Jiangmmh.github.io/>Minghan的博客</a></span> ·
+<span>Powered by
+<a href="https://gohugo.io/?utm_source=papermod" rel=noopener target=_blank>Hugo</a> &
+<a href=https://github.com/adityatelange/hugo-PaperMod/ rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top id=top-link class="top-link hidden" aria-label="go to top" title="Go to Top (Alt + G)" accesskey=g><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevrons-up"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg>
+</a><script src=/js/toc-scrollspy.js defer></script><script>let menu=document.getElementById("menu");if(menu){const e=localStorage.getItem("menu-scroll-position");e&&(menu.scrollLeft=parseInt(e,10)),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}}document.querySelectorAll('a[href^="#"]').forEach(e=>{e.addEventListener("click",function(e){e.preventDefault();var t=this.getAttribute("href").substr(1);window.matchMedia("(prefers-reduced-motion: reduce)").matches?document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView({behavior:"smooth"}),t==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${t}`)})})</script><script>var toplink=document.getElementById("top-link");window.onscroll=function(){const e=window.innerHeight;document.body.scrollTop>e||document.documentElement.scrollTop>e?toplink.classList.remove("hidden"):toplink.classList.add("hidden")}</script><script>document.getElementById("theme-toggle").addEventListener("click",()=>{const e=document.querySelector("html");e.dataset.theme==="dark"?(e.dataset.theme="light",localStorage.setItem("pref-theme","light")):(e.dataset.theme="dark",localStorage.setItem("pref-theme","dark"))})</script><script>document.querySelectorAll("pre > code").forEach(e=>{const n=e.parentNode.parentNode,t=document.createElement("button");t.classList.add("copy-code"),t.innerHTML="copy";function s(){t.innerHTML="copied!",setTimeout(()=>{t.innerHTML="copy"},2e3)}t.addEventListener("click",t=>{if("clipboard"in navigator){navigator.clipboard.writeText(e.textContent),s();return}const n=document.createRange();n.selectNodeContents(e);const o=window.getSelection();o.removeAllRanges(),o.addRange(n);try{document.execCommand("copy"),s()}catch{}o.removeRange(n)}),n.classList.contains("highlight")?n.appendChild(t):n.parentNode.firstChild==n||(e.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName=="TABLE"?e.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(t):e.parentNode.appendChild(t))})</script></body></html>
