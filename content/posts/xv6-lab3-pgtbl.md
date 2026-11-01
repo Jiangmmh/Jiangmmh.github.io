@@ -2,8 +2,8 @@
 title: "MIT6.1810: Lab3 Pagetable"
 date: '2026-10-27T11:01:51+08:00'
 draft: false
-tags: [操作系统, xv6, 页表, 虚拟内存]
-categories: [MIT6.1810]
+tags: [MIT6.1810, xv6, 页表, 虚拟内存]
+categories: [操作系统]
 ---
 
 # 一、**Inspect a user-process page table (easy)**·

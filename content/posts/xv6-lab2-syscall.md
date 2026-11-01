@@ -2,8 +2,8 @@
 title: "MIT6.1810: Lab2 Syscall"
 date: '2026-10-26T09:23:20+08:00'
 draft: false
-tags: [操作系统, xv6]
-categories: [MIT6.1810]
+tags: [MIT6.1810, xv6]
+categories: [操作系统]
 ---
 
 在这个lab中我们将深入理解xv6（其他系统也差不多）的系统调用是如何实现的，并尝试根据功能需求实现自己的系统调用。

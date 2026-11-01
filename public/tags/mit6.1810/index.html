@@ -195,6 +195,29 @@
 
 <article class="post-entry tag-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">MIT6.1810: Lab4 Trap
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>一、RISC-V assembly (easy) 先来看一下 user/call.asm：
+#include &#34;kernel/param.h&#34; #include &#34;kernel/types.h&#34; #include &#34;kernel/stat.h&#34; #include &#34;user/user.h&#34; int g(int x) { return x &#43; 3; } int f(int x) { return g(x); } void main(void) { printf(&#34;%d %d\n&#34;, f(8) &#43; 1, 13); exit(0); } Q1: 哪些寄存器存储着函数的参数？例如，在 main 函数调用printf时，哪个寄存器保存着参数 13 ？
+根据RISC-V的Calling Convention，参数依次存放在a0, a1和a2中。
+Q2: main 函数的汇编代码中，函数f 的调用在哪里 ？函数g的调用在哪里？（提示：编译器可能会内联函数。）
+下面是call.c对应的汇编代码，可以看到其中并没有调用函数f和函数g，因为对这两个函数的调用都被编译器内联了。
+void main(void) { 24:	1141 addi	sp,sp,-16 26:	e406 sd	ra,8(sp) 28:	e022 sd	s0,0(sp) 2a:	0800 addi	s0,sp,16 printf(&#34;%d %d\n&#34;, f(8) &#43; 1, 13); 2c:	4635 li	a2,13 2e:	45b1 li	a1,12 30:	00001517 auipc	a0,0x1 34:	8c050513 addi	a0,a0,-1856 # 8f0 &lt;malloc&#43;0xf2&gt; 38:	70e000ef jal	746 &lt;printf&gt; exit(0); 3c:	4501 li	a0,0 3e:	2ba000ef jal	2f8 &lt;exit&gt; Q3：printf 函数位于哪个地址？
+printf位于地址0x746处。
+Q4：main 函数中printf函数调用jarl 之后， 寄存器ra的值是多少？
+printf的返回值是成功打印输出等字符总数，如果出错则返回一个负数。
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-11-01 10:27:29 +0800 CST'>November 1, 2026</span>&nbsp;·&nbsp;<span>3 min</span>&nbsp;·&nbsp;<span>575 words</span></footer>
+  <a class="entry-link" aria-label="post link to MIT6.1810: Lab4 Trap" href="http://localhost:1313/posts/xv6-lab4-trap/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">再探xv6: 异常控制流篇
     </h2>
   </header>
@@ -221,6 +244,23 @@ UART 接收到新的输入数据。 磁盘控制器完成一次 I/O 操作。 �
 
 <span title='2026-10-27 11:14:45 +0800 CST'>October 27, 2026</span>&nbsp;·&nbsp;<span>7 min</span>&nbsp;·&nbsp;<span>1361 words</span></footer>
   <a class="entry-link" aria-label="post link to 再探xv6: 异常控制流篇" href="http://localhost:1313/posts/xv6-04/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">MIT6.1810: Lab3 Pagetable
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>一、Inspect a user-process page table (easy)· xv6提供了一个用户程序pgtbltest.c，其中调用print_pgtbl()打印了页表的前10个页面和后10页的页表项，因为页表属于内核管理的数据结构，所以想要获取页表项就必须通过系统调用才行。在该lab中xv6额外提供了几个系统调用，其中的pgpte()的作用就是根据虚拟地址va，得到其对应的PTE。
+int ugetpid(void); uint64 pgpte(void *); void vmprint(void); int pgaccess(void *base, int len, void *mask); int ksupernpte(uint64*, uint64 *); void print_pgtbl() { printf(&#34;print_pgtbl starting\n&#34;); for (uint64 i = 0; i &lt; 10; i&#43;&#43;) { print_pte(i * PGSIZE); } uint64 top = MAXVA / PGSIZE; for (uint64 i = top - 10; i &lt; top; i&#43;&#43;) { print_pte(i * PGSIZE); } printf(&#34;print_pgtbl: OK\n&#34;); } 启动xv6，运行程序pgtbltest打印页表：
+xv6 kernel is booting hart 1 starting hart 2 starting init: starting sh $ pgtbltest print_pgtbl starting va 0x0 pte 0x21FC885B pa 0x87F22000 perm 0x5B va 0x1000 pte 0x21FC7C17 pa 0x87F1F000 perm 0x17 va 0x2000 pte 0x21FC7807 pa 0x87F1E000 perm 0x7 va 0x3000 pte 0x21FC74D7 pa 0x87F1D000 perm 0xD7 va 0x4000 pte 0x0 pa 0x0 perm 0x0 va 0x5000 pte 0x0 pa 0x0 perm 0x0 va 0x6000 pte 0x0 pa 0x0 perm 0x0 va 0x7000 pte 0x0 pa 0x0 perm 0x0 va 0x8000 pte 0x0 pa 0x0 perm 0x0 va 0x9000 pte 0x0 pa 0x0 perm 0x0 va 0x3FFFFF6000 pte 0x0 pa 0x0 perm 0x0 va 0x3FFFFF7000 pte 0x0 pa 0x0 perm 0x0 va 0x3FFFFF8000 pte 0x0 pa 0x0 perm 0x0 va 0x3FFFFF9000 pte 0x0 pa 0x0 perm 0x0 va 0x3FFFFFA000 pte 0x0 pa 0x0 perm 0x0 va 0x3FFFFFB000 pte 0x0 pa 0x0 perm 0x0 va 0x3FFFFFC000 pte 0x0 pa 0x0 perm 0x0 va 0x3FFFFFD000 pte 0x0 pa 0x0 perm 0x0 va 0x3FFFFFE000 pte 0x21FD08C7 pa 0x87F42000 perm 0xC7 va 0x3FFFFFF000 pte 0x2000184B pa 0x80006000 perm 0x4B print_pgtbl: OK vmprint_test starting vmprint_test: done pgaccess_test starting pgtbltest: pgaccess_test failed: incorrect access bits set, pid=3 这个页表和用户进程的地址空间正好能对应上：
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-27 11:01:51 +0800 CST'>October 27, 2026</span>&nbsp;·&nbsp;<span>9 min</span>&nbsp;·&nbsp;<span>1733 words</span></footer>
+  <a class="entry-link" aria-label="post link to MIT6.1810: Lab3 Pagetable" href="http://localhost:1313/posts/xv6-lab3-pgtbl/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -271,6 +311,49 @@ struct run { struct run *next; }; struct { struct spinlock lock; struct run *fre
 
 <span title='2026-10-26 10:42:45 +0800 CST'>October 26, 2026</span>&nbsp;·&nbsp;<span>5 min</span>&nbsp;·&nbsp;<span>1016 words</span></footer>
   <a class="entry-link" aria-label="post link to 再探xv6: 内存篇" href="http://localhost:1313/posts/xv6-02/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">MIT6.1810: Lab2 Syscall
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>在这个lab中我们将深入理解xv6（其他系统也差不多）的系统调用是如何实现的，并尝试根据功能需求实现自己的系统调用。
+关于xv6的概述和系统调用的逻辑可以看这篇文章，后面就不过多介绍了。
+一、Using gdb (easy) 这部分内容主要是介绍gdb的使用方法，略。
+二、Sandbox a command(moderate) 题目要求实现一个系统调用interpose，其接受两个参数：一个整数掩码和一个路径，前者指定了要屏蔽哪些系统调用，后者暂时不用管。如果要使用interpose屏蔽当前进程的open系统调用，用法如下：
+interpose(1 &lt;&lt; SYS_open, &#34;-&#34;) 现在开始实现该系统调用，首先是用户侧：
+在 user/user.h 中添加 interpose() 的声明 。 int interpose(int, const char *); 在 user/usys.pl 中添加一行内容用于生成系统调用入口函数的实现。 entry(“interpose”); 题目提供了两个程序sandbox.c和sbtest.c，我们需要在Makefile中将其加入编译：
+UPROGS=\ ...... $U/_sandbox\ $U/_sbtest\ 在内核侧：
+在 kernel/syscall.h 中添加 interpose 的系统调用号宏定义
+#define SYS_interpose 23 在 kernel/proc.h 的proc结构体中添加一个interpose_mask，记录屏蔽字
+int interpose_mask; 在 kernel/sysproc.c 中添加函数 sys_interpose() 处理interpose系统调用
+uint64 sys_interpose(void) { int interpose_mask; argint(0, &amp;interpose_mask); myproc()-&gt;interpose_mask = interpose_mask; return 0; } 为了使子进程能够继承父进程的屏蔽字，需要在创建子进程时拷贝interpose_mask，在 kernel/proc.c 中的 kfork() 函数的末尾添加 interpose_mask 的拷贝。
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-26 09:23:20 +0800 CST'>October 26, 2026</span>&nbsp;·&nbsp;<span>5 min</span>&nbsp;·&nbsp;<span>1044 words</span></footer>
+  <a class="entry-link" aria-label="post link to MIT6.1810: Lab2 Syscall" href="http://localhost:1313/posts/xv6-lab2-syscall/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">MIT6.1810: Lab1 Utils
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>一、环境准备 环境配置见文档，Linux和Mac皆可。
+拉取实验代码：
+$ git clone git://g.csail.mit.edu/xv6-labs-2026 Cloning into &#39;xv6-labs-2026&#39;... ... $ cd xv6-labs-2026 项目中已经提供了Makefile，直接构建并通过qemu启动即可：
+$ make qemu riscv64-unknown-elf-gcc -c -o kernel/entry.o kernel/entry.S riscv64-unknown-elf-gcc -Wall -Werror -O -fno-omit-frame-pointer -ggdb -DSOL_UTIL -MD -mcmodel=medany -ffreestanding -fno-common -nostdlib -mno-relax -I. -fno-stack-protector -fno-pie -no-pie -c -o kernel/start.o kernel/start.c ... riscv64-unknown-elf-ld -z max-page-size=4096 -N -e main -Ttext 0 -o user/_zombie user/zombie.o user/ulib.o user/usys.o user/printf.o user/umalloc.o riscv64-unknown-elf-objdump -S user/_zombie &gt; user/zombie.asm riscv64-unknown-elf-objdump -t user/_zombie | sed &#39;1,/SYMBOL TABLE/d; s/ .* / /; /^$/d&#39; &gt; user/zombie.sym mkfs/mkfs fs.img README user/xargstest.sh user/_cat user/_echo user/_forktest user/_grep user/_init user/_kill user/_ln user/_ls user/_mkdir user/_rm user/_sh user/_stressfs user/_usertests user/_grind user/_wc user/_zombie nmeta 46 (boot, super, log blocks 30 inode blocks 13, bitmap blocks 1) blocks 954 total 1000 balloc: first 591 blocks have been allocated balloc: write bitmap block at sector 45 qemu-system-riscv64 -machine virt -bios none -kernel kernel/kernel -m 128M -smp 3 -nographic -drive file=fs.img,if=none,format=raw,id=x0 -device virtio-blk-device,drive=x0,bus=virtio-mmio-bus.0 xv6 kernel is booting hart 2 starting hart 1 starting init: starting sh $ 关于xv6项目目录结构、构建流程和Boot细节，可以看我的这篇文章。
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-25 15:12:01 +0800 CST'>October 25, 2026</span>&nbsp;·&nbsp;<span>8 min</span>&nbsp;·&nbsp;<span>1668 words</span></footer>
+  <a class="entry-link" aria-label="post link to MIT6.1810: Lab1 Utils" href="http://localhost:1313/posts/xv6-lab1-util/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 

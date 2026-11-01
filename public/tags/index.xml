@@ -6,8 +6,29 @@
     <description>Recent content in Tags on Minghan的博客</description>
     <generator>Hugo</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Fri, 30 Oct 2026 16:20:00 +0800</lastBuildDate>
+    <lastBuildDate>Sun, 01 Nov 2026 10:27:29 +0800</lastBuildDate>
     <atom:link href="http://localhost:1313/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>MIT6.1810</title>
+      <link>http://localhost:1313/tags/mit6.1810/</link>
+      <pubDate>Sun, 01 Nov 2026 10:27:29 +0800</pubDate>
+      <guid>http://localhost:1313/tags/mit6.1810/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Trap</title>
+      <link>http://localhost:1313/tags/trap/</link>
+      <pubDate>Sun, 01 Nov 2026 10:27:29 +0800</pubDate>
+      <guid>http://localhost:1313/tags/trap/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Xv6</title>
+      <link>http://localhost:1313/tags/xv6/</link>
+      <pubDate>Sun, 01 Nov 2026 10:27:29 +0800</pubDate>
+      <guid>http://localhost:1313/tags/xv6/</guid>
+      <description></description>
+    </item>
     <item>
       <title>15441</title>
       <link>http://localhost:1313/tags/15441/</link>
@@ -107,31 +128,10 @@
       <description></description>
     </item>
     <item>
-      <title>MIT6.1810</title>
-      <link>http://localhost:1313/tags/mit6.1810/</link>
-      <pubDate>Tue, 27 Oct 2026 11:14:45 +0800</pubDate>
-      <guid>http://localhost:1313/tags/mit6.1810/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>Xv6</title>
-      <link>http://localhost:1313/tags/xv6/</link>
-      <pubDate>Tue, 27 Oct 2026 11:14:45 +0800</pubDate>
-      <guid>http://localhost:1313/tags/xv6/</guid>
-      <description></description>
-    </item>
-    <item>
       <title>中断</title>
       <link>http://localhost:1313/tags/%E4%B8%AD%E6%96%AD/</link>
       <pubDate>Tue, 27 Oct 2026 11:14:45 +0800</pubDate>
       <guid>http://localhost:1313/tags/%E4%B8%AD%E6%96%AD/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>操作系统</title>
-      <link>http://localhost:1313/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/</link>
-      <pubDate>Tue, 27 Oct 2026 11:14:45 +0800</pubDate>
-      <guid>http://localhost:1313/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/</guid>
       <description></description>
     </item>
     <item>
@@ -265,6 +265,13 @@
       <link>http://localhost:1313/tags/udp/</link>
       <pubDate>Thu, 22 Oct 2026 15:33:34 +0800</pubDate>
       <guid>http://localhost:1313/tags/udp/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>操作系统</title>
+      <link>http://localhost:1313/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/</link>
+      <pubDate>Thu, 22 Oct 2026 15:33:34 +0800</pubDate>
+      <guid>http://localhost:1313/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/</guid>
       <description></description>
     </item>
     <item>

@@ -2,8 +2,8 @@
 title: "MIT6.1810: Lab1 Utils"
 date: '2026-10-25T15:12:01+08:00'
 draft: false
-tags: [操作系统, xv6]
-categories: [MIT6.1810]
+tags: [MIT6.1810, xv6]
+categories: [操作系统]
 ---
 
 # 一、环境准备
