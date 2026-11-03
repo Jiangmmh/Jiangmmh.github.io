@@ -40,13 +40,18 @@ theme = "PaperMod"
   lineNos = false
   tabWidth = 4
 
-# 数学公式：让 Goldmark 保留 LaTeX 原始内容
 [markup.goldmark.extensions.passthrough]
-  enable = true
+enable = true
 
 [markup.goldmark.extensions.passthrough.delimiters]
-  block = [['\[', '\]'], ['$$', '$$']]
-  inline = [['\(', '\)']]
+block = [
+  ["$$", "$$"],
+  ["\\[", "\\]"]
+]
+inline = [
+  ["$", "$"],
+  ["\\(", "\\)"]
+]
 
 [menu]
   [[menu.main]]
@@ -95,3 +100,4 @@ theme = "PaperMod"
     name = "关于"
     url = "/about/"
     weight = 80
+

@@ -94,6 +94,7 @@
     });
   });
 </script>
+
 <meta property="og:url" content="http://localhost:1313/">
   <meta property="og:site_name" content="Minghan的博客">
   <meta property="og:title" content="Minghan的博客">
@@ -227,6 +228,34 @@
 
 <article class="post-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">CMU 15-122 学习笔记（一）：契约式编程与循环不变式
+      <span class="entry-hint" title="Draft">
+        <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 -960 960 960" fill="currentColor">
+          <path
+            d="M160-410v-60h300v60H160Zm0-165v-60h470v60H160Zm0-165v-60h470v60H160Zm360 580v-123l221-220q9-9 20-13t22-4q12 0 23 4.5t20 13.5l37 37q9 9 13 20t4 22q0 11-4.5 22.5T862.09-380L643-160H520Zm300-263-37-37 37 37ZM580-220h38l121-122-18-19-19-18-122 121v38Zm141-141-19-18 37 37-18-19Z" />
+        </svg>
+      </span>
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>CMU15122课程地址：https://web2.qatar.cmu.edu/~mhhammou/15122-s23/index.html。
+Lecture1笔记 本节课的主题：在开发软件系统时，如何实现从直觉调试到形式化证明？
+在软件开发中，我们经常遇到这样的场景：编写了一段看似精妙的算法，测试了几个样例都通过了，但在某种特定输入下程序却悄悄返回了错误答案，或者陷入死循环。
+传统的方法是加 printf 或打断点一步步跟踪（Operational Reasoning）。但对于复杂的循环逻辑，单靠“脑补执行过程”不仅效率低下，而且极易遗漏边缘情况。
+这是 CMU 15-122（Principles of Imperative Computation）的核心思想。下面以一个经典的快速幂算法（Fast Exponentiation）为例，展示如何通过契约式编程（Contracts）与循环不变式（Loop Invariants），从原理上证明算法的正确性，并精准推导出代码中的隐藏 Bug。
+1. 问题背景：一个看似正确的快速幂实现 假设我们需要实现一个计算 xyx^yxy 的快速幂函数 f(x,y)f(x, y)f(x,y)（其中 y≥0y \ge 0y≥0）。
+通过不断拆分指数，我们可以在 O(log⁡y)O(\log y)O(logy) 的时间复杂度内完成计算。下面是最初的代码实现：
+// Specification function! int POW(int b, int e) //@requires e &gt;= 0; { if (e == 0) return 1; return POW(b, e-1) * b; } // 计算 x 的 y 次方 int f(int x, int y) //@requires y &gt;= 0; //@ensures \result == POW(x, y); { int b = x; int e = y; int r = 1; while (e &gt; 1) { if (e % 2 == 1) { r = b * r; } b = b * b; e = e / 2; } return r * b; } 契约（Contracts）说明： @requires y &gt;= 0;：前置条件（Precondition），调用者必须保证 y≥0y \ge 0y≥0。 @ensures \result == POW(x, y);：后置条件（Postcondition），函数必须保证返回结果等于数学上的 xyx^yxy。 运行测试： 如果我们测试 f(2, 8)：
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-11-03 11:25:28 +0800 CST'>November 3, 2026</span>&nbsp;·&nbsp;<span>6 min</span>&nbsp;·&nbsp;<span>1124 words</span></footer>
+  <a class="entry-link" aria-label="post link to CMU 15-122 学习笔记（一）：契约式编程与循环不变式" href="http://localhost:1313/posts/cmu-15122-01/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">MIT6.1810: Lab4 Trap
     </h2>
   </header>
@@ -251,6 +280,12 @@ printf的返回值是成功打印输出等字符总数，如果出错则返回�
 <article class="post-entry"> 
   <header class="entry-header">
     <h2 class="entry-hint-parent">15441-Liso-CP1
+      <span class="entry-hint" title="Draft">
+        <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 -960 960 960" fill="currentColor">
+          <path
+            d="M160-410v-60h300v60H160Zm0-165v-60h470v60H160Zm0-165v-60h470v60H160Zm360 580v-123l221-220q9-9 20-13t22-4q12 0 23 4.5t20 13.5l37 37q9 9 13 20t4 22q0 11-4.5 22.5T862.09-380L643-160H520Zm300-263-37-37 37 37ZM580-220h38l121-122-18-19-19-18-122 121v38Zm141-141-19-18 37 37-18-19Z" />
+        </svg>
+      </span>
     </h2>
   </header>
   <div class="entry-content">
@@ -440,29 +475,6 @@ xv6 kernel is booting hart 1 starting hart 2 starting init: starting sh $ pgtblt
 
 <span title='2026-10-26 17:25:46 +0800 CST'>October 26, 2026</span>&nbsp;·&nbsp;<span>2 min</span>&nbsp;·&nbsp;<span>245 words</span></footer>
   <a class="entry-link" aria-label="post link to 埃拉托色尼筛法（Sieve of Eratosthenes）" href="http://localhost:1313/posts/sieve/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">再探xv6: 并发篇
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>上一篇讲的是内存，这一篇讲并发。并发是 xv6 里最容易写出 bug、也最难调试的部分：对多核的支持让两个 CPU 同时修改同一份数据，中断让内核代码在任意时刻被打断，进程切换又让同一个数据结构被不同的进程轮流访问。
-这一篇先回答&#34;为什么需要锁&#34;，再逐行拆解 xv6 里的两种锁（Spinlock 和 Sleeplock），最后对照 Linux 的并发机制，看看一个通用操作系统为了应付更复杂的场景，做了哪些 xv6 没做的设计。
-一、为什么要提供并发机制？ 1.1 并发的三个来源 并发不等于&#34;多核&#34;。只要存在两个执行流能同时访问同一份内存，并发就存在。在 xv6 里，它有三个来源：
-来源一：多核（SMP）。 kernel/param.h 中定义了 NCPU 8，即最多 8 个 hart（CPU 核）可以同时运行内核代码。它们共享同一片物理内存，也共享同一批外设（virtio 磁盘、uart）。两个核同时修改同一个内存地址，就是一次数据竞争。
-来源二：中断与抢占。 内核代码随时可能被中断打断，而中断处理程序与被中断的代码共享数据结构。最典型的例子在 kernel/console.c 里：键盘中断处理程序 consoleintr() 往输入缓冲区写字符，进程通过 consread() 从同一个缓冲区读字符，两者靠同一把 cons.lock 保护。
-来源三：进程切换。 多个进程通过系统调用共享文件、管道、inode 和页表。struct file 的引用计数、pipe 的环形缓冲区、inode 的引用计数，都会被多个进程并发访问。
-这三个来源有一个共同点：它们都会打断一段正在运行的代码。因此临界区里的代码必须假设&#34;我随时可能被打断，并且被打断后别人也在改同样的数据&#34;。
-1.2 没有同步会发生什么 竞态条件：结果依赖执行顺序 看 kernel/kalloc.c 里分配物理页的代码：
-void * kalloc(void) { struct run *r; acquire(&amp;kmem.lock); r = kmem.freelist; if (r) { kmem.freelist = r-&gt;next; } release(&amp;kmem.lock); if (r) memset((char *)r, 5, PGSIZE); // fill with junk return (void *)r; } 假设去掉 acquire/release。CPU0 和 CPU1 同时进入临界区，可能读到同一个 r：
-...</p>
-  </div>
-  <footer class="entry-footer">
-
-<span title='2026-10-26 11:55:00 +0800 CST'>October 26, 2026</span>&nbsp;·&nbsp;<span>8 min</span>&nbsp;·&nbsp;<span>1577 words</span></footer>
-  <a class="entry-link" aria-label="post link to 再探xv6: 并发篇" href="http://localhost:1313/posts/xv6-03/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">

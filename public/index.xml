@@ -6,8 +6,59 @@
     <description>Recent content on Minghan的博客</description>
     <generator>Hugo</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Sun, 01 Nov 2026 10:27:29 +0800</lastBuildDate>
+    <lastBuildDate>Tue, 03 Nov 2026 11:25:28 +0800</lastBuildDate>
     <atom:link href="http://localhost:1313/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>CMU 15-122 学习笔记（一）：契约式编程与循环不变式</title>
+      <link>http://localhost:1313/posts/cmu-15122-01/</link>
+      <pubDate>Tue, 03 Nov 2026 11:25:28 +0800</pubDate>
+      <guid>http://localhost:1313/posts/cmu-15122-01/</guid>
+      <description>&lt;p&gt;CMU15122课程地址：&lt;a href=&#34;https://web2.qatar.cmu.edu/~mhhammou/15122-s23/index.html&#34;&gt;https://web2.qatar.cmu.edu/~mhhammou/15122-s23/index.html&lt;/a&gt;。&lt;/p&gt;
+&lt;h1 id=&#34;lecture1笔记&#34;&gt;Lecture1笔记&lt;/h1&gt;
+&lt;blockquote&gt;
+&lt;p&gt;本节课的主题：&lt;strong&gt;在开发软件系统时，如何实现从直觉调试到形式化证明&lt;/strong&gt;？&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;在软件开发中，我们经常遇到这样的场景：编写了一段看似精妙的算法，测试了几个样例都通过了，但在某种特定输入下程序却悄悄返回了错误答案，或者陷入死循环。&lt;/p&gt;
+&lt;p&gt;传统的方法是加 &lt;code&gt;printf&lt;/code&gt; 或打断点一步步跟踪（Operational Reasoning）。但对于复杂的循环逻辑，单靠“脑补执行过程”不仅效率低下，而且极易遗漏边缘情况。&lt;/p&gt;
+&lt;p&gt;这是 CMU 15-122（&lt;em&gt;Principles of Imperative Computation&lt;/em&gt;）的核心思想。下面以一个经典的&lt;strong&gt;快速幂算法（Fast Exponentiation）&lt;strong&gt;为例，展示如何通过&lt;/strong&gt;契约式编程（Contracts）&lt;strong&gt;与&lt;/strong&gt;循环不变式（Loop Invariants）&lt;/strong&gt;，从原理上证明算法的正确性，并精准推导出代码中的隐藏 Bug。&lt;/p&gt;
+&lt;h2 id=&#34;1-问题背景一个看似正确的快速幂实现&#34;&gt;1. 问题背景：一个看似正确的快速幂实现&lt;/h2&gt;
+&lt;p&gt;假设我们需要实现一个计算 &lt;span class=&#34;katex&#34;&gt;&lt;span class=&#34;katex-mathml&#34;&gt;&lt;math xmlns=&#34;http://www.w3.org/1998/Math/MathML&#34;&gt;&lt;semantics&gt;&lt;mrow&gt;&lt;msup&gt;&lt;mi&gt;x&lt;/mi&gt;&lt;mi&gt;y&lt;/mi&gt;&lt;/msup&gt;&lt;/mrow&gt;&lt;annotation encoding=&#34;application/x-tex&#34;&gt;x^y&lt;/annotation&gt;&lt;/semantics&gt;&lt;/math&gt;&lt;/span&gt;&lt;span class=&#34;katex-html&#34; aria-hidden=&#34;true&#34;&gt;&lt;span class=&#34;base&#34;&gt;&lt;span class=&#34;strut&#34; style=&#34;height:0.6644em;&#34;&gt;&lt;/span&gt;&lt;span class=&#34;mord&#34;&gt;&lt;span class=&#34;mord mathnormal&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;msupsub&#34;&gt;&lt;span class=&#34;vlist-t&#34;&gt;&lt;span class=&#34;vlist-r&#34;&gt;&lt;span class=&#34;vlist&#34; style=&#34;height:0.6644em;&#34;&gt;&lt;span style=&#34;top:-3.063em;margin-right:0.05em;&#34;&gt;&lt;span class=&#34;pstrut&#34; style=&#34;height:2.7em;&#34;&gt;&lt;/span&gt;&lt;span class=&#34;sizing reset-size6 size3 mtight&#34;&gt;&lt;span class=&#34;mord mathnormal mtight&#34; style=&#34;margin-right:0.03588em;&#34;&gt;y&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt; 的快速幂函数 &lt;span class=&#34;katex&#34;&gt;&lt;span class=&#34;katex-mathml&#34;&gt;&lt;math xmlns=&#34;http://www.w3.org/1998/Math/MathML&#34;&gt;&lt;semantics&gt;&lt;mrow&gt;&lt;mi&gt;f&lt;/mi&gt;&lt;mo stretchy=&#34;false&#34;&gt;(&lt;/mo&gt;&lt;mi&gt;x&lt;/mi&gt;&lt;mo separator=&#34;true&#34;&gt;,&lt;/mo&gt;&lt;mi&gt;y&lt;/mi&gt;&lt;mo stretchy=&#34;false&#34;&gt;)&lt;/mo&gt;&lt;/mrow&gt;&lt;annotation encoding=&#34;application/x-tex&#34;&gt;f(x, y)&lt;/annotation&gt;&lt;/semantics&gt;&lt;/math&gt;&lt;/span&gt;&lt;span class=&#34;katex-html&#34; aria-hidden=&#34;true&#34;&gt;&lt;span class=&#34;base&#34;&gt;&lt;span class=&#34;strut&#34; style=&#34;height:1em;vertical-align:-0.25em;&#34;&gt;&lt;/span&gt;&lt;span class=&#34;mord mathnormal&#34; style=&#34;margin-right:0.10764em;&#34;&gt;f&lt;/span&gt;&lt;span class=&#34;mopen&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;mord mathnormal&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;mpunct&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;mspace&#34; style=&#34;margin-right:0.1667em;&#34;&gt;&lt;/span&gt;&lt;span class=&#34;mord mathnormal&#34; style=&#34;margin-right:0.03588em;&#34;&gt;y&lt;/span&gt;&lt;span class=&#34;mclose&#34;&gt;)&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;（其中 &lt;span class=&#34;katex&#34;&gt;&lt;span class=&#34;katex-mathml&#34;&gt;&lt;math xmlns=&#34;http://www.w3.org/1998/Math/MathML&#34;&gt;&lt;semantics&gt;&lt;mrow&gt;&lt;mi&gt;y&lt;/mi&gt;&lt;mo&gt;≥&lt;/mo&gt;&lt;mn&gt;0&lt;/mn&gt;&lt;/mrow&gt;&lt;annotation encoding=&#34;application/x-tex&#34;&gt;y \ge 0&lt;/annotation&gt;&lt;/semantics&gt;&lt;/math&gt;&lt;/span&gt;&lt;span class=&#34;katex-html&#34; aria-hidden=&#34;true&#34;&gt;&lt;span class=&#34;base&#34;&gt;&lt;span class=&#34;strut&#34; style=&#34;height:0.8304em;vertical-align:-0.1944em;&#34;&gt;&lt;/span&gt;&lt;span class=&#34;mord mathnormal&#34; style=&#34;margin-right:0.03588em;&#34;&gt;y&lt;/span&gt;&lt;span class=&#34;mspace&#34; style=&#34;margin-right:0.2778em;&#34;&gt;&lt;/span&gt;&lt;span class=&#34;mrel&#34;&gt;≥&lt;/span&gt;&lt;span class=&#34;mspace&#34; style=&#34;margin-right:0.2778em;&#34;&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;base&#34;&gt;&lt;span class=&#34;strut&#34; style=&#34;height:0.6444em;&#34;&gt;&lt;/span&gt;&lt;span class=&#34;mord&#34;&gt;0&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;）。&lt;/p&gt;
+&lt;p&gt;通过不断拆分指数，我们可以在 &lt;span class=&#34;katex&#34;&gt;&lt;span class=&#34;katex-mathml&#34;&gt;&lt;math xmlns=&#34;http://www.w3.org/1998/Math/MathML&#34;&gt;&lt;semantics&gt;&lt;mrow&gt;&lt;mi&gt;O&lt;/mi&gt;&lt;mo stretchy=&#34;false&#34;&gt;(&lt;/mo&gt;&lt;mi&gt;log&lt;/mi&gt;&lt;mo&gt;⁡&lt;/mo&gt;&lt;mi&gt;y&lt;/mi&gt;&lt;mo stretchy=&#34;false&#34;&gt;)&lt;/mo&gt;&lt;/mrow&gt;&lt;annotation encoding=&#34;application/x-tex&#34;&gt;O(\log y)&lt;/annotation&gt;&lt;/semantics&gt;&lt;/math&gt;&lt;/span&gt;&lt;span class=&#34;katex-html&#34; aria-hidden=&#34;true&#34;&gt;&lt;span class=&#34;base&#34;&gt;&lt;span class=&#34;strut&#34; style=&#34;height:1em;vertical-align:-0.25em;&#34;&gt;&lt;/span&gt;&lt;span class=&#34;mord mathnormal&#34; style=&#34;margin-right:0.02778em;&#34;&gt;O&lt;/span&gt;&lt;span class=&#34;mopen&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;mop&#34;&gt;lo&lt;span style=&#34;margin-right:0.01389em;&#34;&gt;g&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;mspace&#34; style=&#34;margin-right:0.1667em;&#34;&gt;&lt;/span&gt;&lt;span class=&#34;mord mathnormal&#34; style=&#34;margin-right:0.03588em;&#34;&gt;y&lt;/span&gt;&lt;span class=&#34;mclose&#34;&gt;)&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt; 的时间复杂度内完成计算。下面是最初的代码实现：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;// Specification function!
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;POW&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;b&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;e&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;o&#34;&gt;//&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;@&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;requires&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;e&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;gt;=&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;k&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;e&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;==&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;POW&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;b&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;e&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;b&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;// 计算 x 的 y 次方
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;f&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;y&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;//@requires y &amp;gt;= 0;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;//@ensures \result == POW(x, y);
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;b&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;e&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;y&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;r&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;while&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;e&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;k&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;e&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;%&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;2&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;==&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;            &lt;span class=&#34;n&#34;&gt;r&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;b&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;r&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;n&#34;&gt;b&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;b&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;b&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;n&#34;&gt;e&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;e&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;/&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;2&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;r&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;b&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;契约contracts说明&#34;&gt;契约（Contracts）说明：&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;@requires y &amp;gt;= 0;&lt;/code&gt;：&lt;strong&gt;前置条件（Precondition）&lt;/strong&gt;，调用者必须保证 &lt;span class=&#34;katex&#34;&gt;&lt;span class=&#34;katex-mathml&#34;&gt;&lt;math xmlns=&#34;http://www.w3.org/1998/Math/MathML&#34;&gt;&lt;semantics&gt;&lt;mrow&gt;&lt;mi&gt;y&lt;/mi&gt;&lt;mo&gt;≥&lt;/mo&gt;&lt;mn&gt;0&lt;/mn&gt;&lt;/mrow&gt;&lt;annotation encoding=&#34;application/x-tex&#34;&gt;y \ge 0&lt;/annotation&gt;&lt;/semantics&gt;&lt;/math&gt;&lt;/span&gt;&lt;span class=&#34;katex-html&#34; aria-hidden=&#34;true&#34;&gt;&lt;span class=&#34;base&#34;&gt;&lt;span class=&#34;strut&#34; style=&#34;height:0.8304em;vertical-align:-0.1944em;&#34;&gt;&lt;/span&gt;&lt;span class=&#34;mord mathnormal&#34; style=&#34;margin-right:0.03588em;&#34;&gt;y&lt;/span&gt;&lt;span class=&#34;mspace&#34; style=&#34;margin-right:0.2778em;&#34;&gt;&lt;/span&gt;&lt;span class=&#34;mrel&#34;&gt;≥&lt;/span&gt;&lt;span class=&#34;mspace&#34; style=&#34;margin-right:0.2778em;&#34;&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;base&#34;&gt;&lt;span class=&#34;strut&#34; style=&#34;height:0.6444em;&#34;&gt;&lt;/span&gt;&lt;span class=&#34;mord&#34;&gt;0&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;@ensures \result == POW(x, y);&lt;/code&gt;：&lt;strong&gt;后置条件（Postcondition）&lt;/strong&gt;，函数必须保证返回结果等于数学上的 &lt;span class=&#34;katex&#34;&gt;&lt;span class=&#34;katex-mathml&#34;&gt;&lt;math xmlns=&#34;http://www.w3.org/1998/Math/MathML&#34;&gt;&lt;semantics&gt;&lt;mrow&gt;&lt;msup&gt;&lt;mi&gt;x&lt;/mi&gt;&lt;mi&gt;y&lt;/mi&gt;&lt;/msup&gt;&lt;/mrow&gt;&lt;annotation encoding=&#34;application/x-tex&#34;&gt;x^y&lt;/annotation&gt;&lt;/semantics&gt;&lt;/math&gt;&lt;/span&gt;&lt;span class=&#34;katex-html&#34; aria-hidden=&#34;true&#34;&gt;&lt;span class=&#34;base&#34;&gt;&lt;span class=&#34;strut&#34; style=&#34;height:0.6644em;&#34;&gt;&lt;/span&gt;&lt;span class=&#34;mord&#34;&gt;&lt;span class=&#34;mord mathnormal&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;msupsub&#34;&gt;&lt;span class=&#34;vlist-t&#34;&gt;&lt;span class=&#34;vlist-r&#34;&gt;&lt;span class=&#34;vlist&#34; style=&#34;height:0.6644em;&#34;&gt;&lt;span style=&#34;top:-3.063em;margin-right:0.05em;&#34;&gt;&lt;span class=&#34;pstrut&#34; style=&#34;height:2.7em;&#34;&gt;&lt;/span&gt;&lt;span class=&#34;sizing reset-size6 size3 mtight&#34;&gt;&lt;span class=&#34;mord mathnormal mtight&#34; style=&#34;margin-right:0.03588em;&#34;&gt;y&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;运行测试&#34;&gt;运行测试：&lt;/h3&gt;
+&lt;p&gt;如果我们测试 &lt;code&gt;f(2, 8)&lt;/code&gt;：&lt;/p&gt;</description>
+    </item>
     <item>
       <title>MIT6.1810: Lab4 Trap</title>
       <link>http://localhost:1313/posts/xv6-lab4-trap/</link>
@@ -1691,6 +1742,13 @@
 &lt;p&gt;题目要求：判断两棵树上对应节点的值是否完全相同&lt;/p&gt;</description>
     </item>
     <item>
+      <title>The Soul of a New Machine</title>
+      <link>http://localhost:1313/books/soul-of-new-machine/</link>
+      <pubDate>Fri, 16 Oct 2026 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/books/soul-of-new-machine/</guid>
+      <description>记录一支工程团队开发新型计算机的经历，展现技术、工程实践与组织文化。</description>
+    </item>
+    <item>
       <title>激荡三百年</title>
       <link>http://localhost:1313/books/300year/</link>
       <pubDate>Fri, 16 Oct 2026 00:00:00 +0000</pubDate>
@@ -2147,109 +2205,6 @@
       <pubDate>Fri, 11 Sep 2026 00:00:00 +0000</pubDate>
       <guid>http://localhost:1313/books/nvidia/</guid>
       <description>本书不仅是一部科技企业家的传记，更是一部关于如何在全球科技舞台上取得成功的范本。跨越30年的科技发展历程，我们可以看到人工智能技术是如何发展的，人工智能将会如何影响到我们每一个人，技术发展的速度和进展是怎么样的。在这场技术的发展过程中，英伟达是一个缩影。通过对技术发展历程的洞察，我们将更清晰的看到未来，企业家可以了解到科技行业的复杂性，以及如何在快速变化的市场中保持领先。这本书适合所有对科技、创新和企业家精神感兴趣的读者，无论你是相关行业的专业人士，还是对其充满好奇的普通读者，都能从黄仁勋的故事中获得启发和动力。</description>
-    </item>
-    <item>
-      <title></title>
-      <link>http://localhost:1313/posts/networks-system-approach-409c4e932614808ca914c09dd53aa1c9/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/networks-system-approach-409c4e932614808ca914c09dd53aa1c9/</guid>
-      <description>&lt;h1 id=&#34;networks-system-approach&#34;&gt;Networks System Approach&lt;/h1&gt;
-&lt;h1 id=&#34;preface&#34;&gt;Preface&lt;/h1&gt;
-&lt;blockquote&gt;
-&lt;p&gt;“系统方法” 指的是计算机系统设计和实现领域的一个概念。计算机科学研究人员和从业者通常使用这个术语来研究构建复杂计算系统（例如操作系统、网络、分布式应用程序等）时出现的问题。&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;&lt;strong&gt;系统方法的关键在于“全局观”&lt;/strong&gt;：你需要关注系统的各个组件如何相互作用以实现整体结果，而不是仅仅优化每个组件。&lt;/p&gt;
-&lt;p&gt;在网络领域，这通常意味着要&lt;strong&gt;超越传统的分层视角&lt;/strong&gt;，思考如何以可能涉及多个层面的方式来最佳地解决问题。拥塞控制就是一个很好的例子，它涉及多个层面，并影响终端系统和网络设备。我们将拥塞这一系统级问题单独成章进行讨论，而不是试图将其硬塞进传输层等其他层级。&lt;/p&gt;
-&lt;h1 id=&#34;ch1-foundation&#34;&gt;Ch1: Foundation&lt;/h1&gt;
-&lt;h2 id=&#34;1-问题如何构建计算机网络&#34;&gt;1. 问题：如何构建计算机网络？&lt;/h2&gt;
-&lt;blockquote&gt;
-&lt;p&gt;假设让你来构建一个计算机网络，你会如何设计它？&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;如果我们要构造一个未来可能扩展到全球规模，并支持远程会议、视频点播、电子商务、分布式计算和数字图书馆等各种应用的网络。&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;有哪些&lt;strong&gt;现有技术&lt;/strong&gt;可以作为底层构建模块？&lt;/li&gt;
-&lt;li&gt;你会设计什么样的&lt;strong&gt;软件架构&lt;/strong&gt;来将这些构建模块集成到一个高效的通信服务中？&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;本书的主要目标就是回答这个问题：介绍现有的网络技术，并展示如何利用它们从零开始构建网络。&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;计算机网络与其他类型的网络有何区别？&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;计算机网络最重要的特性或许在于其通用性。其主要由通用可编程硬件（CPU）构建，并非针对特定应用。它们能够承载多种不同类型的数据，并支持广泛且不断增长的应用。&lt;/p&gt;
-&lt;h2 id=&#34;2-应用&#34;&gt;2. 应用&lt;/h2&gt;
-&lt;p&gt;计算机网络的应用包括：例如万维网、电子邮件、社交媒体、流媒体音乐或电影、视频会议、即时通讯、文件共享等等。&lt;/p&gt;
-&lt;p&gt;使用计算机网络的群体：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;网络应用开发者&lt;/li&gt;
-&lt;li&gt;网络运维管理者&lt;/li&gt;
-&lt;li&gt;网络协议的设计和构建者&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&#34;3-要求&#34;&gt;3. 要求&lt;/h2&gt;
-&lt;blockquote&gt;
-&lt;p&gt;我们为自己设定了一个雄心勃勃的目标：从零开始构建计算机网络。&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;为了实现这一目标，我们将从基本原理入手，然后提出在构建实际网络时自然会遇到的问题。&lt;/p&gt;
-&lt;p&gt;计算机网络的要求如下：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;可扩展链接&lt;/li&gt;
-&lt;li&gt;高效的资源共享&lt;/li&gt;
-&lt;li&gt;支持通用服务&lt;/li&gt;
-&lt;li&gt;可管理性好&lt;/li&gt;
-&lt;/ul&gt;
-&lt;hr&gt;
-&lt;p&gt;&lt;strong&gt;网络共享的基本概念：多路复用。&lt;/strong&gt;&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;时分多路复用，将时间分割成大小相等的量子，并以轮询的方式让每个数据流有机会通过物理链路发送数据。&lt;/li&gt;
-&lt;li&gt;频分多路复用，使用不同的频率通过物理链路传输每个数据流
-&lt;ul&gt;
-&lt;li&gt;如果其中一个流（主机对）没有数据要发送，那么它所占用的物理链路份额——即时间片或频率——就会处于空闲状态，即使其他流有数据要发送&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;统计复用，按需从每个数据流发送的，而不是在预定的时隙内发送。
-&lt;ul&gt;
-&lt;li&gt;为了保证每个数据流都能获得使用链路发送数据的机会，统计复用为每个数据流在给定时间允许传输的数据块大小设定了一个上限。这个大小受限的数据块通常被称为&lt;strong&gt;数据&lt;em&gt;包&lt;/em&gt;&lt;/strong&gt;，以区别于应用程序可能想要传输的任意大小的&lt;em&gt;消息&lt;/em&gt;。&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;核心思想：按Packet发送数据，而不是任意长度&lt;/strong&gt;&lt;/li&gt;
-&lt;li&gt;源端可能需要将消息分割成多个数据包，接收端再将这些数据包重新组装成原始消息。&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&#34;4-计算机网络的架构&#34;&gt;4. 计算机网络的架构&lt;/h2&gt;
-&lt;blockquote&gt;
-&lt;p&gt;抽象——即将实现细节隐藏在定义良好的接口之后——是系统设计者用来管理复杂性的基本工具。&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;为了应对设计计算机网络系统的复杂性，网络设计者提出了网络架构的概念来指导网络的设计与实现。主要的计算机网络架构包括：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;OSI七层模型&lt;/li&gt;
-&lt;li&gt;TCP/IP四层模型&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;抽象自然而然地导致了分层，尤其是在网络系统中。其基本思路是，从底层硬件提供的服务入手，然后添加一系列层，每一层都提供更高（更抽象）的服务级别。高层提供的服务是根据底层提供的服务来实现的。&lt;/p&gt;
-&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;Networks%20System%20Approach/image.png&#34;&gt;&lt;/p&gt;
-&lt;p&gt;分层提供了两个实用功能：&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;将构建网络的问题分解成更易于管理的组件。与其实现一个包罗万象的单体软件，不如实现多个层，每个层解决问题的一部分。&lt;/li&gt;
-&lt;li&gt;提供了一种更模块化的设计。如果您决定添加一些新服务，可能只需要修改其中一层的功能，即可重用其他层提供的函数。&lt;/li&gt;
-&lt;/ol&gt;
-&lt;p&gt;很多时候，系统的任何同一层级中提供了多种抽象，每种抽象都为更高层级提供不同的服务，但都基于相同的底层抽象，例如传输层的TCP和UDP协议，都以IP协议的服务为基础，但对上层提供不同的传输服务。&lt;/p&gt;
-&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;Networks%20System%20Approach/image%201.png&#34;&gt;&lt;/p&gt;
-&lt;p&gt;构成网络系统各层的抽象对象称为&lt;strong&gt;协议&lt;/strong&gt;。协议提供了一种通信服务，供更高层的对象（例如应用程序进程，或者更高层级的协议）交换消息。&lt;/p&gt;
-&lt;p&gt;每个协议都定义了两个不同的接口：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;服务接口（纵向）*，*供同一台计算机上其他想要使用其通信服务的对象使用。&lt;/li&gt;
-&lt;li&gt;协议定义了与另一台机器上的对应节点（对等节点）之间的接口（横向）。&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;Networks%20System%20Approach/image%202.png&#34;&gt;&lt;/p&gt;
-&lt;p&gt;协议规定了如何在同层的对等节点之间传输数据，如何体现？本质就是在发送数据之前在其前面加上一个首部（Header），对等节点在收到数据后根据协议解析该首部，然后取出其中的数据发往上层。&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;当我们说底层协议不解释它从高层协议接收到的消息时，指的是它不知道如何从消息中包含的数据中提取任何含义。&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;当然，有时底层协议会对接收到的数据进行一些简单的转换，例如压缩或加密。&lt;/p&gt;
-&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;Networks%20System%20Approach/image%203.png&#34;&gt;&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;多路复用与解多路复用&lt;/strong&gt;&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;因为计算机网络是多层的，且每层可能包含不止一种协议，因此在底层的首部中还要包含一个字段，用来表示该数据所属的上层协议。&lt;/li&gt;
-&lt;li&gt;几乎所有协议都实现了这种机制。&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;下面是OSI七层模型和TCP四层模型的架构图：&lt;/p&gt;
-&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;Networks%20System%20Approach/image%204.png&#34;&gt;&lt;/p&gt;</description>
     </item>
   </channel>
 </rss>

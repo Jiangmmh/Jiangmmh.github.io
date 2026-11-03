@@ -6,8 +6,29 @@
     <description>Recent content in Tags on Minghan的博客</description>
     <generator>Hugo</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Sun, 01 Nov 2026 10:27:29 +0800</lastBuildDate>
+    <lastBuildDate>Tue, 03 Nov 2026 11:25:28 +0800</lastBuildDate>
     <atom:link href="http://localhost:1313/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>CMU15-122</title>
+      <link>http://localhost:1313/tags/cmu15-122/</link>
+      <pubDate>Tue, 03 Nov 2026 11:25:28 +0800</pubDate>
+      <guid>http://localhost:1313/tags/cmu15-122/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Contracts</title>
+      <link>http://localhost:1313/tags/contracts/</link>
+      <pubDate>Tue, 03 Nov 2026 11:25:28 +0800</pubDate>
+      <guid>http://localhost:1313/tags/contracts/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Formal Verification</title>
+      <link>http://localhost:1313/tags/formal-verification/</link>
+      <pubDate>Tue, 03 Nov 2026 11:25:28 +0800</pubDate>
+      <guid>http://localhost:1313/tags/formal-verification/</guid>
+      <description></description>
+    </item>
     <item>
       <title>MIT6.1810</title>
       <link>http://localhost:1313/tags/mit6.1810/</link>
