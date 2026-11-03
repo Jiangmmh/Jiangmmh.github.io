@@ -10,7 +10,7 @@
 <meta name="description" content="">
 <meta name="author" content="">
 <link rel="canonical" href="http://localhost:1313/categories/%E7%AE%97%E6%B3%95/">
-<link crossorigin="anonymous" href="/assets/css/stylesheet.eb75d3d7085f23c257559d796647d69a016c4ff05121443dd8956c46642c5330.css" integrity="sha256-63XT1whfI8JXVZ15ZkfWmgFsT/BRIUQ92JVsRmQsUzA=" rel="preload stylesheet" as="style">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.f9490c4bd2e7d3fd9e21909b0bc528878329710db51c69d38b7057b37e889c1d.css" integrity="sha256-&#43;UkMS9Ln0/2eIZCbC8Uoh4MpcQ21HGnTi3BXs36InB0=" rel="preload stylesheet" as="style">
 <link rel="icon" href="http://localhost:1313/favicon.ico">
 <link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
@@ -65,7 +65,36 @@
         document.querySelector("html").dataset.theme = 'light';
     }
 
-</script><meta property="og:url" content="http://localhost:1313/categories/%E7%AE%97%E6%B3%95/">
+</script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css"
+>
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/contrib/auto-render.min.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    if (typeof renderMathInElement !== "function") {
+      console.error("KaTeX auto-render 加载失败");
+      return;
+    }
+
+    document.querySelectorAll(".post-content, .book-content").forEach(function (element) {
+      renderMathInElement(element, {
+        delimiters: [
+          { left: "$$", right: "$$", display: true },
+          { left: "\\[", right: "\\]", display: true },
+          { left: "\\(", right: "\\)", display: false }
+        ],
+        throwOnError: false
+      });
+    });
+  });
+</script>
+
+<meta property="og:url" content="http://localhost:1313/categories/%E7%AE%97%E6%B3%95/">
   <meta property="og:site_name" content="Minghan的博客">
   <meta property="og:title" content="算法">
   <meta property="og:locale" content="zh_CN">
@@ -120,18 +149,23 @@
                 </a>
             </li>
             <li>
-                <a href="http://localhost:1313/moments/" title="随记">
-                    <span>随记</span>
-                </a>
-            </li>
-            <li>
                 <a href="http://localhost:1313/tags/" title="标签">
                     <span>标签</span>
                 </a>
             </li>
             <li>
+                <a href="http://localhost:1313/moments/" title="随记">
+                    <span>随记</span>
+                </a>
+            </li>
+            <li>
                 <a href="http://localhost:1313/photos/" title="照片墙">
                     <span>照片墙</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/books/" title="阅读">
+                    <span>阅读</span>
                 </a>
             </li>
             <li>
@@ -162,28 +196,30 @@
 
 <article class="post-entry tag-entry"> 
   <header class="entry-header">
-    <h2 class="entry-hint-parent">
+    <h2 class="entry-hint-parent">CMU 15-122 学习笔记（一）：契约式编程与循环不变式
+      <span class="entry-hint" title="Draft">
+        <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 -960 960 960" fill="currentColor">
+          <path
+            d="M160-410v-60h300v60H160Zm0-165v-60h470v60H160Zm0-165v-60h470v60H160Zm360 580v-123l221-220q9-9 20-13t22-4q12 0 23 4.5t20 13.5l37 37q9 9 13 20t4 22q0 11-4.5 22.5T862.09-380L643-160H520Zm300-263-37-37 37 37ZM580-220h38l121-122-18-19-19-18-122 121v38Zm141-141-19-18 37 37-18-19Z" />
+        </svg>
+      </span>
     </h2>
   </header>
   <div class="entry-content">
-    <p>题目来自灵神的题单：https://leetcode.cn/discuss/post/3142882/fen-xiang-gun-ti-dan-lian-biao-er-cha-sh-6srp/。
-在做时带着问题去做下面的题目：
-一般来说，DFS 的递归边界是空节点。在什么情况下，要额外把叶子节点作为递归边界？ 在什么情况下，DFS 需要有返回值？什么情况下不需要有返回值？ 在什么情况下，题目更适合用自顶向下的方法解决？什么情况下更适合用自底向上的方法解决？
-一、遍历二叉树 1. 二叉树的前序遍历 法一：DFS
-树的先序遍历的顺序是：根-左-右
-因为树本身就是递归定义的，即树的子树本身就是一棵树。
-class Solution { vector&lt;int&gt; ans; void dfs(TreeNode* root) { if (root) { ans.push_back(root-&gt;val); dfs(root-&gt;left); dfs(root-&gt;right); } } public: vector&lt;int&gt; preorderTraversal(TreeNode* root) { dfs(root); return ans; } }; 法二：非递归法
-使用一个栈来实现，对于每个节点先处理当前节点（中），然后依次压入右子树和左子树，根据栈的特点，得到的顺序是先左后右。
-class Solution { public: vector&lt;int&gt; preorderTraversal(TreeNode* root) { vector&lt;int&gt; ans; if (!root) return ans; stack&lt;TreeNode*&gt; st; st.push(root); while (!st.empty()) { auto node = st.top(); st.pop(); if (node) { ans.push_back(node-&gt;val); if (node-&gt;right) st.push(node-&gt;right); if (node-&gt;left) st.push(node-&gt;left); } } return ans; } }; 2. 二叉树的中序遍历 法一：DFS
-访问顺序为：左-中-右。递归写法非常简单，调整一下访问根节点的语句的位置即可。
-时间复杂度：O(n)，空间复杂度：O(n)
-class Solution { vector&lt;int&gt; ans; void dfs(TreeNode* root) { if (root) { dfs(root-&gt;left); ans.push_back(root-&gt;val); dfs(root-&gt;right); } } public: vector&lt;int&gt; inorderTraversal(TreeNode* root) { dfs(root); return ans; } }; 法二：非递归-使用栈模拟中序遍历
+    <p>CMU15122课程地址：https://web2.qatar.cmu.edu/~mhhammou/15122-s23/index.html。
+Lecture1笔记 本节课的主题：在开发软件系统时，如何实现从直觉调试到形式化证明？
+在软件开发中，我们经常遇到这样的场景：编写了一段看似精妙的算法，测试了几个样例都通过了，但在某种特定输入下程序却悄悄返回了错误答案，或者陷入死循环。
+传统的方法是加 printf 或打断点一步步跟踪（Operational Reasoning）。但对于复杂的循环逻辑，单靠“脑补执行过程”不仅效率低下，而且极易遗漏边缘情况。
+这是 CMU 15-122（Principles of Imperative Computation）的核心思想。下面以一个经典的快速幂算法（Fast Exponentiation）为例，展示如何通过契约式编程（Contracts）与循环不变式（Loop Invariants），从原理上证明算法的正确性，并精准推导出代码中的隐藏 Bug。
+1. 问题背景：一个看似正确的快速幂实现 假设我们需要实现一个计算 xyx^yxy 的快速幂函数 f(x,y)f(x, y)f(x,y)（其中 y≥0y \ge 0y≥0）。
+通过不断拆分指数，我们可以在 O(log⁡y)O(\log y)O(logy) 的时间复杂度内完成计算。下面是最初的代码实现：
+// Specification function! int POW(int b, int e) //@requires e &gt;= 0; { if (e == 0) return 1; return POW(b, e-1) * b; } // 计算 x 的 y 次方 int f(int x, int y) //@requires y &gt;= 0; //@ensures \result == POW(x, y); { int b = x; int e = y; int r = 1; while (e &gt; 1) { if (e % 2 == 1) { r = b * r; } b = b * b; e = e / 2; } return r * b; } 契约（Contracts）说明： @requires y &gt;= 0;：前置条件（Precondition），调用者必须保证 y≥0y \ge 0y≥0。 @ensures \result == POW(x, y);：后置条件（Postcondition），函数必须保证返回结果等于数学上的 xyx^yxy。 运行测试： 如果我们测试 f(2, 8)：
 ...</p>
   </div>
   <footer class="entry-footer">
 
-<span title='2026-10-14 22:02:01 +0800 CST'>October 14, 2026</span>&nbsp;·&nbsp;<span>7 min</span>&nbsp;·&nbsp;<span>1448 words</span></footer>
-  <a class="entry-link" aria-label="post link to " href="http://localhost:1313/posts/leetecode-tree01/"></a>
+<span title='2026-11-03 11:25:28 +0800 CST'>November 3, 2026</span>&nbsp;·&nbsp;<span>6 min</span>&nbsp;·&nbsp;<span>1124 words</span></footer>
+  <a class="entry-link" aria-label="post link to CMU 15-122 学习笔记（一）：契约式编程与循环不变式" href="http://localhost:1313/posts/cmu-15122-01/"></a>
 </article>
     </main>
     
