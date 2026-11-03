@@ -6,8 +6,66 @@
     <description>Recent content in 操作系统 on Minghan的博客</description>
     <generator>Hugo</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Thu, 22 Oct 2026 15:33:34 +0800</lastBuildDate>
+    <lastBuildDate>Tue, 03 Nov 2026 21:20:56 +0800</lastBuildDate>
     <atom:link href="http://localhost:1313/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>LKD阅读笔记-第一章</title>
+      <link>http://localhost:1313/posts/lkd01/</link>
+      <pubDate>Tue, 03 Nov 2026 21:20:56 +0800</pubDate>
+      <guid>http://localhost:1313/posts/lkd01/</guid>
+      <description>&lt;blockquote&gt;
+&lt;p&gt;参考书籍：Robert Love, &lt;em&gt;Linux Kernel Development&lt;/em&gt;, 3rd Edition, Chapter 1: Introduction to the Linux Kernel&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;1-本章概览&#34;&gt;1. 本章概览&lt;/h2&gt;
+&lt;p&gt;第一章主要介绍 Linux 内核的历史背景、基本概念、设计特点以及开发社区。&lt;/p&gt;
+&lt;p&gt;本章并不会深入某个具体的内核子系统，而是先回答几个基础问题：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Unix 是如何诞生的？Linux 与 Unix 有什么关系？&lt;/li&gt;
+&lt;li&gt;Linux 是什么？Linux 内核与 Linux 操作系统有什么区别？&lt;/li&gt;
+&lt;li&gt;内核究竟负责什么工作？&lt;/li&gt;
+&lt;li&gt;Linux 内核与传统 Unix 内核相比，有哪些设计特点？&lt;/li&gt;
+&lt;li&gt;Linux 内核如何进行版本发布和协作开发？&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;理解这些背景，有助于我们在后续阅读 Linux 源码时建立整体认识。&lt;/p&gt;
+&lt;h2 id=&#34;2-unix-的历史&#34;&gt;2. Unix 的历史&lt;/h2&gt;
+&lt;h3 id=&#34;21-unix-的诞生&#34;&gt;2.1 Unix 的诞生&lt;/h3&gt;
+&lt;p&gt;Unix 最初诞生于 1969 年的贝尔实验室（Bell Labs），主要开发者是 Ken Thompson 和 Dennis Ritchie。&lt;/p&gt;
+&lt;p&gt;Unix 的出现与一个更早的操作系统项目有关：Multics。&lt;/p&gt;
+&lt;p&gt;Multics 是一个由多个研究机构共同参与的大型操作系统项目，目标是构建一个支持多用户、多任务的计算环境。但由于项目过于复杂，开发进展缓慢，最终贝尔实验室退出了该项目。&lt;/p&gt;
+&lt;p&gt;Ken Thompson 等人希望拥有一个更加简单、实用的交互式操作系统，于是开始在一台 PDP-7 计算机上实现新的操作系统。这项工作逐渐演变成 Unix。&lt;/p&gt;
+&lt;p&gt;Unix 发展过程中有几个重要节点：&lt;/p&gt;
+&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;时间&lt;/th&gt;
+					&lt;th&gt;事件&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;1969&lt;/td&gt;
+					&lt;td&gt;Unix 在贝尔实验室诞生&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;1971&lt;/td&gt;
+					&lt;td&gt;Unix 被移植到 PDP-11&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;1973&lt;/td&gt;
+					&lt;td&gt;Unix 使用 C 语言重新实现&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;1977&lt;/td&gt;
+					&lt;td&gt;Unix System III 发布&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;1982&lt;/td&gt;
+					&lt;td&gt;AT&amp;amp;T 发布 Unix System V&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;其中，1973 年是 Unix 历史上非常重要的一个节点：Unix 从汇编语言实现转向 C 语言实现。&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Unix/Linux 进程间通信</title>
       <link>http://localhost:1313/posts/unix-linux-ipc/</link>

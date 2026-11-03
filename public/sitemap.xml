@@ -3,61 +3,58 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>http://localhost:1313/categories/</loc>
-    <lastmod>2026-11-03T11:25:28+08:00</lastmod>
+    <lastmod>2026-11-03T21:20:56+08:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/posts/cmu-15122-01/</loc>
-    <lastmod>2026-11-03T11:25:28+08:00</lastmod>
+    <loc>http://localhost:1313/tags/kernel-development/</loc>
+    <lastmod>2026-11-03T21:20:56+08:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/cmu15-122/</loc>
-    <lastmod>2026-11-03T11:25:28+08:00</lastmod>
+    <loc>http://localhost:1313/categories/linux/</loc>
+    <lastmod>2026-11-03T21:20:56+08:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/contracts/</loc>
-    <lastmod>2026-11-03T11:25:28+08:00</lastmod>
+    <loc>http://localhost:1313/tags/linux/</loc>
+    <lastmod>2026-11-03T21:20:56+08:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/formal-verification/</loc>
-    <lastmod>2026-11-03T11:25:28+08:00</lastmod>
+    <loc>http://localhost:1313/tags/linux%E5%86%85%E6%A0%B8/</loc>
+    <lastmod>2026-11-03T21:20:56+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/posts/lkd01/</loc>
+    <lastmod>2026-11-03T21:20:56+08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/</loc>
-    <lastmod>2026-11-03T11:25:28+08:00</lastmod>
+    <lastmod>2026-11-03T21:20:56+08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/posts/</loc>
-    <lastmod>2026-11-03T11:25:28+08:00</lastmod>
+    <lastmod>2026-11-03T21:20:56+08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/tags/</loc>
-    <lastmod>2026-11-03T11:25:28+08:00</lastmod>
+    <lastmod>2026-11-03T21:20:56+08:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/categories/%E7%AE%97%E6%B3%95/</loc>
-    <lastmod>2026-11-03T11:25:28+08:00</lastmod>
+    <loc>http://localhost:1313/tags/unix/</loc>
+    <lastmod>2026-11-03T21:20:56+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/</loc>
+    <lastmod>2026-11-03T21:20:56+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/</loc>
+    <lastmod>2026-11-03T21:20:56+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/cow-fork/</loc>
+    <lastmod>2026-11-03T21:10:44+08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/tags/mit6.1810/</loc>
-    <lastmod>2026-11-01T10:27:29+08:00</lastmod>
+    <lastmod>2026-11-03T21:10:44+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/posts/xv6-lab5-cow/</loc>
+    <lastmod>2026-11-03T21:10:44+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/xv6/</loc>
+    <lastmod>2026-11-03T21:10:44+08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/posts/xv6-lab4-trap/</loc>
     <lastmod>2026-11-01T10:27:29+08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/tags/trap/</loc>
     <lastmod>2026-11-01T10:27:29+08:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/tags/xv6/</loc>
-    <lastmod>2026-11-01T10:27:29+08:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/</loc>
-    <lastmod>2026-11-01T10:27:29+08:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/tags/15441/</loc>
-    <lastmod>2026-10-30T16:20:00+08:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/posts/liso-cp1/</loc>
-    <lastmod>2026-10-30T16:20:00+08:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/tags/liso/</loc>
-    <lastmod>2026-10-30T16:20:00+08:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/tags/web-server/</loc>
-    <lastmod>2026-10-30T16:20:00+08:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/</loc>
-    <lastmod>2026-10-30T16:20:00+08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/tags/computer-networks-a-systems-approach/</loc>
     <lastmod>2026-10-30T11:59:50+08:00</lastmod>
@@ -69,6 +66,9 @@
     <lastmod>2026-10-30T11:59:50+08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/tags/tcp/ip/</loc>
+    <lastmod>2026-10-30T11:59:50+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/</loc>
     <lastmod>2026-10-30T11:59:50+08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/moments/</loc>
@@ -203,9 +203,6 @@
     <loc>http://localhost:1313/tags/ipc/</loc>
     <lastmod>2026-10-22T15:33:34+08:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/linux/</loc>
-    <lastmod>2026-10-22T15:33:34+08:00</lastmod>
-  </url><url>
     <loc>http://localhost:1313/tags/socket/</loc>
     <lastmod>2026-10-22T15:33:34+08:00</lastmod>
   </url><url>
@@ -213,9 +210,6 @@
     <lastmod>2026-10-22T15:33:34+08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/posts/unix-linux-ipc/</loc>
-    <lastmod>2026-10-22T15:33:34+08:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/</loc>
     <lastmod>2026-10-22T15:33:34+08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/posts/unix-socket/</loc>
@@ -328,9 +322,6 @@
   </url><url>
     <loc>http://localhost:1313/tags/%E8%87%AA%E5%BA%95%E5%90%91%E4%B8%8Adfs/</loc>
     <lastmod>2026-10-16T11:20:25+08:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/books/soul-of-new-machine/</loc>
-    <lastmod>2026-10-16T00:00:00+00:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/books/300year/</loc>
     <lastmod>2026-10-16T00:00:00+00:00</lastmod>

@@ -206,23 +206,49 @@
 
 <article class="post-entry"> 
   <header class="entry-header">
-    <h2 class="entry-hint-parent">CMU-15122（一）
+    <h2 class="entry-hint-parent">LKD阅读笔记-第一章
     </h2>
   </header>
   <div class="entry-content">
-    <p>Lecture1笔记 本节课的主题：在开发软件系统时，如何实现从直觉调试到形式化证明？
-在软件开发中，我们经常遇到这样的场景：编写了一段看似精妙的算法，测试了几个样例都通过了，但在某种特定输入下程序却悄悄返回了错误答案，或者陷入死循环。
-传统的方法是加 printf 或打断点一步步跟踪（Operational Reasoning）。但对于复杂的循环逻辑，单靠“脑补执行过程”不仅效率低下，而且极易遗漏边缘情况。
-这是 CMU 15-122（Principles of Imperative Computation）的核心思想。下面以一个经典的快速幂算法（Fast Exponentiation）为例，展示如何通过契约式编程（Contracts）与循环不变式（Loop Invariants），从原理上证明算法的正确性，并精准推导出代码中的隐藏 Bug。
-1. 问题背景：一个看似正确的快速幂实现 假设我们需要实现一个计算 xyx^yxy 的快速幂函数 f(x,y)f(x, y)f(x,y)（其中 y≥0y \ge 0y≥0）。
-通过二进制拆分指数，我们可以在 O(log⁡y)O(\log y)O(logy) 的时间复杂度内完成计算。下面是最初的代码实现：
-// Specification function! int POW(int b, int e) //@requires e &gt;= 0; { if (e == 0) return 1; return POW(b, e-1) * b; } // 计算 x 的 y 次方 int f(int x, int y) //@requires y &gt;= 0; //@ensures \result == POW(x, y); { int b = x; int e = y; int r = 1; while (e &gt; 1) { if (e % 2 == 1) { r = b * r; } b = b * b; e = e / 2; } return r * b; } 契约（Contracts）说明： @requires y &gt;= 0;：前置条件（Precondition），调用者必须保证 y≥0y \ge 0y≥0。 @ensures \result == POW(x, y);：后置条件（Postcondition），函数必须保证返回结果等于数学上的 xyx^yxy。 运行测试： 如果我们测试 f(2, 8)：
+    <p> 参考书籍：Robert Love, Linux Kernel Development, 3rd Edition, Chapter 1: Introduction to the Linux Kernel
+1. 本章概览 第一章主要介绍 Linux 内核的历史背景、基本概念、设计特点以及开发社区。
+本章并不会深入某个具体的内核子系统，而是先回答几个基础问题：
+Unix 是如何诞生的？Linux 与 Unix 有什么关系？ Linux 是什么？Linux 内核与 Linux 操作系统有什么区别？ 内核究竟负责什么工作？ Linux 内核与传统 Unix 内核相比，有哪些设计特点？ Linux 内核如何进行版本发布和协作开发？ 理解这些背景，有助于我们在后续阅读 Linux 源码时建立整体认识。
+2. Unix 的历史 2.1 Unix 的诞生 Unix 最初诞生于 1969 年的贝尔实验室（Bell Labs），主要开发者是 Ken Thompson 和 Dennis Ritchie。
+Unix 的出现与一个更早的操作系统项目有关：Multics。
+Multics 是一个由多个研究机构共同参与的大型操作系统项目，目标是构建一个支持多用户、多任务的计算环境。但由于项目过于复杂，开发进展缓慢，最终贝尔实验室退出了该项目。
+Ken Thompson 等人希望拥有一个更加简单、实用的交互式操作系统，于是开始在一台 PDP-7 计算机上实现新的操作系统。这项工作逐渐演变成 Unix。
+Unix 发展过程中有几个重要节点：
+时间 事件 1969 Unix 在贝尔实验室诞生 1971 Unix 被移植到 PDP-11 1973 Unix 使用 C 语言重新实现 1977 Unix System III 发布 1982 AT&amp;T 发布 Unix System V 其中，1973 年是 Unix 历史上非常重要的一个节点：Unix 从汇编语言实现转向 C 语言实现。
 ...</p>
   </div>
   <footer class="entry-footer">
 
-<span title='2026-11-03 11:25:28 +0800 CST'>November 3, 2026</span>&nbsp;·&nbsp;<span>4 min</span>&nbsp;·&nbsp;<span>673 words</span></footer>
-  <a class="entry-link" aria-label="post link to CMU-15122（一）" href="http://localhost:1313/posts/cmu-15122-01/"></a>
+<span title='2026-11-03 21:20:56 +0800 CST'>November 3, 2026</span>&nbsp;·&nbsp;<span>4 min</span>&nbsp;·&nbsp;<span>742 words</span></footer>
+  <a class="entry-link" aria-label="post link to LKD阅读笔记-第一章" href="http://localhost:1313/posts/lkd01/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">MIT6.1810: Lab5 COW
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>一、fork 的实现原理 在用户态调用 fork() 后，程序通过系统调用进入内核，最终执行 sys_fork()，并在其中调用 kfork() 创建子进程。
+kfork() 的主要工作包括：
+调用 allocproc() 分配一个新的进程结构体，并完成必要的初始化。 调用 uvmcopy() 将父进程的用户地址空间复制到子进程。 将父进程的 Trapframe 拷贝到子进程，使子进程拥有与父进程相同的寄存器上下文。 遍历父进程打开的文件描述符，在子进程中通过 filedup() 增加对应文件对象的引用计数。 设置子进程的父进程信息，并将其状态设置为 RUNNABLE。 这里有一个比较巧妙的细节：
+// Cause fork to return 0 in the child. np-&gt;trapframe-&gt;a0 = 0; 为什么需要单独修改子进程 Trapframe 中的 a0？
+在 RISC-V 调用约定中，a0 用于传递函数参数和返回值。系统调用返回时，内核会将 Trapframe 中保存的 a0 恢复到用户态寄存器中。
+因此：
+父进程继续执行 fork() 后面的代码，系统调用返回值是子进程的 PID。 子进程第一次被调度时，从保存的上下文继续执行，系统调用返回值是 0。 这样，父子进程就能够通过 fork() 的返回值判断自己所处的执行分支。
+下面是 kfork() 的核心实现（省略了部分与本实验无关的代码）：
+int kfork(void) { int i, pid; struct proc *np; struct proc *p = myproc(); // Allocate process. if ((np = allocproc()) == 0) return -1; // Copy user memory from parent to child. if (uvmcopy(p-&gt;pagetable, np-&gt;pagetable, p-&gt;sz) &lt; 0) { freeproc(np); release(&amp;np-&gt;lock); return -1; } np-&gt;sz = p-&gt;sz; // Copy saved user registers. *(np-&gt;trapframe) = *(p-&gt;trapframe); // Cause fork to return 0 in the child. np-&gt;trapframe-&gt;a0 = 0; // Duplicate open file descriptors. for (i = 0; i &lt; NOFILE; i&#43;&#43;) if (p-&gt;ofile[i]) np-&gt;ofile[i] = filedup(p-&gt;ofile[i]); np-&gt;cwd = idup(p-&gt;cwd); safestrcpy(np-&gt;name, p-&gt;name, sizeof(p-&gt;name)); pid = np-&gt;pid; release(&amp;np-&gt;lock); acquire(&amp;wait_lock); np-&gt;parent = p; release(&amp;wait_lock); acquire(&amp;np-&gt;lock); np-&gt;state = RUNNABLE; release(&amp;np-&gt;lock); return pid; } 这里最值得关注的是 uvmcopy()。
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-11-03 21:10:44 +0800 CST'>November 3, 2026</span>&nbsp;·&nbsp;<span>10 min</span>&nbsp;·&nbsp;<span>2070 words</span></footer>
+  <a class="entry-link" aria-label="post link to MIT6.1810: Lab5 COW" href="http://localhost:1313/posts/xv6-lab5-cow/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -246,24 +272,6 @@ printf的返回值是成功打印输出等字符总数，如果出错则返回�
 
 <span title='2026-11-01 10:27:29 +0800 CST'>November 1, 2026</span>&nbsp;·&nbsp;<span>3 min</span>&nbsp;·&nbsp;<span>575 words</span></footer>
   <a class="entry-link" aria-label="post link to MIT6.1810: Lab4 Trap" href="http://localhost:1313/posts/xv6-lab4-trap/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">15441-Liso-CP1
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>项目介绍 该是卡耐基梅隆大学（CMU）的计算机网络课程（15441: Networking and the Internet）的第一个项目。
-The purpose of this project is to give you experience in developing concurrent network applications.
-在这个项目中我们将使用Berkeley Socket API编写Web服务器，支持：
-部分HTTP1.1 协议，细节见文档 RFC2616 HTTPS（via TLS）协议，细节见文档 RFC2818 CGI（Common Gateway Interface），细节见文档 RFC 3875 your Liso web server will be fully functional and capable of running interactive web applications via its CGI interface. At the end of the project the final test will be running a simple web blog written using the Python Flask microframework。
-...</p>
-  </div>
-  <footer class="entry-footer">
-
-<span title='2026-10-30 16:20:00 +0800 CST'>October 30, 2026</span>&nbsp;·&nbsp;<span>7 min</span>&nbsp;·&nbsp;<span>1420 words</span></footer>
-  <a class="entry-link" aria-label="post link to 15441-Liso-CP1" href="http://localhost:1313/posts/liso-cp1/"></a>
 </article>
 
 <article class="post-entry"> 
