@@ -206,6 +206,30 @@
 
 <article class="post-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">LKD阅读笔记-第二章
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p> 参考书籍：Robert Love, Linux Kernel Development, Third Edition, Chapter 2: Getting Started with the Kernel。
+1. 本章概览 第一章介绍了 Linux 内核的历史、定位和整体设计，而第二章开始进入实际开发：如何获取内核源码、如何编译和安装内核，以及编写内核代码时需要遵循哪些特殊规则。
+本章主要回答三个问题：
+源码从哪里来？ 如何获取、管理和组织 Linux 内核源码？ 内核如何构建？ 如何配置、编译和安装一个 Linux 内核？ 内核代码有什么特殊之处？ 为什么内核开发不能完全按照普通 C 程序的方式进行？ 其中，第三个问题尤其重要。Linux 内核虽然主要使用 C 语言编写，但它并不是一个普通的 C 应用程序。它运行在特权环境中，直接管理硬件和内存，必须处理异步中断、多处理器并发以及严格的资源限制。
+2. 获取 Linux 内核源码 Linux 内核源码可以从官方网站获取：
+官方网站：https://www.kernel.org/ 官方 Git 仓库：https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git 官方提供两种主要获取方式：
+Tarball：完整源码压缩包。 Git：通过版本控制系统获取和管理源码。 2.1 使用 Git Linux 内核使用 Git 进行版本管理。Git 最初由 Linus Torvalds 创建，具有分布式版本控制的特点。
+相比下载压缩包，使用 Git 更适合长期阅读、修改和研究内核源码。
+获取 Linus 主线仓库：
+git clone https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git cd linux 查看当前版本：
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-11-03 22:11:04 +0800 CST'>November 3, 2026</span>&nbsp;·&nbsp;<span>6 min</span>&nbsp;·&nbsp;<span>1207 words</span></footer>
+  <a class="entry-link" aria-label="post link to LKD阅读笔记-第二章" href="http://localhost:1313/posts/lkd02/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">LKD阅读笔记-第一章
     </h2>
   </header>
@@ -224,7 +248,7 @@ Unix 发展过程中有几个重要节点：
   </div>
   <footer class="entry-footer">
 
-<span title='2026-11-03 21:20:56 +0800 CST'>November 3, 2026</span>&nbsp;·&nbsp;<span>4 min</span>&nbsp;·&nbsp;<span>742 words</span></footer>
+<span title='2026-11-03 21:20:56 +0800 CST'>November 3, 2026</span>&nbsp;·&nbsp;<span>4 min</span>&nbsp;·&nbsp;<span>738 words</span></footer>
   <a class="entry-link" aria-label="post link to LKD阅读笔记-第一章" href="http://localhost:1313/posts/lkd01/"></a>
 </article>
 
@@ -429,25 +453,6 @@ xv6 kernel is booting hart 1 starting hart 2 starting init: starting sh $ pgtblt
 
 <span title='2026-10-27 11:01:51 +0800 CST'>October 27, 2026</span>&nbsp;·&nbsp;<span>9 min</span>&nbsp;·&nbsp;<span>1733 words</span></footer>
   <a class="entry-link" aria-label="post link to MIT6.1810: Lab3 Pagetable" href="http://localhost:1313/posts/xv6-lab3-pgtbl/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">埃拉托色尼筛法（Sieve of Eratosthenes）
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>一、原理 埃拉托色尼筛法是一种古老而高效的求素数算法，由古希腊数学家埃拉托色尼（Eratosthenes，约公元前276—前194年）提出。
-核心思想：素数的倍数一定不是素数。因此，从最小的素数 2 开始，把它的所有倍数&#34;筛掉&#34;（标记为合数），然后找到下一个未被筛掉的数（它一定是素数），再筛掉它的倍数……如此反复，最后剩下的就是素数。
-算法步骤：以求 n = 30 以内的素数为例
-列出 2 到 n 的所有整数。 从 2 开始，2 是素数，划掉所有 2 的倍数（4, 6, 8, …, 30）。 找到下一个未划掉的数 3，它是素数，划掉所有 3 的倍数（6, 9, 12, …, 30）。 下一个未划掉的数是 5，划掉 5 的倍数（10, 15, 20, 25, 30）。 下一个是 7，划掉 7 的倍数（14, 21, 28）。 下一个是 11，但 11² = 121 &gt; 30，停止（见下方优化说明）。 剩下未被划掉的数即为素数：2, 3, 5, 7, 11, 13, 17, 19, 23, 29。 进一步优化
-只需筛到 √n：若 i * i &gt; n，则 i 之后的合数必然已被更小的素数筛掉，无需继续。 从 i² 开始筛：筛素数 i 的倍数时，可以从 i*i 开始，因为小于 i*i 的 i 的倍数（如 i2, i3, …）已经被比 i 小的素数筛掉了。 只处理奇数（可选）：除 2 以外，偶数都不是素数，可以只对奇数进行筛选，节省一半空间和时间。 二、实现 Python实现：
-...</p>
-  </div>
-  <footer class="entry-footer">
-
-<span title='2026-10-26 17:25:46 +0800 CST'>October 26, 2026</span>&nbsp;·&nbsp;<span>2 min</span>&nbsp;·&nbsp;<span>245 words</span></footer>
-  <a class="entry-link" aria-label="post link to 埃拉托色尼筛法（Sieve of Eratosthenes）" href="http://localhost:1313/posts/sieve/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">

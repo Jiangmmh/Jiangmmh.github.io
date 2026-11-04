@@ -196,6 +196,30 @@
 
 <article class="post-entry tag-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">LKD阅读笔记-第二章
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p> 参考书籍：Robert Love, Linux Kernel Development, Third Edition, Chapter 2: Getting Started with the Kernel。
+1. 本章概览 第一章介绍了 Linux 内核的历史、定位和整体设计，而第二章开始进入实际开发：如何获取内核源码、如何编译和安装内核，以及编写内核代码时需要遵循哪些特殊规则。
+本章主要回答三个问题：
+源码从哪里来？ 如何获取、管理和组织 Linux 内核源码？ 内核如何构建？ 如何配置、编译和安装一个 Linux 内核？ 内核代码有什么特殊之处？ 为什么内核开发不能完全按照普通 C 程序的方式进行？ 其中，第三个问题尤其重要。Linux 内核虽然主要使用 C 语言编写，但它并不是一个普通的 C 应用程序。它运行在特权环境中，直接管理硬件和内存，必须处理异步中断、多处理器并发以及严格的资源限制。
+2. 获取 Linux 内核源码 Linux 内核源码可以从官方网站获取：
+官方网站：https://www.kernel.org/ 官方 Git 仓库：https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git 官方提供两种主要获取方式：
+Tarball：完整源码压缩包。 Git：通过版本控制系统获取和管理源码。 2.1 使用 Git Linux 内核使用 Git 进行版本管理。Git 最初由 Linus Torvalds 创建，具有分布式版本控制的特点。
+相比下载压缩包，使用 Git 更适合长期阅读、修改和研究内核源码。
+获取 Linus 主线仓库：
+git clone https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git cd linux 查看当前版本：
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-11-03 22:11:04 +0800 CST'>November 3, 2026</span>&nbsp;·&nbsp;<span>6 min</span>&nbsp;·&nbsp;<span>1207 words</span></footer>
+  <a class="entry-link" aria-label="post link to LKD阅读笔记-第二章" href="http://localhost:1313/posts/lkd02/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">LKD阅读笔记-第一章
     </h2>
   </header>
@@ -214,7 +238,7 @@ Unix 发展过程中有几个重要节点：
   </div>
   <footer class="entry-footer">
 
-<span title='2026-11-03 21:20:56 +0800 CST'>November 3, 2026</span>&nbsp;·&nbsp;<span>4 min</span>&nbsp;·&nbsp;<span>742 words</span></footer>
+<span title='2026-11-03 21:20:56 +0800 CST'>November 3, 2026</span>&nbsp;·&nbsp;<span>4 min</span>&nbsp;·&nbsp;<span>738 words</span></footer>
   <a class="entry-link" aria-label="post link to LKD阅读笔记-第一章" href="http://localhost:1313/posts/lkd01/"></a>
 </article>
 
@@ -402,25 +426,6 @@ $ make qemu riscv64-unknown-elf-gcc -c -o kernel/entry.o kernel/entry.S riscv64-
 
 <span title='2026-10-25 15:12:01 +0800 CST'>October 25, 2026</span>&nbsp;·&nbsp;<span>8 min</span>&nbsp;·&nbsp;<span>1668 words</span></footer>
   <a class="entry-link" aria-label="post link to MIT6.1810: Lab1 Utils" href="http://localhost:1313/posts/xv6-lab1-util/"></a>
-</article>
-
-<article class="post-entry tag-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">从目标文件到运行时装载：深入理解链接
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>1. 链接的历史：为什么需要链接器？ 1.1 从一个源文件到一个完整的程序 当我们编写一个 C 程序时，通常会经历以下过程：
-源代码 │ ▼ 预处理（Preprocessing） │ ▼ 编译（Compilation） │ ▼ 汇编（Assembly） │ ▼ 目标文件（Object File） │ ▼ 链接（Linking） │ ▼ 可执行文件（Executable） │ ▼ 装载与执行（Loading &amp; Execution） 初学编程时，我们可能会认为，编译器只需要把源代码翻译成机器指令，再将这些指令交给处理器执行即可。但当软件规模扩大到数十万行、数百万行甚至更多时，问题就变得复杂起来。
-假设我们有这样一个程序：
-// main.c #include &lt;stdio.h&gt; int add(int a, int b); int main(void) { int result = add(10, 20); printf(&#34;%d\n&#34;, result); return 0; } 函数 add() 的实现位于另一个文件：
-// add.c int add(int a, int b) { return a &#43; b; } 我们可以分别编译这两个源文件：
-...</p>
-  </div>
-  <footer class="entry-footer">
-
-<span title='2026-10-23 21:36:30 +0800 CST'>October 23, 2026</span>&nbsp;·&nbsp;<span>9 min</span>&nbsp;·&nbsp;<span>1768 words</span></footer>
-  <a class="entry-link" aria-label="post link to 从目标文件到运行时装载：深入理解链接" href="http://localhost:1313/posts/link/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">

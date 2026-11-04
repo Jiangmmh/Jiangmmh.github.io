@@ -6,8 +6,45 @@
     <description>Recent content on Minghan的博客</description>
     <generator>Hugo</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Tue, 03 Nov 2026 21:20:56 +0800</lastBuildDate>
+    <lastBuildDate>Tue, 03 Nov 2026 22:11:04 +0800</lastBuildDate>
     <atom:link href="http://localhost:1313/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>LKD阅读笔记-第二章</title>
+      <link>http://localhost:1313/posts/lkd02/</link>
+      <pubDate>Tue, 03 Nov 2026 22:11:04 +0800</pubDate>
+      <guid>http://localhost:1313/posts/lkd02/</guid>
+      <description>&lt;blockquote&gt;
+&lt;p&gt;参考书籍：Robert Love, &lt;em&gt;Linux Kernel Development&lt;/em&gt;, Third Edition, Chapter 2: Getting Started with the Kernel。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;1-本章概览&#34;&gt;1. 本章概览&lt;/h2&gt;
+&lt;p&gt;第一章介绍了 Linux 内核的历史、定位和整体设计，而第二章开始进入实际开发：如何获取内核源码、如何编译和安装内核，以及编写内核代码时需要遵循哪些特殊规则。&lt;/p&gt;
+&lt;p&gt;本章主要回答三个问题：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;源码从哪里来？&lt;/strong&gt; 如何获取、管理和组织 Linux 内核源码？&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;内核如何构建？&lt;/strong&gt; 如何配置、编译和安装一个 Linux 内核？&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;内核代码有什么特殊之处？&lt;/strong&gt; 为什么内核开发不能完全按照普通 C 程序的方式进行？&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;其中，第三个问题尤其重要。Linux 内核虽然主要使用 C 语言编写，但它并不是一个普通的 C 应用程序。它运行在特权环境中，直接管理硬件和内存，必须处理异步中断、多处理器并发以及严格的资源限制。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;2-获取-linux-内核源码&#34;&gt;2. 获取 Linux 内核源码&lt;/h2&gt;
+&lt;p&gt;Linux 内核源码可以从官方网站获取：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;官方网站：https://www.kernel.org/&lt;/li&gt;
+&lt;li&gt;官方 Git 仓库：https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;官方提供两种主要获取方式：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Tarball&lt;/strong&gt;：完整源码压缩包。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Git&lt;/strong&gt;：通过版本控制系统获取和管理源码。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;21-使用-git&#34;&gt;2.1 使用 Git&lt;/h3&gt;
+&lt;p&gt;Linux 内核使用 Git 进行版本管理。Git 最初由 Linus Torvalds 创建，具有分布式版本控制的特点。&lt;/p&gt;
+&lt;p&gt;相比下载压缩包，使用 Git 更适合长期阅读、修改和研究内核源码。&lt;/p&gt;
+&lt;p&gt;获取 Linus 主线仓库：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;git clone https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nb&#34;&gt;cd&lt;/span&gt; linux
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;查看当前版本：&lt;/p&gt;</description>
+    </item>
     <item>
       <title>LKD阅读笔记-第一章</title>
       <link>http://localhost:1313/posts/lkd01/</link>

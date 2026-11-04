@@ -2,8 +2,8 @@
 title: "LKD阅读笔记-第一章"
 date: '2026-11-03T21:20:56+08:00'
 draft: false
-tags: [Linux, Linux内核, 操作系统, Unix, Kernel Development]
-categories: [操作系统, Linux]
+tags: [Linux内核, Unix]
+categories: [操作系统]
 ---
 
 
