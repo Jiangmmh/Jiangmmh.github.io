@@ -196,6 +196,31 @@
 
 <article class="post-entry tag-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">论文阅读：Practical, Transparent Operating System Support for Superpages
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>一、论文概述 论文： Practical, Transparent Operating System Support for Superpages
+作者： Juan Navarro, Sitaram Iyer, Peter Druschel, Alan Cox
+发表会议： OSDI 2002
+研究方向： Virtual Memory、Superpages、Memory Management
+论文链接： Practical, Transparent Operating System Support for Superpages
+这篇论文研究了一个非常实际的操作系统问题：如何在不要求应用程序修改代码的情况下，让操作系统透明地使用大页（Superpages），从而降低虚拟地址转换的开销，提高程序性能。
+现代处理器使用 TLB（Translation Lookaside Buffer）缓存虚拟地址到物理地址的转换关系。随着物理内存容量和应用程序工作集不断增大，有限的 TLB 容量越来越难以覆盖整个工作集，TLB Miss 可能成为影响程序性能的重要因素。
+使用更大的页面可以显著提高 TLB Coverage，减少 TLB Miss。但是，大页也带来了新的挑战：
+大页要求物理内存连续且满足对齐要求。 物理内存长期运行后容易产生碎片。 如果应用只使用大页中的一小部分，会造成严重的内部碎片。 大页粒度较粗，不利于精细的页面回收和 Dirty Page 管理。 操作系统需要在性能、内存利用率和管理开销之间进行权衡。 论文基于 FreeBSD 4.3，在 Alpha 处理器上实现了一套透明的多级 Superpage 管理机制。它不仅解决了大页分配问题，还重新设计了页面置换、页面提升、页面拆分和脏页管理策略。
+本文主要介绍论文的核心设计，并讨论其与现代 Linux THP 和 xv6 的联系。
+二、为什么需要 Superpages？ 2.1 TLB 与地址转换 虚拟内存系统通过页表（Page Table）将虚拟地址转换为物理地址。
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-11-04 11:50:28 +0800 CST'>November 4, 2026</span>&nbsp;·&nbsp;<span>8 min</span>&nbsp;·&nbsp;<span>1632 words</span></footer>
+  <a class="entry-link" aria-label="post link to 论文阅读：Practical, Transparent Operating System Support for Superpages" href="http://localhost:1313/posts/huge_page/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">LKD阅读笔记-第二章
     </h2>
   </header>
@@ -408,24 +433,6 @@ uint64 sys_interpose(void) { int interpose_mask; argint(0, &amp;interpose_mask);
 
 <span title='2026-10-26 09:23:20 +0800 CST'>October 26, 2026</span>&nbsp;·&nbsp;<span>5 min</span>&nbsp;·&nbsp;<span>1044 words</span></footer>
   <a class="entry-link" aria-label="post link to MIT6.1810: Lab2 Syscall" href="http://localhost:1313/posts/xv6-lab2-syscall/"></a>
-</article>
-
-<article class="post-entry tag-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">MIT6.1810: Lab1 Utils
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>一、环境准备 环境配置见文档，Linux和Mac皆可。
-拉取实验代码：
-$ git clone git://g.csail.mit.edu/xv6-labs-2026 Cloning into &#39;xv6-labs-2026&#39;... ... $ cd xv6-labs-2026 项目中已经提供了Makefile，直接构建并通过qemu启动即可：
-$ make qemu riscv64-unknown-elf-gcc -c -o kernel/entry.o kernel/entry.S riscv64-unknown-elf-gcc -Wall -Werror -O -fno-omit-frame-pointer -ggdb -DSOL_UTIL -MD -mcmodel=medany -ffreestanding -fno-common -nostdlib -mno-relax -I. -fno-stack-protector -fno-pie -no-pie -c -o kernel/start.o kernel/start.c ... riscv64-unknown-elf-ld -z max-page-size=4096 -N -e main -Ttext 0 -o user/_zombie user/zombie.o user/ulib.o user/usys.o user/printf.o user/umalloc.o riscv64-unknown-elf-objdump -S user/_zombie &gt; user/zombie.asm riscv64-unknown-elf-objdump -t user/_zombie | sed &#39;1,/SYMBOL TABLE/d; s/ .* / /; /^$/d&#39; &gt; user/zombie.sym mkfs/mkfs fs.img README user/xargstest.sh user/_cat user/_echo user/_forktest user/_grep user/_init user/_kill user/_ln user/_ls user/_mkdir user/_rm user/_sh user/_stressfs user/_usertests user/_grind user/_wc user/_zombie nmeta 46 (boot, super, log blocks 30 inode blocks 13, bitmap blocks 1) blocks 954 total 1000 balloc: first 591 blocks have been allocated balloc: write bitmap block at sector 45 qemu-system-riscv64 -machine virt -bios none -kernel kernel/kernel -m 128M -smp 3 -nographic -drive file=fs.img,if=none,format=raw,id=x0 -device virtio-blk-device,drive=x0,bus=virtio-mmio-bus.0 xv6 kernel is booting hart 2 starting hart 1 starting init: starting sh $ 关于xv6项目目录结构、构建流程和Boot细节，可以看我的这篇文章。
-...</p>
-  </div>
-  <footer class="entry-footer">
-
-<span title='2026-10-25 15:12:01 +0800 CST'>October 25, 2026</span>&nbsp;·&nbsp;<span>8 min</span>&nbsp;·&nbsp;<span>1668 words</span></footer>
-  <a class="entry-link" aria-label="post link to MIT6.1810: Lab1 Utils" href="http://localhost:1313/posts/xv6-lab1-util/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">

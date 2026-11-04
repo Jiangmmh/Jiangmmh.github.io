@@ -1,0 +1,1462 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>论文阅读：Practical, Transparent Operating System Support for Superpages | Minghan的博客</title>
+<meta name="keywords" content="操作系统, 虚拟内存, Superpages, Huge Pages, TLB, 内存管理, 论文阅读">
+<meta name="description" content="一、论文概述
+论文： Practical, Transparent Operating System Support for Superpages
+作者： Juan Navarro, Sitaram Iyer, Peter Druschel, Alan Cox
+发表会议： OSDI 2002
+研究方向： Virtual Memory、Superpages、Memory Management
+论文链接： Practical, Transparent Operating System Support for Superpages
+这篇论文研究了一个非常实际的操作系统问题：如何在不要求应用程序修改代码的情况下，让操作系统透明地使用大页（Superpages），从而降低虚拟地址转换的开销，提高程序性能。
+现代处理器使用 TLB（Translation Lookaside Buffer）缓存虚拟地址到物理地址的转换关系。随着物理内存容量和应用程序工作集不断增大，有限的 TLB 容量越来越难以覆盖整个工作集，TLB Miss 可能成为影响程序性能的重要因素。
+使用更大的页面可以显著提高 TLB Coverage，减少 TLB Miss。但是，大页也带来了新的挑战：
+
+大页要求物理内存连续且满足对齐要求。
+物理内存长期运行后容易产生碎片。
+如果应用只使用大页中的一小部分，会造成严重的内部碎片。
+大页粒度较粗，不利于精细的页面回收和 Dirty Page 管理。
+操作系统需要在性能、内存利用率和管理开销之间进行权衡。
+
+论文基于 FreeBSD 4.3，在 Alpha 处理器上实现了一套透明的多级 Superpage 管理机制。它不仅解决了大页分配问题，还重新设计了页面置换、页面提升、页面拆分和脏页管理策略。
+本文主要介绍论文的核心设计，并讨论其与现代 Linux THP 和 xv6 的联系。
+二、为什么需要 Superpages？
+2.1 TLB 与地址转换
+虚拟内存系统通过页表（Page Table）将虚拟地址转换为物理地址。">
+<meta name="author" content="">
+<link rel="canonical" href="http://localhost:1313/posts/huge_page/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.f9490c4bd2e7d3fd9e21909b0bc528878329710db51c69d38b7057b37e889c1d.css" integrity="sha256-&#43;UkMS9Ln0/2eIZCbC8Uoh4MpcQ21HGnTi3BXs36InB0=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/huge_page/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css"
+>
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/contrib/auto-render.min.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    if (typeof renderMathInElement !== "function") {
+      console.error("KaTeX auto-render 加载失败");
+      return;
+    }
+
+    document.querySelectorAll(".post-content, .book-content").forEach(function (element) {
+      renderMathInElement(element, {
+        delimiters: [
+          { left: "$$", right: "$$", display: true },
+          { left: "\\[", right: "\\]", display: true },
+          { left: "\\(", right: "\\)", display: false }
+        ],
+        throwOnError: false
+      });
+    });
+  });
+</script>
+
+<meta property="og:url" content="http://localhost:1313/posts/huge_page/">
+  <meta property="og:site_name" content="Minghan的博客">
+  <meta property="og:title" content="论文阅读：Practical, Transparent Operating System Support for Superpages">
+  <meta property="og:description" content="一、论文概述 论文： Practical, Transparent Operating System Support for Superpages
+作者： Juan Navarro, Sitaram Iyer, Peter Druschel, Alan Cox
+发表会议： OSDI 2002
+研究方向： Virtual Memory、Superpages、Memory Management
+论文链接： Practical, Transparent Operating System Support for Superpages
+这篇论文研究了一个非常实际的操作系统问题：如何在不要求应用程序修改代码的情况下，让操作系统透明地使用大页（Superpages），从而降低虚拟地址转换的开销，提高程序性能。
+现代处理器使用 TLB（Translation Lookaside Buffer）缓存虚拟地址到物理地址的转换关系。随着物理内存容量和应用程序工作集不断增大，有限的 TLB 容量越来越难以覆盖整个工作集，TLB Miss 可能成为影响程序性能的重要因素。
+使用更大的页面可以显著提高 TLB Coverage，减少 TLB Miss。但是，大页也带来了新的挑战：
+大页要求物理内存连续且满足对齐要求。 物理内存长期运行后容易产生碎片。 如果应用只使用大页中的一小部分，会造成严重的内部碎片。 大页粒度较粗，不利于精细的页面回收和 Dirty Page 管理。 操作系统需要在性能、内存利用率和管理开销之间进行权衡。 论文基于 FreeBSD 4.3，在 Alpha 处理器上实现了一套透明的多级 Superpage 管理机制。它不仅解决了大页分配问题，还重新设计了页面置换、页面提升、页面拆分和脏页管理策略。
+本文主要介绍论文的核心设计，并讨论其与现代 Linux THP 和 xv6 的联系。
+二、为什么需要 Superpages？ 2.1 TLB 与地址转换 虚拟内存系统通过页表（Page Table）将虚拟地址转换为物理地址。">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-11-04T11:50:28+08:00">
+    <meta property="article:modified_time" content="2026-11-04T11:50:28+08:00">
+    <meta property="article:tag" content="操作系统">
+    <meta property="article:tag" content="虚拟内存">
+    <meta property="article:tag" content="Superpages">
+    <meta property="article:tag" content="Huge Pages">
+    <meta property="article:tag" content="TLB">
+    <meta property="article:tag" content="内存管理">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="论文阅读：Practical, Transparent Operating System Support for Superpages">
+  <meta name="twitter:description" content="一、论文概述 论文： Practical, Transparent Operating System Support for Superpages
+作者： Juan Navarro, Sitaram Iyer, Peter Druschel, Alan Cox
+发表会议： OSDI 2002
+研究方向： Virtual Memory、Superpages、Memory Management
+论文链接： Practical, Transparent Operating System Support for Superpages
+这篇论文研究了一个非常实际的操作系统问题：如何在不要求应用程序修改代码的情况下，让操作系统透明地使用大页（Superpages），从而降低虚拟地址转换的开销，提高程序性能。
+现代处理器使用 TLB（Translation Lookaside Buffer）缓存虚拟地址到物理地址的转换关系。随着物理内存容量和应用程序工作集不断增大，有限的 TLB 容量越来越难以覆盖整个工作集，TLB Miss 可能成为影响程序性能的重要因素。
+使用更大的页面可以显著提高 TLB Coverage，减少 TLB Miss。但是，大页也带来了新的挑战：
+大页要求物理内存连续且满足对齐要求。 物理内存长期运行后容易产生碎片。 如果应用只使用大页中的一小部分，会造成严重的内部碎片。 大页粒度较粗，不利于精细的页面回收和 Dirty Page 管理。 操作系统需要在性能、内存利用率和管理开销之间进行权衡。 论文基于 FreeBSD 4.3，在 Alpha 处理器上实现了一套透明的多级 Superpage 管理机制。它不仅解决了大页分配问题，还重新设计了页面置换、页面提升、页面拆分和脏页管理策略。
+本文主要介绍论文的核心设计，并讨论其与现代 Linux THP 和 xv6 的联系。
+二、为什么需要 Superpages？ 2.1 TLB 与地址转换 虚拟内存系统通过页表（Page Table）将虚拟地址转换为物理地址。">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "http://localhost:1313/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "论文阅读：Practical, Transparent Operating System Support for Superpages",
+      "item": "http://localhost:1313/posts/huge_page/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "论文阅读：Practical, Transparent Operating System Support for Superpages",
+  "name": "论文阅读：Practical, Transparent Operating System Support for Superpages",
+  "description": "一、论文概述 论文： Practical, Transparent Operating System Support for Superpages\n作者： Juan Navarro, Sitaram Iyer, Peter Druschel, Alan Cox\n发表会议： OSDI 2002\n研究方向： Virtual Memory、Superpages、Memory Management\n论文链接： Practical, Transparent Operating System Support for Superpages\n这篇论文研究了一个非常实际的操作系统问题：如何在不要求应用程序修改代码的情况下，让操作系统透明地使用大页（Superpages），从而降低虚拟地址转换的开销，提高程序性能。\n现代处理器使用 TLB（Translation Lookaside Buffer）缓存虚拟地址到物理地址的转换关系。随着物理内存容量和应用程序工作集不断增大，有限的 TLB 容量越来越难以覆盖整个工作集，TLB Miss 可能成为影响程序性能的重要因素。\n使用更大的页面可以显著提高 TLB Coverage，减少 TLB Miss。但是，大页也带来了新的挑战：\n大页要求物理内存连续且满足对齐要求。 物理内存长期运行后容易产生碎片。 如果应用只使用大页中的一小部分，会造成严重的内部碎片。 大页粒度较粗，不利于精细的页面回收和 Dirty Page 管理。 操作系统需要在性能、内存利用率和管理开销之间进行权衡。 论文基于 FreeBSD 4.3，在 Alpha 处理器上实现了一套透明的多级 Superpage 管理机制。它不仅解决了大页分配问题，还重新设计了页面置换、页面提升、页面拆分和脏页管理策略。\n本文主要介绍论文的核心设计，并讨论其与现代 Linux THP 和 xv6 的联系。\n二、为什么需要 Superpages？ 2.1 TLB 与地址转换 虚拟内存系统通过页表（Page Table）将虚拟地址转换为物理地址。\n",
+  "keywords": [
+    "操作系统", "虚拟内存", "Superpages", "Huge Pages", "TLB", "内存管理", "论文阅读"
+  ],
+  "articleBody": "一、论文概述 论文： Practical, Transparent Operating System Support for Superpages\n作者： Juan Navarro, Sitaram Iyer, Peter Druschel, Alan Cox\n发表会议： OSDI 2002\n研究方向： Virtual Memory、Superpages、Memory Management\n论文链接： Practical, Transparent Operating System Support for Superpages\n这篇论文研究了一个非常实际的操作系统问题：如何在不要求应用程序修改代码的情况下，让操作系统透明地使用大页（Superpages），从而降低虚拟地址转换的开销，提高程序性能。\n现代处理器使用 TLB（Translation Lookaside Buffer）缓存虚拟地址到物理地址的转换关系。随着物理内存容量和应用程序工作集不断增大，有限的 TLB 容量越来越难以覆盖整个工作集，TLB Miss 可能成为影响程序性能的重要因素。\n使用更大的页面可以显著提高 TLB Coverage，减少 TLB Miss。但是，大页也带来了新的挑战：\n大页要求物理内存连续且满足对齐要求。 物理内存长期运行后容易产生碎片。 如果应用只使用大页中的一小部分，会造成严重的内部碎片。 大页粒度较粗，不利于精细的页面回收和 Dirty Page 管理。 操作系统需要在性能、内存利用率和管理开销之间进行权衡。 论文基于 FreeBSD 4.3，在 Alpha 处理器上实现了一套透明的多级 Superpage 管理机制。它不仅解决了大页分配问题，还重新设计了页面置换、页面提升、页面拆分和脏页管理策略。\n本文主要介绍论文的核心设计，并讨论其与现代 Linux THP 和 xv6 的联系。\n二、为什么需要 Superpages？ 2.1 TLB 与地址转换 虚拟内存系统通过页表（Page Table）将虚拟地址转换为物理地址。\n处理器访问内存时，首先查询 TLB。如果命中，就可以直接获得对应的物理地址；如果未命中，则需要进行页表遍历（Page Table Walk），获取转换关系并更新 TLB。\nVirtual Address | v TLB | +--------+--------+ | | Hit Miss | | v v Physical Address Page Table Walk | | | v | Update TLB | | +--------+--------+ | v Memory Access TLB 容量有限，因此它能够覆盖的虚拟内存范围也有限。\n假设 TLB 有 128 个条目，每个条目映射一个 4KB 页面，那么：\n128×4KB=512KB 128 \\times 4KB = 512KB 128×4KB=512KB也就是说，这个 TLB 最多缓存 512KB 的地址转换关系。\n如果应用程序频繁访问 1GB 的工作集，显然不可能将所有地址转换关系都保存在 TLB 中，大量 TLB Miss 就可能成为性能瓶颈。\n2.2 使用大页提高 TLB Coverage Superpage 是比普通页面更大的页面。\n假设普通页面大小为 4KB，大页大小为 2MB：\n页面大小 TLB 条目数量 TLB Coverage 4KB 128 512KB 2MB 128 256MB 相同数量的 TLB 条目，使用 2MB 页面可以覆盖更大的内存范围。\n大页的主要收益包括：\n增大 TLB Coverage。 减少 TLB Miss。 降低页表遍历频率。 减少部分页表管理开销。 因此，大页特别适合具有较大内存工作集、空间局部性较好且访问模式相对稳定的应用。\n2.3 使用大页的代价 大页并不是越大越好。\n假设一个 2MB Superpage 中，应用实际上只访问了 4KB：\n2MB Superpage +--------------------------------------+ | 4KB Used | Unused | +--------------------------------------+ 如果操作系统分配整个 2MB，就会产生大量内部碎片（Internal Fragmentation）。\n此外，大页还要求物理内存连续。\n例如，要分配一个 2MB 的大页，操作系统必须找到一段连续且满足 2MB 对齐要求的物理内存。\n但是，系统长期运行后，物理内存可能变成：\nPhysical Memory: +------+------+------+------+------+------+ | Used | Free | Used | Free | Used | Free | +------+------+------+------+------+------+ 即使系统拥有足够多的空闲页面，也可能无法找到足够大的连续区域。\n这就是外部碎片化（External Fragmentation）。\n因此，大页管理需要同时解决两个问题：\n如何获得足够大的连续物理内存？ 如何避免大页造成过多的内存浪费？ 这也是论文研究的核心。\n三、论文的整体设计 论文提出了一套透明的 Superpage 管理机制。\n所谓透明，是指应用程序不需要显式申请大页，也不需要修改自己的内存访问逻辑。操作系统根据内存访问情况，自动决定何时使用大页、何时拆分大页。\n论文的主要设计可以概括为：\n设计 解决的问题 Reservation-based Allocation 提前保证物理内存连续性 Incremental Promotion 逐步将普通页面提升为大页 Reservation Preemption 回收未充分使用的预留区域 Contiguity-aware Page Replacement 通过页面置换恢复物理内存连续性 Speculative Demotion 拆分大页，恢复细粒度管理 Dirty Superpage Management 避免不必要的大量磁盘写回 其中，Reservation-based Allocation 和 Incremental Promotion 是理解整篇论文的关键。\n四、Reservation-based Allocation：预留连续物理内存 4.1 传统 Demand Paging 的问题 传统 Demand Paging 采用按需分配策略。\n假设一个进程申请了一段连续的虚拟内存：\nVirtual Memory: +------+------+------+------+ | A | B | C | D | +------+------+------+------+ 当进程第一次访问某个页面时，发生 Page Fault，操作系统从空闲物理页面中分配一个页面。\n例如：\nPage Fault 1 -\u003e Physical Page 12 Page Fault 2 -\u003e Physical Page 87 Page Fault 3 -\u003e Physical Page 21 Page Fault 4 -\u003e Physical Page 95 最终可能得到：\nVirtual Pages: Physical Pages: +------+------+ +------+------+------+------+ | A | B | | 12 | 87 | 21 | 95 | +------+------+ +------+------+------+------+ 虽然虚拟地址连续，但是物理页面不连续。\n因此，后续即使这些页面全部被访问，也无法直接将它们合并成一个 Superpage。\n如果想使用大页，操作系统就必须重新寻找连续的物理内存，并将已经分配的页面迁移过去。\n这种方式称为 Relocation-based Allocation。\n页面迁移需要复制数据、更新页表以及处理 TLB，成本较高。\n4.2 Reservation-based Allocation 的核心思想 论文提出了另一种思路：\n不要等到页面分散分配之后才考虑大页，而是在第一次分配时就提前预留一块连续的物理内存。\n例如，进程第一次访问某个 4MB 区域中的页面：\nVirtual Memory: +----------------------------------+ | 4MB Region | +----------------------------------+ 操作系统尝试为这个区域预留一块连续的 4MB 物理内存：\nPhysical Memory: +----------------------------------+ | 4MB Reserved | +----------------------------------+ 这里需要区分两个概念：\nReservation：预留物理内存的位置，保证后续分配的页面具有连续性。 Mapping：真正建立虚拟地址到物理地址的映射。 预留不意味着立即分配全部页面，也不意味着立即建立整个 4MB 的 Superpage 映射。\n假设程序目前只访问了第一个 4KB 页面：\nReserved Physical Region: +------+------+------+------+------+ | Used | Free | Free | Free | Free | +------+------+------+------+------+ 操作系统只分配并映射第一个页面，其余页面仍然处于预留状态。\n当程序后续访问其他页面时，就从之前预留的区域中分配对应的物理页面。\n这样既保留了 Demand Paging 的按需分配特性，又提前保证了物理页面的连续性。\n4.3 为什么不在第一次访问时直接建立 Superpage？ 假设程序申请了 4MB 内存，但实际上只访问了其中的 4KB。\n如果第一次 Page Fault 时就直接建立 4MB Superpage，那么剩余没有真正分配的页面也可能变得可访问。\n这会破坏 Demand Paging 的语义，并造成大量内存浪费。\n因此，论文采用以下策略：\n第一次访问： Reserve a large contiguous physical region Allocate one base page Map one base page 后续访问： Allocate pages from reservation Map individual base pages 所有 base pages 都被填充： Promote to superpage Reservation 保证未来能够使用大页，而按需分配保证不会提前浪费物理内存。\n这是论文最重要的设计思想之一。\n五、Incremental Promotion：逐步提升页面大小 有了 Reservation，操作系统就可以在页面逐渐被填充时，将普通页面提升为大页。\n论文实验平台 Alpha 支持四种页面大小：\n页面类型 页面大小 Base Page 8KB Superpage 1 64KB Superpage 2 512KB Superpage 3 4MB 5.1 为什么需要 Incremental Promotion？ 假设操作系统预留了一个 4MB 的连续物理区域。\n如果程序目前只访问了 64KB，那么直接等待整个 4MB 被填满才建立大页，就可能错过使用较小 Superpage 的机会。\n论文采用逐级提升的策略：\n8KB -\u003e 64KB -\u003e 512KB -\u003e 4MB 例如：\n阶段 1：一个 Base Page 被分配 +------+------+------+------+------+ | Used | Free | Free | Free | Free | +------+------+------+------+------+ 阶段 2：64KB 区域被完全填充 +------+------+------+------+------+ | Used | Used | Used | Used | Used | +------+------+------+------+------+ Promote to 64KB 阶段 3：512KB 区域被完全填充 Promote to 512KB 阶段 4：4MB 区域被完全填充 Promote to 4MB 论文只在满足相应对齐要求的连续区域被完全填充时进行 Promotion。\n这样可以避免为了建立大页而提前分配尚未使用的页面。\n5.2 Promotion 是否需要复制页面？ 不需要像传统 Relocation-based Allocation 那样重新搬迁页面。\n因为在最初的 Reservation 阶段，操作系统已经保证了物理内存连续性。\nPromotion 主要是修改页表，让处理器将原来的一组 Base Page 识别为更大的页面映射。\nBefore Promotion: Virtual Address | v +------+------+------+------+ | PTE0 | PTE1 | PTE2 | PTE3 | +------+------+------+------+ | | | | v v v v Physical contiguous pages After Promotion: Virtual Address | v +---------------------------+ | Superpage PTE | +---------------------------+ | v Physical Superpage 需要注意，具体页表表示与处理器架构有关。论文使用的 Alpha 处理器采用 PTE Replication：仍然为每个 Base Page 保留 PTE，只是更新其中的页面大小字段。\n六、解决内存碎片：Reservation Preemption Reservation-based Allocation 虽然能够保证物理页面连续性，但也带来了新的问题：\n如果操作系统不断预留大块连续物理内存，系统很快就可能找不到新的连续区域。\n而且，部分 Reservation 可能只使用了很少的物理页面。\n例如：\nReservation A: 4MB Used: 8KB Free: 4088KB Reservation B: 4MB Used: 2MB Free: 2MB Reservation C: 4MB Used: 4MB Free: 0 如果另一个进程需要 512KB 连续物理内存，但系统已经无法提供，就需要考虑回收之前的 Reservation。\n6.1 Preempting Reservations 论文提出 Reservation Preemption：\n在物理内存不足时，抢占尚未充分使用的 Reservation，将其中未分配的物理页面归还给系统。\n例如：\nBefore: Reservation A (4MB) +--------+--------+--------+--------+ | Used | Free | Free | Free | +--------+--------+--------+--------+ After Preemption: +--------+--------+--------+--------+ | 8KB | Free | Free | Free | +--------+--------+--------+--------+ 其中：\n已经分配的页面继续保留。 未使用的页面返回物理内存分配器。 剩余区域可以根据情况重新组织为较小的 Reservation。 6.2 如何选择需要抢占的 Reservation？ 论文采用基于最近分配时间的策略。\n优先抢占最近没有发生过页面分配的 Reservation。\n理由是：\n最近仍在持续分配页面的 Reservation，可能很快就会被进一步填充。 长时间没有新页面分配的 Reservation，后续继续填充的可能性相对较低。 论文维护 Reservation List，并根据最近一次分配时间进行组织。\n这是一种简单的预测策略：通过历史分配行为估计 Reservation 的未来使用价值。\n需要强调，抢占的是尚未分配的预留页面，而不是直接释放已经被应用程序使用的页面。\n七、Contiguity-aware Page Replacement：考虑连续性的页面置换 仅仅回收 Reservation 还不够。\n因为系统运行一段时间后，已经真正分配出去的页面也可能导致严重的物理内存碎片。\n传统页面置换算法主要考虑页面是否最近被访问过，例如 LRU 及其近似算法。\n但是，如果操作系统希望持续支持 Superpage，那么页面置换还应该考虑一个因素：\n换出哪些页面能够帮助恢复更大的连续物理内存区域？\n这就是 Contiguity-aware Page Replacement。\n7.1 传统 Page Replacement 的局限 假设物理内存如下：\n+------+------+------+------+------+------+ | Used | Used | Free | Used | Free | Used | +------+------+------+------+------+------+ 传统页面置换可能根据页面访问情况选择若干冷页面。\n但是它不一定考虑这些页面在物理内存中的位置关系。\n即使换出了多个页面，也未必能形成足够大的连续区域。\n7.2 Contiguity-aware 的设计思路 论文希望优先回收那些能够帮助恢复较大连续物理区域的页面。\n例如：\nPhysical Memory: +------+------+------+------+------+------+ | Used | Cold | Used | Cold | Cold | Used | +------+------+------+------+------+------+ 通过选择合适的 Cold Page 进行置换，可以让 Buddy Allocator 合并更多相邻的空闲页面。\n论文在 FreeBSD 的 Page Daemon 中实现了这种策略。\n主要包括：\n将 Cache Page 也纳入 Buddy Allocator 的管理，使其能够参与连续区域的合并。 不仅在内存不足时唤醒 Page Daemon，当系统无法获得所需大小的连续区域时，也会唤醒它。 Page Daemon 扫描 Inactive List，优先回收有助于满足连续内存需求的页面。 对已经关闭文件对应的干净页面，积极将其移动到 Inactive List，增加可供选择的页面数量。 这样，页面置换的目标就从单纯回收内存，扩展为同时恢复物理内存连续性。\n7.3 为什么不直接使用 Memory Compaction？ 另一个思路是将分散的物理页面复制到一起，这就是 Memory Compaction。\n但是页面迁移需要：\n复制页面内容。 更新页表映射。 处理 TLB。 处理页面并发访问。 论文尽量避免通过迁移页面来恢复连续性，而是通过选择合适的页面进行置换，让 Buddy Allocator 重新合并空闲区域。\n当然，如果需要的连续区域中存在大量活跃页面，仅靠页面置换也不可能恢复连续性。\n八、Speculative Demotion：主动拆分大页 前面介绍了 Promotion，即从小页面升级为大页面。\n那么，什么时候需要反过来拆分 Superpage？\n这就是 Demotion。\n8.1 为什么需要 Demotion？ 假设一个进程曾经使用了一个 4MB Superpage：\n+--------------------------------------+ | 4MB Superpage | +--------------------------------------+ 但一段时间后，程序只访问其中很小的一部分：\n+--------+--------+--------+--------+ | Active | Active | Idle | Idle | +--------+--------+--------+--------+ 如果继续将整个区域作为 4MB Superpage 管理，就可能无法准确判断哪些 Base Page 真正活跃。\n原因在于：\n硬件通常只维护一个 Superpage 级别的 Reference Bit。\n只要 4MB 中任意部分被访问，整个 Superpage 都可能被认为最近访问过。\n操作系统无法区分：\n整个 4MB 都在使用。 只有其中 8KB 在使用。 这会影响页面回收的准确性。\n8.2 Speculative Demotion 的思路 论文提出，在内存压力下，操作系统可以主动拆分 Superpage，重新观察各个 Base Page 的访问状态。\n例如：\nBefore: +--------------------------------------+ | 4MB Superpage | +--------------------------------------+ After: +----------------+---------------------+ | 512KB Superpage| 512KB Superpage | +----------------+---------------------+ | 512KB Superpage| 512KB Superpage | +----------------+---------------------+ 还可以继续拆分：\n512KB -\u003e 64KB -\u003e 8KB 这种逐级拆分可以减少不必要的页表更新。\n8.3 为什么叫 Speculative？ 因为操作系统并不知道一个大页内部究竟有多少页面仍然活跃。\n它通过主动 Demotion，重新获得更细粒度的 Reference Bit 信息。\n基本流程：\nPage Daemon 检查页面的引用状态。 如果存在内存压力，主动拆分对应 Superpage。 重新观察各个 Base Page 的访问情况。 将长期未访问的页面放入置换候选集合。 如果后续发现所有页面都在被访问，则可以重新 Promotion。 论文实验实现使用的概率参数 p=1，即在相应的内存压力处理过程中执行这种拆分策略。\n核心思想是：\n当硬件只能提供粗粒度的访问信息时，操作系统可以通过调整页面粒度，重新获得细粒度的信息。\n九、Dirty Superpage：如何处理大页的脏状态？ 这是论文中非常值得关注的一个细节。\n9.1 大页的 Dirty Bit 问题 假设一个 4MB Superpage 由 512 个 8KB Base Page 组成。\n程序只修改了其中一个页面：\n4MB Superpage: +------+------+------+------+------+ | Dirty| Clean| Clean| Clean| Clean| +------+------+------+------+------+ 但是硬件只提供 Superpage 级别的 Dirty Bit。\n一旦这个 Superpage 被标记为 Dirty，操作系统就无法判断究竟哪个 Base Page 被修改了。\n如果需要将其写回磁盘，就可能需要写回整个 4MB。\n但实际上可能只有 8KB 被修改。\n这会导致写回数据量放大 512 倍。\n9.2 通过 Demotion 恢复细粒度 Dirty 信息 论文采用的策略是：\n当一个 Clean Superpage 中的任意 Base Page 第一次被修改时，将整个 Superpage Demote。\n例如：\nBefore: +--------------------------------------+ | 4MB Superpage | | Clean | +--------------------------------------+ Write to one Base Page | v Demote to smaller pages +------+------+------+------+------+ | Dirty| Clean| Clean| Clean| Clean| +------+------+------+------+------+ 这样操作系统重新获得每个 Base Page 的 Dirty 状态。\n写回磁盘时，就只需要写回真正被修改的页面。\n9.3 为什么不通过 Hash 判断页面是否被修改？ 论文还讨论了一种替代方案：\n在页面从磁盘加载时，为每个 Base Page 计算 Hash。\n当整个 Superpage 需要写回时：\n重新计算每个 Base Page 的 Hash。 与原来的 Hash 比较。 只有内容发生变化的页面才写回磁盘。 作者尝试了 SHA-1，但实验发现 Hash 计算带来了明显开销：\n磁盘密集型应用最多增加约 15% 开销。 某些极端场景下性能下降达到 60%。 因此，作者最终没有采用这种方案，而是选择通过 Demotion 恢复细粒度 Dirty 信息。\n这个案例体现了论文的设计哲学：\n不能为了追求大页带来的性能收益，而让少数异常场景出现无法接受的退化。\n十、实验结果 论文在 Compaq XP-1000 上进行了实验。\n硬件参数 配置 CPU Alpha 21264 500MHz RAM 512MB Base Page 8KB Superpage 64KB / 512KB / 4MB Data TLB 128 entries Instruction TLB 128 entries 操作系统基于 FreeBSD 4.3，整个实现约 3500 行 C 代码。\n10.1 不同应用的性能收益 论文中的一些代表性结果：\nBenchmark 加速比 Matrix Transposition 7.546× Apsi 1.827× MCF 1.676× FFTW 1.549× Tree 1.503× Linker 1.326× Image 1.228× 其中 Matrix Transposition 的结果非常突出。\n其使用的是非分块矩阵转置算法：\nfor (int i = 0; i \u003c N; i++) { for (int j = 0; j \u003c N; j++) { B[j][i] = A[i][j]; } } 访问矩阵 B 时，内存访问模式可能产生大量跨页面访问。\n论文指出，该测试的访问模式几乎每两次内存访问就产生一次 TLB Miss，因此对地址转换性能非常敏感。\n使用 Superpage 后，TLB Miss 显著减少，最终获得约 7.5 倍加速。\n10.2 为什么需要多种 Superpage Size？ 不同应用的最佳页面大小并不相同。\n论文实验发现：\nSP：64KB 表现较好。 VPR：512KB 表现较好。 FFTW：4MB 表现较好。 例如，FFTW 使用 4MB Superpage 时获得约 1.55 倍加速，而较小页面几乎没有收益。\n这说明页面大小应该根据应用实际使用模式动态选择，而不是固定使用某一种大页。\n10.3 长时间运行后的性能 论文还设计了一个非常有意思的实验：\n先运行 Web Server。 通过大量请求加载文件。 让系统物理内存发生严重碎片化。 再运行 FFTW。 在普通系统中，即使还有大量空闲内存，也可能无法分配 4MB 连续区域。\n论文提出的 Contiguity-aware Page Replacement 能够逐步恢复连续性。\nFFTW 连续运行四次后，获得的 4MB Superpage 数量分别为：\n执行次数 4MB Superpage 数量 第一次 20 第二次 35 第三次 38 第四次 40 最终性能接近最佳状态，获得约 55% 的加速。\n与此同时，恢复连续性的机制对 Web Server 造成的额外性能损失只有约 3%。\n这证明了大页管理不能只关注系统刚启动时的性能，还必须考虑长期运行后的内存碎片问题。\n十一、联系现代 Linux：HugeTLB 和 Transparent Huge Pages 这篇论文发表于 2002 年，但其中的设计思想今天仍然具有实际价值。\nLinux 已经提供了两类重要的大页机制：HugeTLB 和 Transparent Huge Pages。\n11.1 HugeTLB Linux 提供 HugeTLB，用于显式管理大页。\n可以通过以下命令查看大页相关信息：\ncat /proc/meminfo | grep Huge 也可以查看：\ncat /sys/kernel/mm/hugepages/ HugeTLB 通常需要提前预留大页池，应用程序可以通过 mmap 等接口使用。\n它与论文中的 Reservation-based Allocation 有相似之处：\n都重视连续物理内存。 都涉及大页预留和分配。 都需要考虑物理内存碎片。 但两者并不是同一种实现。论文强调透明的、按需建立的多尺寸 Superpage 管理，而 HugeTLB 是显式的大页池机制。\n11.2 Transparent Huge Pages Linux 还提供 Transparent Huge Pages（THP）。\n它的目标与这篇论文非常接近：\n尽可能让应用程序透明地使用大页，而不要求应用程序修改代码。\n在 x86-64 Linux 上，普通页面通常为 4KB，而 THP 经常使用 2MB 页面。\nTHP 主要涉及：\n在合适的条件下使用大页。 通过内存分配和缺页处理建立大页映射。 在必要时执行大页拆分。 在后台进行内存压缩（Compaction），寻找连续物理内存。 值得研究的内核组件和接口：\n名称 作用 khugepaged 后台扫描并尝试合并页面 madvise() 向内核提供内存使用建议 MADV_HUGEPAGE 建议内核使用大页 MADV_NOHUGEPAGE 建议内核不使用大页 transhuge THP 内核文档和相关配置 官方文档：\nLinux Kernel Documentation: Transparent Hugepage Support\n11.3 论文与 Linux THP 的设计对照 论文机制 Linux 中相关概念 Reservation-based Allocation 大页分配与预留 Incremental Promotion THP 大页建立与合并 Demotion Huge Page Split Contiguity-aware Replacement 内存回收、Compaction Dirty Superpage 大页 Dirty Tracking 与拆分 Buddy Allocator Linux Buddy System 需要注意，这只是设计思想层面的对应关系，并不意味着 Linux THP 直接采用了论文的全部算法。\n尤其是论文采用 Reservation 来提前保证连续性，而现代 Linux THP 更多依赖 Buddy Allocator、Compaction、khugepaged 等机制获得和维护大页。\n十二、联系 xv6：如何自己实现 Superpage？ 如果希望将这篇论文转化为操作系统实践，可以从 xv6 的物理内存管理和页表管理入手。\n12.1 首先理解 xv6 的普通页面分配 xv6 的物理内存分配器位于 kernel/kalloc.c。\n核心逻辑非常简单：\nvoid * kalloc(void) { struct run *r; acquire(\u0026kmem.lock); r = kmem.freelist; if (r) kmem.freelist = r-\u003enext; release(\u0026kmem.lock); if (r) memset((char *)r, 5, PGSIZE); return (void *)r; } 它从空闲链表中取出一个物理页面。\n这里并没有考虑：\n连续分配多个页面。 页面大小不同。 大页对齐。 Reservation。 页面 Promotion / Demotion。 这正是论文试图改进的部分。\n12.2 RISC-V 的大页支持 MIT xv6 使用 RISC-V Sv39 地址转换机制。\nSv39 支持通过不同级别的页表项建立不同粒度的映射：\n页表级别 页面大小 Level 0 4KB Level 1 2MB Level 2 1GB 因此，可以尝试给 xv6 增加 2MB Superpage 支持。\n12.3 实现路线 第一步：修改物理内存分配器。\n增加连续物理页面分配接口：\nvoid *kalloc_large(void); void kfree_large(void *pa); 要求返回的物理地址满足 2MB 对齐，并且物理页面连续。\n第二步：修改页表映射逻辑。\n普通映射使用 Level 0 PTE。\n大页映射则在 Level 1 建立 Leaf PTE。\n注意，RISC-V 大页映射要求物理地址和虚拟地址满足相应页面大小的对齐要求。\n第三步：修改 Page Fault 处理。\n当进程首次访问一个虚拟地址时：\n判断对应虚拟区域是否适合大页。 尝试分配 2MB 连续物理内存。 如果成功，按需建立映射。 如果不适合，则退回普通 4KB 页面。 第四步：实现 Promotion 和 Demotion。\n当某个区域的 512 个 Base Page 都被分配后，可以考虑将它们转换成一个 2MB 映射。\n反过来，如果需要回收其中某个 4KB 页面，就必须先拆分大页映射。\n这里需要特别注意：\n页表层级转换。 TLB 刷新。 物理页面所有权。 对齐约束。 并发访问和页面回收。 这会是一个很有价值的 xv6 扩展实验。\n十三、总结 这篇论文最重要的贡献，不是简单地证明 Superpage 能够提高 TLB Coverage，而是展示了一个看似简单的硬件特性，为什么会迫使操作系统重新设计物理内存分配、页面置换、页面回收和页表管理。\n可以总结为：\n问题 论文的解决方案 如何保证物理页面连续？ Reservation-based Allocation 如何逐步利用大页？ Incremental Promotion 如何回收未使用的预留内存？ Reservation Preemption 如何处理物理内存碎片？ Contiguity-aware Page Replacement 如何发现大页中的非活跃区域？ Speculative Demotion 如何避免 Dirty 大页产生大量磁盘 I/O？ Dirty Superpage Demotion 如何支持不同应用的工作集？ Multiple Superpage Sizes 我认为这篇论文最值得记住的系统设计思想是：\n操作系统不能只优化资源的当前使用效率，还必须考虑资源未来的可用性。\nReservation-based Allocation 就是一个很好的例子：它看起来浪费了暂时未使用的物理内存，但实际上是在为未来创建大页保留连续性。\n而 Preemption 和 Contiguity-aware Page Replacement 又让这种预留能够在必要时被回收。\n这是一种典型的操作系统设计权衡：用适度的资源预留，换取长期、可持续的性能收益。\n参考资料 Juan Navarro, Sitaram Iyer, Peter Druschel, Alan Cox. Practical, Transparent Operating System Support for Superpages. OSDI 2002. 论文 PDF MIT 6.1810 Paper Reading Homework: Superpages Linux Kernel Documentation: Transparent Hugepage Support Linux Kernel Documentation: Physical Memory ",
+  "wordCount" : "1632",
+  "inLanguage": "en",
+  "datePublished": "2026-11-04T11:50:28+08:00",
+  "dateModified": "2026-11-04T11:50:28+08:00",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "http://localhost:1313/posts/huge_page/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Minghan的博客",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "http://localhost:1313/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="header-nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="Minghan的博客 (Alt + H)">Minghan的博客</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" class="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg class="sun" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu" class="menu">
+            <li>
+                <a href="http://localhost:1313/posts/" title="文章">
+                    <span>文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/archives/" title="归档">
+                    <span>归档</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/categories/" title="分类">
+                    <span>分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="标签">
+                    <span>标签</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/moments/" title="随记">
+                    <span>随记</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/photos/" title="照片墙">
+                    <span>照片墙</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/books/" title="阅读">
+                    <span>阅读</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/about/" title="关于">
+                    <span>关于</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <nav class="breadcrumbs" role="navigation" aria-label="Breadcrumb">
+            <a href="/">Home</a>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+            <a href="/posts/">Posts</a>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+        <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+</nav>
+    <h1 class="post-title entry-hint-parent">
+      论文阅读：Practical, Transparent Operating System Support for Superpages
+    </h1>
+    <div class="post-meta">
+
+<span title='2026-11-04 11:50:28 +0800 CST'>November 4, 2026</span>&nbsp;·&nbsp;<span>8 min</span>&nbsp;·&nbsp;<span>1632 words</span>
+
+</div>
+  </header> <details class="toc"  open>
+    <summary accesskey="c" title="(Alt + C)">
+        <span class="title">Table of Contents</span>
+    </summary>
+
+    <div class="inner"><ul>
+            <li>
+                <a href="#%e4%b8%80%e8%ae%ba%e6%96%87%e6%a6%82%e8%bf%b0" aria-label="一、论文概述">一、论文概述</a></li>
+            <li>
+                <a href="#%e4%ba%8c%e4%b8%ba%e4%bb%80%e4%b9%88%e9%9c%80%e8%a6%81-superpages" aria-label="二、为什么需要 Superpages？">二、为什么需要 Superpages？</a><ul>
+                    
+            <li>
+                <a href="#21-tlb-%e4%b8%8e%e5%9c%b0%e5%9d%80%e8%bd%ac%e6%8d%a2" aria-label="2.1 TLB 与地址转换">2.1 TLB 与地址转换</a></li>
+            <li>
+                <a href="#22-%e4%bd%bf%e7%94%a8%e5%a4%a7%e9%a1%b5%e6%8f%90%e9%ab%98-tlb-coverage" aria-label="2.2 使用大页提高 TLB Coverage">2.2 使用大页提高 TLB Coverage</a></li>
+            <li>
+                <a href="#23-%e4%bd%bf%e7%94%a8%e5%a4%a7%e9%a1%b5%e7%9a%84%e4%bb%a3%e4%bb%b7" aria-label="2.3 使用大页的代价">2.3 使用大页的代价</a></li></ul>
+            </li>
+            <li>
+                <a href="#%e4%b8%89%e8%ae%ba%e6%96%87%e7%9a%84%e6%95%b4%e4%bd%93%e8%ae%be%e8%ae%a1" aria-label="三、论文的整体设计">三、论文的整体设计</a></li>
+            <li>
+                <a href="#%e5%9b%9breservation-based-allocation%e9%a2%84%e7%95%99%e8%bf%9e%e7%bb%ad%e7%89%a9%e7%90%86%e5%86%85%e5%ad%98" aria-label="四、Reservation-based Allocation：预留连续物理内存">四、Reservation-based Allocation：预留连续物理内存</a><ul>
+                    
+            <li>
+                <a href="#41-%e4%bc%a0%e7%bb%9f-demand-paging-%e7%9a%84%e9%97%ae%e9%a2%98" aria-label="4.1 传统 Demand Paging 的问题">4.1 传统 Demand Paging 的问题</a></li>
+            <li>
+                <a href="#42-reservation-based-allocation-%e7%9a%84%e6%a0%b8%e5%bf%83%e6%80%9d%e6%83%b3" aria-label="4.2 Reservation-based Allocation 的核心思想">4.2 Reservation-based Allocation 的核心思想</a></li>
+            <li>
+                <a href="#43-%e4%b8%ba%e4%bb%80%e4%b9%88%e4%b8%8d%e5%9c%a8%e7%ac%ac%e4%b8%80%e6%ac%a1%e8%ae%bf%e9%97%ae%e6%97%b6%e7%9b%b4%e6%8e%a5%e5%bb%ba%e7%ab%8b-superpage" aria-label="4.3 为什么不在第一次访问时直接建立 Superpage？">4.3 为什么不在第一次访问时直接建立 Superpage？</a></li></ul>
+            </li>
+            <li>
+                <a href="#%e4%ba%94incremental-promotion%e9%80%90%e6%ad%a5%e6%8f%90%e5%8d%87%e9%a1%b5%e9%9d%a2%e5%a4%a7%e5%b0%8f" aria-label="五、Incremental Promotion：逐步提升页面大小">五、Incremental Promotion：逐步提升页面大小</a><ul>
+                    
+            <li>
+                <a href="#51-%e4%b8%ba%e4%bb%80%e4%b9%88%e9%9c%80%e8%a6%81-incremental-promotion" aria-label="5.1 为什么需要 Incremental Promotion？">5.1 为什么需要 Incremental Promotion？</a></li>
+            <li>
+                <a href="#52-promotion-%e6%98%af%e5%90%a6%e9%9c%80%e8%a6%81%e5%a4%8d%e5%88%b6%e9%a1%b5%e9%9d%a2" aria-label="5.2 Promotion 是否需要复制页面？">5.2 Promotion 是否需要复制页面？</a></li></ul>
+            </li>
+            <li>
+                <a href="#%e5%85%ad%e8%a7%a3%e5%86%b3%e5%86%85%e5%ad%98%e7%a2%8e%e7%89%87reservation-preemption" aria-label="六、解决内存碎片：Reservation Preemption">六、解决内存碎片：Reservation Preemption</a><ul>
+                    
+            <li>
+                <a href="#61-preempting-reservations" aria-label="6.1 Preempting Reservations">6.1 Preempting Reservations</a></li>
+            <li>
+                <a href="#62-%e5%a6%82%e4%bd%95%e9%80%89%e6%8b%a9%e9%9c%80%e8%a6%81%e6%8a%a2%e5%8d%a0%e7%9a%84-reservation" aria-label="6.2 如何选择需要抢占的 Reservation？">6.2 如何选择需要抢占的 Reservation？</a></li></ul>
+            </li>
+            <li>
+                <a href="#%e4%b8%83contiguity-aware-page-replacement%e8%80%83%e8%99%91%e8%bf%9e%e7%bb%ad%e6%80%a7%e7%9a%84%e9%a1%b5%e9%9d%a2%e7%bd%ae%e6%8d%a2" aria-label="七、Contiguity-aware Page Replacement：考虑连续性的页面置换">七、Contiguity-aware Page Replacement：考虑连续性的页面置换</a><ul>
+                    
+            <li>
+                <a href="#71-%e4%bc%a0%e7%bb%9f-page-replacement-%e7%9a%84%e5%b1%80%e9%99%90" aria-label="7.1 传统 Page Replacement 的局限">7.1 传统 Page Replacement 的局限</a></li>
+            <li>
+                <a href="#72-contiguity-aware-%e7%9a%84%e8%ae%be%e8%ae%a1%e6%80%9d%e8%b7%af" aria-label="7.2 Contiguity-aware 的设计思路">7.2 Contiguity-aware 的设计思路</a></li>
+            <li>
+                <a href="#73-%e4%b8%ba%e4%bb%80%e4%b9%88%e4%b8%8d%e7%9b%b4%e6%8e%a5%e4%bd%bf%e7%94%a8-memory-compaction" aria-label="7.3 为什么不直接使用 Memory Compaction？">7.3 为什么不直接使用 Memory Compaction？</a></li></ul>
+            </li>
+            <li>
+                <a href="#%e5%85%abspeculative-demotion%e4%b8%bb%e5%8a%a8%e6%8b%86%e5%88%86%e5%a4%a7%e9%a1%b5" aria-label="八、Speculative Demotion：主动拆分大页">八、Speculative Demotion：主动拆分大页</a><ul>
+                    
+            <li>
+                <a href="#81-%e4%b8%ba%e4%bb%80%e4%b9%88%e9%9c%80%e8%a6%81-demotion" aria-label="8.1 为什么需要 Demotion？">8.1 为什么需要 Demotion？</a></li>
+            <li>
+                <a href="#82-speculative-demotion-%e7%9a%84%e6%80%9d%e8%b7%af" aria-label="8.2 Speculative Demotion 的思路">8.2 Speculative Demotion 的思路</a></li>
+            <li>
+                <a href="#83-%e4%b8%ba%e4%bb%80%e4%b9%88%e5%8f%ab-speculative" aria-label="8.3 为什么叫 Speculative？">8.3 为什么叫 Speculative？</a></li></ul>
+            </li>
+            <li>
+                <a href="#%e4%b9%9ddirty-superpage%e5%a6%82%e4%bd%95%e5%a4%84%e7%90%86%e5%a4%a7%e9%a1%b5%e7%9a%84%e8%84%8f%e7%8a%b6%e6%80%81" aria-label="九、Dirty Superpage：如何处理大页的脏状态？">九、Dirty Superpage：如何处理大页的脏状态？</a><ul>
+                    
+            <li>
+                <a href="#91-%e5%a4%a7%e9%a1%b5%e7%9a%84-dirty-bit-%e9%97%ae%e9%a2%98" aria-label="9.1 大页的 Dirty Bit 问题">9.1 大页的 Dirty Bit 问题</a></li>
+            <li>
+                <a href="#92-%e9%80%9a%e8%bf%87-demotion-%e6%81%a2%e5%a4%8d%e7%bb%86%e7%b2%92%e5%ba%a6-dirty-%e4%bf%a1%e6%81%af" aria-label="9.2 通过 Demotion 恢复细粒度 Dirty 信息">9.2 通过 Demotion 恢复细粒度 Dirty 信息</a></li>
+            <li>
+                <a href="#93-%e4%b8%ba%e4%bb%80%e4%b9%88%e4%b8%8d%e9%80%9a%e8%bf%87-hash-%e5%88%a4%e6%96%ad%e9%a1%b5%e9%9d%a2%e6%98%af%e5%90%a6%e8%a2%ab%e4%bf%ae%e6%94%b9" aria-label="9.3 为什么不通过 Hash 判断页面是否被修改？">9.3 为什么不通过 Hash 判断页面是否被修改？</a></li></ul>
+            </li>
+            <li>
+                <a href="#%e5%8d%81%e5%ae%9e%e9%aa%8c%e7%bb%93%e6%9e%9c" aria-label="十、实验结果">十、实验结果</a><ul>
+                    
+            <li>
+                <a href="#101-%e4%b8%8d%e5%90%8c%e5%ba%94%e7%94%a8%e7%9a%84%e6%80%a7%e8%83%bd%e6%94%b6%e7%9b%8a" aria-label="10.1 不同应用的性能收益">10.1 不同应用的性能收益</a></li>
+            <li>
+                <a href="#102-%e4%b8%ba%e4%bb%80%e4%b9%88%e9%9c%80%e8%a6%81%e5%a4%9a%e7%a7%8d-superpage-size" aria-label="10.2 为什么需要多种 Superpage Size？">10.2 为什么需要多种 Superpage Size？</a></li>
+            <li>
+                <a href="#103-%e9%95%bf%e6%97%b6%e9%97%b4%e8%bf%90%e8%a1%8c%e5%90%8e%e7%9a%84%e6%80%a7%e8%83%bd" aria-label="10.3 长时间运行后的性能">10.3 长时间运行后的性能</a></li></ul>
+            </li>
+            <li>
+                <a href="#%e5%8d%81%e4%b8%80%e8%81%94%e7%b3%bb%e7%8e%b0%e4%bb%a3-linuxhugetlb-%e5%92%8c-transparent-huge-pages" aria-label="十一、联系现代 Linux：HugeTLB 和 Transparent Huge Pages">十一、联系现代 Linux：HugeTLB 和 Transparent Huge Pages</a><ul>
+                    
+            <li>
+                <a href="#111-hugetlb" aria-label="11.1 HugeTLB">11.1 HugeTLB</a></li>
+            <li>
+                <a href="#112-transparent-huge-pages" aria-label="11.2 Transparent Huge Pages">11.2 Transparent Huge Pages</a></li>
+            <li>
+                <a href="#113-%e8%ae%ba%e6%96%87%e4%b8%8e-linux-thp-%e7%9a%84%e8%ae%be%e8%ae%a1%e5%af%b9%e7%85%a7" aria-label="11.3 论文与 Linux THP 的设计对照">11.3 论文与 Linux THP 的设计对照</a></li></ul>
+            </li>
+            <li>
+                <a href="#%e5%8d%81%e4%ba%8c%e8%81%94%e7%b3%bb-xv6%e5%a6%82%e4%bd%95%e8%87%aa%e5%b7%b1%e5%ae%9e%e7%8e%b0-superpage" aria-label="十二、联系 xv6：如何自己实现 Superpage？">十二、联系 xv6：如何自己实现 Superpage？</a><ul>
+                    
+            <li>
+                <a href="#121-%e9%a6%96%e5%85%88%e7%90%86%e8%a7%a3-xv6-%e7%9a%84%e6%99%ae%e9%80%9a%e9%a1%b5%e9%9d%a2%e5%88%86%e9%85%8d" aria-label="12.1 首先理解 xv6 的普通页面分配">12.1 首先理解 xv6 的普通页面分配</a></li>
+            <li>
+                <a href="#122-risc-v-%e7%9a%84%e5%a4%a7%e9%a1%b5%e6%94%af%e6%8c%81" aria-label="12.2 RISC-V 的大页支持">12.2 RISC-V 的大页支持</a></li>
+            <li>
+                <a href="#123-%e5%ae%9e%e7%8e%b0%e8%b7%af%e7%ba%bf" aria-label="12.3 实现路线">12.3 实现路线</a></li></ul>
+            </li>
+            <li>
+                <a href="#%e5%8d%81%e4%b8%89%e6%80%bb%e7%bb%93" aria-label="十三、总结">十三、总结</a><ul>
+                    
+            <li>
+                <a href="#%e5%8f%82%e8%80%83%e8%b5%84%e6%96%99" aria-label="参考资料">参考资料</a>
+            </li>
+        </ul>
+        </li>
+        </ul>
+    </div>
+</details>
+
+  <div class="post-content md-content"><h1 id="一论文概述">一、论文概述<a hidden class="anchor" aria-hidden="true" href="#一论文概述">#</a></h1>
+<p><strong>论文：</strong> Practical, Transparent Operating System Support for Superpages</p>
+<p><strong>作者：</strong> Juan Navarro, Sitaram Iyer, Peter Druschel, Alan Cox</p>
+<p><strong>发表会议：</strong> OSDI 2002</p>
+<p><strong>研究方向：</strong> Virtual Memory、Superpages、Memory Management</p>
+<p><strong>论文链接：</strong> <a href="https://www.usenix.org/events/osdi02/tech/full_papers/navarro/navarro.pdf">Practical, Transparent Operating System Support for Superpages</a></p>
+<p>这篇论文研究了一个非常实际的操作系统问题：如何在不要求应用程序修改代码的情况下，让操作系统透明地使用大页（Superpages），从而降低虚拟地址转换的开销，提高程序性能。</p>
+<p>现代处理器使用 TLB（Translation Lookaside Buffer）缓存虚拟地址到物理地址的转换关系。随着物理内存容量和应用程序工作集不断增大，有限的 TLB 容量越来越难以覆盖整个工作集，TLB Miss 可能成为影响程序性能的重要因素。</p>
+<p>使用更大的页面可以显著提高 TLB Coverage，减少 TLB Miss。但是，大页也带来了新的挑战：</p>
+<ol>
+<li>大页要求物理内存连续且满足对齐要求。</li>
+<li>物理内存长期运行后容易产生碎片。</li>
+<li>如果应用只使用大页中的一小部分，会造成严重的内部碎片。</li>
+<li>大页粒度较粗，不利于精细的页面回收和 Dirty Page 管理。</li>
+<li>操作系统需要在性能、内存利用率和管理开销之间进行权衡。</li>
+</ol>
+<p>论文基于 FreeBSD 4.3，在 Alpha 处理器上实现了一套透明的多级 Superpage 管理机制。它不仅解决了大页分配问题，还重新设计了页面置换、页面提升、页面拆分和脏页管理策略。</p>
+<p>本文主要介绍论文的核心设计，并讨论其与现代 Linux THP 和 xv6 的联系。</p>
+<h1 id="二为什么需要-superpages">二、为什么需要 Superpages？<a hidden class="anchor" aria-hidden="true" href="#二为什么需要-superpages">#</a></h1>
+<h2 id="21-tlb-与地址转换">2.1 TLB 与地址转换<a hidden class="anchor" aria-hidden="true" href="#21-tlb-与地址转换">#</a></h2>
+<p>虚拟内存系统通过页表（Page Table）将虚拟地址转换为物理地址。</p>
+<p>处理器访问内存时，首先查询 TLB。如果命中，就可以直接获得对应的物理地址；如果未命中，则需要进行页表遍历（Page Table Walk），获取转换关系并更新 TLB。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">             Virtual Address
+</span></span><span class="line"><span class="cl">                    |
+</span></span><span class="line"><span class="cl">                    v
+</span></span><span class="line"><span class="cl">                  TLB
+</span></span><span class="line"><span class="cl">                    |
+</span></span><span class="line"><span class="cl">           +--------+--------+
+</span></span><span class="line"><span class="cl">           |                 |
+</span></span><span class="line"><span class="cl">         Hit                Miss
+</span></span><span class="line"><span class="cl">           |                 |
+</span></span><span class="line"><span class="cl">           v                 v
+</span></span><span class="line"><span class="cl">    Physical Address    Page Table Walk
+</span></span><span class="line"><span class="cl">           |                 |
+</span></span><span class="line"><span class="cl">           |                 v
+</span></span><span class="line"><span class="cl">           |           Update TLB
+</span></span><span class="line"><span class="cl">           |                 |
+</span></span><span class="line"><span class="cl">           +--------+--------+
+</span></span><span class="line"><span class="cl">                    |
+</span></span><span class="line"><span class="cl">                    v
+</span></span><span class="line"><span class="cl">              Memory Access
+</span></span></code></pre></div><p>TLB 容量有限，因此它能够覆盖的虚拟内存范围也有限。</p>
+<p>假设 TLB 有 128 个条目，每个条目映射一个 4KB 页面，那么：</p>
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mn>128</mn><mo>×</mo><mn>4</mn><mi>K</mi><mi>B</mi><mo>=</mo><mn>512</mn><mi>K</mi><mi>B</mi></mrow><annotation encoding="application/x-tex">
+128 \times 4KB = 512KB
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">128</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord">4</span><span class="mord mathnormal" style="margin-right:0.07153em;">K</span><span class="mord mathnormal" style="margin-right:0.05017em;">B</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord">512</span><span class="mord mathnormal" style="margin-right:0.07153em;">K</span><span class="mord mathnormal" style="margin-right:0.05017em;">B</span></span></span></span></span><p>也就是说，这个 TLB 最多缓存 512KB 的地址转换关系。</p>
+<p>如果应用程序频繁访问 1GB 的工作集，显然不可能将所有地址转换关系都保存在 TLB 中，大量 TLB Miss 就可能成为性能瓶颈。</p>
+<h2 id="22-使用大页提高-tlb-coverage">2.2 使用大页提高 TLB Coverage<a hidden class="anchor" aria-hidden="true" href="#22-使用大页提高-tlb-coverage">#</a></h2>
+<p>Superpage 是比普通页面更大的页面。</p>
+<p>假设普通页面大小为 4KB，大页大小为 2MB：</p>
+<table>
+	<thead>
+			<tr>
+					<th>页面大小</th>
+					<th style="text-align: right">TLB 条目数量</th>
+					<th style="text-align: right">TLB Coverage</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>4KB</td>
+					<td style="text-align: right">128</td>
+					<td style="text-align: right">512KB</td>
+			</tr>
+			<tr>
+					<td>2MB</td>
+					<td style="text-align: right">128</td>
+					<td style="text-align: right">256MB</td>
+			</tr>
+	</tbody>
+</table>
+<p>相同数量的 TLB 条目，使用 2MB 页面可以覆盖更大的内存范围。</p>
+<p>大页的主要收益包括：</p>
+<ul>
+<li>增大 TLB Coverage。</li>
+<li>减少 TLB Miss。</li>
+<li>降低页表遍历频率。</li>
+<li>减少部分页表管理开销。</li>
+</ul>
+<p>因此，大页特别适合具有较大内存工作集、空间局部性较好且访问模式相对稳定的应用。</p>
+<h2 id="23-使用大页的代价">2.3 使用大页的代价<a hidden class="anchor" aria-hidden="true" href="#23-使用大页的代价">#</a></h2>
+<p>大页并不是越大越好。</p>
+<p>假设一个 2MB Superpage 中，应用实际上只访问了 4KB：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">2MB Superpage
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">+--------------------------------------+
+</span></span><span class="line"><span class="cl">| 4KB Used |         Unused             |
+</span></span><span class="line"><span class="cl">+--------------------------------------+
+</span></span></code></pre></div><p>如果操作系统分配整个 2MB，就会产生大量内部碎片（Internal Fragmentation）。</p>
+<p>此外，大页还要求物理内存连续。</p>
+<p>例如，要分配一个 2MB 的大页，操作系统必须找到一段连续且满足 2MB 对齐要求的物理内存。</p>
+<p>但是，系统长期运行后，物理内存可能变成：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">Physical Memory:
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">+------+------+------+------+------+------+
+</span></span><span class="line"><span class="cl">| Used | Free | Used | Free | Used | Free |
+</span></span><span class="line"><span class="cl">+------+------+------+------+------+------+
+</span></span></code></pre></div><p>即使系统拥有足够多的空闲页面，也可能无法找到足够大的连续区域。</p>
+<p>这就是外部碎片化（External Fragmentation）。</p>
+<p>因此，大页管理需要同时解决两个问题：</p>
+<ol>
+<li>如何获得足够大的连续物理内存？</li>
+<li>如何避免大页造成过多的内存浪费？</li>
+</ol>
+<p>这也是论文研究的核心。</p>
+<h1 id="三论文的整体设计">三、论文的整体设计<a hidden class="anchor" aria-hidden="true" href="#三论文的整体设计">#</a></h1>
+<p>论文提出了一套透明的 Superpage 管理机制。</p>
+<p>所谓透明，是指应用程序不需要显式申请大页，也不需要修改自己的内存访问逻辑。操作系统根据内存访问情况，自动决定何时使用大页、何时拆分大页。</p>
+<p>论文的主要设计可以概括为：</p>
+<table>
+	<thead>
+			<tr>
+					<th>设计</th>
+					<th>解决的问题</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>Reservation-based Allocation</td>
+					<td>提前保证物理内存连续性</td>
+			</tr>
+			<tr>
+					<td>Incremental Promotion</td>
+					<td>逐步将普通页面提升为大页</td>
+			</tr>
+			<tr>
+					<td>Reservation Preemption</td>
+					<td>回收未充分使用的预留区域</td>
+			</tr>
+			<tr>
+					<td>Contiguity-aware Page Replacement</td>
+					<td>通过页面置换恢复物理内存连续性</td>
+			</tr>
+			<tr>
+					<td>Speculative Demotion</td>
+					<td>拆分大页，恢复细粒度管理</td>
+			</tr>
+			<tr>
+					<td>Dirty Superpage Management</td>
+					<td>避免不必要的大量磁盘写回</td>
+			</tr>
+	</tbody>
+</table>
+<p>其中，Reservation-based Allocation 和 Incremental Promotion 是理解整篇论文的关键。</p>
+<h1 id="四reservation-based-allocation预留连续物理内存">四、Reservation-based Allocation：预留连续物理内存<a hidden class="anchor" aria-hidden="true" href="#四reservation-based-allocation预留连续物理内存">#</a></h1>
+<h2 id="41-传统-demand-paging-的问题">4.1 传统 Demand Paging 的问题<a hidden class="anchor" aria-hidden="true" href="#41-传统-demand-paging-的问题">#</a></h2>
+<p>传统 Demand Paging 采用按需分配策略。</p>
+<p>假设一个进程申请了一段连续的虚拟内存：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">Virtual Memory:
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">+------+------+------+------+
+</span></span><span class="line"><span class="cl">|  A   |  B   |  C   |  D   |
+</span></span><span class="line"><span class="cl">+------+------+------+------+
+</span></span></code></pre></div><p>当进程第一次访问某个页面时，发生 Page Fault，操作系统从空闲物理页面中分配一个页面。</p>
+<p>例如：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">Page Fault 1 -&gt; Physical Page 12
+</span></span><span class="line"><span class="cl">Page Fault 2 -&gt; Physical Page 87
+</span></span><span class="line"><span class="cl">Page Fault 3 -&gt; Physical Page 21
+</span></span><span class="line"><span class="cl">Page Fault 4 -&gt; Physical Page 95
+</span></span></code></pre></div><p>最终可能得到：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">Virtual Pages:       Physical Pages:
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">+------+------+      +------+------+------+------+
+</span></span><span class="line"><span class="cl">|  A   |  B   |      |  12  |  87  |  21  |  95  |
+</span></span><span class="line"><span class="cl">+------+------+      +------+------+------+------+
+</span></span></code></pre></div><p>虽然虚拟地址连续，但是物理页面不连续。</p>
+<p>因此，后续即使这些页面全部被访问，也无法直接将它们合并成一个 Superpage。</p>
+<p>如果想使用大页，操作系统就必须重新寻找连续的物理内存，并将已经分配的页面迁移过去。</p>
+<p>这种方式称为 Relocation-based Allocation。</p>
+<p>页面迁移需要复制数据、更新页表以及处理 TLB，成本较高。</p>
+<h2 id="42-reservation-based-allocation-的核心思想">4.2 Reservation-based Allocation 的核心思想<a hidden class="anchor" aria-hidden="true" href="#42-reservation-based-allocation-的核心思想">#</a></h2>
+<p>论文提出了另一种思路：</p>
+<p><strong>不要等到页面分散分配之后才考虑大页，而是在第一次分配时就提前预留一块连续的物理内存。</strong></p>
+<p>例如，进程第一次访问某个 4MB 区域中的页面：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">Virtual Memory:
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">+----------------------------------+
+</span></span><span class="line"><span class="cl">|             4MB Region           |
+</span></span><span class="line"><span class="cl">+----------------------------------+
+</span></span></code></pre></div><p>操作系统尝试为这个区域预留一块连续的 4MB 物理内存：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">Physical Memory:
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">+----------------------------------+
+</span></span><span class="line"><span class="cl">|          4MB Reserved            |
+</span></span><span class="line"><span class="cl">+----------------------------------+
+</span></span></code></pre></div><p>这里需要区分两个概念：</p>
+<ul>
+<li>Reservation：预留物理内存的位置，保证后续分配的页面具有连续性。</li>
+<li>Mapping：真正建立虚拟地址到物理地址的映射。</li>
+</ul>
+<p>预留不意味着立即分配全部页面，也不意味着立即建立整个 4MB 的 Superpage 映射。</p>
+<p>假设程序目前只访问了第一个 4KB 页面：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">Reserved Physical Region:
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">+------+------+------+------+------+
+</span></span><span class="line"><span class="cl">| Used | Free | Free | Free | Free |
+</span></span><span class="line"><span class="cl">+------+------+------+------+------+
+</span></span></code></pre></div><p>操作系统只分配并映射第一个页面，其余页面仍然处于预留状态。</p>
+<p>当程序后续访问其他页面时，就从之前预留的区域中分配对应的物理页面。</p>
+<p>这样既保留了 Demand Paging 的按需分配特性，又提前保证了物理页面的连续性。</p>
+<h2 id="43-为什么不在第一次访问时直接建立-superpage">4.3 为什么不在第一次访问时直接建立 Superpage？<a hidden class="anchor" aria-hidden="true" href="#43-为什么不在第一次访问时直接建立-superpage">#</a></h2>
+<p>假设程序申请了 4MB 内存，但实际上只访问了其中的 4KB。</p>
+<p>如果第一次 Page Fault 时就直接建立 4MB Superpage，那么剩余没有真正分配的页面也可能变得可访问。</p>
+<p>这会破坏 Demand Paging 的语义，并造成大量内存浪费。</p>
+<p>因此，论文采用以下策略：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">第一次访问：
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    Reserve a large contiguous physical region
+</span></span><span class="line"><span class="cl">    Allocate one base page
+</span></span><span class="line"><span class="cl">    Map one base page
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">后续访问：
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    Allocate pages from reservation
+</span></span><span class="line"><span class="cl">    Map individual base pages
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">所有 base pages 都被填充：
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    Promote to superpage
+</span></span></code></pre></div><p><strong>Reservation 保证未来能够使用大页，而按需分配保证不会提前浪费物理内存。</strong></p>
+<p>这是论文最重要的设计思想之一。</p>
+<h1 id="五incremental-promotion逐步提升页面大小">五、Incremental Promotion：逐步提升页面大小<a hidden class="anchor" aria-hidden="true" href="#五incremental-promotion逐步提升页面大小">#</a></h1>
+<p>有了 Reservation，操作系统就可以在页面逐渐被填充时，将普通页面提升为大页。</p>
+<p>论文实验平台 Alpha 支持四种页面大小：</p>
+<table>
+	<thead>
+			<tr>
+					<th>页面类型</th>
+					<th style="text-align: right">页面大小</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>Base Page</td>
+					<td style="text-align: right">8KB</td>
+			</tr>
+			<tr>
+					<td>Superpage 1</td>
+					<td style="text-align: right">64KB</td>
+			</tr>
+			<tr>
+					<td>Superpage 2</td>
+					<td style="text-align: right">512KB</td>
+			</tr>
+			<tr>
+					<td>Superpage 3</td>
+					<td style="text-align: right">4MB</td>
+			</tr>
+	</tbody>
+</table>
+<h2 id="51-为什么需要-incremental-promotion">5.1 为什么需要 Incremental Promotion？<a hidden class="anchor" aria-hidden="true" href="#51-为什么需要-incremental-promotion">#</a></h2>
+<p>假设操作系统预留了一个 4MB 的连续物理区域。</p>
+<p>如果程序目前只访问了 64KB，那么直接等待整个 4MB 被填满才建立大页，就可能错过使用较小 Superpage 的机会。</p>
+<p>论文采用逐级提升的策略：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">8KB -&gt; 64KB -&gt; 512KB -&gt; 4MB
+</span></span></code></pre></div><p>例如：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">阶段 1：一个 Base Page 被分配
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">+------+------+------+------+------+
+</span></span><span class="line"><span class="cl">| Used | Free | Free | Free | Free |
+</span></span><span class="line"><span class="cl">+------+------+------+------+------+
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">阶段 2：64KB 区域被完全填充
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">+------+------+------+------+------+
+</span></span><span class="line"><span class="cl">| Used | Used | Used | Used | Used |
+</span></span><span class="line"><span class="cl">+------+------+------+------+------+
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">       Promote to 64KB
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">阶段 3：512KB 区域被完全填充
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">       Promote to 512KB
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">阶段 4：4MB 区域被完全填充
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">       Promote to 4MB
+</span></span></code></pre></div><p>论文只在满足相应对齐要求的连续区域被完全填充时进行 Promotion。</p>
+<p>这样可以避免为了建立大页而提前分配尚未使用的页面。</p>
+<h2 id="52-promotion-是否需要复制页面">5.2 Promotion 是否需要复制页面？<a hidden class="anchor" aria-hidden="true" href="#52-promotion-是否需要复制页面">#</a></h2>
+<p>不需要像传统 Relocation-based Allocation 那样重新搬迁页面。</p>
+<p>因为在最初的 Reservation 阶段，操作系统已经保证了物理内存连续性。</p>
+<p>Promotion 主要是修改页表，让处理器将原来的一组 Base Page 识别为更大的页面映射。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">Before Promotion:
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Virtual Address
+</span></span><span class="line"><span class="cl">      |
+</span></span><span class="line"><span class="cl">      v
+</span></span><span class="line"><span class="cl">+------+------+------+------+
+</span></span><span class="line"><span class="cl">| PTE0 | PTE1 | PTE2 | PTE3 |
+</span></span><span class="line"><span class="cl">+------+------+------+------+
+</span></span><span class="line"><span class="cl">   |      |      |      |
+</span></span><span class="line"><span class="cl">   v      v      v      v
+</span></span><span class="line"><span class="cl"> Physical contiguous pages
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">After Promotion:
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Virtual Address
+</span></span><span class="line"><span class="cl">      |
+</span></span><span class="line"><span class="cl">      v
+</span></span><span class="line"><span class="cl">+---------------------------+
+</span></span><span class="line"><span class="cl">|       Superpage PTE       |
+</span></span><span class="line"><span class="cl">+---------------------------+
+</span></span><span class="line"><span class="cl">              |
+</span></span><span class="line"><span class="cl">              v
+</span></span><span class="line"><span class="cl">       Physical Superpage
+</span></span></code></pre></div><p>需要注意，具体页表表示与处理器架构有关。论文使用的 Alpha 处理器采用 PTE Replication：仍然为每个 Base Page 保留 PTE，只是更新其中的页面大小字段。</p>
+<h1 id="六解决内存碎片reservation-preemption">六、解决内存碎片：Reservation Preemption<a hidden class="anchor" aria-hidden="true" href="#六解决内存碎片reservation-preemption">#</a></h1>
+<p>Reservation-based Allocation 虽然能够保证物理页面连续性，但也带来了新的问题：</p>
+<p>如果操作系统不断预留大块连续物理内存，系统很快就可能找不到新的连续区域。</p>
+<p>而且，部分 Reservation 可能只使用了很少的物理页面。</p>
+<p>例如：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">Reservation A: 4MB
+</span></span><span class="line"><span class="cl">    Used: 8KB
+</span></span><span class="line"><span class="cl">    Free: 4088KB
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Reservation B: 4MB
+</span></span><span class="line"><span class="cl">    Used: 2MB
+</span></span><span class="line"><span class="cl">    Free: 2MB
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Reservation C: 4MB
+</span></span><span class="line"><span class="cl">    Used: 4MB
+</span></span><span class="line"><span class="cl">    Free: 0
+</span></span></code></pre></div><p>如果另一个进程需要 512KB 连续物理内存，但系统已经无法提供，就需要考虑回收之前的 Reservation。</p>
+<h2 id="61-preempting-reservations">6.1 Preempting Reservations<a hidden class="anchor" aria-hidden="true" href="#61-preempting-reservations">#</a></h2>
+<p>论文提出 Reservation Preemption：</p>
+<p><strong>在物理内存不足时，抢占尚未充分使用的 Reservation，将其中未分配的物理页面归还给系统。</strong></p>
+<p>例如：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">Before:
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Reservation A (4MB)
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">+--------+--------+--------+--------+
+</span></span><span class="line"><span class="cl">| Used   | Free   | Free   | Free   |
+</span></span><span class="line"><span class="cl">+--------+--------+--------+--------+
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">After Preemption:
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">+--------+--------+--------+--------+
+</span></span><span class="line"><span class="cl">| 8KB    | Free   | Free   | Free   |
+</span></span><span class="line"><span class="cl">+--------+--------+--------+--------+
+</span></span></code></pre></div><p>其中：</p>
+<ul>
+<li>已经分配的页面继续保留。</li>
+<li>未使用的页面返回物理内存分配器。</li>
+<li>剩余区域可以根据情况重新组织为较小的 Reservation。</li>
+</ul>
+<h2 id="62-如何选择需要抢占的-reservation">6.2 如何选择需要抢占的 Reservation？<a hidden class="anchor" aria-hidden="true" href="#62-如何选择需要抢占的-reservation">#</a></h2>
+<p>论文采用基于最近分配时间的策略。</p>
+<p>优先抢占最近没有发生过页面分配的 Reservation。</p>
+<p>理由是：</p>
+<ul>
+<li>最近仍在持续分配页面的 Reservation，可能很快就会被进一步填充。</li>
+<li>长时间没有新页面分配的 Reservation，后续继续填充的可能性相对较低。</li>
+</ul>
+<p>论文维护 Reservation List，并根据最近一次分配时间进行组织。</p>
+<p>这是一种简单的预测策略：通过历史分配行为估计 Reservation 的未来使用价值。</p>
+<p>需要强调，抢占的是尚未分配的预留页面，而不是直接释放已经被应用程序使用的页面。</p>
+<h1 id="七contiguity-aware-page-replacement考虑连续性的页面置换">七、Contiguity-aware Page Replacement：考虑连续性的页面置换<a hidden class="anchor" aria-hidden="true" href="#七contiguity-aware-page-replacement考虑连续性的页面置换">#</a></h1>
+<p>仅仅回收 Reservation 还不够。</p>
+<p>因为系统运行一段时间后，已经真正分配出去的页面也可能导致严重的物理内存碎片。</p>
+<p>传统页面置换算法主要考虑页面是否最近被访问过，例如 LRU 及其近似算法。</p>
+<p>但是，如果操作系统希望持续支持 Superpage，那么页面置换还应该考虑一个因素：</p>
+<p><strong>换出哪些页面能够帮助恢复更大的连续物理内存区域？</strong></p>
+<p>这就是 Contiguity-aware Page Replacement。</p>
+<h2 id="71-传统-page-replacement-的局限">7.1 传统 Page Replacement 的局限<a hidden class="anchor" aria-hidden="true" href="#71-传统-page-replacement-的局限">#</a></h2>
+<p>假设物理内存如下：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">+------+------+------+------+------+------+
+</span></span><span class="line"><span class="cl">| Used | Used | Free | Used | Free | Used |
+</span></span><span class="line"><span class="cl">+------+------+------+------+------+------+
+</span></span></code></pre></div><p>传统页面置换可能根据页面访问情况选择若干冷页面。</p>
+<p>但是它不一定考虑这些页面在物理内存中的位置关系。</p>
+<p>即使换出了多个页面，也未必能形成足够大的连续区域。</p>
+<h2 id="72-contiguity-aware-的设计思路">7.2 Contiguity-aware 的设计思路<a hidden class="anchor" aria-hidden="true" href="#72-contiguity-aware-的设计思路">#</a></h2>
+<p>论文希望优先回收那些能够帮助恢复较大连续物理区域的页面。</p>
+<p>例如：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">Physical Memory:
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">+------+------+------+------+------+------+
+</span></span><span class="line"><span class="cl">| Used | Cold | Used | Cold | Cold | Used |
+</span></span><span class="line"><span class="cl">+------+------+------+------+------+------+
+</span></span></code></pre></div><p>通过选择合适的 Cold Page 进行置换，可以让 Buddy Allocator 合并更多相邻的空闲页面。</p>
+<p>论文在 FreeBSD 的 Page Daemon 中实现了这种策略。</p>
+<p>主要包括：</p>
+<ol>
+<li>将 Cache Page 也纳入 Buddy Allocator 的管理，使其能够参与连续区域的合并。</li>
+<li>不仅在内存不足时唤醒 Page Daemon，当系统无法获得所需大小的连续区域时，也会唤醒它。</li>
+<li>Page Daemon 扫描 Inactive List，优先回收有助于满足连续内存需求的页面。</li>
+<li>对已经关闭文件对应的干净页面，积极将其移动到 Inactive List，增加可供选择的页面数量。</li>
+</ol>
+<p>这样，页面置换的目标就从单纯回收内存，扩展为同时恢复物理内存连续性。</p>
+<h2 id="73-为什么不直接使用-memory-compaction">7.3 为什么不直接使用 Memory Compaction？<a hidden class="anchor" aria-hidden="true" href="#73-为什么不直接使用-memory-compaction">#</a></h2>
+<p>另一个思路是将分散的物理页面复制到一起，这就是 Memory Compaction。</p>
+<p>但是页面迁移需要：</p>
+<ul>
+<li>复制页面内容。</li>
+<li>更新页表映射。</li>
+<li>处理 TLB。</li>
+<li>处理页面并发访问。</li>
+</ul>
+<p>论文尽量避免通过迁移页面来恢复连续性，而是通过选择合适的页面进行置换，让 Buddy Allocator 重新合并空闲区域。</p>
+<p>当然，如果需要的连续区域中存在大量活跃页面，仅靠页面置换也不可能恢复连续性。</p>
+<h1 id="八speculative-demotion主动拆分大页">八、Speculative Demotion：主动拆分大页<a hidden class="anchor" aria-hidden="true" href="#八speculative-demotion主动拆分大页">#</a></h1>
+<p>前面介绍了 Promotion，即从小页面升级为大页面。</p>
+<p>那么，什么时候需要反过来拆分 Superpage？</p>
+<p>这就是 Demotion。</p>
+<h2 id="81-为什么需要-demotion">8.1 为什么需要 Demotion？<a hidden class="anchor" aria-hidden="true" href="#81-为什么需要-demotion">#</a></h2>
+<p>假设一个进程曾经使用了一个 4MB Superpage：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">+--------------------------------------+
+</span></span><span class="line"><span class="cl">|             4MB Superpage            |
+</span></span><span class="line"><span class="cl">+--------------------------------------+
+</span></span></code></pre></div><p>但一段时间后，程序只访问其中很小的一部分：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">+--------+--------+--------+--------+
+</span></span><span class="line"><span class="cl">| Active | Active |  Idle  |  Idle  |
+</span></span><span class="line"><span class="cl">+--------+--------+--------+--------+
+</span></span></code></pre></div><p>如果继续将整个区域作为 4MB Superpage 管理，就可能无法准确判断哪些 Base Page 真正活跃。</p>
+<p>原因在于：</p>
+<p>硬件通常只维护一个 Superpage 级别的 Reference Bit。</p>
+<p>只要 4MB 中任意部分被访问，整个 Superpage 都可能被认为最近访问过。</p>
+<p>操作系统无法区分：</p>
+<ul>
+<li>整个 4MB 都在使用。</li>
+<li>只有其中 8KB 在使用。</li>
+</ul>
+<p>这会影响页面回收的准确性。</p>
+<h2 id="82-speculative-demotion-的思路">8.2 Speculative Demotion 的思路<a hidden class="anchor" aria-hidden="true" href="#82-speculative-demotion-的思路">#</a></h2>
+<p>论文提出，在内存压力下，操作系统可以主动拆分 Superpage，重新观察各个 Base Page 的访问状态。</p>
+<p>例如：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">Before:
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">+--------------------------------------+
+</span></span><span class="line"><span class="cl">|             4MB Superpage            |
+</span></span><span class="line"><span class="cl">+--------------------------------------+
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">After:
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">+----------------+---------------------+
+</span></span><span class="line"><span class="cl">| 512KB Superpage| 512KB Superpage     |
+</span></span><span class="line"><span class="cl">+----------------+---------------------+
+</span></span><span class="line"><span class="cl">| 512KB Superpage| 512KB Superpage     |
+</span></span><span class="line"><span class="cl">+----------------+---------------------+
+</span></span></code></pre></div><p>还可以继续拆分：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">512KB -&gt; 64KB -&gt; 8KB
+</span></span></code></pre></div><p>这种逐级拆分可以减少不必要的页表更新。</p>
+<h2 id="83-为什么叫-speculative">8.3 为什么叫 Speculative？<a hidden class="anchor" aria-hidden="true" href="#83-为什么叫-speculative">#</a></h2>
+<p>因为操作系统并不知道一个大页内部究竟有多少页面仍然活跃。</p>
+<p>它通过主动 Demotion，重新获得更细粒度的 Reference Bit 信息。</p>
+<p>基本流程：</p>
+<ol>
+<li>Page Daemon 检查页面的引用状态。</li>
+<li>如果存在内存压力，主动拆分对应 Superpage。</li>
+<li>重新观察各个 Base Page 的访问情况。</li>
+<li>将长期未访问的页面放入置换候选集合。</li>
+<li>如果后续发现所有页面都在被访问，则可以重新 Promotion。</li>
+</ol>
+<p>论文实验实现使用的概率参数 p=1，即在相应的内存压力处理过程中执行这种拆分策略。</p>
+<p>核心思想是：</p>
+<p><strong>当硬件只能提供粗粒度的访问信息时，操作系统可以通过调整页面粒度，重新获得细粒度的信息。</strong></p>
+<h1 id="九dirty-superpage如何处理大页的脏状态">九、Dirty Superpage：如何处理大页的脏状态？<a hidden class="anchor" aria-hidden="true" href="#九dirty-superpage如何处理大页的脏状态">#</a></h1>
+<p>这是论文中非常值得关注的一个细节。</p>
+<h2 id="91-大页的-dirty-bit-问题">9.1 大页的 Dirty Bit 问题<a hidden class="anchor" aria-hidden="true" href="#91-大页的-dirty-bit-问题">#</a></h2>
+<p>假设一个 4MB Superpage 由 512 个 8KB Base Page 组成。</p>
+<p>程序只修改了其中一个页面：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">4MB Superpage:
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">+------+------+------+------+------+
+</span></span><span class="line"><span class="cl">| Dirty| Clean| Clean| Clean| Clean|
+</span></span><span class="line"><span class="cl">+------+------+------+------+------+
+</span></span></code></pre></div><p>但是硬件只提供 Superpage 级别的 Dirty Bit。</p>
+<p>一旦这个 Superpage 被标记为 Dirty，操作系统就无法判断究竟哪个 Base Page 被修改了。</p>
+<p>如果需要将其写回磁盘，就可能需要写回整个 4MB。</p>
+<p>但实际上可能只有 8KB 被修改。</p>
+<p>这会导致写回数据量放大 512 倍。</p>
+<h2 id="92-通过-demotion-恢复细粒度-dirty-信息">9.2 通过 Demotion 恢复细粒度 Dirty 信息<a hidden class="anchor" aria-hidden="true" href="#92-通过-demotion-恢复细粒度-dirty-信息">#</a></h2>
+<p>论文采用的策略是：</p>
+<p><strong>当一个 Clean Superpage 中的任意 Base Page 第一次被修改时，将整个 Superpage Demote。</strong></p>
+<p>例如：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">Before:
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">+--------------------------------------+
+</span></span><span class="line"><span class="cl">|              4MB Superpage           |
+</span></span><span class="line"><span class="cl">|                Clean                 |
+</span></span><span class="line"><span class="cl">+--------------------------------------+
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Write to one Base Page
+</span></span><span class="line"><span class="cl">             |
+</span></span><span class="line"><span class="cl">             v
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Demote to smaller pages
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">+------+------+------+------+------+
+</span></span><span class="line"><span class="cl">| Dirty| Clean| Clean| Clean| Clean|
+</span></span><span class="line"><span class="cl">+------+------+------+------+------+
+</span></span></code></pre></div><p>这样操作系统重新获得每个 Base Page 的 Dirty 状态。</p>
+<p>写回磁盘时，就只需要写回真正被修改的页面。</p>
+<h2 id="93-为什么不通过-hash-判断页面是否被修改">9.3 为什么不通过 Hash 判断页面是否被修改？<a hidden class="anchor" aria-hidden="true" href="#93-为什么不通过-hash-判断页面是否被修改">#</a></h2>
+<p>论文还讨论了一种替代方案：</p>
+<p>在页面从磁盘加载时，为每个 Base Page 计算 Hash。</p>
+<p>当整个 Superpage 需要写回时：</p>
+<ol>
+<li>重新计算每个 Base Page 的 Hash。</li>
+<li>与原来的 Hash 比较。</li>
+<li>只有内容发生变化的页面才写回磁盘。</li>
+</ol>
+<p>作者尝试了 SHA-1，但实验发现 Hash 计算带来了明显开销：</p>
+<ul>
+<li>磁盘密集型应用最多增加约 15% 开销。</li>
+<li>某些极端场景下性能下降达到 60%。</li>
+</ul>
+<p>因此，作者最终没有采用这种方案，而是选择通过 Demotion 恢复细粒度 Dirty 信息。</p>
+<p>这个案例体现了论文的设计哲学：</p>
+<p><strong>不能为了追求大页带来的性能收益，而让少数异常场景出现无法接受的退化。</strong></p>
+<h1 id="十实验结果">十、实验结果<a hidden class="anchor" aria-hidden="true" href="#十实验结果">#</a></h1>
+<p>论文在 Compaq XP-1000 上进行了实验。</p>
+<table>
+	<thead>
+			<tr>
+					<th>硬件参数</th>
+					<th>配置</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>CPU</td>
+					<td>Alpha 21264 500MHz</td>
+			</tr>
+			<tr>
+					<td>RAM</td>
+					<td>512MB</td>
+			</tr>
+			<tr>
+					<td>Base Page</td>
+					<td>8KB</td>
+			</tr>
+			<tr>
+					<td>Superpage</td>
+					<td>64KB / 512KB / 4MB</td>
+			</tr>
+			<tr>
+					<td>Data TLB</td>
+					<td>128 entries</td>
+			</tr>
+			<tr>
+					<td>Instruction TLB</td>
+					<td>128 entries</td>
+			</tr>
+	</tbody>
+</table>
+<p>操作系统基于 FreeBSD 4.3，整个实现约 3500 行 C 代码。</p>
+<h2 id="101-不同应用的性能收益">10.1 不同应用的性能收益<a hidden class="anchor" aria-hidden="true" href="#101-不同应用的性能收益">#</a></h2>
+<p>论文中的一些代表性结果：</p>
+<table>
+	<thead>
+			<tr>
+					<th>Benchmark</th>
+					<th style="text-align: right">加速比</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>Matrix Transposition</td>
+					<td style="text-align: right">7.546×</td>
+			</tr>
+			<tr>
+					<td>Apsi</td>
+					<td style="text-align: right">1.827×</td>
+			</tr>
+			<tr>
+					<td>MCF</td>
+					<td style="text-align: right">1.676×</td>
+			</tr>
+			<tr>
+					<td>FFTW</td>
+					<td style="text-align: right">1.549×</td>
+			</tr>
+			<tr>
+					<td>Tree</td>
+					<td style="text-align: right">1.503×</td>
+			</tr>
+			<tr>
+					<td>Linker</td>
+					<td style="text-align: right">1.326×</td>
+			</tr>
+			<tr>
+					<td>Image</td>
+					<td style="text-align: right">1.228×</td>
+			</tr>
+	</tbody>
+</table>
+<p>其中 Matrix Transposition 的结果非常突出。</p>
+<p>其使用的是非分块矩阵转置算法：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">B</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>访问矩阵 B 时，内存访问模式可能产生大量跨页面访问。</p>
+<p>论文指出，该测试的访问模式几乎每两次内存访问就产生一次 TLB Miss，因此对地址转换性能非常敏感。</p>
+<p>使用 Superpage 后，TLB Miss 显著减少，最终获得约 7.5 倍加速。</p>
+<h2 id="102-为什么需要多种-superpage-size">10.2 为什么需要多种 Superpage Size？<a hidden class="anchor" aria-hidden="true" href="#102-为什么需要多种-superpage-size">#</a></h2>
+<p>不同应用的最佳页面大小并不相同。</p>
+<p>论文实验发现：</p>
+<ul>
+<li>SP：64KB 表现较好。</li>
+<li>VPR：512KB 表现较好。</li>
+<li>FFTW：4MB 表现较好。</li>
+</ul>
+<p>例如，FFTW 使用 4MB Superpage 时获得约 1.55 倍加速，而较小页面几乎没有收益。</p>
+<p>这说明页面大小应该根据应用实际使用模式动态选择，而不是固定使用某一种大页。</p>
+<h2 id="103-长时间运行后的性能">10.3 长时间运行后的性能<a hidden class="anchor" aria-hidden="true" href="#103-长时间运行后的性能">#</a></h2>
+<p>论文还设计了一个非常有意思的实验：</p>
+<ol>
+<li>先运行 Web Server。</li>
+<li>通过大量请求加载文件。</li>
+<li>让系统物理内存发生严重碎片化。</li>
+<li>再运行 FFTW。</li>
+</ol>
+<p>在普通系统中，即使还有大量空闲内存，也可能无法分配 4MB 连续区域。</p>
+<p>论文提出的 Contiguity-aware Page Replacement 能够逐步恢复连续性。</p>
+<p>FFTW 连续运行四次后，获得的 4MB Superpage 数量分别为：</p>
+<table>
+	<thead>
+			<tr>
+					<th>执行次数</th>
+					<th style="text-align: right">4MB Superpage 数量</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>第一次</td>
+					<td style="text-align: right">20</td>
+			</tr>
+			<tr>
+					<td>第二次</td>
+					<td style="text-align: right">35</td>
+			</tr>
+			<tr>
+					<td>第三次</td>
+					<td style="text-align: right">38</td>
+			</tr>
+			<tr>
+					<td>第四次</td>
+					<td style="text-align: right">40</td>
+			</tr>
+	</tbody>
+</table>
+<p>最终性能接近最佳状态，获得约 55% 的加速。</p>
+<p>与此同时，恢复连续性的机制对 Web Server 造成的额外性能损失只有约 3%。</p>
+<p>这证明了大页管理不能只关注系统刚启动时的性能，还必须考虑长期运行后的内存碎片问题。</p>
+<h1 id="十一联系现代-linuxhugetlb-和-transparent-huge-pages">十一、联系现代 Linux：HugeTLB 和 Transparent Huge Pages<a hidden class="anchor" aria-hidden="true" href="#十一联系现代-linuxhugetlb-和-transparent-huge-pages">#</a></h1>
+<p>这篇论文发表于 2002 年，但其中的设计思想今天仍然具有实际价值。</p>
+<p>Linux 已经提供了两类重要的大页机制：HugeTLB 和 Transparent Huge Pages。</p>
+<h2 id="111-hugetlb">11.1 HugeTLB<a hidden class="anchor" aria-hidden="true" href="#111-hugetlb">#</a></h2>
+<p>Linux 提供 HugeTLB，用于显式管理大页。</p>
+<p>可以通过以下命令查看大页相关信息：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">cat /proc/meminfo <span class="p">|</span> grep Huge
+</span></span></code></pre></div><p>也可以查看：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">cat /sys/kernel/mm/hugepages/
+</span></span></code></pre></div><p>HugeTLB 通常需要提前预留大页池，应用程序可以通过 mmap 等接口使用。</p>
+<p>它与论文中的 Reservation-based Allocation 有相似之处：</p>
+<ul>
+<li>都重视连续物理内存。</li>
+<li>都涉及大页预留和分配。</li>
+<li>都需要考虑物理内存碎片。</li>
+</ul>
+<p>但两者并不是同一种实现。论文强调透明的、按需建立的多尺寸 Superpage 管理，而 HugeTLB 是显式的大页池机制。</p>
+<h2 id="112-transparent-huge-pages">11.2 Transparent Huge Pages<a hidden class="anchor" aria-hidden="true" href="#112-transparent-huge-pages">#</a></h2>
+<p>Linux 还提供 Transparent Huge Pages（THP）。</p>
+<p>它的目标与这篇论文非常接近：</p>
+<p><strong>尽可能让应用程序透明地使用大页，而不要求应用程序修改代码。</strong></p>
+<p>在 x86-64 Linux 上，普通页面通常为 4KB，而 THP 经常使用 2MB 页面。</p>
+<p>THP 主要涉及：</p>
+<ul>
+<li>在合适的条件下使用大页。</li>
+<li>通过内存分配和缺页处理建立大页映射。</li>
+<li>在必要时执行大页拆分。</li>
+<li>在后台进行内存压缩（Compaction），寻找连续物理内存。</li>
+</ul>
+<p>值得研究的内核组件和接口：</p>
+<table>
+	<thead>
+			<tr>
+					<th>名称</th>
+					<th>作用</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>khugepaged</code></td>
+					<td>后台扫描并尝试合并页面</td>
+			</tr>
+			<tr>
+					<td><code>madvise()</code></td>
+					<td>向内核提供内存使用建议</td>
+			</tr>
+			<tr>
+					<td><code>MADV_HUGEPAGE</code></td>
+					<td>建议内核使用大页</td>
+			</tr>
+			<tr>
+					<td><code>MADV_NOHUGEPAGE</code></td>
+					<td>建议内核不使用大页</td>
+			</tr>
+			<tr>
+					<td><code>transhuge</code></td>
+					<td>THP 内核文档和相关配置</td>
+			</tr>
+	</tbody>
+</table>
+<p>官方文档：</p>
+<p><a href="https://docs.kernel.org/admin-guide/mm/transhuge.html">Linux Kernel Documentation: Transparent Hugepage Support</a></p>
+<h2 id="113-论文与-linux-thp-的设计对照">11.3 论文与 Linux THP 的设计对照<a hidden class="anchor" aria-hidden="true" href="#113-论文与-linux-thp-的设计对照">#</a></h2>
+<table>
+	<thead>
+			<tr>
+					<th>论文机制</th>
+					<th>Linux 中相关概念</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>Reservation-based Allocation</td>
+					<td>大页分配与预留</td>
+			</tr>
+			<tr>
+					<td>Incremental Promotion</td>
+					<td>THP 大页建立与合并</td>
+			</tr>
+			<tr>
+					<td>Demotion</td>
+					<td>Huge Page Split</td>
+			</tr>
+			<tr>
+					<td>Contiguity-aware Replacement</td>
+					<td>内存回收、Compaction</td>
+			</tr>
+			<tr>
+					<td>Dirty Superpage</td>
+					<td>大页 Dirty Tracking 与拆分</td>
+			</tr>
+			<tr>
+					<td>Buddy Allocator</td>
+					<td>Linux Buddy System</td>
+			</tr>
+	</tbody>
+</table>
+<p>需要注意，这只是设计思想层面的对应关系，并不意味着 Linux THP 直接采用了论文的全部算法。</p>
+<p>尤其是论文采用 Reservation 来提前保证连续性，而现代 Linux THP 更多依赖 Buddy Allocator、Compaction、khugepaged 等机制获得和维护大页。</p>
+<h1 id="十二联系-xv6如何自己实现-superpage">十二、联系 xv6：如何自己实现 Superpage？<a hidden class="anchor" aria-hidden="true" href="#十二联系-xv6如何自己实现-superpage">#</a></h1>
+<p>如果希望将这篇论文转化为操作系统实践，可以从 xv6 的物理内存管理和页表管理入手。</p>
+<h2 id="121-首先理解-xv6-的普通页面分配">12.1 首先理解 xv6 的普通页面分配<a hidden class="anchor" aria-hidden="true" href="#121-首先理解-xv6-的普通页面分配">#</a></h2>
+<p>xv6 的物理内存分配器位于 <code>kernel/kalloc.c</code>。</p>
+<p>核心逻辑非常简单：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">void</span> <span class="o">*</span>
+</span></span><span class="line"><span class="cl"><span class="nf">kalloc</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">struct</span> <span class="n">run</span> <span class="o">*</span><span class="n">r</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">acquire</span><span class="p">(</span><span class="o">&amp;</span><span class="n">kmem</span><span class="p">.</span><span class="n">lock</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">r</span> <span class="o">=</span> <span class="n">kmem</span><span class="p">.</span><span class="n">freelist</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">r</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">kmem</span><span class="p">.</span><span class="n">freelist</span> <span class="o">=</span> <span class="n">r</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">release</span><span class="p">(</span><span class="o">&amp;</span><span class="n">kmem</span><span class="p">.</span><span class="n">lock</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">r</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">memset</span><span class="p">((</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">r</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">PGSIZE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span><span class="n">r</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>它从空闲链表中取出一个物理页面。</p>
+<p>这里并没有考虑：</p>
+<ul>
+<li>连续分配多个页面。</li>
+<li>页面大小不同。</li>
+<li>大页对齐。</li>
+<li>Reservation。</li>
+<li>页面 Promotion / Demotion。</li>
+</ul>
+<p>这正是论文试图改进的部分。</p>
+<h2 id="122-risc-v-的大页支持">12.2 RISC-V 的大页支持<a hidden class="anchor" aria-hidden="true" href="#122-risc-v-的大页支持">#</a></h2>
+<p>MIT xv6 使用 RISC-V Sv39 地址转换机制。</p>
+<p>Sv39 支持通过不同级别的页表项建立不同粒度的映射：</p>
+<table>
+	<thead>
+			<tr>
+					<th>页表级别</th>
+					<th style="text-align: right">页面大小</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>Level 0</td>
+					<td style="text-align: right">4KB</td>
+			</tr>
+			<tr>
+					<td>Level 1</td>
+					<td style="text-align: right">2MB</td>
+			</tr>
+			<tr>
+					<td>Level 2</td>
+					<td style="text-align: right">1GB</td>
+			</tr>
+	</tbody>
+</table>
+<p>因此，可以尝试给 xv6 增加 2MB Superpage 支持。</p>
+<h2 id="123-实现路线">12.3 实现路线<a hidden class="anchor" aria-hidden="true" href="#123-实现路线">#</a></h2>
+<p><strong>第一步：修改物理内存分配器。</strong></p>
+<p>增加连续物理页面分配接口：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">void</span> <span class="o">*</span><span class="nf">kalloc_large</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">kfree_large</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">pa</span><span class="p">);</span>
+</span></span></code></pre></div><p>要求返回的物理地址满足 2MB 对齐，并且物理页面连续。</p>
+<p><strong>第二步：修改页表映射逻辑。</strong></p>
+<p>普通映射使用 Level 0 PTE。</p>
+<p>大页映射则在 Level 1 建立 Leaf PTE。</p>
+<p>注意，RISC-V 大页映射要求物理地址和虚拟地址满足相应页面大小的对齐要求。</p>
+<p><strong>第三步：修改 Page Fault 处理。</strong></p>
+<p>当进程首次访问一个虚拟地址时：</p>
+<ul>
+<li>判断对应虚拟区域是否适合大页。</li>
+<li>尝试分配 2MB 连续物理内存。</li>
+<li>如果成功，按需建立映射。</li>
+<li>如果不适合，则退回普通 4KB 页面。</li>
+</ul>
+<p><strong>第四步：实现 Promotion 和 Demotion。</strong></p>
+<p>当某个区域的 512 个 Base Page 都被分配后，可以考虑将它们转换成一个 2MB 映射。</p>
+<p>反过来，如果需要回收其中某个 4KB 页面，就必须先拆分大页映射。</p>
+<p>这里需要特别注意：</p>
+<ul>
+<li>页表层级转换。</li>
+<li>TLB 刷新。</li>
+<li>物理页面所有权。</li>
+<li>对齐约束。</li>
+<li>并发访问和页面回收。</li>
+</ul>
+<p>这会是一个很有价值的 xv6 扩展实验。</p>
+<h1 id="十三总结">十三、总结<a hidden class="anchor" aria-hidden="true" href="#十三总结">#</a></h1>
+<p>这篇论文最重要的贡献，不是简单地证明 Superpage 能够提高 TLB Coverage，而是展示了一个看似简单的硬件特性，为什么会迫使操作系统重新设计物理内存分配、页面置换、页面回收和页表管理。</p>
+<p>可以总结为：</p>
+<table>
+	<thead>
+			<tr>
+					<th>问题</th>
+					<th>论文的解决方案</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>如何保证物理页面连续？</td>
+					<td>Reservation-based Allocation</td>
+			</tr>
+			<tr>
+					<td>如何逐步利用大页？</td>
+					<td>Incremental Promotion</td>
+			</tr>
+			<tr>
+					<td>如何回收未使用的预留内存？</td>
+					<td>Reservation Preemption</td>
+			</tr>
+			<tr>
+					<td>如何处理物理内存碎片？</td>
+					<td>Contiguity-aware Page Replacement</td>
+			</tr>
+			<tr>
+					<td>如何发现大页中的非活跃区域？</td>
+					<td>Speculative Demotion</td>
+			</tr>
+			<tr>
+					<td>如何避免 Dirty 大页产生大量磁盘 I/O？</td>
+					<td>Dirty Superpage Demotion</td>
+			</tr>
+			<tr>
+					<td>如何支持不同应用的工作集？</td>
+					<td>Multiple Superpage Sizes</td>
+			</tr>
+	</tbody>
+</table>
+<p>我认为这篇论文最值得记住的系统设计思想是：</p>
+<p><strong>操作系统不能只优化资源的当前使用效率，还必须考虑资源未来的可用性。</strong></p>
+<p>Reservation-based Allocation 就是一个很好的例子：它看起来浪费了暂时未使用的物理内存，但实际上是在为未来创建大页保留连续性。</p>
+<p>而 Preemption 和 Contiguity-aware Page Replacement 又让这种预留能够在必要时被回收。</p>
+<p>这是一种典型的操作系统设计权衡：用适度的资源预留，换取长期、可持续的性能收益。</p>
+<h2 id="参考资料">参考资料<a hidden class="anchor" aria-hidden="true" href="#参考资料">#</a></h2>
+<ol>
+<li>Juan Navarro, Sitaram Iyer, Peter Druschel, Alan Cox. <em>Practical, Transparent Operating System Support for Superpages</em>. OSDI 2002. <a href="https://www.usenix.org/events/osdi02/tech/full_papers/navarro/navarro.pdf">论文 PDF</a></li>
+<li><a href="https://pdos.csail.mit.edu/6.1810/2025/homework/paper-superpages.html">MIT 6.1810 Paper Reading Homework: Superpages</a></li>
+<li><a href="https://docs.kernel.org/admin-guide/mm/transhuge.html">Linux Kernel Documentation: Transparent Hugepage Support</a></li>
+<li><a href="https://docs.kernel.org/mm/physical_memory.html">Linux Kernel Documentation: Physical Memory</a></li>
+</ol>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="http://localhost:1313/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a></li>
+      <li><a href="http://localhost:1313/tags/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98/">虚拟内存</a></li>
+      <li><a href="http://localhost:1313/tags/superpages/">Superpages</a></li>
+      <li><a href="http://localhost:1313/tags/huge-pages/">Huge Pages</a></li>
+      <li><a href="http://localhost:1313/tags/tlb/">TLB</a></li>
+      <li><a href="http://localhost:1313/tags/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/">内存管理</a></li>
+      <li><a href="http://localhost:1313/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB/">论文阅读</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="next" href="http://localhost:1313/posts/lkd02/">
+    <span class="title">Next »</span>
+    <span>LKD阅读笔记-第二章</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="http://localhost:1313/">Minghan的博客</a></span> · 
+
+    
+    
+    <span>
+        Powered by
+        <a href="https://gohugo.io/?utm_source=papermod" rel="noopener" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" id="top-link" class="top-link hidden" aria-label="go to top" title="Go to Top (Alt + G)" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevrons-up">
+        <polyline points="17 11 12 6 7 11"></polyline>
+        <polyline points="17 18 12 13 7 18"></polyline>
+    </svg>
+</a><script src="/js/toc-scrollspy.js" defer></script>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var toplink = document.getElementById("top-link");
+    window.onscroll = function () {
+        const scrollThreshold = window.innerHeight;
+        if (document.body.scrollTop > scrollThreshold || document.documentElement.scrollTop > scrollThreshold) {
+            toplink.classList.remove("hidden");
+        } else {
+            toplink.classList.add("hidden");
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

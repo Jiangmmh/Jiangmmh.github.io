@@ -194,6 +194,39 @@
 
 <article class="post-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">一生一芯-F4阶段笔记
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>课程笔记 本阶段课程的大纲如下：
+1. CPU的基本组成和工作原理 通过指令的组合实现需求, 就是编程。
+CPU是一种通用的芯片，其提供了一组数量有限的指令集合；但CPU的用户可以按需求组合指令集中的指令，实现自定义的功能。
+指令分为操作码和操作数，前者指定处理数据的方式，后者指定要处理的数据。
+CPU中提供一组通用寄存器存放临时值，指令需要操作数字段指出所使用的寄存器。
+下面是一个简单的ISA——sCPU，其包括4个寄存器和3条指令。
+2. 指令集架构 可以将计算机视为一个有限状态机（FSM），其状态由内存和寄存器中的值决定，指令作为激励事件实现状态机的状态转移。
+sISA作为一个状态机：
+3. C语言程序的状态机模型 4. 数字电路的状态机模型 深刻理解下面这个模型：
+5. 各状态机模型之间的转换 计算机程序的各个层次都可以被视为等价的状态机：
+C语言程序是一个状态机 汇编语言程序是一个状态机 处理器电路也是一个状态机 状态（PC、GPR和内存）使用时序逻辑电路表示 指令（ISA定义的指令集）使用组合逻辑电路执行 6. 最后的话 讲义笔记 1. sISA和状态机 计算机是一个机械地进行数据处理的设备，这里的“机械”是指其原理非常死板，毫无神秘可言。 计算机的ISA（指令集架构）定义了一组硬件规范（PC、GPR和内存）和一组有限的指令。
+在ISA之上，我们利用ISA提供的指令来构建操作系统、编译器等系统软件。
+在ISA之下，我们根据ISA的定义来设计数字电路，在物理上实现ISA的功能。
+指令主要包括两部分内容：
+操作码：标识指令的功能
+操作数：标识指令要处理的数据
+下面是一个简单的指令集架构——sISA所支持的指令：
+下面是使用sISA指令实现的数列求和程序：
+0: li r0, 10 # r0表示执行10次循环 1: li r1, 0 # r1表示循环变量i 2: li r2, 0 # r2表示和 3: li r3, 1 # r3表示i每次递增的步长 4: add r1, r1, r3 5: add r2, r2, r1 6: bner0 r1, 4 7: bner0 r3, 7 该程序的状态机模型如下：
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-18 23:26:02 +0800 CST'>October 18, 2026</span>&nbsp;·&nbsp;<span>5 min</span>&nbsp;·&nbsp;<span>864 words</span></footer>
+  <a class="entry-link" aria-label="post link to 一生一芯-F4阶段笔记" href="http://localhost:1313/posts/ysyx-f4/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">一生一芯-F3阶段笔记
     </h2>
   </header>
@@ -382,30 +415,6 @@ class Solution { public: vector&lt;int&gt; preorderTraversal(TreeNode* root) { v
 
 <article class="post-entry"> 
   <header class="entry-header">
-    <h2 class="entry-hint-parent">Leetecode 链表
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>这篇文章记录了链表相关的重点算法题 （共51道），使用C&#43;&#43;实现。
-题目链接见灵神的题单：链表题单。
-一、遍历链表 1. 二进制链表转整数 链表元素均为0或1，整个链表表示一个二进制数（最高位在链表头部），将该链表转换为该二进制数的十进制值。
-思路：将ans初始化为0，遍历该链表，每遇到一个节点就将ans左移一位并加上当前节点的值。
-时间复杂度为：O(n)，n为链表长度
-class Solution { public: int getDecimalValue(ListNode* head) { int ans = 0; for (auto cur = head; cur; cur = cur-&gt;next) { ans = (ans &lt;&lt; 1) &#43; cur-&gt;val; } return ans; } }; 2. 找出临界点之间的最小和最大距 临界点就是极值点（严格大于或小于两侧元素）。
-我的思路：先遍历链表，找出全部的临界点，再遍历找出的临界点数组，得到最大和最小临界点距离。
-编写函数findLocalMinMax，找出全部临界点，并返回临界点的下标数组localMinMax 最大临界点距离就是localMinMax第一个元素与最后一个元素之差 最小临界点距离就是localMinMax中相邻元素之差的最小值 时间复杂度：O(n), n为输入链表的长度
-空间复杂度：O(n)
-class Solution { vector&lt;int&gt; findLocalMinMax(ListNode *head) { vector&lt;int&gt; ans; if (!head || !head-&gt;next) return ans; auto prev = head; int idx = 1; for (auto cur = head-&gt;next; cur-&gt;next; cur = cur-&gt;next) { // 取出前驱和后继的值 int p = prev-&gt;val, q = cur-&gt;next-&gt;val; int x = cur-&gt;val; if ((p &lt; x &amp;&amp; q &lt; x) || (p &gt; x &amp;&amp; q &gt; x)) { ans.push_back(idx); } prev = cur; idx&#43;&#43;; } return ans; } public: vector&lt;int&gt; nodesBetweenCriticalPoints(ListNode* head) { // 找到全部的临界点 vector&lt;int&gt; localMinMax = findLocalMinMax(head); int n = localMinMax.size(); // 临界点数量少于两个，直接返回 {-1, -1} if (n &lt; 2) return {-1, -1}; int maxDistance = localMinMax[n-1] - localMinMax[0]; int minDistance = INT_MAX; for (int i = 1; i &lt; n; i&#43;&#43;) { minDistance = min(minDistance, localMinMax[i] - localMinMax[i-1]); } return {minDistance, maxDistance}; } }; 优化：可以在遍历链表的过程中，记录第一个临界点的位置和记录前一个临界点的位置，来得到最大和最小临界点距离，将空间复杂度降为O(1)。
-...</p>
-  </div>
-  <footer class="entry-footer">
-
-<span title='2026-10-14 21:14:25 +0800 CST'>October 14, 2026</span>&nbsp;·&nbsp;<span>25 min</span>&nbsp;·&nbsp;<span>5134 words</span></footer>
-  <a class="entry-link" aria-label="post link to Leetecode 链表" href="http://localhost:1313/posts/leetecode-linkedlist/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
     <h2 class="entry-hint-parent">如何快速构建一个静态博客?
     </h2>
   </header>
@@ -423,6 +432,28 @@ class Solution { vector&lt;int&gt; findLocalMinMax(ListNode *head) { vector&lt;i
 
 <span title='2026-10-14 11:44:43 +0800 CST'>October 14, 2026</span>&nbsp;·&nbsp;<span>6 min</span>&nbsp;·&nbsp;<span>1268 words</span></footer>
   <a class="entry-link" aria-label="post link to 如何快速构建一个静态博客?" href="http://localhost:1313/posts/hello-world/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">LeetCode 链表专题
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>这篇笔记整理了 51 道链表相关题目，使用 C&#43;&#43; 实现。它既是刷题记录，也是一份按问题模式组织的复习手册：重点不在记住某一道题的代码，而在识别题目背后的链表操作模式，并能解释指针变化、边界条件和复杂度。
+链表题的主要难点通常不是算法本身，而是节点关系的维护。写代码前，建议先明确：要改变哪条 next 链接、是否需要前驱节点、操作后链表是否仍然连通、是否会形成环，以及是否需要保留原链表。
+阅读与练习建议 第一次学习：先读题意和思路，遮住代码，自己画出 3～5 个节点的指针变化。 第二次复习：只看每题的核心模式，尝试从空链表、单节点、头尾节点等边界重新写一遍。 第三次复习：重点比较相似题，例如“删除重复元素 I / II”“反转链表 / 反转区间 / K 组反转”“LRU / LFU / AllOne”。 代码中的 ListNode、Node 通常由 LeetCode 提供定义；不同题目中的节点类型并不通用。 题单来源 题目链接见灵神的题单：链表题单。
+链表操作的基本约定 本文多数代码采用 LeetCode 常见的裸指针接口。dummy（哨兵节点）通常是栈上对象，只负责简化头节点操作，不应被 delete；通过 new 创建并最终成为返回链表一部分的节点，则由题目平台或调用方按题目约定管理。若把代码移植到独立 C&#43;&#43; 项目，应进一步明确节点所有权，优先考虑 unique_ptr、容器或明确的析构策略。
+一、遍历链表 1. 二进制链表转整数 链表元素均为0或1，整个链表表示一个二进制数（最高位在链表头部），将该链表转换为该二进制数的十进制值。
+思路：将ans初始化为0，遍历该链表，每遇到一个节点就将ans左移一位并加上当前节点的值。
+时间复杂度为：O(n)，n为链表长度
+class Solution { public: int getDecimalValue(ListNode* head) { int ans = 0; for (auto cur = head; cur; cur = cur-&gt;next) { ans = (ans &lt;&lt; 1) &#43; cur-&gt;val; } return ans; } }; 2. 找出临界点之间的最小和最大距离 临界点就是极值点（严格大于或小于两侧元素）。
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-14 11:00:00 +0800 CST'>October 14, 2026</span>&nbsp;·&nbsp;<span>26 min</span>&nbsp;·&nbsp;<span>5425 words</span></footer>
+  <a class="entry-link" aria-label="post link to LeetCode 链表专题" href="http://localhost:1313/posts/leetecode-linkedlist/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">

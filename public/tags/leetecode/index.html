@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Leetecode | Minghan的博客</title>
+<meta name="keywords" content="">
+<meta name="description" content="">
+<meta name="author" content="">
+<link rel="canonical" href="http://localhost:1313/tags/leetecode/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.f9490c4bd2e7d3fd9e21909b0bc528878329710db51c69d38b7057b37e889c1d.css" integrity="sha256-&#43;UkMS9Ln0/2eIZCbC8Uoh4MpcQ21HGnTi3BXs36InB0=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" type="application/rss+xml" href="http://localhost:1313/tags/leetecode/index.xml" title="rss">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/tags/leetecode/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css"
+>
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/contrib/auto-render.min.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    if (typeof renderMathInElement !== "function") {
+      console.error("KaTeX auto-render 加载失败");
+      return;
+    }
+
+    document.querySelectorAll(".post-content, .book-content").forEach(function (element) {
+      renderMathInElement(element, {
+        delimiters: [
+          { left: "$$", right: "$$", display: true },
+          { left: "\\[", right: "\\]", display: true },
+          { left: "\\(", right: "\\)", display: false }
+        ],
+        throwOnError: false
+      });
+    });
+  });
+</script>
+
+<meta property="og:url" content="http://localhost:1313/tags/leetecode/">
+  <meta property="og:site_name" content="Minghan的博客">
+  <meta property="og:title" content="Leetecode">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:type" content="website">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Leetecode">
+
+</head>
+<body class="list" id="top">
+    <header class="header">
+    <nav class="header-nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="Minghan的博客 (Alt + H)">Minghan的博客</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" class="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg class="sun" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu" class="menu">
+            <li>
+                <a href="http://localhost:1313/posts/" title="文章">
+                    <span>文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/archives/" title="归档">
+                    <span>归档</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/categories/" title="分类">
+                    <span>分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="标签">
+                    <span>标签</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/moments/" title="随记">
+                    <span>随记</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/photos/" title="照片墙">
+                    <span>照片墙</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/books/" title="阅读">
+                    <span>阅读</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/about/" title="关于">
+                    <span>关于</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main"> 
+<header class="page-header"><nav class="breadcrumbs" role="navigation" aria-label="Breadcrumb">
+            <a href="/">Home</a>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+            <a href="/tags/">Tags</a>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+        <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+</nav>
+  <h1>
+    Leetecode
+  </h1>
+</header>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Leetecode 二叉树(三)
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>一、有递有归 49. 把二叉搜索树转换为累加树 这道题目要求将BST右侧的节点之和加到当前节点。
+使用一个全局变量s记录当前和，按右-中-左的顺序遍历BST，将s加到当前节点中。
+class Solution { public: TreeNode* convertBST(TreeNode* root) { int s = 0; // 返回子树之和 auto dfs = [&amp;](auto&amp;&amp; self, TreeNode* node) { if (!node) return ; self(self, node-&gt;right); s &#43;= node-&gt;val; node-&gt;val = s; self(self, node-&gt;left); }; dfs(dfs, root); return root; } }; 50. 具有所有最深节点的最小子树 二叉树深度和高度的区别：深度指从根节点到某个节点的路径长度（边数），或节点层数（根为第1层时）。高度指从某个节点到其最远叶子节点的路径长度（边数）。
+这道题目的题目描述有点stupid，翻译一下：找最深节点的最近公共祖先（LCA）。
+我们可以使用DFS递归实现，在递的过程中记录当前层次的深度，并通过全局变量max_depth记录最大深度，在归的过程中如果发现左右子树的深度相同且等于全局最大深度，当前节点就是满足条件的子树。
+class Solution { public: TreeNode* subtreeWithAllDeepest(TreeNode* root) { // 在递的过程中计算最大深度，在归的过程中找最深叶子的LCA int max_depth = -1; TreeNode* ans; // 返回左右子树中叶子的最大 auto dfs = [&amp;](auto&amp;&amp; self, TreeNode* node, int depth) -&gt; int { if (!node) { // max_depth会记录全部叶子中的最大深度 max_depth = max(max_depth, depth); return depth; } int l = self(self, node-&gt;left, depth&#43;1); int r = self(self, node-&gt;right, depth&#43;1); if (l == r &amp;&amp; l == max_depth) ans = node; return max(l, r); }; dfs(dfs, root, 0); return ans; } }; 51. 根到叶路径上的不足节点 思路：“递”计算路径和，“归”判断不足节点并删除
+在“递”的过程中：不断用limit减去当前节点的值（等价于计算从根到叶子的路径和）。 在“归”的过程中： 当遇到叶子时判断limit是否大于0，如果是表示当前路径和小于limit，是需要被删除的不足节点，返回nullptr；否则不需要被删除，返回当前节点。 对于非叶子节点，如果只有其左右子树均被删除时才选择将其删除 class Solution { public: TreeNode* sufficientSubset(TreeNode* root, int limit) { if (!root) return nullptr; limit -= root-&gt;val; if (!root-&gt;left &amp;&amp; !root-&gt;right) { return limit &gt; 0 ? nullptr : root; } root-&gt;left = sufficientSubset(root-&gt;left, limit); root-&gt;right = sufficientSubset(root-&gt;right, limit); // 只有左右子树均是不足节点才删除 return root-&gt;left || root-&gt;right ? root : nullptr; } }; 二、二叉树的直径 52. 二叉树的直径 思路：自底向上DFS遍历二叉树，先求出左右子树的最大高度，用两者之和（直径）更新ans，最后返回当前子树的最大高度，即左右子树高度较大者 &#43; 1。
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-22 16:17:04 +0800 CST'>October 22, 2026</span>&nbsp;·&nbsp;<span>10 min</span>&nbsp;·&nbsp;<span>2127 words</span></footer>
+  <a class="entry-link" aria-label="post link to Leetecode 二叉树(三)" href="http://localhost:1313/posts/leetecode-tree03/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Leetecode 二叉树(二)
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>题目来自灵神的题单：二叉树题单。
+在上一篇文章中已经介绍了简单遍历和自顶向下DFS的思路，这篇文章主要介绍自底向上DFS的思路。
+一、自底向上 DFS（后序遍历） 在二叉树系列的前一篇博客中其实已经提到过了自顶向下和自底向上的区别了，这里再啰嗦一遍。
+自顶向下，指从根节点往叶子节点 “递”的过程中 更新结果 自底向上，指先递归处理叶子节点，在 “归“的过程中 更新结果 21. 二叉树的最大深度 自底向上的解法：
+先递归得到左右子树各自的最大深度，然后取大者&#43;1作为结果返回。
+时间复杂度：O(n)，空间复杂度：O(n)
+class Solution { public: int maxDepth(TreeNode* root) { // base case if (!root) return 0; // 递归求解左右子树的最大深度 int l = maxDepth(root-&gt;left); int r = maxDepth(root-&gt;right); return max(l, r) &#43; 1; } }; 22. 二叉树的最小深度 注意：最小深度必须从根到叶子，即当一个节点只有一个孩子时，不能直接返回，而是要继续递归直至叶子节点。
+自底向上的解法
+有这么几种情况：
+当前节点为空，直接返回0 左子树为空，右子树不为空，返回minDepth(root-&gt;right) &#43; 1 右子树为空，左子树不为空，返回minDepth(root-&gt;left) &#43; 1 左右子树均不为空，返回min(min_l, min_r)&#43;1 时间复杂度：O(n)，空间复杂度：O(n)
+class Solution { public: int minDepth(TreeNode* root) { if (!root) return 0; if (!root-&gt;left &amp;&amp; root-&gt;right) return minDepth(root-&gt;right) &#43; 1; if (!root-&gt;right &amp;&amp; root-&gt;left) return minDepth(root-&gt;left) &#43; 1; int min_l = minDepth(root-&gt;left); int min_r = minDepth(root-&gt;right); return min(min_l, min_r)&#43;1; } }; 23. 单值二叉树 题目要求判断树中各节点的值是否均相同，我的思路：
+使用变量rootval记录根节点的值（题目保证树非空） 准备一个初值为true的bool变量ans记录答案 遍历整棵二叉树，如果发现存在节点值不等于rootval，则将ans置为false 最后返回ans即可 class Solution { public: bool isUnivalTree(TreeNode* root) { // 树非空 int rootval = root-&gt;val; bool ans = true; auto dfs = [&amp;](auto&amp;&amp; self, TreeNode* node) { if (!node) return; if (node-&gt;val != rootval) { ans = false; return ; } self(self, node-&gt;left); self(self, node-&gt;right); }; dfs(dfs, root); return ans; } }; 24. 相同的树 题目要求：判断两棵树上对应节点的值是否完全相同
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-16 11:20:25 +0800 CST'>October 16, 2026</span>&nbsp;·&nbsp;<span>9 min</span>&nbsp;·&nbsp;<span>1829 words</span></footer>
+  <a class="entry-link" aria-label="post link to Leetecode 二叉树(二)" href="http://localhost:1313/posts/leetecode-tree02/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Leetecode 二叉树(一)
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>题目来自灵神的题单：二叉树题单。
+在做时带着问题去做下面的题目：
+一般来说，DFS 的递归边界是空节点。 在什么情况下，要额外把叶子节点作为递归边界？ 在什么情况下，DFS 需要有返回值？什么情况下不需要有返回值？ 在什么情况下，题目更适合用自顶向下的方法解决？ 什么情况下更适合用自底向上的方法解决？ C&#43;&#43;不同标准下，支持递归的Lambda表达式写法：
+C&#43;&#43;11标准起支持 #include &lt;functional&gt; std::function&lt;void(TreeNode*, string)&gt; dfs = [&amp;](TreeNode* node, string s) { if (!node) return; // ... dfs(node-&gt;left, s); // 直接用 dfs，因为 dfs 已经声明了 dfs(node-&gt;right, s); }; dfs(root, &#34;&#34;); C&#43;&#43;14标准支持 auto dfs = [&amp;](auto&amp;&amp; self, TreeNode* node, string s) -&gt; void { if (!node) return; // ... self(self, node-&gt;left, s); // 把自己作为参数传进去 self(self, node-&gt;right, s); }; dfs(dfs, root, &#34;&#34;); // 调用时也要把自己传进去 在我的解法实现中采用的是C&#43;&#43;14标准的写法。
+一、遍历二叉树 因为树本身就是递归定义的，即树的子树本身就是一棵树，所以树的算法大多通过递归来实现。
+1. 二叉树的前序遍历 法一：DFS 树的先序遍历的顺序是：根-左-右
+在遍历过程中:
+如果当前节点为空，直接返回； 如果当前节点非空，先访问当前节点，然后依次递归访问左右子树； class Solution { vector&lt;int&gt; ans; void dfs(TreeNode* root) { if (root) { ans.push_back(root-&gt;val); dfs(root-&gt;left); dfs(root-&gt;right); } } public: vector&lt;int&gt; preorderTraversal(TreeNode* root) { dfs(root); return ans; } }; 法二：非递归法
+使用一个栈来实现，对于每个节点先处理当前节点（中），然后依次压入右子树和左子树，根据栈的特点，得到的顺序是先左后右。
+class Solution { public: vector&lt;int&gt; preorderTraversal(TreeNode* root) { vector&lt;int&gt; ans; if (!root) return ans; stack&lt;TreeNode*&gt; st; st.push(root); while (!st.empty()) { auto node = st.top(); st.pop(); if (node) { ans.push_back(node-&gt;val); if (node-&gt;right) st.push(node-&gt;right); if (node-&gt;left) st.push(node-&gt;left); } } return ans; } }; 2. 二叉树的中序遍历 法一：DFS
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-14 22:02:01 +0800 CST'>October 14, 2026</span>&nbsp;·&nbsp;<span>8 min</span>&nbsp;·&nbsp;<span>1582 words</span></footer>
+  <a class="entry-link" aria-label="post link to Leetecode 二叉树(一)" href="http://localhost:1313/posts/leetecode-tree01/"></a>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="http://localhost:1313/">Minghan的博客</a></span> · 
+
+    
+    
+    <span>
+        Powered by
+        <a href="https://gohugo.io/?utm_source=papermod" rel="noopener" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" id="top-link" class="top-link hidden" aria-label="go to top" title="Go to Top (Alt + G)" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevrons-up">
+        <polyline points="17 11 12 6 7 11"></polyline>
+        <polyline points="17 18 12 13 7 18"></polyline>
+    </svg>
+</a><script src="/js/toc-scrollspy.js" defer></script>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var toplink = document.getElementById("top-link");
+    window.onscroll = function () {
+        const scrollThreshold = window.innerHeight;
+        if (document.body.scrollTop > scrollThreshold || document.documentElement.scrollTop > scrollThreshold) {
+            toplink.classList.remove("hidden");
+        } else {
+            toplink.classList.add("hidden");
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

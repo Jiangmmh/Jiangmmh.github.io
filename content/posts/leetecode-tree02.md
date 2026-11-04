@@ -2,8 +2,8 @@
 title: "Leetecode 二叉树(二)"
 date: '2026-10-16T11:20:25+08:00'
 draft: false
-tags: [二叉树, 自底向上DFS]
-categories: [Leetecode]
+tags: [Leetecode, 二叉树, 自底向上DFS]
+categories: [算法]
 ---
 题目来自灵神的题单：[二叉树题单](https://leetcode.cn/discuss/post/3142882/fen-xiang-gun-ti-dan-lian-biao-er-cha-sh-6srp/)。
 

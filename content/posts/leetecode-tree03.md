@@ -2,8 +2,8 @@
 title: "Leetecode 二叉树(三)"
 date: '2026-10-22T16:17:04+08:00'
 draft: false
-tags: [二搜索叉树, 中序遍历, 二叉树的直径, 回溯]
-categories: [Leetecode]
+tags: [Leetecode, 二搜索叉树, 中序遍历, 二叉树的直径, 回溯]
+categories: [算法]
 ---
 
 # **一、有递有归**

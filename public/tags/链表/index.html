@@ -196,26 +196,24 @@
 
 <article class="post-entry tag-entry"> 
   <header class="entry-header">
-    <h2 class="entry-hint-parent">Leetecode 链表
+    <h2 class="entry-hint-parent">LeetCode 链表专题
     </h2>
   </header>
   <div class="entry-content">
-    <p>这篇文章记录了链表相关的重点算法题 （共51道），使用C&#43;&#43;实现。
-题目链接见灵神的题单：链表题单。
+    <p>这篇笔记整理了 51 道链表相关题目，使用 C&#43;&#43; 实现。它既是刷题记录，也是一份按问题模式组织的复习手册：重点不在记住某一道题的代码，而在识别题目背后的链表操作模式，并能解释指针变化、边界条件和复杂度。
+链表题的主要难点通常不是算法本身，而是节点关系的维护。写代码前，建议先明确：要改变哪条 next 链接、是否需要前驱节点、操作后链表是否仍然连通、是否会形成环，以及是否需要保留原链表。
+阅读与练习建议 第一次学习：先读题意和思路，遮住代码，自己画出 3～5 个节点的指针变化。 第二次复习：只看每题的核心模式，尝试从空链表、单节点、头尾节点等边界重新写一遍。 第三次复习：重点比较相似题，例如“删除重复元素 I / II”“反转链表 / 反转区间 / K 组反转”“LRU / LFU / AllOne”。 代码中的 ListNode、Node 通常由 LeetCode 提供定义；不同题目中的节点类型并不通用。 题单来源 题目链接见灵神的题单：链表题单。
+链表操作的基本约定 本文多数代码采用 LeetCode 常见的裸指针接口。dummy（哨兵节点）通常是栈上对象，只负责简化头节点操作，不应被 delete；通过 new 创建并最终成为返回链表一部分的节点，则由题目平台或调用方按题目约定管理。若把代码移植到独立 C&#43;&#43; 项目，应进一步明确节点所有权，优先考虑 unique_ptr、容器或明确的析构策略。
 一、遍历链表 1. 二进制链表转整数 链表元素均为0或1，整个链表表示一个二进制数（最高位在链表头部），将该链表转换为该二进制数的十进制值。
 思路：将ans初始化为0，遍历该链表，每遇到一个节点就将ans左移一位并加上当前节点的值。
 时间复杂度为：O(n)，n为链表长度
-class Solution { public: int getDecimalValue(ListNode* head) { int ans = 0; for (auto cur = head; cur; cur = cur-&gt;next) { ans = (ans &lt;&lt; 1) &#43; cur-&gt;val; } return ans; } }; 2. 找出临界点之间的最小和最大距 临界点就是极值点（严格大于或小于两侧元素）。
-我的思路：先遍历链表，找出全部的临界点，再遍历找出的临界点数组，得到最大和最小临界点距离。
-编写函数findLocalMinMax，找出全部临界点，并返回临界点的下标数组localMinMax 最大临界点距离就是localMinMax第一个元素与最后一个元素之差 最小临界点距离就是localMinMax中相邻元素之差的最小值 时间复杂度：O(n), n为输入链表的长度
-空间复杂度：O(n)
-class Solution { vector&lt;int&gt; findLocalMinMax(ListNode *head) { vector&lt;int&gt; ans; if (!head || !head-&gt;next) return ans; auto prev = head; int idx = 1; for (auto cur = head-&gt;next; cur-&gt;next; cur = cur-&gt;next) { // 取出前驱和后继的值 int p = prev-&gt;val, q = cur-&gt;next-&gt;val; int x = cur-&gt;val; if ((p &lt; x &amp;&amp; q &lt; x) || (p &gt; x &amp;&amp; q &gt; x)) { ans.push_back(idx); } prev = cur; idx&#43;&#43;; } return ans; } public: vector&lt;int&gt; nodesBetweenCriticalPoints(ListNode* head) { // 找到全部的临界点 vector&lt;int&gt; localMinMax = findLocalMinMax(head); int n = localMinMax.size(); // 临界点数量少于两个，直接返回 {-1, -1} if (n &lt; 2) return {-1, -1}; int maxDistance = localMinMax[n-1] - localMinMax[0]; int minDistance = INT_MAX; for (int i = 1; i &lt; n; i&#43;&#43;) { minDistance = min(minDistance, localMinMax[i] - localMinMax[i-1]); } return {minDistance, maxDistance}; } }; 优化：可以在遍历链表的过程中，记录第一个临界点的位置和记录前一个临界点的位置，来得到最大和最小临界点距离，将空间复杂度降为O(1)。
+class Solution { public: int getDecimalValue(ListNode* head) { int ans = 0; for (auto cur = head; cur; cur = cur-&gt;next) { ans = (ans &lt;&lt; 1) &#43; cur-&gt;val; } return ans; } }; 2. 找出临界点之间的最小和最大距离 临界点就是极值点（严格大于或小于两侧元素）。
 ...</p>
   </div>
   <footer class="entry-footer">
 
-<span title='2026-10-14 21:14:25 +0800 CST'>October 14, 2026</span>&nbsp;·&nbsp;<span>25 min</span>&nbsp;·&nbsp;<span>5134 words</span></footer>
-  <a class="entry-link" aria-label="post link to Leetecode 链表" href="http://localhost:1313/posts/leetecode-linkedlist/"></a>
+<span title='2026-10-14 11:00:00 +0800 CST'>October 14, 2026</span>&nbsp;·&nbsp;<span>26 min</span>&nbsp;·&nbsp;<span>5425 words</span></footer>
+  <a class="entry-link" aria-label="post link to LeetCode 链表专题" href="http://localhost:1313/posts/leetecode-linkedlist/"></a>
 </article>
     </main>
     
