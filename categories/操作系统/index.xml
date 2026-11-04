@@ -1,4 +1,152 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>操作系统 on Minghan的博客</title><link>https://Jiangmmh.github.io/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/</link><description>Recent content in 操作系统 on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Sun, 01 Nov 2026 10:27:29 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/index.xml" rel="self" type="application/rss+xml"/><item><title>MIT6.1810: Lab4 Trap</title><link>https://Jiangmmh.github.io/posts/xv6-lab4-trap/</link><pubDate>Sun, 01 Nov 2026 10:27:29 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/xv6-lab4-trap/</guid><description>&lt;h1 id="一risc-v-assemblyeasy">一、&lt;strong>RISC-V assembly (easy)&lt;/strong>&lt;/h1>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>操作系统 on Minghan的博客</title><link>https://Jiangmmh.github.io/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/</link><description>Recent content in 操作系统 on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Tue, 03 Nov 2026 22:11:04 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/index.xml" rel="self" type="application/rss+xml"/><item><title>LKD阅读笔记-第二章</title><link>https://Jiangmmh.github.io/posts/lkd02/</link><pubDate>Tue, 03 Nov 2026 22:11:04 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/lkd02/</guid><description>&lt;blockquote>
+&lt;p>参考书籍：Robert Love, &lt;em>Linux Kernel Development&lt;/em>, Third Edition, Chapter 2: Getting Started with the Kernel。&lt;/p>&lt;/blockquote>
+&lt;h2 id="1-本章概览">1. 本章概览&lt;/h2>
+&lt;p>第一章介绍了 Linux 内核的历史、定位和整体设计，而第二章开始进入实际开发：如何获取内核源码、如何编译和安装内核，以及编写内核代码时需要遵循哪些特殊规则。&lt;/p>
+&lt;p>本章主要回答三个问题：&lt;/p>
+&lt;ol>
+&lt;li>&lt;strong>源码从哪里来？&lt;/strong> 如何获取、管理和组织 Linux 内核源码？&lt;/li>
+&lt;li>&lt;strong>内核如何构建？&lt;/strong> 如何配置、编译和安装一个 Linux 内核？&lt;/li>
+&lt;li>&lt;strong>内核代码有什么特殊之处？&lt;/strong> 为什么内核开发不能完全按照普通 C 程序的方式进行？&lt;/li>
+&lt;/ol>
+&lt;p>其中，第三个问题尤其重要。Linux 内核虽然主要使用 C 语言编写，但它并不是一个普通的 C 应用程序。它运行在特权环境中，直接管理硬件和内存，必须处理异步中断、多处理器并发以及严格的资源限制。&lt;/p>
+&lt;hr>
+&lt;h2 id="2-获取-linux-内核源码">2. 获取 Linux 内核源码&lt;/h2>
+&lt;p>Linux 内核源码可以从官方网站获取：&lt;/p>
+&lt;ul>
+&lt;li>官方网站：https://www.kernel.org/&lt;/li>
+&lt;li>官方 Git 仓库：https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git&lt;/li>
+&lt;/ul>
+&lt;p>官方提供两种主要获取方式：&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>Tarball&lt;/strong>：完整源码压缩包。&lt;/li>
+&lt;li>&lt;strong>Git&lt;/strong>：通过版本控制系统获取和管理源码。&lt;/li>
+&lt;/ul>
+&lt;h3 id="21-使用-git">2.1 使用 Git&lt;/h3>
+&lt;p>Linux 内核使用 Git 进行版本管理。Git 最初由 Linus Torvalds 创建，具有分布式版本控制的特点。&lt;/p>
+&lt;p>相比下载压缩包，使用 Git 更适合长期阅读、修改和研究内核源码。&lt;/p>
+&lt;p>获取 Linus 主线仓库：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">git clone https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nb">cd&lt;/span> linux
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>查看当前版本：&lt;/p></description></item><item><title>LKD阅读笔记-第一章</title><link>https://Jiangmmh.github.io/posts/lkd01/</link><pubDate>Tue, 03 Nov 2026 21:20:56 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/lkd01/</guid><description>&lt;blockquote>
+&lt;p>参考书籍：Robert Love, &lt;em>Linux Kernel Development&lt;/em>, 3rd Edition, Chapter 1: Introduction to the Linux Kernel&lt;/p>&lt;/blockquote>
+&lt;h2 id="1-本章概览">1. 本章概览&lt;/h2>
+&lt;p>第一章主要介绍 Linux 内核的历史背景、基本概念、设计特点以及开发社区。&lt;/p>
+&lt;p>本章并不会深入某个具体的内核子系统，而是先回答几个基础问题：&lt;/p>
+&lt;ul>
+&lt;li>Unix 是如何诞生的？Linux 与 Unix 有什么关系？&lt;/li>
+&lt;li>Linux 是什么？Linux 内核与 Linux 操作系统有什么区别？&lt;/li>
+&lt;li>内核究竟负责什么工作？&lt;/li>
+&lt;li>Linux 内核与传统 Unix 内核相比，有哪些设计特点？&lt;/li>
+&lt;li>Linux 内核如何进行版本发布和协作开发？&lt;/li>
+&lt;/ul>
+&lt;p>理解这些背景，有助于我们在后续阅读 Linux 源码时建立整体认识。&lt;/p>
+&lt;h2 id="2-unix-的历史">2. Unix 的历史&lt;/h2>
+&lt;h3 id="21-unix-的诞生">2.1 Unix 的诞生&lt;/h3>
+&lt;p>Unix 最初诞生于 1969 年的贝尔实验室（Bell Labs），主要开发者是 Ken Thompson 和 Dennis Ritchie。&lt;/p>
+&lt;p>Unix 的出现与一个更早的操作系统项目有关：Multics。&lt;/p>
+&lt;p>Multics 是一个由多个研究机构共同参与的大型操作系统项目，目标是构建一个支持多用户、多任务的计算环境。但由于项目过于复杂，开发进展缓慢，最终贝尔实验室退出了该项目。&lt;/p>
+&lt;p>Ken Thompson 等人希望拥有一个更加简单、实用的交互式操作系统，于是开始在一台 PDP-7 计算机上实现新的操作系统。这项工作逐渐演变成 Unix。&lt;/p>
+&lt;p>Unix 发展过程中有几个重要节点：&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>时间&lt;/th>
+&lt;th>事件&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>1969&lt;/td>
+&lt;td>Unix 在贝尔实验室诞生&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>1971&lt;/td>
+&lt;td>Unix 被移植到 PDP-11&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>1973&lt;/td>
+&lt;td>Unix 使用 C 语言重新实现&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>1977&lt;/td>
+&lt;td>Unix System III 发布&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>1982&lt;/td>
+&lt;td>AT&amp;amp;T 发布 Unix System V&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>其中，1973 年是 Unix 历史上非常重要的一个节点：Unix 从汇编语言实现转向 C 语言实现。&lt;/p></description></item><item><title>MIT6.1810: Lab5 COW</title><link>https://Jiangmmh.github.io/posts/xv6-lab5-cow/</link><pubDate>Tue, 03 Nov 2026 21:10:44 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/xv6-lab5-cow/</guid><description>&lt;h1 id="一fork-的实现原理">一、fork 的实现原理&lt;/h1>
+&lt;p>在用户态调用 &lt;code>fork()&lt;/code> 后，程序通过系统调用进入内核，最终执行 &lt;code>sys_fork()&lt;/code>，并在其中调用 &lt;code>kfork()&lt;/code> 创建子进程。&lt;/p>
+&lt;p>&lt;code>kfork()&lt;/code> 的主要工作包括：&lt;/p>
+&lt;ul>
+&lt;li>调用 &lt;code>allocproc()&lt;/code> 分配一个新的进程结构体，并完成必要的初始化。&lt;/li>
+&lt;li>调用 &lt;code>uvmcopy()&lt;/code> 将父进程的用户地址空间复制到子进程。&lt;/li>
+&lt;li>将父进程的 Trapframe 拷贝到子进程，使子进程拥有与父进程相同的寄存器上下文。&lt;/li>
+&lt;li>遍历父进程打开的文件描述符，在子进程中通过 &lt;code>filedup()&lt;/code> 增加对应文件对象的引用计数。&lt;/li>
+&lt;li>设置子进程的父进程信息，并将其状态设置为 &lt;code>RUNNABLE&lt;/code>。&lt;/li>
+&lt;/ul>
+&lt;p>这里有一个比较巧妙的细节：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-c" data-lang="c">&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// Cause fork to return 0 in the child.
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="n">np&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">trapframe&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">a0&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>为什么需要单独修改子进程 Trapframe 中的 &lt;code>a0&lt;/code>？&lt;/p>
+&lt;p>在 RISC-V 调用约定中，&lt;code>a0&lt;/code> 用于传递函数参数和返回值。系统调用返回时，内核会将 Trapframe 中保存的 &lt;code>a0&lt;/code> 恢复到用户态寄存器中。&lt;/p>
+&lt;p>因此：&lt;/p>
+&lt;ul>
+&lt;li>父进程继续执行 &lt;code>fork()&lt;/code> 后面的代码，系统调用返回值是子进程的 PID。&lt;/li>
+&lt;li>子进程第一次被调度时，从保存的上下文继续执行，系统调用返回值是 0。&lt;/li>
+&lt;/ul>
+&lt;p>这样，父子进程就能够通过 &lt;code>fork()&lt;/code> 的返回值判断自己所处的执行分支。&lt;/p>
+&lt;p>下面是 &lt;code>kfork()&lt;/code> 的核心实现（省略了部分与本实验无关的代码）：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-c" data-lang="c">&lt;span class="line">&lt;span class="cl">&lt;span class="kt">int&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nf">kfork&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="kt">void&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kt">int&lt;/span> &lt;span class="n">i&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">pid&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">struct&lt;/span> &lt;span class="n">proc&lt;/span> &lt;span class="o">*&lt;/span>&lt;span class="n">np&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">struct&lt;/span> &lt;span class="n">proc&lt;/span> &lt;span class="o">*&lt;/span>&lt;span class="n">p&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nf">myproc&lt;/span>&lt;span class="p">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1">// Allocate process.
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="k">if&lt;/span> &lt;span class="p">((&lt;/span>&lt;span class="n">np&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nf">allocproc&lt;/span>&lt;span class="p">())&lt;/span> &lt;span class="o">==&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="o">-&lt;/span>&lt;span class="mi">1&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1">// Copy user memory from parent to child.
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="k">if&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nf">uvmcopy&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">p&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">pagetable&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">np&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">pagetable&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">p&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">sz&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="o">&amp;lt;&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">freeproc&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">np&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">release&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">np&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">lock&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="o">-&lt;/span>&lt;span class="mi">1&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">np&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">sz&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">p&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">sz&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1">// Copy saved user registers.
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="o">*&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">np&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">trapframe&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="o">*&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">p&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">trapframe&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1">// Cause fork to return 0 in the child.
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="n">np&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">trapframe&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">a0&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1">// Duplicate open file descriptors.
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="k">for&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">i&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="n">i&lt;/span> &lt;span class="o">&amp;lt;&lt;/span> &lt;span class="n">NOFILE&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="n">i&lt;/span>&lt;span class="o">++&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">p&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">ofile&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="n">i&lt;/span>&lt;span class="p">])&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">np&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">ofile&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="n">i&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nf">filedup&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">p&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">ofile&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="n">i&lt;/span>&lt;span class="p">]);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">np&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">cwd&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nf">idup&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">p&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">cwd&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">safestrcpy&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">np&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">name&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">p&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">name&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="k">sizeof&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">p&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">name&lt;/span>&lt;span class="p">));&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">pid&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">np&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">pid&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">release&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">np&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">lock&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">acquire&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">wait_lock&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">np&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">parent&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">p&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">release&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">wait_lock&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">acquire&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">np&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">lock&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">np&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">state&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">RUNNABLE&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">release&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">np&lt;/span>&lt;span class="o">-&amp;gt;&lt;/span>&lt;span class="n">lock&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">pid&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>这里最值得关注的是 &lt;code>uvmcopy()&lt;/code>。&lt;/p></description></item><item><title>MIT6.1810: Lab4 Trap</title><link>https://Jiangmmh.github.io/posts/xv6-lab4-trap/</link><pubDate>Sun, 01 Nov 2026 10:27:29 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/xv6-lab4-trap/</guid><description>&lt;h1 id="一risc-v-assemblyeasy">一、&lt;strong>RISC-V assembly (easy)&lt;/strong>&lt;/h1>
 &lt;p>先来看一下 user/call.asm：&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-c" data-lang="c">&lt;span class="line">&lt;span class="cl">&lt;span class="cp">#include&lt;/span> &lt;span class="cpf">&amp;#34;kernel/param.h&amp;#34;&lt;/span>&lt;span class="cp">
 &lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cp">#include&lt;/span> &lt;span class="cpf">&amp;#34;kernel/types.h&amp;#34;&lt;/span>&lt;span class="cp">
