@@ -1,0 +1,1630 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>LevelDB源码学习: 调试环境 | Minghan的博客</title>
+<meta name="keywords" content="LevelDB, C&#43;&#43;, CMake, LLDB, 源码阅读">
+<meta name="description" content="一、为什么选择 LevelDB
+LevelDB 是 Google 开源的一款高性能嵌入式 Key-Value 存储引擎，使用 C&#43;&#43; 编写。它提供有序的键值映射，支持基本的 Put、Get、Delete 操作，同时支持批量写入、快照、迭代器以及数据压缩。
+LevelDB 虽然不是一个完整的关系型数据库，但它的实现涉及很多值得深入学习的系统编程技术：
+
+LSM-Tree： 理解日志结构合并树的基本设计思想。
+WAL： 理解预写日志如何保证写入的持久性。
+MemTable： 理解内存中的有序数据结构及其实现。
+SSTable： 理解磁盘上的有序数据组织方式。
+Compaction： 理解后台数据合并、磁盘空间回收和读写放大的权衡。
+Cache： 理解缓存设计及引用计数。
+并发控制： 理解互斥锁、条件变量和后台任务调度。
+
+相比从零开始阅读一个大型数据库，LevelDB 的代码规模相对适中，非常适合作为深入学习存储引擎的起点。
+本文以 Apple Silicon Mac（M 系列芯片）为例，搭建一套可以进行源码阅读、单步调试、单元测试和性能测试的开发环境。
+二、环境准备
+2.1 开发环境
+本文使用以下工具：
+
+	
+			
+					工具
+					用途
+			
+	
+	
+			
+					macOS
+					开发操作系统
+			
+			
+					Apple Clang
+					C/C&#43;&#43; 编译器
+			
+			
+					CMake
+					项目构建系统
+			
+			
+					Ninja
+					可选的构建后端
+			
+			
+					LLDB
+					源码级调试器
+			
+			
+					Git
+					源码版本管理
+			
+			
+					VS Code
+					代码阅读和编辑
+			
+	
+
+LevelDB 当前主线要求 C&#43;&#43;17，CMake 工程要求 CMake 3.22 或更新版本。因此，需要提前准备合适的工具链。
+2.2 安装 Xcode Command Line Tools
+macOS 可以直接使用 Apple 提供的 Clang 工具链。">
+<meta name="author" content="">
+<link rel="canonical" href="http://localhost:1313/posts/leveldb01/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.f9490c4bd2e7d3fd9e21909b0bc528878329710db51c69d38b7057b37e889c1d.css" integrity="sha256-&#43;UkMS9Ln0/2eIZCbC8Uoh4MpcQ21HGnTi3BXs36InB0=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/leveldb01/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css"
+>
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/contrib/auto-render.min.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    if (typeof renderMathInElement !== "function") {
+      console.error("KaTeX auto-render 加载失败");
+      return;
+    }
+
+    document.querySelectorAll(".post-content, .book-content").forEach(function (element) {
+      renderMathInElement(element, {
+        delimiters: [
+          { left: "$$", right: "$$", display: true },
+          { left: "\\[", right: "\\]", display: true },
+          { left: "\\(", right: "\\)", display: false }
+        ],
+        throwOnError: false
+      });
+    });
+  });
+</script>
+
+<meta property="og:url" content="http://localhost:1313/posts/leveldb01/">
+  <meta property="og:site_name" content="Minghan的博客">
+  <meta property="og:title" content="LevelDB源码学习: 调试环境">
+  <meta property="og:description" content="一、为什么选择 LevelDB LevelDB 是 Google 开源的一款高性能嵌入式 Key-Value 存储引擎，使用 C&#43;&#43; 编写。它提供有序的键值映射，支持基本的 Put、Get、Delete 操作，同时支持批量写入、快照、迭代器以及数据压缩。
+LevelDB 虽然不是一个完整的关系型数据库，但它的实现涉及很多值得深入学习的系统编程技术：
+LSM-Tree： 理解日志结构合并树的基本设计思想。 WAL： 理解预写日志如何保证写入的持久性。 MemTable： 理解内存中的有序数据结构及其实现。 SSTable： 理解磁盘上的有序数据组织方式。 Compaction： 理解后台数据合并、磁盘空间回收和读写放大的权衡。 Cache： 理解缓存设计及引用计数。 并发控制： 理解互斥锁、条件变量和后台任务调度。 相比从零开始阅读一个大型数据库，LevelDB 的代码规模相对适中，非常适合作为深入学习存储引擎的起点。
+本文以 Apple Silicon Mac（M 系列芯片）为例，搭建一套可以进行源码阅读、单步调试、单元测试和性能测试的开发环境。
+二、环境准备 2.1 开发环境 本文使用以下工具：
+工具 用途 macOS 开发操作系统 Apple Clang C/C&#43;&#43; 编译器 CMake 项目构建系统 Ninja 可选的构建后端 LLDB 源码级调试器 Git 源码版本管理 VS Code 代码阅读和编辑 LevelDB 当前主线要求 C&#43;&#43;17，CMake 工程要求 CMake 3.22 或更新版本。因此，需要提前准备合适的工具链。
+2.2 安装 Xcode Command Line Tools macOS 可以直接使用 Apple 提供的 Clang 工具链。">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-11-05T17:36:38+08:00">
+    <meta property="article:modified_time" content="2026-11-05T17:36:38+08:00">
+    <meta property="article:tag" content="LevelDB">
+    <meta property="article:tag" content="C&#43;&#43;">
+    <meta property="article:tag" content="CMake">
+    <meta property="article:tag" content="LLDB">
+    <meta property="article:tag" content="源码阅读">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="LevelDB源码学习: 调试环境">
+  <meta name="twitter:description" content="一、为什么选择 LevelDB LevelDB 是 Google 开源的一款高性能嵌入式 Key-Value 存储引擎，使用 C&#43;&#43; 编写。它提供有序的键值映射，支持基本的 Put、Get、Delete 操作，同时支持批量写入、快照、迭代器以及数据压缩。
+LevelDB 虽然不是一个完整的关系型数据库，但它的实现涉及很多值得深入学习的系统编程技术：
+LSM-Tree： 理解日志结构合并树的基本设计思想。 WAL： 理解预写日志如何保证写入的持久性。 MemTable： 理解内存中的有序数据结构及其实现。 SSTable： 理解磁盘上的有序数据组织方式。 Compaction： 理解后台数据合并、磁盘空间回收和读写放大的权衡。 Cache： 理解缓存设计及引用计数。 并发控制： 理解互斥锁、条件变量和后台任务调度。 相比从零开始阅读一个大型数据库，LevelDB 的代码规模相对适中，非常适合作为深入学习存储引擎的起点。
+本文以 Apple Silicon Mac（M 系列芯片）为例，搭建一套可以进行源码阅读、单步调试、单元测试和性能测试的开发环境。
+二、环境准备 2.1 开发环境 本文使用以下工具：
+工具 用途 macOS 开发操作系统 Apple Clang C/C&#43;&#43; 编译器 CMake 项目构建系统 Ninja 可选的构建后端 LLDB 源码级调试器 Git 源码版本管理 VS Code 代码阅读和编辑 LevelDB 当前主线要求 C&#43;&#43;17，CMake 工程要求 CMake 3.22 或更新版本。因此，需要提前准备合适的工具链。
+2.2 安装 Xcode Command Line Tools macOS 可以直接使用 Apple 提供的 Clang 工具链。">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "http://localhost:1313/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "LevelDB源码学习: 调试环境",
+      "item": "http://localhost:1313/posts/leveldb01/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "LevelDB源码学习: 调试环境",
+  "name": "LevelDB源码学习: 调试环境",
+  "description": "一、为什么选择 LevelDB LevelDB 是 Google 开源的一款高性能嵌入式 Key-Value 存储引擎，使用 C++ 编写。它提供有序的键值映射，支持基本的 Put、Get、Delete 操作，同时支持批量写入、快照、迭代器以及数据压缩。\nLevelDB 虽然不是一个完整的关系型数据库，但它的实现涉及很多值得深入学习的系统编程技术：\nLSM-Tree： 理解日志结构合并树的基本设计思想。 WAL： 理解预写日志如何保证写入的持久性。 MemTable： 理解内存中的有序数据结构及其实现。 SSTable： 理解磁盘上的有序数据组织方式。 Compaction： 理解后台数据合并、磁盘空间回收和读写放大的权衡。 Cache： 理解缓存设计及引用计数。 并发控制： 理解互斥锁、条件变量和后台任务调度。 相比从零开始阅读一个大型数据库，LevelDB 的代码规模相对适中，非常适合作为深入学习存储引擎的起点。\n本文以 Apple Silicon Mac（M 系列芯片）为例，搭建一套可以进行源码阅读、单步调试、单元测试和性能测试的开发环境。\n二、环境准备 2.1 开发环境 本文使用以下工具：\n工具 用途 macOS 开发操作系统 Apple Clang C/C++ 编译器 CMake 项目构建系统 Ninja 可选的构建后端 LLDB 源码级调试器 Git 源码版本管理 VS Code 代码阅读和编辑 LevelDB 当前主线要求 C++17，CMake 工程要求 CMake 3.22 或更新版本。因此，需要提前准备合适的工具链。\n2.2 安装 Xcode Command Line Tools macOS 可以直接使用 Apple 提供的 Clang 工具链。\n",
+  "keywords": [
+    "LevelDB", "C++", "CMake", "LLDB", "源码阅读"
+  ],
+  "articleBody": "一、为什么选择 LevelDB LevelDB 是 Google 开源的一款高性能嵌入式 Key-Value 存储引擎，使用 C++ 编写。它提供有序的键值映射，支持基本的 Put、Get、Delete 操作，同时支持批量写入、快照、迭代器以及数据压缩。\nLevelDB 虽然不是一个完整的关系型数据库，但它的实现涉及很多值得深入学习的系统编程技术：\nLSM-Tree： 理解日志结构合并树的基本设计思想。 WAL： 理解预写日志如何保证写入的持久性。 MemTable： 理解内存中的有序数据结构及其实现。 SSTable： 理解磁盘上的有序数据组织方式。 Compaction： 理解后台数据合并、磁盘空间回收和读写放大的权衡。 Cache： 理解缓存设计及引用计数。 并发控制： 理解互斥锁、条件变量和后台任务调度。 相比从零开始阅读一个大型数据库，LevelDB 的代码规模相对适中，非常适合作为深入学习存储引擎的起点。\n本文以 Apple Silicon Mac（M 系列芯片）为例，搭建一套可以进行源码阅读、单步调试、单元测试和性能测试的开发环境。\n二、环境准备 2.1 开发环境 本文使用以下工具：\n工具 用途 macOS 开发操作系统 Apple Clang C/C++ 编译器 CMake 项目构建系统 Ninja 可选的构建后端 LLDB 源码级调试器 Git 源码版本管理 VS Code 代码阅读和编辑 LevelDB 当前主线要求 C++17，CMake 工程要求 CMake 3.22 或更新版本。因此，需要提前准备合适的工具链。\n2.2 安装 Xcode Command Line Tools macOS 可以直接使用 Apple 提供的 Clang 工具链。\n执行：\nxcode-select --install 安装完成后检查：\nclang --version clang++ --version lldb --version 检查编译器是否正常：\ncat \u003e hello.cpp \u003c\u003c'EOF' #include int main() { std::cout \u003c\u003c \"Hello LevelDB!\" \u003c\u003c std::endl; return 0; } EOF clang++ -std=c++17 hello.cpp -o hello ./hello 正常情况下输出：\nHello LevelDB! 这里使用 Apple Clang 即可，不需要为了学习 LevelDB 特意安装 GCC。\n2.3 安装 CMake 和 Ninja 推荐使用 Homebrew：\nbrew install cmake ninja 检查版本：\ncmake --version ninja --version 其中：\nCMake 负责读取项目中的 CMakeLists.txt，生成构建系统。 Ninja 负责根据生成的构建文件执行编译任务。 当然，也可以直接使用 CMake 默认的 Unix Makefiles，不强制要求 Ninja。\n2.4 创建源码目录 建议将源码、构建产物和自己的测试程序分开管理：\n~/minghan/cs/src/ ├── leveldb/ │ ├── db/ │ ├── table/ │ ├── util/ │ ├── include/ │ ├── helpers/ │ ├── third_party/ │ ├── CMakeLists.txt │ └── ... │ └── leveldb-playground/ ├── CMakeLists.txt ├── examples/ └── build/ 其中：\nleveldb/：LevelDB 官方源码，不建议随意修改项目结构。 leveldb-playground/：自己的实验代码，用来编写测试程序和验证想法。 这样既方便跟踪官方仓库的更新，也方便独立编写自己的实验程序。\n三、获取 LevelDB 源码 3.1 克隆官方仓库 LevelDB 官方仓库：\nhttps://github.com/google/leveldb\n使用下面的命令获取源码：\ncd ~/minghan/cs/src git clone --recurse-submodules \\ https://github.com/google/leveldb.git cd leveldb 这里需要特别注意 --recurse-submodules。\nLevelDB 使用 Git Submodule 管理部分第三方依赖，主要包括：\nthird_party/googletest：Google Test 和 Google Mock，用于单元测试。 third_party/benchmark：Google Benchmark，用于性能测试。 如果仅仅执行：\ngit clone https://github.com/google/leveldb.git 可能只会得到子模块目录，而不会获取其中的实际源码。\n随后执行 CMake，就可能遇到：\nCMake Error at CMakeLists.txt:303 (add_subdirectory): The source directory third_party/googletest does not contain a CMakeLists.txt file. 或者：\nThe source directory third_party/benchmark does not contain a CMakeLists.txt file. 这并不是编译器或者 CMake 本身的问题，而是第三方依赖没有初始化。\n如果已经克隆了仓库，也不需要重新下载，直接执行：\ngit submodule update --init --recursive 检查子模块：\ngit submodule status 正常情况下，子模块状态前面不应该出现 -。\n还可以直接检查：\ntest -f third_party/googletest/CMakeLists.txt \\ \u0026\u0026 echo \"googletest OK\" test -f third_party/benchmark/CMakeLists.txt \\ \u0026\u0026 echo \"benchmark OK\" 3.2 查看源码版本 获取源码后，建议记录当前学习的版本：\ngit log -1 --oneline git describe --tags --always git status 如果学习过程中需要修改源码，可以创建自己的分支：\ngit switch -c study-leveldb 这样可以方便地记录实验过程，也能避免自己的修改与官方代码混在一起。\n一个建议： 阅读源码时尽量固定一个 Git Commit，不要频繁切换版本。不同版本之间的内部实现可能存在差异，固定版本更有利于建立完整的代码理解。\n四、使用 CMake 构建 LevelDB LevelDB 官方使用 CMake 作为构建系统，仓库根目录下的 CMakeLists.txt 定义了编译选项、目标和测试规则。\n当前主线使用 C++17。\n4.1 理解 CMake 构建选项 首先了解几个重要的 CMake 选项：\n选项 默认值 作用 LEVELDB_BUILD_TESTS ON 是否编译单元测试 LEVELDB_BUILD_BENCHMARKS ON 是否编译性能测试 LEVELDB_INSTALL ON 是否生成安装规则 BUILD_SHARED_LIBS OFF 是否构建共享库 对于源码学习，我建议：\n保留单元测试。 保留 Benchmark。 使用 Debug 构建。 生成独立的构建目录。 这样可以在不影响源码目录的情况下，同时维护 Debug 和 Release 两套构建结果。\n4.2 Debug 构建 首先进入 LevelDB 根目录：\ncd ~/minghan/cs/src/leveldb 创建 Debug 构建目录：\ncmake -S . -B build-debug \\ -G Ninja \\ -DCMAKE_BUILD_TYPE=Debug \\ -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \\ -DLEVELDB_BUILD_TESTS=ON \\ -DLEVELDB_BUILD_BENCHMARKS=ON 参数说明：\n-S .：指定源码目录。 -B build-debug：指定构建目录。 -G Ninja：使用 Ninja 生成构建文件。 CMAKE_BUILD_TYPE=Debug：启用 Debug 构建配置。 CMAKE_EXPORT_COMPILE_COMMANDS=ON：生成 compile_commands.json。 LEVELDB_BUILD_TESTS=ON：构建单元测试。 LEVELDB_BUILD_BENCHMARKS=ON：构建性能测试。 其中 compile_commands.json 非常有用。它记录了每个源文件实际使用的编译命令，可以帮助 VS Code、clangd 等工具理解项目的编译环境。\n执行编译：\ncmake --build build-debug \\ --parallel $(sysctl -n hw.ncpu) 也可以指定具体目标：\ncmake --build build-debug --target leveldb 编译完成后，可以检查：\nfind build-debug -name \"*.a\" find build-debug -name \"leveldb_tests\" find build-debug -name \"db_bench\" 默认情况下会生成静态库 libleveldb.a，以及测试和 Benchmark 程序。\n4.3 Release 构建 除了 Debug 构建，建议额外准备一套 Release 环境。\ncmake -S . -B build-release \\ -G Ninja \\ -DCMAKE_BUILD_TYPE=Release \\ -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \\ -DLEVELDB_BUILD_TESTS=ON \\ -DLEVELDB_BUILD_BENCHMARKS=ON 编译：\ncmake --build build-release \\ --parallel $(sysctl -n hw.ncpu) 两套构建目录互不影响：\nleveldb/ ├── build-debug/ │ ├── build.ninja │ ├── compile_commands.json │ └── ... │ ├── build-release/ │ ├── build.ninja │ ├── compile_commands.json │ └── ... │ └── ... 为什么要保留两套环境？\nDebug 版本主要用于：\n设置断点。 查看局部变量。 跟踪函数调用。 分析数据结构。 调试单元测试。 Release 版本主要用于：\n性能测试。 Benchmark。 观察优化后的执行行为。 注意：Debug 和 Release 的执行性能差异可能很大，不能直接使用 Debug 构建结果评价 LevelDB 的实际性能。\n4.4 不需要测试时的构建方式 如果只是想将 LevelDB 集成到自己的项目中，可以关闭测试和 Benchmark：\ncmake -S . -B build \\ -DCMAKE_BUILD_TYPE=Release \\ -DLEVELDB_BUILD_TESTS=OFF \\ -DLEVELDB_BUILD_BENCHMARKS=OFF cmake --build build -j$(sysctl -n hw.ncpu) 但是，如果目的是深入学习源码，我不建议关闭测试。\nLevelDB 的测试代码本身就是非常重要的学习材料。\n五、运行测试与 Benchmark 编译成功并不意味着环境已经完全正常。还需要通过测试程序验证。\n5.1 运行全部单元测试 LevelDB 使用 Google Test 编写单元测试。\n执行：\nctest --test-dir build-debug --output-on-failure 其中：\n--test-dir：指定 CTest 的构建目录。 --output-on-failure：只在测试失败时输出详细信息。 如果全部通过，说明当前构建环境基本正常。\n也可以直接运行测试二进制：\n./build-debug/leveldb_tests Google Test 支持通过过滤器运行指定测试：\n./build-debug/leveldb_tests \\ --gtest_filter=\"DBTest.*\" 例如：\n./build-debug/leveldb_tests \\ --gtest_filter=\"DBTest.Recover*\" 具体测试名称可以先查看：\n./build-debug/leveldb_tests --gtest_list_tests 5.2 认识 LevelDB 的测试组织 建议优先阅读以下测试：\n测试文件 学习内容 db/db_test.cc 数据库整体行为 db/version_set_test.cc Version 和 VersionSet db/write_batch_test.cc 批量写入 db/log_test.cc WAL 日志 db/skiplist_test.cc SkipList table/table_test.cc SSTable util/cache_test.cc LRU Cache util/bloom_test.cc Bloom Filter 不要一开始就试图阅读全部测试代码。\n更有效的方法是：先理解一个功能的测试用例，再跟踪对应的实现。\n例如，研究写入功能时，可以先找到 DBTest 中的写入测试，再追踪 DBImpl::Write()。\n5.3 运行 Benchmark LevelDB 提供 db_bench，用于测试数据库的读写性能。\n执行：\n./build-release/db_bench \\ --benchmarks=fillseq,readseq,readrandom 常见测试项目：\nBenchmark 含义 fillseq 按顺序写入 fillrandom 随机写入 readseq 顺序读取 readrandom 随机读取 readreverse 逆序读取 overwrite 覆盖写入 deleteseq 顺序删除 deleterandom 随机删除 如果需要控制数据规模：\n./build-release/db_bench \\ --num=100000 \\ --benchmarks=fillseq,readseq,readrandom 这里的 --num 表示操作使用的记录数量。\n需要注意，Benchmark 结果受磁盘、缓存、数据规模、压缩策略以及编译优化等因素影响。不同机器之间的结果不宜直接比较。\n六、使用 LLDB 调试 LevelDB 源码 源码学习最重要的环节是调试。\n仅仅通过阅读代码，很难完整理解一次数据库操作究竟经过了哪些模块。借助 LLDB，可以从公开 API 进入内部实现，逐层跟踪函数调用。\n6.1 检查 Debug 符号 首先检查构建产物：\nfile build-debug/leveldb_tests 再查看编译命令：\ngrep -m 1 \"db_impl.cc\" \\ build-debug/compile_commands.json Debug 构建通常会包含 -g，同时不会启用 Release 级别的优化。\n对于源码调试，推荐：\n-DCMAKE_BUILD_TYPE=Debug 如果需要明确控制优化级别，也可以在 Debug 配置中加入：\n-DCMAKE_CXX_FLAGS_DEBUG=\"-g -O0\" -O0 可以减少优化导致的变量消失、代码重排和函数内联问题。\n6.2 启动 LLDB 直接使用 LLDB 启动测试程序：\nlldb -- ./build-debug/leveldb_tests 进入 LLDB 后：\n(lldb) breakpoint set --name leveldb::DBImpl::Write (lldb) run --gtest_filter=DBTest.Empty 如果当前构建版本中的符号名称存在差异，可以先搜索：\n(lldb) image lookup -rn 'DBImpl.*Write' 也可以使用源码行号设置断点：\n(lldb) breakpoint set --file db_impl.cc --line 200 这里的行号只是示例，实际使用时应根据当前源码定位。\n常用 LLDB 命令：\n命令 作用 b function 设置函数断点 b file:line 设置文件行号断点 run 启动程序 n 单步执行，不进入函数 s 单步进入函数 finish 执行到当前函数返回 bt 查看调用栈 frame variable 查看当前栈帧变量 p variable 打印变量 thread backtrace all 查看所有线程调用栈 continue 继续执行 quit 退出调试器 6.3 使用 VS Code 调试 如果习惯使用 VS Code，可以安装 C/C++ 扩展。\n打开 LevelDB 源码目录，创建 .vscode/launch.json：\n{ \"version\": \"0.2.0\", \"configurations\": [ { \"name\": \"Debug LevelDB Tests\", \"type\": \"cppdbg\", \"request\": \"launch\", \"program\": \"${workspaceFolder}/build-debug/leveldb_tests\", \"args\": [ \"--gtest_filter=DBTest.Empty\" ], \"cwd\": \"${workspaceFolder}\", \"MIMode\": \"lldb\", \"stopAtEntry\": false, \"externalConsole\": false } ] } 注意：\n需要安装 VS Code C/C++ 扩展。 program 应该指向实际生成的测试程序。 args 可以指定 Google Test 的过滤器。 调试器需要使用本机可用的 LLDB。 如果 VS Code 找不到 LLDB，可以先在终端执行：\nwhich lldb 再根据实际路径调整调试器配置。\n如果只是进行源码级调试，我更推荐先熟悉命令行 LLDB。命令行方式更加直接，也更方便理解断点、线程和调用栈。\n七、编写自己的 LevelDB 实验程序 只阅读官方测试还不够，建议自己编写一个简单的数据库程序，观察公开 API 如何进入内部实现。\n7.1 编写测试程序 在独立的实验目录中创建：\nleveldb-playground/ ├── CMakeLists.txt ├── main.cpp └── build/ main.cpp：\n#include #include #include #include \"leveldb/db.h\" #include \"leveldb/options.h\" #include \"leveldb/slice.h\" #include \"leveldb/status.h\" int main() { leveldb::DB* db = nullptr; leveldb::Options options; options.create_if_missing = true; const std::string path = \"./testdb\"; leveldb::Status status = leveldb::DB::Open(options, path, \u0026db); if (!status.ok()) { std::cerr \u003c\u003c \"Open failed: \" \u003c\u003c status.ToString() \u003c\u003c '\\n'; return 1; } std::unique_ptr\u003cleveldb::DB\u003e database(db); // Write status = database-\u003ePut( leveldb::WriteOptions(), \"name\", \"LevelDB\" ); if (!status.ok()) { std::cerr \u003c\u003c \"Put failed: \" \u003c\u003c status.ToString() \u003c\u003c '\\n'; return 1; } // Read std::string value; status = database-\u003eGet( leveldb::ReadOptions(), \"name\", \u0026value ); if (!status.ok()) { std::cerr \u003c\u003c \"Get failed: \" \u003c\u003c status.ToString() \u003c\u003c '\\n'; return 1; } std::cout \u003c\u003c \"Value: \" \u003c\u003c value \u003c\u003c '\\n'; // Delete status = database-\u003eDelete( leveldb::WriteOptions(), \"name\" ); if (!status.ok()) { std::cerr \u003c\u003c \"Delete failed: \" \u003c\u003c status.ToString() \u003c\u003c '\\n'; return 1; } return 0; } 这里使用 std::unique_ptr 管理 DB 对象，避免忘记释放资源。\n7.2 编写 CMakeLists.txt 为了避免手动处理 LevelDB 的静态库依赖，推荐直接通过 add_subdirectory() 将 LevelDB 源码作为子项目加入自己的实验工程。\nCMakeLists.txt：\ncmake_minimum_required(VERSION 3.22) project(leveldb_playground LANGUAGES CXX) set(CMAKE_CXX_STANDARD 17) set(CMAKE_CXX_STANDARD_REQUIRED ON) # LevelDB 源码目录 add_subdirectory( ../leveldb ${CMAKE_BINARY_DIR}/leveldb EXCLUDE_FROM_ALL ) add_executable(leveldb_demo main.cpp) target_link_libraries( leveldb_demo PRIVATE leveldb ) 这里假设两个目录是同级目录：\nsrc/ ├── leveldb/ └── leveldb-playground/ 配置并构建：\ncmake -S . -B build \\ -G Ninja \\ -DCMAKE_BUILD_TYPE=Debug \\ -DLEVELDB_BUILD_TESTS=OFF \\ -DLEVELDB_BUILD_BENCHMARKS=OFF cmake --build build 运行：\n./build/leveldb_demo 预期输出：\nValue: LevelDB 此时可以在自己的程序中设置断点，跟踪公开 API 进入 LevelDB 内部实现的完整过程。\n这种方式也非常适合后续修改 LevelDB 源码并观察行为变化。\n八、如何开始阅读 LevelDB 源码 环境搭建完成后，真正的问题是：从哪里开始阅读？\n我不建议按照目录顺序从头到尾阅读 LevelDB。更好的方法是围绕一条完整的数据流展开。\n8.1 先建立整体架构认识 LevelDB 的核心设计思想是 LSM-Tree。\n可以先建立下面这张简化的结构图：\nClient | v Public API | v DBImpl | +--------+--------+ | | v v Write Read | | v v WAL MemTable | | v v MemTable Immutable | | v v Background SSTable Flush | | | +--------+--------+ | v Version | v SSTable Files | v Compaction 这只是帮助理解的概念图，不代表所有操作都严格按照这张图中的单一顺序执行。\n特别是读取操作还会涉及 Immutable MemTable、多个 SSTable、Bloom Filter 和 Block Cache。\n建议先阅读：\ndoc/index.md doc/impl.md include/leveldb/db.h db/db_impl.h db/db_impl.cc 8.2 第一阶段：从 DB::Open 开始 首先理解数据库如何打开。\n建议追踪：\nleveldb::DB::Open() | v DBImpl::Open() | v DBImpl 初始化 | v 恢复数据库状态 | v 创建 DB 实例 重点关注：\nDB 对象如何创建？ 如何判断数据库是否存在？ 如何恢复已有数据库？ 如何恢复日志？ VersionSet 在哪里初始化？ MemTable 在哪里创建？ 这一阶段主要理解数据库启动和恢复机制。\n8.3 第二阶段：追踪一次 Put 操作 这是最值得深入研究的一条路径。\n从用户调用：\ndb-\u003ePut(write_options, key, value); 开始，追踪：\nDB::Put() | v DBImpl::Put() | v WriteBatch | v DBImpl::Write() | +-------------------+ | | v v WAL MemTable | | v v 日志写入 内存更新 | | +---------+---------+ | v Write 完成 需要特别注意：\nPut() 本身只是一个方便的公开接口。 WriteBatch 负责组织一批写操作。 DBImpl::Write() 是写入路径的核心。 WAL 负责记录需要持久化的更新。 MemTable 负责提供内存中的有序数据访问。 这里有一个非常值得思考的问题：\n为什么 LevelDB 需要先写 WAL，再更新 MemTable？\n建议结合 WriteOptions::sync、日志写入、WriteBatch 和 MemTable 更新逻辑理解写入的持久性和原子性。\n8.4 第三阶段：追踪 Get 操作 从：\ndb-\u003eGet(read_options, key, \u0026value); 开始追踪读取路径。\n重点关注：\nDBImpl::Get() MemTable 查询 Immutable MemTable 查询 Version 查询 TableCache BlockCache SSTable 查找 需要理解：为什么 LevelDB 读取数据时，不是简单地从一个文件中查找？\n因为数据可能同时存在于内存表和多个磁盘文件中，而且不同层级的数据可能存在覆盖关系。\n8.5 第四阶段：研究后台 Compaction 当 MemTable 达到一定大小后，LevelDB 会将其转换为磁盘上的 SSTable。\n与此同时，LevelDB 还需要通过 Compaction 整理不同层级的文件。\n重点关注：\nMemTable | v Immutable MemTable | v Flush | v SSTable | v VersionSet | v Compaction | v 新的 SSTable 建议阅读：\ndb/db_impl.cc db/db_impl.h db/version_set.cc db/version_set.h db/builder.cc table/table_builder.cc 重点理解：\n什么情况下触发 Compaction？ 如何选择需要合并的文件？ 如何处理重复 Key？ 如何处理 Delete 操作产生的墓碑？ Compaction 如何更新 Version？ 旧 SSTable 什么时候可以删除？ 这一阶段是理解 LevelDB 存储引擎设计的关键。\n8.6 第五阶段：深入底层数据结构 最后再研究各个底层组件：\n组件 重点文件 学习内容 SkipList db/skiplist.h 跳表及并发读写 MemTable db/memtable.cc 内存数据组织 WAL db/log_writer.cc、db/log_reader.cc 日志格式与恢复 SSTable table/table_builder.cc、table/table.cc 磁盘数据组织 Bloom Filter util/bloom.cc 概率型数据结构 Cache util/cache.cc LRU 缓存 VersionSet db/version_set.cc 文件版本管理 不要试图同时理解所有组件。\n应该沿着一条数据流逐步深入，遇到不理解的数据结构时再进入对应实现。\n九、源码阅读与调试技巧 除了 LLDB，下面这些工具和方法也非常值得掌握。\n9.1 使用 rg 搜索函数定义 推荐安装 ripgrep：\nbrew install ripgrep 搜索函数：\nrg \"DBImpl::Write\" db/ 搜索类定义：\nrg \"class MemTable\" db/ 搜索某个成员变量：\nrg \"imm_\" db/ 搜索函数调用：\nrg \"MakeRoomForWrite\" db/ 9.2 使用 ctags 建立代码索引 安装：\nbrew install universal-ctags 生成索引：\nctags -R . 之后可以借助编辑器跳转到函数定义。\n如果使用 VS Code，也可以使用 clangd 扩展，配合 compile_commands.json 实现更准确的代码跳转、补全和引用查找。\n9.3 使用 git blame 理解代码演进 当遇到难以理解的实现时，不妨查看代码的历史：\ngit blame db/db_impl.cc 查看某个函数的历史：\ngit log -p -S\"MakeRoomForWrite\" -- db/db_impl.cc 这有助于理解：\n某个设计为什么出现？ 某个实现解决了什么问题？ 为什么没有采用更简单的方案？ 9.4 不要只设置函数断点 推荐采用以下调试过程：\n找到公开 API。 找到内部实现。 找到关键状态变量。 设置断点。 单步进入关键函数。 查看调用栈。 观察数据结构变化。 对照测试用例验证自己的理解。 例如研究 DBImpl::Write()，不要只看函数入口和出口，而是重点观察：\nWriteBatch 的内容。 Writer 队列。 WAL 写入位置。 MemTable 的引用。 Sequence Number 的变化。 这样才能真正理解一次写入操作。\n十、推荐的学习路线 如果目标是深入掌握 LevelDB，我建议分为四个阶段。\n阶段一：理解基本使用和架构 目标：能够使用 LevelDB，并理解 LSM-Tree 的基本设计。\n任务：\n编译 LevelDB。 运行所有单元测试。 编写简单的 Put/Get/Delete 程序。 理解 DB、Options、Status、Slice。 阅读 doc/impl.md。 阶段二：理解读写路径 目标：能够独立追踪一次读写操作。\n任务：\n追踪 DB::Open。 追踪 DBImpl::Write。 追踪 DBImpl::Get。 理解 WriteBatch。 理解 WAL。 理解 MemTable。 建议在每条调用链上至少设置一次断点，并记录关键状态的变化。\n阶段三：理解磁盘存储和后台任务 目标：理解数据如何从内存进入磁盘，以及磁盘文件如何组织。\n任务：\n阅读 SSTable 格式。 理解 Block 和 BlockHandle。 理解 TableBuilder。 理解 Version 和 VersionSet。 追踪 Flush。 追踪 Compaction。 阶段四：动手修改和实验 目标：从代码阅读过渡到真正理解设计。\n建议完成以下实验：\n实验 目标 修改 MemTable 写入逻辑 理解内存数据结构 修改 Bloom Filter 参数 理解空间与误判率 调整 BlockCache 容量 观察缓存对读取性能的影响 调整 WriteBufferSize 观察 Flush 频率变化 修改 Compaction 相关参数 观察读写放大和空间放大 追踪 WAL 恢复过程 理解故障恢复 每次实验建议记录：\n修改了什么？ 为什么修改？ 预期结果是什么？ 实际结果是什么？ 是否影响已有测试？ 对性能产生了什么影响？ 不要只看 Benchmark 数字，还要结合源码解释数字变化的原因。\n十一、总结 在 Mac M4 上学习 LevelDB，不需要复杂的交叉编译环境，也不需要额外搭建 Linux 虚拟机。使用 Apple Clang、CMake 和 LLDB，就可以完成源码构建、测试和调试。\n对于源码学习而言，最重要的并不是把所有文件读一遍，而是建立一条完整的理解路径：\n公开 API | v DBImpl | v 读写路径 | v MemTable / WAL | v SSTable | v VersionSet | v Compaction 建议始终坚持一个原则：\n以实际操作为入口，以单元测试为验证，以 LLDB 为工具，以数据结构和状态变化为核心。\n当你能够独立追踪一次 Put、Get、Flush 和 Compaction 的完整执行过程时，才算真正开始理解 LevelDB。\n",
+  "wordCount" : "1595",
+  "inLanguage": "en",
+  "datePublished": "2026-11-05T17:36:38+08:00",
+  "dateModified": "2026-11-05T17:36:38+08:00",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "http://localhost:1313/posts/leveldb01/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Minghan的博客",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "http://localhost:1313/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="header-nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="Minghan的博客 (Alt + H)">Minghan的博客</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" class="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg class="sun" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu" class="menu">
+            <li>
+                <a href="http://localhost:1313/posts/" title="文章">
+                    <span>文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/archives/" title="归档">
+                    <span>归档</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/categories/" title="分类">
+                    <span>分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="标签">
+                    <span>标签</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/moments/" title="随记">
+                    <span>随记</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/photos/" title="照片墙">
+                    <span>照片墙</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/books/" title="阅读">
+                    <span>阅读</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/about/" title="关于">
+                    <span>关于</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <nav class="breadcrumbs" role="navigation" aria-label="Breadcrumb">
+            <a href="/">Home</a>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+            <a href="/posts/">Posts</a>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+        <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+</nav>
+    <h1 class="post-title entry-hint-parent">
+      LevelDB源码学习: 调试环境
+    </h1>
+    <div class="post-meta">
+
+<span title='2026-11-05 17:36:38 +0800 CST'>November 5, 2026</span>&nbsp;·&nbsp;<span>8 min</span>&nbsp;·&nbsp;<span>1595 words</span>
+
+</div>
+  </header> <details class="toc"  open>
+    <summary accesskey="c" title="(Alt + C)">
+        <span class="title">Table of Contents</span>
+    </summary>
+
+    <div class="inner"><ul>
+            <li>
+                <a href="#%e4%b8%80%e4%b8%ba%e4%bb%80%e4%b9%88%e9%80%89%e6%8b%a9-leveldb" aria-label="一、为什么选择 LevelDB">一、为什么选择 LevelDB</a></li>
+            <li>
+                <a href="#%e4%ba%8c%e7%8e%af%e5%a2%83%e5%87%86%e5%a4%87" aria-label="二、环境准备">二、环境准备</a><ul>
+                    
+            <li>
+                <a href="#21-%e5%bc%80%e5%8f%91%e7%8e%af%e5%a2%83" aria-label="2.1 开发环境">2.1 开发环境</a></li>
+            <li>
+                <a href="#22-%e5%ae%89%e8%a3%85-xcode-command-line-tools" aria-label="2.2 安装 Xcode Command Line Tools">2.2 安装 Xcode Command Line Tools</a></li>
+            <li>
+                <a href="#23-%e5%ae%89%e8%a3%85-cmake-%e5%92%8c-ninja" aria-label="2.3 安装 CMake 和 Ninja">2.3 安装 CMake 和 Ninja</a></li>
+            <li>
+                <a href="#24-%e5%88%9b%e5%bb%ba%e6%ba%90%e7%a0%81%e7%9b%ae%e5%bd%95" aria-label="2.4 创建源码目录">2.4 创建源码目录</a></li></ul>
+            </li>
+            <li>
+                <a href="#%e4%b8%89%e8%8e%b7%e5%8f%96-leveldb-%e6%ba%90%e7%a0%81" aria-label="三、获取 LevelDB 源码">三、获取 LevelDB 源码</a><ul>
+                    
+            <li>
+                <a href="#31-%e5%85%8b%e9%9a%86%e5%ae%98%e6%96%b9%e4%bb%93%e5%ba%93" aria-label="3.1 克隆官方仓库">3.1 克隆官方仓库</a></li>
+            <li>
+                <a href="#32-%e6%9f%a5%e7%9c%8b%e6%ba%90%e7%a0%81%e7%89%88%e6%9c%ac" aria-label="3.2 查看源码版本">3.2 查看源码版本</a></li></ul>
+            </li>
+            <li>
+                <a href="#%e5%9b%9b%e4%bd%bf%e7%94%a8-cmake-%e6%9e%84%e5%bb%ba-leveldb" aria-label="四、使用 CMake 构建 LevelDB">四、使用 CMake 构建 LevelDB</a><ul>
+                    
+            <li>
+                <a href="#41-%e7%90%86%e8%a7%a3-cmake-%e6%9e%84%e5%bb%ba%e9%80%89%e9%a1%b9" aria-label="4.1 理解 CMake 构建选项">4.1 理解 CMake 构建选项</a></li>
+            <li>
+                <a href="#42-debug-%e6%9e%84%e5%bb%ba" aria-label="4.2 Debug 构建">4.2 Debug 构建</a></li>
+            <li>
+                <a href="#43-release-%e6%9e%84%e5%bb%ba" aria-label="4.3 Release 构建">4.3 Release 构建</a></li>
+            <li>
+                <a href="#44-%e4%b8%8d%e9%9c%80%e8%a6%81%e6%b5%8b%e8%af%95%e6%97%b6%e7%9a%84%e6%9e%84%e5%bb%ba%e6%96%b9%e5%bc%8f" aria-label="4.4 不需要测试时的构建方式">4.4 不需要测试时的构建方式</a></li></ul>
+            </li>
+            <li>
+                <a href="#%e4%ba%94%e8%bf%90%e8%a1%8c%e6%b5%8b%e8%af%95%e4%b8%8e-benchmark" aria-label="五、运行测试与 Benchmark">五、运行测试与 Benchmark</a><ul>
+                    
+            <li>
+                <a href="#51-%e8%bf%90%e8%a1%8c%e5%85%a8%e9%83%a8%e5%8d%95%e5%85%83%e6%b5%8b%e8%af%95" aria-label="5.1 运行全部单元测试">5.1 运行全部单元测试</a></li>
+            <li>
+                <a href="#52-%e8%ae%a4%e8%af%86-leveldb-%e7%9a%84%e6%b5%8b%e8%af%95%e7%bb%84%e7%bb%87" aria-label="5.2 认识 LevelDB 的测试组织">5.2 认识 LevelDB 的测试组织</a></li>
+            <li>
+                <a href="#53-%e8%bf%90%e8%a1%8c-benchmark" aria-label="5.3 运行 Benchmark">5.3 运行 Benchmark</a></li></ul>
+            </li>
+            <li>
+                <a href="#%e5%85%ad%e4%bd%bf%e7%94%a8-lldb-%e8%b0%83%e8%af%95-leveldb-%e6%ba%90%e7%a0%81" aria-label="六、使用 LLDB 调试 LevelDB 源码">六、使用 LLDB 调试 LevelDB 源码</a><ul>
+                    
+            <li>
+                <a href="#61-%e6%a3%80%e6%9f%a5-debug-%e7%ac%a6%e5%8f%b7" aria-label="6.1 检查 Debug 符号">6.1 检查 Debug 符号</a></li>
+            <li>
+                <a href="#62-%e5%90%af%e5%8a%a8-lldb" aria-label="6.2 启动 LLDB">6.2 启动 LLDB</a></li>
+            <li>
+                <a href="#63-%e4%bd%bf%e7%94%a8-vs-code-%e8%b0%83%e8%af%95" aria-label="6.3 使用 VS Code 调试">6.3 使用 VS Code 调试</a></li></ul>
+            </li>
+            <li>
+                <a href="#%e4%b8%83%e7%bc%96%e5%86%99%e8%87%aa%e5%b7%b1%e7%9a%84-leveldb-%e5%ae%9e%e9%aa%8c%e7%a8%8b%e5%ba%8f" aria-label="七、编写自己的 LevelDB 实验程序">七、编写自己的 LevelDB 实验程序</a><ul>
+                    
+            <li>
+                <a href="#71-%e7%bc%96%e5%86%99%e6%b5%8b%e8%af%95%e7%a8%8b%e5%ba%8f" aria-label="7.1 编写测试程序">7.1 编写测试程序</a></li>
+            <li>
+                <a href="#72-%e7%bc%96%e5%86%99-cmakeliststxt" aria-label="7.2 编写 CMakeLists.txt">7.2 编写 CMakeLists.txt</a></li></ul>
+            </li>
+            <li>
+                <a href="#%e5%85%ab%e5%a6%82%e4%bd%95%e5%bc%80%e5%a7%8b%e9%98%85%e8%af%bb-leveldb-%e6%ba%90%e7%a0%81" aria-label="八、如何开始阅读 LevelDB 源码">八、如何开始阅读 LevelDB 源码</a><ul>
+                    
+            <li>
+                <a href="#81-%e5%85%88%e5%bb%ba%e7%ab%8b%e6%95%b4%e4%bd%93%e6%9e%b6%e6%9e%84%e8%ae%a4%e8%af%86" aria-label="8.1 先建立整体架构认识">8.1 先建立整体架构认识</a></li>
+            <li>
+                <a href="#82-%e7%ac%ac%e4%b8%80%e9%98%b6%e6%ae%b5%e4%bb%8e-dbopen-%e5%bc%80%e5%a7%8b" aria-label="8.2 第一阶段：从 DB::Open 开始">8.2 第一阶段：从 DB::Open 开始</a></li>
+            <li>
+                <a href="#83-%e7%ac%ac%e4%ba%8c%e9%98%b6%e6%ae%b5%e8%bf%bd%e8%b8%aa%e4%b8%80%e6%ac%a1-put-%e6%93%8d%e4%bd%9c" aria-label="8.3 第二阶段：追踪一次 Put 操作">8.3 第二阶段：追踪一次 Put 操作</a></li>
+            <li>
+                <a href="#84-%e7%ac%ac%e4%b8%89%e9%98%b6%e6%ae%b5%e8%bf%bd%e8%b8%aa-get-%e6%93%8d%e4%bd%9c" aria-label="8.4 第三阶段：追踪 Get 操作">8.4 第三阶段：追踪 Get 操作</a></li>
+            <li>
+                <a href="#85-%e7%ac%ac%e5%9b%9b%e9%98%b6%e6%ae%b5%e7%a0%94%e7%a9%b6%e5%90%8e%e5%8f%b0-compaction" aria-label="8.5 第四阶段：研究后台 Compaction">8.5 第四阶段：研究后台 Compaction</a></li>
+            <li>
+                <a href="#86-%e7%ac%ac%e4%ba%94%e9%98%b6%e6%ae%b5%e6%b7%b1%e5%85%a5%e5%ba%95%e5%b1%82%e6%95%b0%e6%8d%ae%e7%bb%93%e6%9e%84" aria-label="8.6 第五阶段：深入底层数据结构">8.6 第五阶段：深入底层数据结构</a></li></ul>
+            </li>
+            <li>
+                <a href="#%e4%b9%9d%e6%ba%90%e7%a0%81%e9%98%85%e8%af%bb%e4%b8%8e%e8%b0%83%e8%af%95%e6%8a%80%e5%b7%a7" aria-label="九、源码阅读与调试技巧">九、源码阅读与调试技巧</a><ul>
+                    
+            <li>
+                <a href="#91-%e4%bd%bf%e7%94%a8-rg-%e6%90%9c%e7%b4%a2%e5%87%bd%e6%95%b0%e5%ae%9a%e4%b9%89" aria-label="9.1 使用 rg 搜索函数定义">9.1 使用 rg 搜索函数定义</a></li>
+            <li>
+                <a href="#92-%e4%bd%bf%e7%94%a8-ctags-%e5%bb%ba%e7%ab%8b%e4%bb%a3%e7%a0%81%e7%b4%a2%e5%bc%95" aria-label="9.2 使用 ctags 建立代码索引">9.2 使用 ctags 建立代码索引</a></li>
+            <li>
+                <a href="#93-%e4%bd%bf%e7%94%a8-git-blame-%e7%90%86%e8%a7%a3%e4%bb%a3%e7%a0%81%e6%bc%94%e8%bf%9b" aria-label="9.3 使用 git blame 理解代码演进">9.3 使用 git blame 理解代码演进</a></li>
+            <li>
+                <a href="#94-%e4%b8%8d%e8%a6%81%e5%8f%aa%e8%ae%be%e7%bd%ae%e5%87%bd%e6%95%b0%e6%96%ad%e7%82%b9" aria-label="9.4 不要只设置函数断点">9.4 不要只设置函数断点</a></li></ul>
+            </li>
+            <li>
+                <a href="#%e5%8d%81%e6%8e%a8%e8%8d%90%e7%9a%84%e5%ad%a6%e4%b9%a0%e8%b7%af%e7%ba%bf" aria-label="十、推荐的学习路线">十、推荐的学习路线</a><ul>
+                    
+            <li>
+                <a href="#%e9%98%b6%e6%ae%b5%e4%b8%80%e7%90%86%e8%a7%a3%e5%9f%ba%e6%9c%ac%e4%bd%bf%e7%94%a8%e5%92%8c%e6%9e%b6%e6%9e%84" aria-label="阶段一：理解基本使用和架构">阶段一：理解基本使用和架构</a></li>
+            <li>
+                <a href="#%e9%98%b6%e6%ae%b5%e4%ba%8c%e7%90%86%e8%a7%a3%e8%af%bb%e5%86%99%e8%b7%af%e5%be%84" aria-label="阶段二：理解读写路径">阶段二：理解读写路径</a></li>
+            <li>
+                <a href="#%e9%98%b6%e6%ae%b5%e4%b8%89%e7%90%86%e8%a7%a3%e7%a3%81%e7%9b%98%e5%ad%98%e5%82%a8%e5%92%8c%e5%90%8e%e5%8f%b0%e4%bb%bb%e5%8a%a1" aria-label="阶段三：理解磁盘存储和后台任务">阶段三：理解磁盘存储和后台任务</a></li>
+            <li>
+                <a href="#%e9%98%b6%e6%ae%b5%e5%9b%9b%e5%8a%a8%e6%89%8b%e4%bf%ae%e6%94%b9%e5%92%8c%e5%ae%9e%e9%aa%8c" aria-label="阶段四：动手修改和实验">阶段四：动手修改和实验</a></li></ul>
+            </li>
+            <li>
+                <a href="#%e5%8d%81%e4%b8%80%e6%80%bb%e7%bb%93" aria-label="十一、总结">十一、总结</a>
+            </li>
+        </ul>
+    </div>
+</details>
+
+  <div class="post-content md-content"><h1 id="一为什么选择-leveldb">一、为什么选择 LevelDB<a hidden class="anchor" aria-hidden="true" href="#一为什么选择-leveldb">#</a></h1>
+<p><a href="https://github.com/google/leveldb">LevelDB</a> 是 Google 开源的一款高性能嵌入式 Key-Value 存储引擎，使用 C++ 编写。它提供有序的键值映射，支持基本的 Put、Get、Delete 操作，同时支持批量写入、快照、迭代器以及数据压缩。</p>
+<p>LevelDB 虽然不是一个完整的关系型数据库，但它的实现涉及很多值得深入学习的系统编程技术：</p>
+<ul>
+<li><strong>LSM-Tree：</strong> 理解日志结构合并树的基本设计思想。</li>
+<li><strong>WAL：</strong> 理解预写日志如何保证写入的持久性。</li>
+<li><strong>MemTable：</strong> 理解内存中的有序数据结构及其实现。</li>
+<li><strong>SSTable：</strong> 理解磁盘上的有序数据组织方式。</li>
+<li><strong>Compaction：</strong> 理解后台数据合并、磁盘空间回收和读写放大的权衡。</li>
+<li><strong>Cache：</strong> 理解缓存设计及引用计数。</li>
+<li><strong>并发控制：</strong> 理解互斥锁、条件变量和后台任务调度。</li>
+</ul>
+<p>相比从零开始阅读一个大型数据库，LevelDB 的代码规模相对适中，非常适合作为深入学习存储引擎的起点。</p>
+<p>本文以 Apple Silicon Mac（M 系列芯片）为例，搭建一套可以进行源码阅读、单步调试、单元测试和性能测试的开发环境。</p>
+<h1 id="二环境准备">二、环境准备<a hidden class="anchor" aria-hidden="true" href="#二环境准备">#</a></h1>
+<h2 id="21-开发环境">2.1 开发环境<a hidden class="anchor" aria-hidden="true" href="#21-开发环境">#</a></h2>
+<p>本文使用以下工具：</p>
+<table>
+	<thead>
+			<tr>
+					<th>工具</th>
+					<th>用途</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>macOS</td>
+					<td>开发操作系统</td>
+			</tr>
+			<tr>
+					<td>Apple Clang</td>
+					<td>C/C++ 编译器</td>
+			</tr>
+			<tr>
+					<td>CMake</td>
+					<td>项目构建系统</td>
+			</tr>
+			<tr>
+					<td>Ninja</td>
+					<td>可选的构建后端</td>
+			</tr>
+			<tr>
+					<td>LLDB</td>
+					<td>源码级调试器</td>
+			</tr>
+			<tr>
+					<td>Git</td>
+					<td>源码版本管理</td>
+			</tr>
+			<tr>
+					<td>VS Code</td>
+					<td>代码阅读和编辑</td>
+			</tr>
+	</tbody>
+</table>
+<p>LevelDB 当前主线要求 C++17，CMake 工程要求 CMake 3.22 或更新版本。因此，需要提前准备合适的工具链。</p>
+<h2 id="22-安装-xcode-command-line-tools">2.2 安装 Xcode Command Line Tools<a hidden class="anchor" aria-hidden="true" href="#22-安装-xcode-command-line-tools">#</a></h2>
+<p>macOS 可以直接使用 Apple 提供的 Clang 工具链。</p>
+<p>执行：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">xcode-select --install
+</span></span></code></pre></div><p>安装完成后检查：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">clang --version
+</span></span><span class="line"><span class="cl">clang++ --version
+</span></span><span class="line"><span class="cl">lldb --version
+</span></span></code></pre></div><p>检查编译器是否正常：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">cat &gt; hello.cpp <span class="s">&lt;&lt;&#39;EOF&#39;
+</span></span></span><span class="line"><span class="cl"><span class="s">#include &lt;iostream&gt;
+</span></span></span><span class="line"><span class="cl"><span class="s">
+</span></span></span><span class="line"><span class="cl"><span class="s">int main() {
+</span></span></span><span class="line"><span class="cl"><span class="s">    std::cout &lt;&lt; &#34;Hello LevelDB!&#34; &lt;&lt; std::endl;
+</span></span></span><span class="line"><span class="cl"><span class="s">    return 0;
+</span></span></span><span class="line"><span class="cl"><span class="s">}
+</span></span></span><span class="line"><span class="cl"><span class="s">EOF</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">clang++ -std<span class="o">=</span>c++17 hello.cpp -o hello
+</span></span><span class="line"><span class="cl">./hello
+</span></span></code></pre></div><p>正常情况下输出：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">Hello LevelDB!
+</span></span></code></pre></div><p>这里使用 Apple Clang 即可，不需要为了学习 LevelDB 特意安装 GCC。</p>
+<h2 id="23-安装-cmake-和-ninja">2.3 安装 CMake 和 Ninja<a hidden class="anchor" aria-hidden="true" href="#23-安装-cmake-和-ninja">#</a></h2>
+<p>推荐使用 Homebrew：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">brew install cmake ninja
+</span></span></code></pre></div><p>检查版本：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">cmake --version
+</span></span><span class="line"><span class="cl">ninja --version
+</span></span></code></pre></div><p>其中：</p>
+<ul>
+<li>CMake 负责读取项目中的 <code>CMakeLists.txt</code>，生成构建系统。</li>
+<li>Ninja 负责根据生成的构建文件执行编译任务。</li>
+</ul>
+<p>当然，也可以直接使用 CMake 默认的 Unix Makefiles，不强制要求 Ninja。</p>
+<h2 id="24-创建源码目录">2.4 创建源码目录<a hidden class="anchor" aria-hidden="true" href="#24-创建源码目录">#</a></h2>
+<p>建议将源码、构建产物和自己的测试程序分开管理：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">~/minghan/cs/src/
+</span></span><span class="line"><span class="cl">├── leveldb/
+</span></span><span class="line"><span class="cl">│   ├── db/
+</span></span><span class="line"><span class="cl">│   ├── table/
+</span></span><span class="line"><span class="cl">│   ├── util/
+</span></span><span class="line"><span class="cl">│   ├── include/
+</span></span><span class="line"><span class="cl">│   ├── helpers/
+</span></span><span class="line"><span class="cl">│   ├── third_party/
+</span></span><span class="line"><span class="cl">│   ├── CMakeLists.txt
+</span></span><span class="line"><span class="cl">│   └── ...
+</span></span><span class="line"><span class="cl">│
+</span></span><span class="line"><span class="cl">└── leveldb-playground/
+</span></span><span class="line"><span class="cl">    ├── CMakeLists.txt
+</span></span><span class="line"><span class="cl">    ├── examples/
+</span></span><span class="line"><span class="cl">    └── build/
+</span></span></code></pre></div><p>其中：</p>
+<ul>
+<li><code>leveldb/</code>：LevelDB 官方源码，不建议随意修改项目结构。</li>
+<li><code>leveldb-playground/</code>：自己的实验代码，用来编写测试程序和验证想法。</li>
+</ul>
+<p>这样既方便跟踪官方仓库的更新，也方便独立编写自己的实验程序。</p>
+<h1 id="三获取-leveldb-源码">三、获取 LevelDB 源码<a hidden class="anchor" aria-hidden="true" href="#三获取-leveldb-源码">#</a></h1>
+<h2 id="31-克隆官方仓库">3.1 克隆官方仓库<a hidden class="anchor" aria-hidden="true" href="#31-克隆官方仓库">#</a></h2>
+<p>LevelDB 官方仓库：</p>
+<p><a href="https://github.com/google/leveldb">https://github.com/google/leveldb</a></p>
+<p>使用下面的命令获取源码：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nb">cd</span> ~/minghan/cs/src
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">git clone --recurse-submodules <span class="se">\
+</span></span></span><span class="line"><span class="cl">    https://github.com/google/leveldb.git
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nb">cd</span> leveldb
+</span></span></code></pre></div><p>这里需要特别注意 <code>--recurse-submodules</code>。</p>
+<p>LevelDB 使用 Git Submodule 管理部分第三方依赖，主要包括：</p>
+<ul>
+<li><code>third_party/googletest</code>：Google Test 和 Google Mock，用于单元测试。</li>
+<li><code>third_party/benchmark</code>：Google Benchmark，用于性能测试。</li>
+</ul>
+<p>如果仅仅执行：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">git clone https://github.com/google/leveldb.git
+</span></span></code></pre></div><p>可能只会得到子模块目录，而不会获取其中的实际源码。</p>
+<p>随后执行 CMake，就可能遇到：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">CMake Error at CMakeLists.txt:303 (add_subdirectory):
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">The source directory
+</span></span><span class="line"><span class="cl">third_party/googletest
+</span></span><span class="line"><span class="cl">does not contain a CMakeLists.txt file.
+</span></span></code></pre></div><p>或者：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">The source directory
+</span></span><span class="line"><span class="cl">third_party/benchmark
+</span></span><span class="line"><span class="cl">does not contain a CMakeLists.txt file.
+</span></span></code></pre></div><p>这并不是编译器或者 CMake 本身的问题，而是第三方依赖没有初始化。</p>
+<p>如果已经克隆了仓库，也不需要重新下载，直接执行：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">git submodule update --init --recursive
+</span></span></code></pre></div><p>检查子模块：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">git submodule status
+</span></span></code></pre></div><p>正常情况下，子模块状态前面不应该出现 <code>-</code>。</p>
+<p>还可以直接检查：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nb">test</span> -f third_party/googletest/CMakeLists.txt <span class="se">\
+</span></span></span><span class="line"><span class="cl">    <span class="o">&amp;&amp;</span> <span class="nb">echo</span> <span class="s2">&#34;googletest OK&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nb">test</span> -f third_party/benchmark/CMakeLists.txt <span class="se">\
+</span></span></span><span class="line"><span class="cl">    <span class="o">&amp;&amp;</span> <span class="nb">echo</span> <span class="s2">&#34;benchmark OK&#34;</span>
+</span></span></code></pre></div><h2 id="32-查看源码版本">3.2 查看源码版本<a hidden class="anchor" aria-hidden="true" href="#32-查看源码版本">#</a></h2>
+<p>获取源码后，建议记录当前学习的版本：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">git log -1 --oneline
+</span></span><span class="line"><span class="cl">git describe --tags --always
+</span></span><span class="line"><span class="cl">git status
+</span></span></code></pre></div><p>如果学习过程中需要修改源码，可以创建自己的分支：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">git switch -c study-leveldb
+</span></span></code></pre></div><p>这样可以方便地记录实验过程，也能避免自己的修改与官方代码混在一起。</p>
+<p><strong>一个建议：</strong> 阅读源码时尽量固定一个 Git Commit，不要频繁切换版本。不同版本之间的内部实现可能存在差异，固定版本更有利于建立完整的代码理解。</p>
+<h1 id="四使用-cmake-构建-leveldb">四、使用 CMake 构建 LevelDB<a hidden class="anchor" aria-hidden="true" href="#四使用-cmake-构建-leveldb">#</a></h1>
+<p>LevelDB 官方使用 CMake 作为构建系统，仓库根目录下的 <code>CMakeLists.txt</code> 定义了编译选项、目标和测试规则。</p>
+<p>当前主线使用 C++17。</p>
+<h2 id="41-理解-cmake-构建选项">4.1 理解 CMake 构建选项<a hidden class="anchor" aria-hidden="true" href="#41-理解-cmake-构建选项">#</a></h2>
+<p>首先了解几个重要的 CMake 选项：</p>
+<table>
+	<thead>
+			<tr>
+					<th>选项</th>
+					<th>默认值</th>
+					<th>作用</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>LEVELDB_BUILD_TESTS</code></td>
+					<td>ON</td>
+					<td>是否编译单元测试</td>
+			</tr>
+			<tr>
+					<td><code>LEVELDB_BUILD_BENCHMARKS</code></td>
+					<td>ON</td>
+					<td>是否编译性能测试</td>
+			</tr>
+			<tr>
+					<td><code>LEVELDB_INSTALL</code></td>
+					<td>ON</td>
+					<td>是否生成安装规则</td>
+			</tr>
+			<tr>
+					<td><code>BUILD_SHARED_LIBS</code></td>
+					<td>OFF</td>
+					<td>是否构建共享库</td>
+			</tr>
+	</tbody>
+</table>
+<p>对于源码学习，我建议：</p>
+<ul>
+<li>保留单元测试。</li>
+<li>保留 Benchmark。</li>
+<li>使用 Debug 构建。</li>
+<li>生成独立的构建目录。</li>
+</ul>
+<p>这样可以在不影响源码目录的情况下，同时维护 Debug 和 Release 两套构建结果。</p>
+<h2 id="42-debug-构建">4.2 Debug 构建<a hidden class="anchor" aria-hidden="true" href="#42-debug-构建">#</a></h2>
+<p>首先进入 LevelDB 根目录：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nb">cd</span> ~/minghan/cs/src/leveldb
+</span></span></code></pre></div><p>创建 Debug 构建目录：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">cmake -S . -B build-debug <span class="se">\
+</span></span></span><span class="line"><span class="cl">    -G Ninja <span class="se">\
+</span></span></span><span class="line"><span class="cl">    -DCMAKE_BUILD_TYPE<span class="o">=</span>Debug <span class="se">\
+</span></span></span><span class="line"><span class="cl">    -DCMAKE_EXPORT_COMPILE_COMMANDS<span class="o">=</span>ON <span class="se">\
+</span></span></span><span class="line"><span class="cl">    -DLEVELDB_BUILD_TESTS<span class="o">=</span>ON <span class="se">\
+</span></span></span><span class="line"><span class="cl">    -DLEVELDB_BUILD_BENCHMARKS<span class="o">=</span>ON
+</span></span></code></pre></div><p>参数说明：</p>
+<ul>
+<li><code>-S .</code>：指定源码目录。</li>
+<li><code>-B build-debug</code>：指定构建目录。</li>
+<li><code>-G Ninja</code>：使用 Ninja 生成构建文件。</li>
+<li><code>CMAKE_BUILD_TYPE=Debug</code>：启用 Debug 构建配置。</li>
+<li><code>CMAKE_EXPORT_COMPILE_COMMANDS=ON</code>：生成 <code>compile_commands.json</code>。</li>
+<li><code>LEVELDB_BUILD_TESTS=ON</code>：构建单元测试。</li>
+<li><code>LEVELDB_BUILD_BENCHMARKS=ON</code>：构建性能测试。</li>
+</ul>
+<p>其中 <code>compile_commands.json</code> 非常有用。它记录了每个源文件实际使用的编译命令，可以帮助 VS Code、clangd 等工具理解项目的编译环境。</p>
+<p>执行编译：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">cmake --build build-debug <span class="se">\
+</span></span></span><span class="line"><span class="cl">    --parallel <span class="k">$(</span>sysctl -n hw.ncpu<span class="k">)</span>
+</span></span></code></pre></div><p>也可以指定具体目标：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">cmake --build build-debug --target leveldb
+</span></span></code></pre></div><p>编译完成后，可以检查：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">find build-debug -name <span class="s2">&#34;*.a&#34;</span>
+</span></span><span class="line"><span class="cl">find build-debug -name <span class="s2">&#34;leveldb_tests&#34;</span>
+</span></span><span class="line"><span class="cl">find build-debug -name <span class="s2">&#34;db_bench&#34;</span>
+</span></span></code></pre></div><p>默认情况下会生成静态库 <code>libleveldb.a</code>，以及测试和 Benchmark 程序。</p>
+<h2 id="43-release-构建">4.3 Release 构建<a hidden class="anchor" aria-hidden="true" href="#43-release-构建">#</a></h2>
+<p>除了 Debug 构建，建议额外准备一套 Release 环境。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">cmake -S . -B build-release <span class="se">\
+</span></span></span><span class="line"><span class="cl">    -G Ninja <span class="se">\
+</span></span></span><span class="line"><span class="cl">    -DCMAKE_BUILD_TYPE<span class="o">=</span>Release <span class="se">\
+</span></span></span><span class="line"><span class="cl">    -DCMAKE_EXPORT_COMPILE_COMMANDS<span class="o">=</span>ON <span class="se">\
+</span></span></span><span class="line"><span class="cl">    -DLEVELDB_BUILD_TESTS<span class="o">=</span>ON <span class="se">\
+</span></span></span><span class="line"><span class="cl">    -DLEVELDB_BUILD_BENCHMARKS<span class="o">=</span>ON
+</span></span></code></pre></div><p>编译：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">cmake --build build-release <span class="se">\
+</span></span></span><span class="line"><span class="cl">    --parallel <span class="k">$(</span>sysctl -n hw.ncpu<span class="k">)</span>
+</span></span></code></pre></div><p>两套构建目录互不影响：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">leveldb/
+</span></span><span class="line"><span class="cl">├── build-debug/
+</span></span><span class="line"><span class="cl">│   ├── build.ninja
+</span></span><span class="line"><span class="cl">│   ├── compile_commands.json
+</span></span><span class="line"><span class="cl">│   └── ...
+</span></span><span class="line"><span class="cl">│
+</span></span><span class="line"><span class="cl">├── build-release/
+</span></span><span class="line"><span class="cl">│   ├── build.ninja
+</span></span><span class="line"><span class="cl">│   ├── compile_commands.json
+</span></span><span class="line"><span class="cl">│   └── ...
+</span></span><span class="line"><span class="cl">│
+</span></span><span class="line"><span class="cl">└── ...
+</span></span></code></pre></div><p>为什么要保留两套环境？</p>
+<p>Debug 版本主要用于：</p>
+<ul>
+<li>设置断点。</li>
+<li>查看局部变量。</li>
+<li>跟踪函数调用。</li>
+<li>分析数据结构。</li>
+<li>调试单元测试。</li>
+</ul>
+<p>Release 版本主要用于：</p>
+<ul>
+<li>性能测试。</li>
+<li>Benchmark。</li>
+<li>观察优化后的执行行为。</li>
+</ul>
+<p>注意：Debug 和 Release 的执行性能差异可能很大，不能直接使用 Debug 构建结果评价 LevelDB 的实际性能。</p>
+<h2 id="44-不需要测试时的构建方式">4.4 不需要测试时的构建方式<a hidden class="anchor" aria-hidden="true" href="#44-不需要测试时的构建方式">#</a></h2>
+<p>如果只是想将 LevelDB 集成到自己的项目中，可以关闭测试和 Benchmark：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">cmake -S . -B build <span class="se">\
+</span></span></span><span class="line"><span class="cl">    -DCMAKE_BUILD_TYPE<span class="o">=</span>Release <span class="se">\
+</span></span></span><span class="line"><span class="cl">    -DLEVELDB_BUILD_TESTS<span class="o">=</span>OFF <span class="se">\
+</span></span></span><span class="line"><span class="cl">    -DLEVELDB_BUILD_BENCHMARKS<span class="o">=</span>OFF
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">cmake --build build -j<span class="k">$(</span>sysctl -n hw.ncpu<span class="k">)</span>
+</span></span></code></pre></div><p>但是，如果目的是深入学习源码，我不建议关闭测试。</p>
+<p>LevelDB 的测试代码本身就是非常重要的学习材料。</p>
+<h1 id="五运行测试与-benchmark">五、运行测试与 Benchmark<a hidden class="anchor" aria-hidden="true" href="#五运行测试与-benchmark">#</a></h1>
+<p>编译成功并不意味着环境已经完全正常。还需要通过测试程序验证。</p>
+<h2 id="51-运行全部单元测试">5.1 运行全部单元测试<a hidden class="anchor" aria-hidden="true" href="#51-运行全部单元测试">#</a></h2>
+<p>LevelDB 使用 Google Test 编写单元测试。</p>
+<p>执行：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">ctest --test-dir build-debug --output-on-failure
+</span></span></code></pre></div><p>其中：</p>
+<ul>
+<li><code>--test-dir</code>：指定 CTest 的构建目录。</li>
+<li><code>--output-on-failure</code>：只在测试失败时输出详细信息。</li>
+</ul>
+<p>如果全部通过，说明当前构建环境基本正常。</p>
+<p>也可以直接运行测试二进制：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">./build-debug/leveldb_tests
+</span></span></code></pre></div><p>Google Test 支持通过过滤器运行指定测试：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">./build-debug/leveldb_tests <span class="se">\
+</span></span></span><span class="line"><span class="cl">    --gtest_filter<span class="o">=</span><span class="s2">&#34;DBTest.*&#34;</span>
+</span></span></code></pre></div><p>例如：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">./build-debug/leveldb_tests <span class="se">\
+</span></span></span><span class="line"><span class="cl">    --gtest_filter<span class="o">=</span><span class="s2">&#34;DBTest.Recover*&#34;</span>
+</span></span></code></pre></div><p>具体测试名称可以先查看：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">./build-debug/leveldb_tests --gtest_list_tests
+</span></span></code></pre></div><h2 id="52-认识-leveldb-的测试组织">5.2 认识 LevelDB 的测试组织<a hidden class="anchor" aria-hidden="true" href="#52-认识-leveldb-的测试组织">#</a></h2>
+<p>建议优先阅读以下测试：</p>
+<table>
+	<thead>
+			<tr>
+					<th>测试文件</th>
+					<th>学习内容</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>db/db_test.cc</code></td>
+					<td>数据库整体行为</td>
+			</tr>
+			<tr>
+					<td><code>db/version_set_test.cc</code></td>
+					<td>Version 和 VersionSet</td>
+			</tr>
+			<tr>
+					<td><code>db/write_batch_test.cc</code></td>
+					<td>批量写入</td>
+			</tr>
+			<tr>
+					<td><code>db/log_test.cc</code></td>
+					<td>WAL 日志</td>
+			</tr>
+			<tr>
+					<td><code>db/skiplist_test.cc</code></td>
+					<td>SkipList</td>
+			</tr>
+			<tr>
+					<td><code>table/table_test.cc</code></td>
+					<td>SSTable</td>
+			</tr>
+			<tr>
+					<td><code>util/cache_test.cc</code></td>
+					<td>LRU Cache</td>
+			</tr>
+			<tr>
+					<td><code>util/bloom_test.cc</code></td>
+					<td>Bloom Filter</td>
+			</tr>
+	</tbody>
+</table>
+<p>不要一开始就试图阅读全部测试代码。</p>
+<p>更有效的方法是：先理解一个功能的测试用例，再跟踪对应的实现。</p>
+<p>例如，研究写入功能时，可以先找到 <code>DBTest</code> 中的写入测试，再追踪 <code>DBImpl::Write()</code>。</p>
+<h2 id="53-运行-benchmark">5.3 运行 Benchmark<a hidden class="anchor" aria-hidden="true" href="#53-运行-benchmark">#</a></h2>
+<p>LevelDB 提供 <code>db_bench</code>，用于测试数据库的读写性能。</p>
+<p>执行：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">./build-release/db_bench <span class="se">\
+</span></span></span><span class="line"><span class="cl">    --benchmarks<span class="o">=</span>fillseq,readseq,readrandom
+</span></span></code></pre></div><p>常见测试项目：</p>
+<table>
+	<thead>
+			<tr>
+					<th>Benchmark</th>
+					<th>含义</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>fillseq</code></td>
+					<td>按顺序写入</td>
+			</tr>
+			<tr>
+					<td><code>fillrandom</code></td>
+					<td>随机写入</td>
+			</tr>
+			<tr>
+					<td><code>readseq</code></td>
+					<td>顺序读取</td>
+			</tr>
+			<tr>
+					<td><code>readrandom</code></td>
+					<td>随机读取</td>
+			</tr>
+			<tr>
+					<td><code>readreverse</code></td>
+					<td>逆序读取</td>
+			</tr>
+			<tr>
+					<td><code>overwrite</code></td>
+					<td>覆盖写入</td>
+			</tr>
+			<tr>
+					<td><code>deleteseq</code></td>
+					<td>顺序删除</td>
+			</tr>
+			<tr>
+					<td><code>deleterandom</code></td>
+					<td>随机删除</td>
+			</tr>
+	</tbody>
+</table>
+<p>如果需要控制数据规模：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">./build-release/db_bench <span class="se">\
+</span></span></span><span class="line"><span class="cl">    --num<span class="o">=</span><span class="m">100000</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl">    --benchmarks<span class="o">=</span>fillseq,readseq,readrandom
+</span></span></code></pre></div><p>这里的 <code>--num</code> 表示操作使用的记录数量。</p>
+<p>需要注意，Benchmark 结果受磁盘、缓存、数据规模、压缩策略以及编译优化等因素影响。不同机器之间的结果不宜直接比较。</p>
+<h1 id="六使用-lldb-调试-leveldb-源码">六、使用 LLDB 调试 LevelDB 源码<a hidden class="anchor" aria-hidden="true" href="#六使用-lldb-调试-leveldb-源码">#</a></h1>
+<p>源码学习最重要的环节是调试。</p>
+<p>仅仅通过阅读代码，很难完整理解一次数据库操作究竟经过了哪些模块。借助 LLDB，可以从公开 API 进入内部实现，逐层跟踪函数调用。</p>
+<h2 id="61-检查-debug-符号">6.1 检查 Debug 符号<a hidden class="anchor" aria-hidden="true" href="#61-检查-debug-符号">#</a></h2>
+<p>首先检查构建产物：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">file build-debug/leveldb_tests
+</span></span></code></pre></div><p>再查看编译命令：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">grep -m <span class="m">1</span> <span class="s2">&#34;db_impl.cc&#34;</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl">    build-debug/compile_commands.json
+</span></span></code></pre></div><p>Debug 构建通常会包含 <code>-g</code>，同时不会启用 Release 级别的优化。</p>
+<p>对于源码调试，推荐：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">-DCMAKE_BUILD_TYPE=Debug
+</span></span></code></pre></div><p>如果需要明确控制优化级别，也可以在 Debug 配置中加入：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">-DCMAKE_CXX_FLAGS_DEBUG<span class="o">=</span><span class="s2">&#34;-g -O0&#34;</span>
+</span></span></code></pre></div><p><code>-O0</code> 可以减少优化导致的变量消失、代码重排和函数内联问题。</p>
+<h2 id="62-启动-lldb">6.2 启动 LLDB<a hidden class="anchor" aria-hidden="true" href="#62-启动-lldb">#</a></h2>
+<p>直接使用 LLDB 启动测试程序：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">lldb -- ./build-debug/leveldb_tests
+</span></span></code></pre></div><p>进入 LLDB 后：</p>
+<pre tabindex="0"><code class="language-lldb" data-lang="lldb">(lldb) breakpoint set --name leveldb::DBImpl::Write
+(lldb) run --gtest_filter=DBTest.Empty
+</code></pre><p>如果当前构建版本中的符号名称存在差异，可以先搜索：</p>
+<pre tabindex="0"><code class="language-lldb" data-lang="lldb">(lldb) image lookup -rn &#39;DBImpl.*Write&#39;
+</code></pre><p>也可以使用源码行号设置断点：</p>
+<pre tabindex="0"><code class="language-lldb" data-lang="lldb">(lldb) breakpoint set --file db_impl.cc --line 200
+</code></pre><p>这里的行号只是示例，实际使用时应根据当前源码定位。</p>
+<p>常用 LLDB 命令：</p>
+<table>
+	<thead>
+			<tr>
+					<th>命令</th>
+					<th>作用</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>b function</code></td>
+					<td>设置函数断点</td>
+			</tr>
+			<tr>
+					<td><code>b file:line</code></td>
+					<td>设置文件行号断点</td>
+			</tr>
+			<tr>
+					<td><code>run</code></td>
+					<td>启动程序</td>
+			</tr>
+			<tr>
+					<td><code>n</code></td>
+					<td>单步执行，不进入函数</td>
+			</tr>
+			<tr>
+					<td><code>s</code></td>
+					<td>单步进入函数</td>
+			</tr>
+			<tr>
+					<td><code>finish</code></td>
+					<td>执行到当前函数返回</td>
+			</tr>
+			<tr>
+					<td><code>bt</code></td>
+					<td>查看调用栈</td>
+			</tr>
+			<tr>
+					<td><code>frame variable</code></td>
+					<td>查看当前栈帧变量</td>
+			</tr>
+			<tr>
+					<td><code>p variable</code></td>
+					<td>打印变量</td>
+			</tr>
+			<tr>
+					<td><code>thread backtrace all</code></td>
+					<td>查看所有线程调用栈</td>
+			</tr>
+			<tr>
+					<td><code>continue</code></td>
+					<td>继续执行</td>
+			</tr>
+			<tr>
+					<td><code>quit</code></td>
+					<td>退出调试器</td>
+			</tr>
+	</tbody>
+</table>
+<h2 id="63-使用-vs-code-调试">6.3 使用 VS Code 调试<a hidden class="anchor" aria-hidden="true" href="#63-使用-vs-code-调试">#</a></h2>
+<p>如果习惯使用 VS Code，可以安装 C/C++ 扩展。</p>
+<p>打开 LevelDB 源码目录，创建 <code>.vscode/launch.json</code>：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="s2">&#34;0.2.0&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;configurations&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Debug LevelDB Tests&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;cppdbg&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;request&#34;</span><span class="p">:</span> <span class="s2">&#34;launch&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;program&#34;</span><span class="p">:</span> <span class="s2">&#34;${workspaceFolder}/build-debug/leveldb_tests&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;args&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">                <span class="s2">&#34;--gtest_filter=DBTest.Empty&#34;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">],</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;cwd&#34;</span><span class="p">:</span> <span class="s2">&#34;${workspaceFolder}&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;MIMode&#34;</span><span class="p">:</span> <span class="s2">&#34;lldb&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;stopAtEntry&#34;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;externalConsole&#34;</span><span class="p">:</span> <span class="kc">false</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>注意：</p>
+<ol>
+<li>需要安装 VS Code C/C++ 扩展。</li>
+<li><code>program</code> 应该指向实际生成的测试程序。</li>
+<li><code>args</code> 可以指定 Google Test 的过滤器。</li>
+<li>调试器需要使用本机可用的 LLDB。</li>
+</ol>
+<p>如果 VS Code 找不到 LLDB，可以先在终端执行：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">which lldb
+</span></span></code></pre></div><p>再根据实际路径调整调试器配置。</p>
+<p>如果只是进行源码级调试，我更推荐先熟悉命令行 LLDB。命令行方式更加直接，也更方便理解断点、线程和调用栈。</p>
+<h1 id="七编写自己的-leveldb-实验程序">七、编写自己的 LevelDB 实验程序<a hidden class="anchor" aria-hidden="true" href="#七编写自己的-leveldb-实验程序">#</a></h1>
+<p>只阅读官方测试还不够，建议自己编写一个简单的数据库程序，观察公开 API 如何进入内部实现。</p>
+<h2 id="71-编写测试程序">7.1 编写测试程序<a hidden class="anchor" aria-hidden="true" href="#71-编写测试程序">#</a></h2>
+<p>在独立的实验目录中创建：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">leveldb-playground/
+</span></span><span class="line"><span class="cl">├── CMakeLists.txt
+</span></span><span class="line"><span class="cl">├── main.cpp
+</span></span><span class="line"><span class="cl">└── build/
+</span></span></code></pre></div><p><code>main.cpp</code>：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;memory&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;string&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;leveldb/db.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;leveldb/options.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;leveldb/slice.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;leveldb/status.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">leveldb</span><span class="o">::</span><span class="n">DB</span><span class="o">*</span> <span class="n">db</span> <span class="o">=</span> <span class="k">nullptr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">leveldb</span><span class="o">::</span><span class="n">Options</span> <span class="n">options</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">options</span><span class="p">.</span><span class="n">create_if_missing</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">path</span> <span class="o">=</span> <span class="s">&#34;./testdb&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">leveldb</span><span class="o">::</span><span class="n">Status</span> <span class="n">status</span> <span class="o">=</span>
+</span></span><span class="line"><span class="cl">        <span class="n">leveldb</span><span class="o">::</span><span class="n">DB</span><span class="o">::</span><span class="n">Open</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">db</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">status</span><span class="p">.</span><span class="n">ok</span><span class="p">())</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">std</span><span class="o">::</span><span class="n">cerr</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Open failed: &#34;</span>
+</span></span><span class="line"><span class="cl">                  <span class="o">&lt;&lt;</span> <span class="n">status</span><span class="p">.</span><span class="n">ToString</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="sc">&#39;\n&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">leveldb</span><span class="o">::</span><span class="n">DB</span><span class="o">&gt;</span> <span class="n">database</span><span class="p">(</span><span class="n">db</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// Write
+</span></span></span><span class="line"><span class="cl">    <span class="n">status</span> <span class="o">=</span> <span class="n">database</span><span class="o">-&gt;</span><span class="n">Put</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="n">leveldb</span><span class="o">::</span><span class="n">WriteOptions</span><span class="p">(),</span>
+</span></span><span class="line"><span class="cl">        <span class="s">&#34;name&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="s">&#34;LevelDB&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">status</span><span class="p">.</span><span class="n">ok</span><span class="p">())</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">std</span><span class="o">::</span><span class="n">cerr</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Put failed: &#34;</span>
+</span></span><span class="line"><span class="cl">                  <span class="o">&lt;&lt;</span> <span class="n">status</span><span class="p">.</span><span class="n">ToString</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="sc">&#39;\n&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// Read
+</span></span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">value</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">status</span> <span class="o">=</span> <span class="n">database</span><span class="o">-&gt;</span><span class="n">Get</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="n">leveldb</span><span class="o">::</span><span class="n">ReadOptions</span><span class="p">(),</span>
+</span></span><span class="line"><span class="cl">        <span class="s">&#34;name&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="o">&amp;</span><span class="n">value</span>
+</span></span><span class="line"><span class="cl">    <span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">status</span><span class="p">.</span><span class="n">ok</span><span class="p">())</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">std</span><span class="o">::</span><span class="n">cerr</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Get failed: &#34;</span>
+</span></span><span class="line"><span class="cl">                  <span class="o">&lt;&lt;</span> <span class="n">status</span><span class="p">.</span><span class="n">ToString</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="sc">&#39;\n&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Value: &#34;</span> <span class="o">&lt;&lt;</span> <span class="n">value</span> <span class="o">&lt;&lt;</span> <span class="sc">&#39;\n&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// Delete
+</span></span></span><span class="line"><span class="cl">    <span class="n">status</span> <span class="o">=</span> <span class="n">database</span><span class="o">-&gt;</span><span class="n">Delete</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="n">leveldb</span><span class="o">::</span><span class="n">WriteOptions</span><span class="p">(),</span>
+</span></span><span class="line"><span class="cl">        <span class="s">&#34;name&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">status</span><span class="p">.</span><span class="n">ok</span><span class="p">())</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">std</span><span class="o">::</span><span class="n">cerr</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Delete failed: &#34;</span>
+</span></span><span class="line"><span class="cl">                  <span class="o">&lt;&lt;</span> <span class="n">status</span><span class="p">.</span><span class="n">ToString</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="sc">&#39;\n&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>这里使用 <code>std::unique_ptr</code> 管理 DB 对象，避免忘记释放资源。</p>
+<h2 id="72-编写-cmakeliststxt">7.2 编写 CMakeLists.txt<a hidden class="anchor" aria-hidden="true" href="#72-编写-cmakeliststxt">#</a></h2>
+<p>为了避免手动处理 LevelDB 的静态库依赖，推荐直接通过 <code>add_subdirectory()</code> 将 LevelDB 源码作为子项目加入自己的实验工程。</p>
+<p><code>CMakeLists.txt</code>：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cmake" data-lang="cmake"><span class="line"><span class="cl"><span class="nb">cmake_minimum_required</span><span class="p">(</span><span class="s">VERSION</span> <span class="s">3.22</span><span class="p">)</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="nb">project</span><span class="p">(</span><span class="s">leveldb_playground</span> <span class="s">LANGUAGES</span> <span class="s">CXX</span><span class="p">)</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="nb">set</span><span class="p">(</span><span class="s">CMAKE_CXX_STANDARD</span> <span class="s">17</span><span class="p">)</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="nb">set</span><span class="p">(</span><span class="s">CMAKE_CXX_STANDARD_REQUIRED</span> <span class="s">ON</span><span class="p">)</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="c"># LevelDB 源码目录
+</span></span></span><span class="line"><span class="cl"><span class="nb">add_subdirectory</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="s">../leveldb</span>
+</span></span><span class="line"><span class="cl">    <span class="o">${</span><span class="nv">CMAKE_BINARY_DIR</span><span class="o">}</span><span class="s">/leveldb</span>
+</span></span><span class="line"><span class="cl">    <span class="s">EXCLUDE_FROM_ALL</span>
+</span></span><span class="line"><span class="cl"><span class="p">)</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="nb">add_executable</span><span class="p">(</span><span class="s">leveldb_demo</span> <span class="s">main.cpp</span><span class="p">)</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="nb">target_link_libraries</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="s">leveldb_demo</span>
+</span></span><span class="line"><span class="cl">    <span class="s">PRIVATE</span> <span class="s">leveldb</span>
+</span></span><span class="line"><span class="cl"><span class="p">)</span><span class="err">
+</span></span></span></code></pre></div><p>这里假设两个目录是同级目录：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">src/
+</span></span><span class="line"><span class="cl">├── leveldb/
+</span></span><span class="line"><span class="cl">└── leveldb-playground/
+</span></span></code></pre></div><p>配置并构建：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">cmake -S . -B build <span class="se">\
+</span></span></span><span class="line"><span class="cl">    -G Ninja <span class="se">\
+</span></span></span><span class="line"><span class="cl">    -DCMAKE_BUILD_TYPE<span class="o">=</span>Debug <span class="se">\
+</span></span></span><span class="line"><span class="cl">    -DLEVELDB_BUILD_TESTS<span class="o">=</span>OFF <span class="se">\
+</span></span></span><span class="line"><span class="cl">    -DLEVELDB_BUILD_BENCHMARKS<span class="o">=</span>OFF
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">cmake --build build
+</span></span></code></pre></div><p>运行：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">./build/leveldb_demo
+</span></span></code></pre></div><p>预期输出：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">Value: LevelDB
+</span></span></code></pre></div><p>此时可以在自己的程序中设置断点，跟踪公开 API 进入 LevelDB 内部实现的完整过程。</p>
+<p>这种方式也非常适合后续修改 LevelDB 源码并观察行为变化。</p>
+<h1 id="八如何开始阅读-leveldb-源码">八、如何开始阅读 LevelDB 源码<a hidden class="anchor" aria-hidden="true" href="#八如何开始阅读-leveldb-源码">#</a></h1>
+<p>环境搭建完成后，真正的问题是：从哪里开始阅读？</p>
+<p>我不建议按照目录顺序从头到尾阅读 LevelDB。更好的方法是围绕一条完整的数据流展开。</p>
+<h2 id="81-先建立整体架构认识">8.1 先建立整体架构认识<a hidden class="anchor" aria-hidden="true" href="#81-先建立整体架构认识">#</a></h2>
+<p>LevelDB 的核心设计思想是 LSM-Tree。</p>
+<p>可以先建立下面这张简化的结构图：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">             Client
+</span></span><span class="line"><span class="cl">                |
+</span></span><span class="line"><span class="cl">                v
+</span></span><span class="line"><span class="cl">           Public API
+</span></span><span class="line"><span class="cl">                |
+</span></span><span class="line"><span class="cl">                v
+</span></span><span class="line"><span class="cl">              DBImpl
+</span></span><span class="line"><span class="cl">                |
+</span></span><span class="line"><span class="cl">       +--------+--------+
+</span></span><span class="line"><span class="cl">       |                 |
+</span></span><span class="line"><span class="cl">       v                 v
+</span></span><span class="line"><span class="cl">     Write              Read
+</span></span><span class="line"><span class="cl">       |                 |
+</span></span><span class="line"><span class="cl">       v                 v
+</span></span><span class="line"><span class="cl">      WAL              MemTable
+</span></span><span class="line"><span class="cl">       |                 |
+</span></span><span class="line"><span class="cl">       v                 v
+</span></span><span class="line"><span class="cl">    MemTable          Immutable
+</span></span><span class="line"><span class="cl">       |                 |
+</span></span><span class="line"><span class="cl">       v                 v
+</span></span><span class="line"><span class="cl">   Background         SSTable
+</span></span><span class="line"><span class="cl">    Flush                |
+</span></span><span class="line"><span class="cl">       |                 |
+</span></span><span class="line"><span class="cl">       +--------+--------+
+</span></span><span class="line"><span class="cl">                |
+</span></span><span class="line"><span class="cl">                v
+</span></span><span class="line"><span class="cl">             Version
+</span></span><span class="line"><span class="cl">                |
+</span></span><span class="line"><span class="cl">                v
+</span></span><span class="line"><span class="cl">          SSTable Files
+</span></span><span class="line"><span class="cl">                |
+</span></span><span class="line"><span class="cl">                v
+</span></span><span class="line"><span class="cl">            Compaction
+</span></span></code></pre></div><p>这只是帮助理解的概念图，不代表所有操作都严格按照这张图中的单一顺序执行。</p>
+<p>特别是读取操作还会涉及 Immutable MemTable、多个 SSTable、Bloom Filter 和 Block Cache。</p>
+<p>建议先阅读：</p>
+<ul>
+<li><code>doc/index.md</code></li>
+<li><code>doc/impl.md</code></li>
+<li><code>include/leveldb/db.h</code></li>
+<li><code>db/db_impl.h</code></li>
+<li><code>db/db_impl.cc</code></li>
+</ul>
+<h2 id="82-第一阶段从-dbopen-开始">8.2 第一阶段：从 DB::Open 开始<a hidden class="anchor" aria-hidden="true" href="#82-第一阶段从-dbopen-开始">#</a></h2>
+<p>首先理解数据库如何打开。</p>
+<p>建议追踪：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">leveldb::DB::Open()
+</span></span><span class="line"><span class="cl">        |
+</span></span><span class="line"><span class="cl">        v
+</span></span><span class="line"><span class="cl">    DBImpl::Open()
+</span></span><span class="line"><span class="cl">        |
+</span></span><span class="line"><span class="cl">        v
+</span></span><span class="line"><span class="cl">   DBImpl 初始化
+</span></span><span class="line"><span class="cl">        |
+</span></span><span class="line"><span class="cl">        v
+</span></span><span class="line"><span class="cl">    恢复数据库状态
+</span></span><span class="line"><span class="cl">        |
+</span></span><span class="line"><span class="cl">        v
+</span></span><span class="line"><span class="cl">    创建 DB 实例
+</span></span></code></pre></div><p>重点关注：</p>
+<ul>
+<li>DB 对象如何创建？</li>
+<li>如何判断数据库是否存在？</li>
+<li>如何恢复已有数据库？</li>
+<li>如何恢复日志？</li>
+<li>VersionSet 在哪里初始化？</li>
+<li>MemTable 在哪里创建？</li>
+</ul>
+<p>这一阶段主要理解数据库启动和恢复机制。</p>
+<h2 id="83-第二阶段追踪一次-put-操作">8.3 第二阶段：追踪一次 Put 操作<a hidden class="anchor" aria-hidden="true" href="#83-第二阶段追踪一次-put-操作">#</a></h2>
+<p>这是最值得深入研究的一条路径。</p>
+<p>从用户调用：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="n">db</span><span class="o">-&gt;</span><span class="n">Put</span><span class="p">(</span><span class="n">write_options</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">);</span>
+</span></span></code></pre></div><p>开始，追踪：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">DB::Put()
+</span></span><span class="line"><span class="cl">    |
+</span></span><span class="line"><span class="cl">    v
+</span></span><span class="line"><span class="cl">DBImpl::Put()
+</span></span><span class="line"><span class="cl">    |
+</span></span><span class="line"><span class="cl">    v
+</span></span><span class="line"><span class="cl">WriteBatch
+</span></span><span class="line"><span class="cl">    |
+</span></span><span class="line"><span class="cl">    v
+</span></span><span class="line"><span class="cl">DBImpl::Write()
+</span></span><span class="line"><span class="cl">    |
+</span></span><span class="line"><span class="cl">    +-------------------+
+</span></span><span class="line"><span class="cl">    |                   |
+</span></span><span class="line"><span class="cl">    v                   v
+</span></span><span class="line"><span class="cl">   WAL              MemTable
+</span></span><span class="line"><span class="cl">    |                   |
+</span></span><span class="line"><span class="cl">    v                   v
+</span></span><span class="line"><span class="cl">日志写入             内存更新
+</span></span><span class="line"><span class="cl">    |                   |
+</span></span><span class="line"><span class="cl">    +---------+---------+
+</span></span><span class="line"><span class="cl">              |
+</span></span><span class="line"><span class="cl">              v
+</span></span><span class="line"><span class="cl">          Write 完成
+</span></span></code></pre></div><p>需要特别注意：</p>
+<ol>
+<li><code>Put()</code> 本身只是一个方便的公开接口。</li>
+<li><code>WriteBatch</code> 负责组织一批写操作。</li>
+<li><code>DBImpl::Write()</code> 是写入路径的核心。</li>
+<li>WAL 负责记录需要持久化的更新。</li>
+<li>MemTable 负责提供内存中的有序数据访问。</li>
+</ol>
+<p>这里有一个非常值得思考的问题：</p>
+<p><strong>为什么 LevelDB 需要先写 WAL，再更新 MemTable？</strong></p>
+<p>建议结合 <code>WriteOptions::sync</code>、日志写入、<code>WriteBatch</code> 和 MemTable 更新逻辑理解写入的持久性和原子性。</p>
+<h2 id="84-第三阶段追踪-get-操作">8.4 第三阶段：追踪 Get 操作<a hidden class="anchor" aria-hidden="true" href="#84-第三阶段追踪-get-操作">#</a></h2>
+<p>从：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="n">db</span><span class="o">-&gt;</span><span class="n">Get</span><span class="p">(</span><span class="n">read_options</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">value</span><span class="p">);</span>
+</span></span></code></pre></div><p>开始追踪读取路径。</p>
+<p>重点关注：</p>
+<ul>
+<li><code>DBImpl::Get()</code></li>
+<li>MemTable 查询</li>
+<li>Immutable MemTable 查询</li>
+<li>Version 查询</li>
+<li>TableCache</li>
+<li>BlockCache</li>
+<li>SSTable 查找</li>
+</ul>
+<p>需要理解：为什么 LevelDB 读取数据时，不是简单地从一个文件中查找？</p>
+<p>因为数据可能同时存在于内存表和多个磁盘文件中，而且不同层级的数据可能存在覆盖关系。</p>
+<h2 id="85-第四阶段研究后台-compaction">8.5 第四阶段：研究后台 Compaction<a hidden class="anchor" aria-hidden="true" href="#85-第四阶段研究后台-compaction">#</a></h2>
+<p>当 MemTable 达到一定大小后，LevelDB 会将其转换为磁盘上的 SSTable。</p>
+<p>与此同时，LevelDB 还需要通过 Compaction 整理不同层级的文件。</p>
+<p>重点关注：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">MemTable
+</span></span><span class="line"><span class="cl">    |
+</span></span><span class="line"><span class="cl">    v
+</span></span><span class="line"><span class="cl">Immutable MemTable
+</span></span><span class="line"><span class="cl">    |
+</span></span><span class="line"><span class="cl">    v
+</span></span><span class="line"><span class="cl">Flush
+</span></span><span class="line"><span class="cl">    |
+</span></span><span class="line"><span class="cl">    v
+</span></span><span class="line"><span class="cl">SSTable
+</span></span><span class="line"><span class="cl">    |
+</span></span><span class="line"><span class="cl">    v
+</span></span><span class="line"><span class="cl">VersionSet
+</span></span><span class="line"><span class="cl">    |
+</span></span><span class="line"><span class="cl">    v
+</span></span><span class="line"><span class="cl">Compaction
+</span></span><span class="line"><span class="cl">    |
+</span></span><span class="line"><span class="cl">    v
+</span></span><span class="line"><span class="cl">新的 SSTable
+</span></span></code></pre></div><p>建议阅读：</p>
+<ul>
+<li><code>db/db_impl.cc</code></li>
+<li><code>db/db_impl.h</code></li>
+<li><code>db/version_set.cc</code></li>
+<li><code>db/version_set.h</code></li>
+<li><code>db/builder.cc</code></li>
+<li><code>table/table_builder.cc</code></li>
+</ul>
+<p>重点理解：</p>
+<ul>
+<li>什么情况下触发 Compaction？</li>
+<li>如何选择需要合并的文件？</li>
+<li>如何处理重复 Key？</li>
+<li>如何处理 Delete 操作产生的墓碑？</li>
+<li>Compaction 如何更新 Version？</li>
+<li>旧 SSTable 什么时候可以删除？</li>
+</ul>
+<p>这一阶段是理解 LevelDB 存储引擎设计的关键。</p>
+<h2 id="86-第五阶段深入底层数据结构">8.6 第五阶段：深入底层数据结构<a hidden class="anchor" aria-hidden="true" href="#86-第五阶段深入底层数据结构">#</a></h2>
+<p>最后再研究各个底层组件：</p>
+<table>
+	<thead>
+			<tr>
+					<th>组件</th>
+					<th>重点文件</th>
+					<th>学习内容</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>SkipList</td>
+					<td><code>db/skiplist.h</code></td>
+					<td>跳表及并发读写</td>
+			</tr>
+			<tr>
+					<td>MemTable</td>
+					<td><code>db/memtable.cc</code></td>
+					<td>内存数据组织</td>
+			</tr>
+			<tr>
+					<td>WAL</td>
+					<td><code>db/log_writer.cc</code>、<code>db/log_reader.cc</code></td>
+					<td>日志格式与恢复</td>
+			</tr>
+			<tr>
+					<td>SSTable</td>
+					<td><code>table/table_builder.cc</code>、<code>table/table.cc</code></td>
+					<td>磁盘数据组织</td>
+			</tr>
+			<tr>
+					<td>Bloom Filter</td>
+					<td><code>util/bloom.cc</code></td>
+					<td>概率型数据结构</td>
+			</tr>
+			<tr>
+					<td>Cache</td>
+					<td><code>util/cache.cc</code></td>
+					<td>LRU 缓存</td>
+			</tr>
+			<tr>
+					<td>VersionSet</td>
+					<td><code>db/version_set.cc</code></td>
+					<td>文件版本管理</td>
+			</tr>
+	</tbody>
+</table>
+<p>不要试图同时理解所有组件。</p>
+<p>应该沿着一条数据流逐步深入，遇到不理解的数据结构时再进入对应实现。</p>
+<h1 id="九源码阅读与调试技巧">九、源码阅读与调试技巧<a hidden class="anchor" aria-hidden="true" href="#九源码阅读与调试技巧">#</a></h1>
+<p>除了 LLDB，下面这些工具和方法也非常值得掌握。</p>
+<h2 id="91-使用-rg-搜索函数定义">9.1 使用 rg 搜索函数定义<a hidden class="anchor" aria-hidden="true" href="#91-使用-rg-搜索函数定义">#</a></h2>
+<p>推荐安装 ripgrep：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">brew install ripgrep
+</span></span></code></pre></div><p>搜索函数：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">rg <span class="s2">&#34;DBImpl::Write&#34;</span> db/
+</span></span></code></pre></div><p>搜索类定义：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">rg <span class="s2">&#34;class MemTable&#34;</span> db/
+</span></span></code></pre></div><p>搜索某个成员变量：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">rg <span class="s2">&#34;imm_&#34;</span> db/
+</span></span></code></pre></div><p>搜索函数调用：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">rg <span class="s2">&#34;MakeRoomForWrite&#34;</span> db/
+</span></span></code></pre></div><h2 id="92-使用-ctags-建立代码索引">9.2 使用 ctags 建立代码索引<a hidden class="anchor" aria-hidden="true" href="#92-使用-ctags-建立代码索引">#</a></h2>
+<p>安装：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">brew install universal-ctags
+</span></span></code></pre></div><p>生成索引：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">ctags -R .
+</span></span></code></pre></div><p>之后可以借助编辑器跳转到函数定义。</p>
+<p>如果使用 VS Code，也可以使用 clangd 扩展，配合 <code>compile_commands.json</code> 实现更准确的代码跳转、补全和引用查找。</p>
+<h2 id="93-使用-git-blame-理解代码演进">9.3 使用 git blame 理解代码演进<a hidden class="anchor" aria-hidden="true" href="#93-使用-git-blame-理解代码演进">#</a></h2>
+<p>当遇到难以理解的实现时，不妨查看代码的历史：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">git blame db/db_impl.cc
+</span></span></code></pre></div><p>查看某个函数的历史：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">git log -p -S<span class="s2">&#34;MakeRoomForWrite&#34;</span> -- db/db_impl.cc
+</span></span></code></pre></div><p>这有助于理解：</p>
+<ul>
+<li>某个设计为什么出现？</li>
+<li>某个实现解决了什么问题？</li>
+<li>为什么没有采用更简单的方案？</li>
+</ul>
+<h2 id="94-不要只设置函数断点">9.4 不要只设置函数断点<a hidden class="anchor" aria-hidden="true" href="#94-不要只设置函数断点">#</a></h2>
+<p>推荐采用以下调试过程：</p>
+<ol>
+<li>找到公开 API。</li>
+<li>找到内部实现。</li>
+<li>找到关键状态变量。</li>
+<li>设置断点。</li>
+<li>单步进入关键函数。</li>
+<li>查看调用栈。</li>
+<li>观察数据结构变化。</li>
+<li>对照测试用例验证自己的理解。</li>
+</ol>
+<p>例如研究 <code>DBImpl::Write()</code>，不要只看函数入口和出口，而是重点观察：</p>
+<ul>
+<li>WriteBatch 的内容。</li>
+<li>Writer 队列。</li>
+<li>WAL 写入位置。</li>
+<li>MemTable 的引用。</li>
+<li>Sequence Number 的变化。</li>
+</ul>
+<p>这样才能真正理解一次写入操作。</p>
+<h1 id="十推荐的学习路线">十、推荐的学习路线<a hidden class="anchor" aria-hidden="true" href="#十推荐的学习路线">#</a></h1>
+<p>如果目标是深入掌握 LevelDB，我建议分为四个阶段。</p>
+<h2 id="阶段一理解基本使用和架构">阶段一：理解基本使用和架构<a hidden class="anchor" aria-hidden="true" href="#阶段一理解基本使用和架构">#</a></h2>
+<p>目标：能够使用 LevelDB，并理解 LSM-Tree 的基本设计。</p>
+<p>任务：</p>
+<ul>
+<li>编译 LevelDB。</li>
+<li>运行所有单元测试。</li>
+<li>编写简单的 Put/Get/Delete 程序。</li>
+<li>理解 DB、Options、Status、Slice。</li>
+<li>阅读 <code>doc/impl.md</code>。</li>
+</ul>
+<h2 id="阶段二理解读写路径">阶段二：理解读写路径<a hidden class="anchor" aria-hidden="true" href="#阶段二理解读写路径">#</a></h2>
+<p>目标：能够独立追踪一次读写操作。</p>
+<p>任务：</p>
+<ul>
+<li>追踪 DB::Open。</li>
+<li>追踪 DBImpl::Write。</li>
+<li>追踪 DBImpl::Get。</li>
+<li>理解 WriteBatch。</li>
+<li>理解 WAL。</li>
+<li>理解 MemTable。</li>
+</ul>
+<p>建议在每条调用链上至少设置一次断点，并记录关键状态的变化。</p>
+<h2 id="阶段三理解磁盘存储和后台任务">阶段三：理解磁盘存储和后台任务<a hidden class="anchor" aria-hidden="true" href="#阶段三理解磁盘存储和后台任务">#</a></h2>
+<p>目标：理解数据如何从内存进入磁盘，以及磁盘文件如何组织。</p>
+<p>任务：</p>
+<ul>
+<li>阅读 SSTable 格式。</li>
+<li>理解 Block 和 BlockHandle。</li>
+<li>理解 TableBuilder。</li>
+<li>理解 Version 和 VersionSet。</li>
+<li>追踪 Flush。</li>
+<li>追踪 Compaction。</li>
+</ul>
+<h2 id="阶段四动手修改和实验">阶段四：动手修改和实验<a hidden class="anchor" aria-hidden="true" href="#阶段四动手修改和实验">#</a></h2>
+<p>目标：从代码阅读过渡到真正理解设计。</p>
+<p>建议完成以下实验：</p>
+<table>
+	<thead>
+			<tr>
+					<th>实验</th>
+					<th>目标</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>修改 MemTable 写入逻辑</td>
+					<td>理解内存数据结构</td>
+			</tr>
+			<tr>
+					<td>修改 Bloom Filter 参数</td>
+					<td>理解空间与误判率</td>
+			</tr>
+			<tr>
+					<td>调整 BlockCache 容量</td>
+					<td>观察缓存对读取性能的影响</td>
+			</tr>
+			<tr>
+					<td>调整 WriteBufferSize</td>
+					<td>观察 Flush 频率变化</td>
+			</tr>
+			<tr>
+					<td>修改 Compaction 相关参数</td>
+					<td>观察读写放大和空间放大</td>
+			</tr>
+			<tr>
+					<td>追踪 WAL 恢复过程</td>
+					<td>理解故障恢复</td>
+			</tr>
+	</tbody>
+</table>
+<p>每次实验建议记录：</p>
+<ol>
+<li>修改了什么？</li>
+<li>为什么修改？</li>
+<li>预期结果是什么？</li>
+<li>实际结果是什么？</li>
+<li>是否影响已有测试？</li>
+<li>对性能产生了什么影响？</li>
+</ol>
+<p>不要只看 Benchmark 数字，还要结合源码解释数字变化的原因。</p>
+<h1 id="十一总结">十一、总结<a hidden class="anchor" aria-hidden="true" href="#十一总结">#</a></h1>
+<p>在 Mac M4 上学习 LevelDB，不需要复杂的交叉编译环境，也不需要额外搭建 Linux 虚拟机。使用 Apple Clang、CMake 和 LLDB，就可以完成源码构建、测试和调试。</p>
+<p>对于源码学习而言，最重要的并不是把所有文件读一遍，而是建立一条完整的理解路径：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">公开 API
+</span></span><span class="line"><span class="cl">   |
+</span></span><span class="line"><span class="cl">   v
+</span></span><span class="line"><span class="cl">DBImpl
+</span></span><span class="line"><span class="cl">   |
+</span></span><span class="line"><span class="cl">   v
+</span></span><span class="line"><span class="cl">读写路径
+</span></span><span class="line"><span class="cl">   |
+</span></span><span class="line"><span class="cl">   v
+</span></span><span class="line"><span class="cl">MemTable / WAL
+</span></span><span class="line"><span class="cl">   |
+</span></span><span class="line"><span class="cl">   v
+</span></span><span class="line"><span class="cl">SSTable
+</span></span><span class="line"><span class="cl">   |
+</span></span><span class="line"><span class="cl">   v
+</span></span><span class="line"><span class="cl">VersionSet
+</span></span><span class="line"><span class="cl">   |
+</span></span><span class="line"><span class="cl">   v
+</span></span><span class="line"><span class="cl">Compaction
+</span></span></code></pre></div><p>建议始终坚持一个原则：</p>
+<p><strong>以实际操作为入口，以单元测试为验证，以 LLDB 为工具，以数据结构和状态变化为核心。</strong></p>
+<p>当你能够独立追踪一次 Put、Get、Flush 和 Compaction 的完整执行过程时，才算真正开始理解 LevelDB。</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="http://localhost:1313/tags/leveldb/">LevelDB</a></li>
+      <li><a href="http://localhost:1313/tags/c&#43;&#43;/">C&#43;&#43;</a></li>
+      <li><a href="http://localhost:1313/tags/cmake/">CMake</a></li>
+      <li><a href="http://localhost:1313/tags/lldb/">LLDB</a></li>
+      <li><a href="http://localhost:1313/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/">源码阅读</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="next" href="http://localhost:1313/posts/xv6-lab6-lock/">
+    <span class="title">Next »</span>
+    <span>MIT6.1810: Lab6 Lock</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="http://localhost:1313/">Minghan的博客</a></span> · 
+
+    
+    
+    <span>
+        Powered by
+        <a href="https://gohugo.io/?utm_source=papermod" rel="noopener" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" id="top-link" class="top-link hidden" aria-label="go to top" title="Go to Top (Alt + G)" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevrons-up">
+        <polyline points="17 11 12 6 7 11"></polyline>
+        <polyline points="17 18 12 13 7 18"></polyline>
+    </svg>
+</a><script src="/js/toc-scrollspy.js" defer></script>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var toplink = document.getElementById("top-link");
+    window.onscroll = function () {
+        const scrollThreshold = window.innerHeight;
+        if (document.body.scrollTop > scrollThreshold || document.documentElement.scrollTop > scrollThreshold) {
+            toplink.classList.remove("hidden");
+        } else {
+            toplink.classList.add("hidden");
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

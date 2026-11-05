@@ -6,8 +6,126 @@
     <description>Recent content in Posts on Minghan的博客</description>
     <generator>Hugo</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Wed, 04 Nov 2026 11:50:28 +0800</lastBuildDate>
+    <lastBuildDate>Thu, 05 Nov 2026 17:36:38 +0800</lastBuildDate>
     <atom:link href="http://localhost:1313/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>LevelDB源码学习: 调试环境</title>
+      <link>http://localhost:1313/posts/leveldb01/</link>
+      <pubDate>Thu, 05 Nov 2026 17:36:38 +0800</pubDate>
+      <guid>http://localhost:1313/posts/leveldb01/</guid>
+      <description>&lt;h1 id=&#34;一为什么选择-leveldb&#34;&gt;一、为什么选择 LevelDB&lt;/h1&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/google/leveldb&#34;&gt;LevelDB&lt;/a&gt; 是 Google 开源的一款高性能嵌入式 Key-Value 存储引擎，使用 C++ 编写。它提供有序的键值映射，支持基本的 Put、Get、Delete 操作，同时支持批量写入、快照、迭代器以及数据压缩。&lt;/p&gt;
+&lt;p&gt;LevelDB 虽然不是一个完整的关系型数据库，但它的实现涉及很多值得深入学习的系统编程技术：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;LSM-Tree：&lt;/strong&gt; 理解日志结构合并树的基本设计思想。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;WAL：&lt;/strong&gt; 理解预写日志如何保证写入的持久性。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;MemTable：&lt;/strong&gt; 理解内存中的有序数据结构及其实现。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;SSTable：&lt;/strong&gt; 理解磁盘上的有序数据组织方式。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Compaction：&lt;/strong&gt; 理解后台数据合并、磁盘空间回收和读写放大的权衡。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Cache：&lt;/strong&gt; 理解缓存设计及引用计数。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;并发控制：&lt;/strong&gt; 理解互斥锁、条件变量和后台任务调度。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;相比从零开始阅读一个大型数据库，LevelDB 的代码规模相对适中，非常适合作为深入学习存储引擎的起点。&lt;/p&gt;
+&lt;p&gt;本文以 Apple Silicon Mac（M 系列芯片）为例，搭建一套可以进行源码阅读、单步调试、单元测试和性能测试的开发环境。&lt;/p&gt;
+&lt;h1 id=&#34;二环境准备&#34;&gt;二、环境准备&lt;/h1&gt;
+&lt;h2 id=&#34;21-开发环境&#34;&gt;2.1 开发环境&lt;/h2&gt;
+&lt;p&gt;本文使用以下工具：&lt;/p&gt;
+&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;工具&lt;/th&gt;
+					&lt;th&gt;用途&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;macOS&lt;/td&gt;
+					&lt;td&gt;开发操作系统&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;Apple Clang&lt;/td&gt;
+					&lt;td&gt;C/C++ 编译器&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;CMake&lt;/td&gt;
+					&lt;td&gt;项目构建系统&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;Ninja&lt;/td&gt;
+					&lt;td&gt;可选的构建后端&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;LLDB&lt;/td&gt;
+					&lt;td&gt;源码级调试器&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;Git&lt;/td&gt;
+					&lt;td&gt;源码版本管理&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;VS Code&lt;/td&gt;
+					&lt;td&gt;代码阅读和编辑&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;LevelDB 当前主线要求 C++17，CMake 工程要求 CMake 3.22 或更新版本。因此，需要提前准备合适的工具链。&lt;/p&gt;
+&lt;h2 id=&#34;22-安装-xcode-command-line-tools&#34;&gt;2.2 安装 Xcode Command Line Tools&lt;/h2&gt;
+&lt;p&gt;macOS 可以直接使用 Apple 提供的 Clang 工具链。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>MIT6.1810: Lab6 Lock</title>
+      <link>http://localhost:1313/posts/xv6-lab6-lock/</link>
+      <pubDate>Thu, 05 Nov 2026 16:41:33 +0800</pubDate>
+      <guid>http://localhost:1313/posts/xv6-lab6-lock/</guid>
+      <description>&lt;h1 id=&#34;一memory-allocator-easy&#34;&gt;一、Memory allocator (easy)&lt;/h1&gt;
+&lt;h2 id=&#34;1-物理内存分配器现状&#34;&gt;1. 物理内存分配器现状&lt;/h2&gt;
+&lt;p&gt;当前 xv6 的物理内存管理策略比较简单：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;将可用的物理内存划分为 4KB 大小的页面。&lt;/li&gt;
+&lt;li&gt;使用一个 freelist（空闲链表）将这些页面串联起来。&lt;/li&gt;
+&lt;li&gt;使用一个自旋锁保护 freelist，保证多核环境下链表操作的互斥性。&lt;/li&gt;
+&lt;li&gt;调用 &lt;code&gt;kalloc()&lt;/code&gt; 和 &lt;code&gt;kfree()&lt;/code&gt; 操作 freelist 之前先获取自旋锁，操作完成后释放锁。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;更多细节可以参考我的&lt;a href=&#34;https://jiangmmh.github.io/posts/xv6-02/&#34;&gt;这篇博客&lt;/a&gt;。&lt;/p&gt;
+&lt;p&gt;按照实验要求，在 xv6 中运行 &lt;code&gt;kalloctest&lt;/code&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ kalloctest
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;start test1
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;test1 results:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;--- lock kmem stats
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;lock: kmem: &lt;span class=&#34;c1&#34;&gt;#test-and-set 67377 #acquire() 433136&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;--- top &lt;span class=&#34;m&#34;&gt;5&lt;/span&gt; contended locks:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;lock: virtio_disk: &lt;span class=&#34;c1&#34;&gt;#test-and-set 144638 #acquire() 183&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;lock: proc: &lt;span class=&#34;c1&#34;&gt;#test-and-set 86684 #acquire() 667829&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;lock: proc: &lt;span class=&#34;c1&#34;&gt;#test-and-set 78406 #acquire() 667827&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;lock: proc: &lt;span class=&#34;c1&#34;&gt;#test-and-set 72893 #acquire() 270341&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;lock: kmem: &lt;span class=&#34;c1&#34;&gt;#test-and-set 67377 #acquire() 433136&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nv&#34;&gt;tot&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;67377&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;test1 FAIL
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;start test2
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;total free number of pages: &lt;span class=&#34;m&#34;&gt;32465&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;out of 32768&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;..........
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;test2 OK
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;start test3
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;..........child &lt;span class=&#34;k&#34;&gt;done&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;10000&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;test3 OK
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;start test4
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;............................child &lt;span class=&#34;k&#34;&gt;done&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;100000&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;.child &lt;span class=&#34;k&#34;&gt;done&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;100000&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;.child &lt;span class=&#34;k&#34;&gt;done&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;100000&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;--- lock kmem stats
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;lock: kmem: &lt;span class=&#34;c1&#34;&gt;#test-and-set 989593 #acquire() 3377039&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;--- top &lt;span class=&#34;m&#34;&gt;5&lt;/span&gt; contended locks:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;lock: wait_lock: &lt;span class=&#34;c1&#34;&gt;#test-and-set 18470332 #acquire() 40032&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;lock: proc: &lt;span class=&#34;c1&#34;&gt;#test-and-set 1525506 #acquire() 2552018&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;lock: kmem: &lt;span class=&#34;c1&#34;&gt;#test-and-set 989593 #acquire() 3377039&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;lock: proc: &lt;span class=&#34;c1&#34;&gt;#test-and-set 248206 #acquire() 1613804&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;lock: proc: &lt;span class=&#34;c1&#34;&gt;#test-and-set 211798 #acquire() 1956210&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nv&#34;&gt;tot&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;989593&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;test4 FAIL m &lt;span class=&#34;m&#34;&gt;190242&lt;/span&gt; n &lt;span class=&#34;m&#34;&gt;989593&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;11-理解锁竞争统计&#34;&gt;1.1 理解锁竞争统计&lt;/h3&gt;
+&lt;p&gt;在 lab lock 版本中，&lt;code&gt;acquire()&lt;/code&gt; 函数会记录两个指标：&lt;/p&gt;</description>
+    </item>
     <item>
       <title>论文阅读：Practical, Transparent Operating System Support for Superpages</title>
       <link>http://localhost:1313/posts/huge_page/</link>
@@ -2163,66 +2281,6 @@
 &lt;/blockquote&gt;
 &lt;blockquote&gt;
 &lt;p&gt;临界点就是极值点（严格大于或小于两侧元素）。&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title></title>
-      <link>http://localhost:1313/posts/xv6-lab6-lock/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/xv6-lab6-lock/</guid>
-      <description>&lt;hr&gt;
-&lt;h2 id=&#34;categories-操作系统&#34;&gt;title: &amp;ldquo;MIT6.1810: Lab6 Lock&amp;rdquo;
-date: &amp;lsquo;2026-11-05T16:41:33+08:00&amp;rsquo;
-draft: false
-tags: [xv6, RISC-V, 并发编程, 自旋锁, 内存管理]
-categories: [操作系统]&lt;/h2&gt;
-&lt;h1 id=&#34;一memory-allocator-easy&#34;&gt;一、Memory allocator (easy)&lt;/h1&gt;
-&lt;h2 id=&#34;1-物理内存分配器现状&#34;&gt;1. 物理内存分配器现状&lt;/h2&gt;
-&lt;p&gt;当前 xv6 的物理内存管理策略比较简单：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;将可用的物理内存划分为 4KB 大小的页面。&lt;/li&gt;
-&lt;li&gt;使用一个 freelist（空闲链表）将这些页面串联起来。&lt;/li&gt;
-&lt;li&gt;使用一个自旋锁保护 freelist，保证多核环境下链表操作的互斥性。&lt;/li&gt;
-&lt;li&gt;调用 &lt;code&gt;kalloc()&lt;/code&gt; 和 &lt;code&gt;kfree()&lt;/code&gt; 操作 freelist 之前先获取自旋锁，操作完成后释放锁。&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;更多细节可以参考我的&lt;a href=&#34;https://jiangmmh.github.io/posts/xv6-02/&#34;&gt;这篇博客&lt;/a&gt;。&lt;/p&gt;
-&lt;p&gt;按照实验要求，在 xv6 中运行 &lt;code&gt;kalloctest&lt;/code&gt;：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ kalloctest
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;start test1
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;test1 results:
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;--- lock kmem stats
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;lock: kmem: &lt;span class=&#34;c1&#34;&gt;#test-and-set 67377 #acquire() 433136&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;--- top &lt;span class=&#34;m&#34;&gt;5&lt;/span&gt; contended locks:
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;lock: virtio_disk: &lt;span class=&#34;c1&#34;&gt;#test-and-set 144638 #acquire() 183&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;lock: proc: &lt;span class=&#34;c1&#34;&gt;#test-and-set 86684 #acquire() 667829&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;lock: proc: &lt;span class=&#34;c1&#34;&gt;#test-and-set 78406 #acquire() 667827&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;lock: proc: &lt;span class=&#34;c1&#34;&gt;#test-and-set 72893 #acquire() 270341&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;lock: kmem: &lt;span class=&#34;c1&#34;&gt;#test-and-set 67377 #acquire() 433136&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nv&#34;&gt;tot&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;67377&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;test1 FAIL
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;start test2
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;total free number of pages: &lt;span class=&#34;m&#34;&gt;32465&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;out of 32768&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;..........
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;test2 OK
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;start test3
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;..........child &lt;span class=&#34;k&#34;&gt;done&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;10000&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;test3 OK
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;start test4
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;............................child &lt;span class=&#34;k&#34;&gt;done&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;100000&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;.child &lt;span class=&#34;k&#34;&gt;done&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;100000&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;.child &lt;span class=&#34;k&#34;&gt;done&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;100000&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;--- lock kmem stats
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;lock: kmem: &lt;span class=&#34;c1&#34;&gt;#test-and-set 989593 #acquire() 3377039&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;--- top &lt;span class=&#34;m&#34;&gt;5&lt;/span&gt; contended locks:
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;lock: wait_lock: &lt;span class=&#34;c1&#34;&gt;#test-and-set 18470332 #acquire() 40032&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;lock: proc: &lt;span class=&#34;c1&#34;&gt;#test-and-set 1525506 #acquire() 2552018&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;lock: kmem: &lt;span class=&#34;c1&#34;&gt;#test-and-set 989593 #acquire() 3377039&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;lock: proc: &lt;span class=&#34;c1&#34;&gt;#test-and-set 248206 #acquire() 1613804&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;lock: proc: &lt;span class=&#34;c1&#34;&gt;#test-and-set 211798 #acquire() 1956210&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nv&#34;&gt;tot&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;989593&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;test4 FAIL m &lt;span class=&#34;m&#34;&gt;190242&lt;/span&gt; n &lt;span class=&#34;m&#34;&gt;989593&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;11-理解锁竞争统计&#34;&gt;1.1 理解锁竞争统计&lt;/h3&gt;
-&lt;p&gt;在 lab lock 版本中，&lt;code&gt;acquire()&lt;/code&gt; 函数会记录两个指标：&lt;/p&gt;</description>
     </item>
   </channel>
 </rss>
