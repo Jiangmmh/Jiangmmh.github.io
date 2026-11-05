@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>数据库 on Minghan的博客</title><link>https://Jiangmmh.github.io/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/</link><description>Recent content in 数据库 on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Thu, 05 Nov 2026 17:36:38 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/index.xml" rel="self" type="application/rss+xml"/><item><title>LevelDB源码学习: 调试环境</title><link>https://Jiangmmh.github.io/posts/leveldb01/</link><pubDate>Thu, 05 Nov 2026 17:36:38 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/leveldb01/</guid><description>&lt;h1 id="一为什么选择-leveldb">一、为什么选择 LevelDB&lt;/h1>
+&lt;p>&lt;a href="https://github.com/google/leveldb">LevelDB&lt;/a> 是 Google 开源的一款高性能嵌入式 Key-Value 存储引擎，使用 C++ 编写。它提供有序的键值映射，支持基本的 Put、Get、Delete 操作，同时支持批量写入、快照、迭代器以及数据压缩。&lt;/p>
+&lt;p>LevelDB 虽然不是一个完整的关系型数据库，但它的实现涉及很多值得深入学习的系统编程技术：&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>LSM-Tree：&lt;/strong> 理解日志结构合并树的基本设计思想。&lt;/li>
+&lt;li>&lt;strong>WAL：&lt;/strong> 理解预写日志如何保证写入的持久性。&lt;/li>
+&lt;li>&lt;strong>MemTable：&lt;/strong> 理解内存中的有序数据结构及其实现。&lt;/li>
+&lt;li>&lt;strong>SSTable：&lt;/strong> 理解磁盘上的有序数据组织方式。&lt;/li>
+&lt;li>&lt;strong>Compaction：&lt;/strong> 理解后台数据合并、磁盘空间回收和读写放大的权衡。&lt;/li>
+&lt;li>&lt;strong>Cache：&lt;/strong> 理解缓存设计及引用计数。&lt;/li>
+&lt;li>&lt;strong>并发控制：&lt;/strong> 理解互斥锁、条件变量和后台任务调度。&lt;/li>
+&lt;/ul>
+&lt;p>相比从零开始阅读一个大型数据库，LevelDB 的代码规模相对适中，非常适合作为深入学习存储引擎的起点。&lt;/p>
+&lt;p>本文以 Apple Silicon Mac（M 系列芯片）为例，搭建一套可以进行源码阅读、单步调试、单元测试和性能测试的开发环境。&lt;/p>
+&lt;h1 id="二环境准备">二、环境准备&lt;/h1>
+&lt;h2 id="21-开发环境">2.1 开发环境&lt;/h2>
+&lt;p>本文使用以下工具：&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>工具&lt;/th>
+&lt;th>用途&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>macOS&lt;/td>
+&lt;td>开发操作系统&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Apple Clang&lt;/td>
+&lt;td>C/C++ 编译器&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>CMake&lt;/td>
+&lt;td>项目构建系统&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Ninja&lt;/td>
+&lt;td>可选的构建后端&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>LLDB&lt;/td>
+&lt;td>源码级调试器&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Git&lt;/td>
+&lt;td>源码版本管理&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>VS Code&lt;/td>
+&lt;td>代码阅读和编辑&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>LevelDB 当前主线要求 C++17，CMake 工程要求 CMake 3.22 或更新版本。因此，需要提前准备合适的工具链。&lt;/p>
+&lt;h2 id="22-安装-xcode-command-line-tools">2.2 安装 Xcode Command Line Tools&lt;/h2>
+&lt;p>macOS 可以直接使用 Apple 提供的 Clang 工具链。&lt;/p></description></item></channel></rss>
