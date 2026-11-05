@@ -1,8 +1,8 @@
 ---
-title: "LeetCode 链表专题"
+title: "Leetcode 链表专题"
 date: '2026-10-14T11:00:00+08:00'
 draft: false
-tags: ["LeetCode", "链表", "数据结构"]
+tags: ["Leetcode", "链表", "数据结构"]
 categories: ["算法"]
 ---
 

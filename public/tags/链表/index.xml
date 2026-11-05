@@ -9,7 +9,7 @@
     <lastBuildDate>Wed, 14 Oct 2026 11:00:00 +0800</lastBuildDate>
     <atom:link href="http://localhost:1313/tags/%E9%93%BE%E8%A1%A8/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>LeetCode 链表专题</title>
+      <title>Leetcode 链表专题</title>
       <link>http://localhost:1313/posts/leetecode-linkedlist/</link>
       <pubDate>Wed, 14 Oct 2026 11:00:00 +0800</pubDate>
       <guid>http://localhost:1313/posts/leetecode-linkedlist/</guid>
