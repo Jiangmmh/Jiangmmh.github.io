@@ -1,4 +1,28 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Linux on Minghan的博客</title><link>https://Jiangmmh.github.io/tags/linux/</link><description>Recent content in Linux on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Thu, 22 Oct 2026 15:33:34 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/tags/linux/index.xml" rel="self" type="application/rss+xml"/><item><title>Unix/Linux 进程间通信</title><link>https://Jiangmmh.github.io/posts/unix-linux-ipc/</link><pubDate>Thu, 22 Oct 2026 15:33:34 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/unix-linux-ipc/</guid><description>深入理解 Unix/Linux 进程间通信机制，涵盖文件描述符、fork、管道、socketpair、Unix Domain Socket、TCP/UDP Socket、数据传输语义、错误处理与实战示例。</description></item><item><title>[翻译]BSD Socket编程入门</title><link>https://Jiangmmh.github.io/posts/unix-socket/</link><pubDate>Thu, 22 Oct 2026 15:27:57 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/unix-socket/</guid><description>从零理解 BSD Socket API，掌握 TCP 客户端与服务端的工作流程、数据读写、连接关闭和网络字节序。</description></item><item><title>[转载]Linux内核代码风格：官方规范与实践指南</title><link>https://Jiangmmh.github.io/posts/linux-style/</link><pubDate>Mon, 19 Oct 2026 21:44:39 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/linux-style/</guid><description>&lt;h1 id="linux-内核代码风格官方规范与实践指南">Linux 内核代码风格：官方规范与实践指南&lt;/h1>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Linux on Minghan的博客</title><link>https://Jiangmmh.github.io/tags/linux/</link><description>Recent content in Linux on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Thu, 05 Nov 2026 20:00:00 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/tags/linux/index.xml" rel="self" type="application/rss+xml"/><item><title>再探xv6-shell详解</title><link>https://Jiangmmh.github.io/posts/xv6-shell/</link><pubDate>Thu, 05 Nov 2026 20:00:00 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/xv6-shell/</guid><description>&lt;h1 id="一what--why">一、What &amp;amp; Why？&lt;/h1>
+&lt;p>Shell（命令解释器）是用户与操作系统交互的重要接口。我们平时在 Linux、macOS 中使用的 Bash、Zsh，以及其他 Unix Shell，本质上都是一个运行在用户态的程序。&lt;/p>
+&lt;p>用户通过 Shell 输入命令，Shell 负责解析命令、组织进程、处理输入输出，并最终调用操作系统提供的系统调用完成任务。&lt;/p>
+&lt;p>例如：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">$ ls -l &lt;span class="p">|&lt;/span> grep &lt;span class="s2">&amp;#34;.c&amp;#34;&lt;/span> &amp;gt; result.txt
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>这条命令包含了多个操作：&lt;/p>
+&lt;ol>
+&lt;li>执行 &lt;code>ls -l&lt;/code>，列出当前目录下的文件；&lt;/li>
+&lt;li>将 &lt;code>ls&lt;/code> 的标准输出连接到管道；&lt;/li>
+&lt;li>执行 &lt;code>grep &amp;quot;.c&amp;quot;&lt;/code>，从管道读取数据并过滤；&lt;/li>
+&lt;li>将 &lt;code>grep&lt;/code> 的输出重定向到 &lt;code>result.txt&lt;/code>。&lt;/li>
+&lt;/ol>
+&lt;p>Shell 并不需要自己实现 &lt;code>ls&lt;/code>、&lt;code>grep&lt;/code> 等程序的功能，也不需要自己实现管道的数据传输。它只需要通过操作系统提供的系统调用，将这些程序组织起来。&lt;/p>
+&lt;p>从操作系统的角度来看，Shell 最重要的工作可以归纳为：&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>命令解析&lt;/strong>：将用户输入的字符串转换为结构化的命令描述；&lt;/li>
+&lt;li>&lt;strong>进程管理&lt;/strong>：通过 &lt;code>fork()&lt;/code>、&lt;code>exec()&lt;/code>、&lt;code>wait()&lt;/code> 等系统调用组织程序执行；&lt;/li>
+&lt;li>&lt;strong>文件描述符管理&lt;/strong>：通过 &lt;code>open()&lt;/code>、&lt;code>close()&lt;/code>、&lt;code>dup()&lt;/code> 等系统调用实现输入输出重定向；&lt;/li>
+&lt;li>&lt;strong>进程间通信&lt;/strong>：通过 &lt;code>pipe()&lt;/code> 创建管道，连接不同进程的输入输出；&lt;/li>
+&lt;li>&lt;strong>作业控制&lt;/strong>：管理前台任务、后台任务以及进程组。&lt;/li>
+&lt;/ul>
+&lt;p>xv6 提供了一个非常精简的 Shell 实现。虽然它不支持现代 Shell 的全部功能，但已经包含了 Unix Shell 最核心的设计思想。&lt;/p>
+&lt;p>因此，阅读 xv6 的 &lt;code>user/sh.c&lt;/code>，实际上是在学习 Unix Shell 最基本的实现原理。&lt;/p>
+&lt;h1 id="二xv6-shell-的实现">二、xv6 Shell 的实现&lt;/h1>
+&lt;p>xv6 的 Shell 源码位于：&lt;/p></description></item><item><title>Unix/Linux 进程间通信</title><link>https://Jiangmmh.github.io/posts/unix-linux-ipc/</link><pubDate>Thu, 22 Oct 2026 15:33:34 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/unix-linux-ipc/</guid><description>深入理解 Unix/Linux 进程间通信机制，涵盖文件描述符、fork、管道、socketpair、Unix Domain Socket、TCP/UDP Socket、数据传输语义、错误处理与实战示例。</description></item><item><title>[翻译]BSD Socket编程入门</title><link>https://Jiangmmh.github.io/posts/unix-socket/</link><pubDate>Thu, 22 Oct 2026 15:27:57 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/unix-socket/</guid><description>从零理解 BSD Socket API，掌握 TCP 客户端与服务端的工作流程、数据读写、连接关闭和网络字节序。</description></item><item><title>[转载]Linux内核代码风格：官方规范与实践指南</title><link>https://Jiangmmh.github.io/posts/linux-style/</link><pubDate>Mon, 19 Oct 2026 21:44:39 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/linux-style/</guid><description>&lt;h1 id="linux-内核代码风格官方规范与实践指南">Linux 内核代码风格：官方规范与实践指南&lt;/h1>
 &lt;blockquote>
 &lt;p>原始文档：&lt;a href="https://docs.kernel.org/process/coding-style.html">Linux kernel coding style&lt;/a>&lt;/p>
 &lt;p>本文根据 Linux 内核官方文档整理，以中文概括核心规则并补充实践说明。具体开发时，应结合目标内核版本、所属子系统的现有代码和相关 API 文档。&lt;/p>&lt;/blockquote>

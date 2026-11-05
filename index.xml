@@ -1,4 +1,73 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Minghan的博客</title><link>https://Jiangmmh.github.io/</link><description>Recent content on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Thu, 05 Nov 2026 17:36:38 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/index.xml" rel="self" type="application/rss+xml"/><item><title>LevelDB源码学习: 调试环境</title><link>https://Jiangmmh.github.io/posts/leveldb01/</link><pubDate>Thu, 05 Nov 2026 17:36:38 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/leveldb01/</guid><description>&lt;h1 id="一为什么选择-leveldb">一、为什么选择 LevelDB&lt;/h1>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Minghan的博客</title><link>https://Jiangmmh.github.io/</link><description>Recent content on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Thu, 05 Nov 2026 20:23:00 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/index.xml" rel="self" type="application/rss+xml"/><item><title>关于Git的一切</title><link>https://Jiangmmh.github.io/posts/git-intro/</link><pubDate>Thu, 05 Nov 2026 20:23:00 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/git-intro/</guid><description>&lt;h1 id="一为什么需要版本控制">一、为什么需要版本控制？&lt;/h1>
+&lt;h2 id="11-从一个实际问题出发">1.1 从一个实际问题出发&lt;/h2>
+&lt;p>假设你正在开发一个 C++ 项目。&lt;/p>
+&lt;p>第一天，你实现了一个内存池，代码能够正常运行。第二天，你尝试优化内存分配算法，修改了大量代码。第三天，你发现优化后的版本存在严重的内存泄漏，而且已经无法确定究竟修改了哪些地方。&lt;/p>
+&lt;p>你可能会想到一个简单的办法：定期复制整个项目。&lt;/p>
+&lt;p>于是出现了这样的目录：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-text" data-lang="text">&lt;span class="line">&lt;span class="cl">memory-pool/
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">memory-pool-old/
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">memory-pool-new/
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">memory-pool-new2/
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">memory-pool-final/
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">memory-pool-final-v2/
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">memory-pool-final-really/
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>这种方法很快就会暴露出问题：&lt;/p>
+&lt;ol>
+&lt;li>&lt;strong>无法准确追踪变化&lt;/strong>：不知道某个文件究竟修改了什么。&lt;/li>
+&lt;li>&lt;strong>难以回退&lt;/strong>：想恢复某个功能，需要找到正确的历史目录。&lt;/li>
+&lt;li>&lt;strong>无法有效协作&lt;/strong>：多个人修改同一个项目，很难安全地合并各自的工作。&lt;/li>
+&lt;li>&lt;strong>缺乏责任追踪&lt;/strong>：不知道是谁、在什么时候、因为什么原因修改了代码。&lt;/li>
+&lt;li>&lt;strong>无法建立可靠的发布流程&lt;/strong>：难以确定某个版本究竟对应哪些代码。&lt;/li>
+&lt;/ol>
+&lt;p>这些问题实际上指向了软件开发中的一个基础需求：&lt;/p>
+&lt;p>&lt;strong>我们需要一种机制，能够记录项目随时间发生的变化，并允许我们查询、比较、恢复和协作。&lt;/strong>&lt;/p>
+&lt;p>这就是版本控制系统（Version Control System，VCS）存在的原因。&lt;/p>
+&lt;h2 id="12-版本控制系统解决什么问题">1.2 版本控制系统解决什么问题？&lt;/h2>
+&lt;p>版本控制系统的核心职责可以概括为四件事。&lt;/p>
+&lt;h3 id="1-记录历史">1. 记录历史&lt;/h3>
+&lt;p>每次提交（Commit）都记录一次有意义的项目状态变化。&lt;/p>
+&lt;p>例如：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-text" data-lang="text">&lt;span class="line">&lt;span class="cl">commit 1: 初始化项目
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">commit 2: 实现内存分配器
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">commit 3: 添加线程安全支持
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">commit 4: 修复内存泄漏
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">commit 5: 优化空闲链表
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>我们可以随时查看历史记录：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">git log --oneline
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>也可以查看某次提交具体修改了什么：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">git show &amp;lt;commit-id&amp;gt;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="2-比较和回退">2. 比较和回退&lt;/h3>
+&lt;p>版本控制系统能够比较两个版本之间的差异。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">git diff
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">git diff HEAD~1 HEAD
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>当某次修改引入了 Bug，可以恢复到之前的状态，或者创建一个新的提交来撤销错误修改。&lt;/p>
+&lt;p>这使得软件开发从不可逆的文件修改过程，变成了可以安全探索和试错的过程。&lt;/p>
+&lt;h3 id="3-并行开发">3. 并行开发&lt;/h3>
+&lt;p>假设一个团队有三名开发人员：&lt;/p></description></item><item><title>再探xv6-shell详解</title><link>https://Jiangmmh.github.io/posts/xv6-shell/</link><pubDate>Thu, 05 Nov 2026 20:00:00 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/xv6-shell/</guid><description>&lt;h1 id="一what--why">一、What &amp;amp; Why？&lt;/h1>
+&lt;p>Shell（命令解释器）是用户与操作系统交互的重要接口。我们平时在 Linux、macOS 中使用的 Bash、Zsh，以及其他 Unix Shell，本质上都是一个运行在用户态的程序。&lt;/p>
+&lt;p>用户通过 Shell 输入命令，Shell 负责解析命令、组织进程、处理输入输出，并最终调用操作系统提供的系统调用完成任务。&lt;/p>
+&lt;p>例如：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">$ ls -l &lt;span class="p">|&lt;/span> grep &lt;span class="s2">&amp;#34;.c&amp;#34;&lt;/span> &amp;gt; result.txt
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>这条命令包含了多个操作：&lt;/p>
+&lt;ol>
+&lt;li>执行 &lt;code>ls -l&lt;/code>，列出当前目录下的文件；&lt;/li>
+&lt;li>将 &lt;code>ls&lt;/code> 的标准输出连接到管道；&lt;/li>
+&lt;li>执行 &lt;code>grep &amp;quot;.c&amp;quot;&lt;/code>，从管道读取数据并过滤；&lt;/li>
+&lt;li>将 &lt;code>grep&lt;/code> 的输出重定向到 &lt;code>result.txt&lt;/code>。&lt;/li>
+&lt;/ol>
+&lt;p>Shell 并不需要自己实现 &lt;code>ls&lt;/code>、&lt;code>grep&lt;/code> 等程序的功能，也不需要自己实现管道的数据传输。它只需要通过操作系统提供的系统调用，将这些程序组织起来。&lt;/p>
+&lt;p>从操作系统的角度来看，Shell 最重要的工作可以归纳为：&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>命令解析&lt;/strong>：将用户输入的字符串转换为结构化的命令描述；&lt;/li>
+&lt;li>&lt;strong>进程管理&lt;/strong>：通过 &lt;code>fork()&lt;/code>、&lt;code>exec()&lt;/code>、&lt;code>wait()&lt;/code> 等系统调用组织程序执行；&lt;/li>
+&lt;li>&lt;strong>文件描述符管理&lt;/strong>：通过 &lt;code>open()&lt;/code>、&lt;code>close()&lt;/code>、&lt;code>dup()&lt;/code> 等系统调用实现输入输出重定向；&lt;/li>
+&lt;li>&lt;strong>进程间通信&lt;/strong>：通过 &lt;code>pipe()&lt;/code> 创建管道，连接不同进程的输入输出；&lt;/li>
+&lt;li>&lt;strong>作业控制&lt;/strong>：管理前台任务、后台任务以及进程组。&lt;/li>
+&lt;/ul>
+&lt;p>xv6 提供了一个非常精简的 Shell 实现。虽然它不支持现代 Shell 的全部功能，但已经包含了 Unix Shell 最核心的设计思想。&lt;/p>
+&lt;p>因此，阅读 xv6 的 &lt;code>user/sh.c&lt;/code>，实际上是在学习 Unix Shell 最基本的实现原理。&lt;/p>
+&lt;h1 id="二xv6-shell-的实现">二、xv6 Shell 的实现&lt;/h1>
+&lt;p>xv6 的 Shell 源码位于：&lt;/p></description></item><item><title>LevelDB源码学习: 调试环境</title><link>https://Jiangmmh.github.io/posts/leveldb01/</link><pubDate>Thu, 05 Nov 2026 17:36:38 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/leveldb01/</guid><description>&lt;h1 id="一为什么选择-leveldb">一、为什么选择 LevelDB&lt;/h1>
 &lt;p>&lt;a href="https://github.com/google/leveldb">LevelDB&lt;/a> 是 Google 开源的一款高性能嵌入式 Key-Value 存储引擎，使用 C++ 编写。它提供有序的键值映射，支持基本的 Put、Get、Delete 操作，同时支持批量写入、快照、迭代器以及数据压缩。&lt;/p>
 &lt;p>LevelDB 虽然不是一个完整的关系型数据库，但它的实现涉及很多值得深入学习的系统编程技术：&lt;/p>
 &lt;ul>

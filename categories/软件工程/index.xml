@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>软件工程 on Minghan的博客</title>
+    <link>http://localhost:1313/categories/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B/</link>
+    <description>Recent content in 软件工程 on Minghan的博客</description>
+    <generator>Hugo</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Thu, 05 Nov 2026 20:23:00 +0800</lastBuildDate>
+    <atom:link href="http://localhost:1313/categories/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Git：从版本控制到分布式版本管理的设计与实践</title>
+      <link>http://localhost:1313/posts/git-intro/</link>
+      <pubDate>Thu, 05 Nov 2026 20:23:00 +0800</pubDate>
+      <guid>http://localhost:1313/posts/git-intro/</guid>
+      <description>&lt;h1 id=&#34;一为什么需要版本控制&#34;&gt;一、为什么需要版本控制？&lt;/h1&gt;
+&lt;h2 id=&#34;11-从一个实际问题出发&#34;&gt;1.1 从一个实际问题出发&lt;/h2&gt;
+&lt;p&gt;假设你正在开发一个 C++ 项目。&lt;/p&gt;
+&lt;p&gt;第一天，你实现了一个内存池，代码能够正常运行。第二天，你尝试优化内存分配算法，修改了大量代码。第三天，你发现优化后的版本存在严重的内存泄漏，而且已经无法确定究竟修改了哪些地方。&lt;/p&gt;
+&lt;p&gt;你可能会想到一个简单的办法：定期复制整个项目。&lt;/p&gt;
+&lt;p&gt;于是出现了这样的目录：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;memory-pool/
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;memory-pool-old/
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;memory-pool-new/
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;memory-pool-new2/
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;memory-pool-final/
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;memory-pool-final-v2/
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;memory-pool-final-really/
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;这种方法很快就会暴露出问题：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;无法准确追踪变化&lt;/strong&gt;：不知道某个文件究竟修改了什么。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;难以回退&lt;/strong&gt;：想恢复某个功能，需要找到正确的历史目录。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;无法有效协作&lt;/strong&gt;：多个人修改同一个项目，很难安全地合并各自的工作。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;缺乏责任追踪&lt;/strong&gt;：不知道是谁、在什么时候、因为什么原因修改了代码。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;无法建立可靠的发布流程&lt;/strong&gt;：难以确定某个版本究竟对应哪些代码。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;这些问题实际上指向了软件开发中的一个基础需求：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;我们需要一种机制，能够记录项目随时间发生的变化，并允许我们查询、比较、恢复和协作。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;这就是版本控制系统（Version Control System，VCS）存在的原因。&lt;/p&gt;
+&lt;h2 id=&#34;12-版本控制系统解决什么问题&#34;&gt;1.2 版本控制系统解决什么问题？&lt;/h2&gt;
+&lt;p&gt;版本控制系统的核心职责可以概括为四件事。&lt;/p&gt;
+&lt;h3 id=&#34;1-记录历史&#34;&gt;1. 记录历史&lt;/h3&gt;
+&lt;p&gt;每次提交（Commit）都记录一次有意义的项目状态变化。&lt;/p&gt;
+&lt;p&gt;例如：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;commit 1: 初始化项目
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;commit 2: 实现内存分配器
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;commit 3: 添加线程安全支持
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;commit 4: 修复内存泄漏
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;commit 5: 优化空闲链表
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;我们可以随时查看历史记录：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;git log --oneline
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;也可以查看某次提交具体修改了什么：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;git show &amp;lt;commit-id&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;2-比较和回退&#34;&gt;2. 比较和回退&lt;/h3&gt;
+&lt;p&gt;版本控制系统能够比较两个版本之间的差异。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;git diff
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;git diff HEAD~1 HEAD
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;当某次修改引入了 Bug，可以恢复到之前的状态，或者创建一个新的提交来撤销错误修改。&lt;/p&gt;
+&lt;p&gt;这使得软件开发从不可逆的文件修改过程，变成了可以安全探索和试错的过程。&lt;/p&gt;
+&lt;h3 id=&#34;3-并行开发&#34;&gt;3. 并行开发&lt;/h3&gt;
+&lt;p&gt;假设一个团队有三名开发人员：&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

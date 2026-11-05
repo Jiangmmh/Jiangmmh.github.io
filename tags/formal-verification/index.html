@@ -196,23 +196,30 @@
 
 <article class="post-entry tag-entry"> 
   <header class="entry-header">
-    <h2 class="entry-hint-parent">CMU-15122（一）
+    <h2 class="entry-hint-parent">CMU 15-122 学习笔记（一）：契约式编程与循环不变式
+      <span class="entry-hint" title="Draft">
+        <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 -960 960 960" fill="currentColor">
+          <path
+            d="M160-410v-60h300v60H160Zm0-165v-60h470v60H160Zm0-165v-60h470v60H160Zm360 580v-123l221-220q9-9 20-13t22-4q12 0 23 4.5t20 13.5l37 37q9 9 13 20t4 22q0 11-4.5 22.5T862.09-380L643-160H520Zm300-263-37-37 37 37ZM580-220h38l121-122-18-19-19-18-122 121v38Zm141-141-19-18 37 37-18-19Z" />
+        </svg>
+      </span>
     </h2>
   </header>
   <div class="entry-content">
-    <p>Lecture1笔记 本节课的主题：在开发软件系统时，如何实现从直觉调试到形式化证明？
+    <p>CMU15122课程地址：https://web2.qatar.cmu.edu/~mhhammou/15122-s23/index.html。
+Lecture1笔记 本节课的主题：在开发软件系统时，如何实现从直觉调试到形式化证明？
 在软件开发中，我们经常遇到这样的场景：编写了一段看似精妙的算法，测试了几个样例都通过了，但在某种特定输入下程序却悄悄返回了错误答案，或者陷入死循环。
 传统的方法是加 printf 或打断点一步步跟踪（Operational Reasoning）。但对于复杂的循环逻辑，单靠“脑补执行过程”不仅效率低下，而且极易遗漏边缘情况。
 这是 CMU 15-122（Principles of Imperative Computation）的核心思想。下面以一个经典的快速幂算法（Fast Exponentiation）为例，展示如何通过契约式编程（Contracts）与循环不变式（Loop Invariants），从原理上证明算法的正确性，并精准推导出代码中的隐藏 Bug。
 1. 问题背景：一个看似正确的快速幂实现 假设我们需要实现一个计算 xyx^yxy 的快速幂函数 f(x,y)f(x, y)f(x,y)（其中 y≥0y \ge 0y≥0）。
-通过二进制拆分指数，我们可以在 O(log⁡y)O(\log y)O(logy) 的时间复杂度内完成计算。下面是最初的代码实现：
+通过不断拆分指数，我们可以在 O(log⁡y)O(\log y)O(logy) 的时间复杂度内完成计算。下面是最初的代码实现：
 // Specification function! int POW(int b, int e) //@requires e &gt;= 0; { if (e == 0) return 1; return POW(b, e-1) * b; } // 计算 x 的 y 次方 int f(int x, int y) //@requires y &gt;= 0; //@ensures \result == POW(x, y); { int b = x; int e = y; int r = 1; while (e &gt; 1) { if (e % 2 == 1) { r = b * r; } b = b * b; e = e / 2; } return r * b; } 契约（Contracts）说明： @requires y &gt;= 0;：前置条件（Precondition），调用者必须保证 y≥0y \ge 0y≥0。 @ensures \result == POW(x, y);：后置条件（Postcondition），函数必须保证返回结果等于数学上的 xyx^yxy。 运行测试： 如果我们测试 f(2, 8)：
 ...</p>
   </div>
   <footer class="entry-footer">
 
-<span title='2026-11-03 11:25:28 +0800 CST'>November 3, 2026</span>&nbsp;·&nbsp;<span>4 min</span>&nbsp;·&nbsp;<span>673 words</span></footer>
-  <a class="entry-link" aria-label="post link to CMU-15122（一）" href="http://localhost:1313/posts/cmu-15122-01/"></a>
+<span title='2026-11-03 11:25:28 +0800 CST'>November 3, 2026</span>&nbsp;·&nbsp;<span>6 min</span>&nbsp;·&nbsp;<span>1124 words</span></footer>
+  <a class="entry-link" aria-label="post link to CMU 15-122 学习笔记（一）：契约式编程与循环不变式" href="http://localhost:1313/posts/cmu-15122-01/"></a>
 </article>
     </main>
     
