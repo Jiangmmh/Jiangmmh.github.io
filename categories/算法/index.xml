@@ -244,7 +244,7 @@
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">};&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="2-二叉树的中序遍历">2. &lt;strong>二叉树的中序遍历&lt;/strong>&lt;/h2>
-&lt;p>&lt;strong>法一：DFS&lt;/strong>&lt;/p></description></item><item><title>LeetCode 链表专题</title><link>https://Jiangmmh.github.io/posts/leetecode-linkedlist/</link><pubDate>Wed, 14 Oct 2026 11:00:00 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/leetecode-linkedlist/</guid><description>&lt;p>这篇笔记整理了 51 道链表相关题目，使用 C++ 实现。它既是刷题记录，也是一份按问题模式组织的复习手册：重点不在记住某一道题的代码，而在识别题目背后的链表操作模式，并能解释指针变化、边界条件和复杂度。&lt;/p>
+&lt;p>&lt;strong>法一：DFS&lt;/strong>&lt;/p></description></item><item><title>Leetcode 链表专题</title><link>https://Jiangmmh.github.io/posts/leetecode-linkedlist/</link><pubDate>Wed, 14 Oct 2026 11:00:00 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/leetecode-linkedlist/</guid><description>&lt;p>这篇笔记整理了 51 道链表相关题目，使用 C++ 实现。它既是刷题记录，也是一份按问题模式组织的复习手册：重点不在记住某一道题的代码，而在识别题目背后的链表操作模式，并能解释指针变化、边界条件和复杂度。&lt;/p>
 &lt;p>链表题的主要难点通常不是算法本身，而是&lt;strong>节点关系的维护&lt;/strong>。写代码前，建议先明确：要改变哪条 &lt;code>next&lt;/code> 链接、是否需要前驱节点、操作后链表是否仍然连通、是否会形成环，以及是否需要保留原链表。&lt;/p>
 &lt;h3 id="阅读与练习建议">阅读与练习建议&lt;/h3>
 &lt;ul>

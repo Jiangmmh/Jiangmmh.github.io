@@ -1,4 +1,51 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Xv6 on Minghan的博客</title><link>https://Jiangmmh.github.io/tags/xv6/</link><description>Recent content in Xv6 on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Tue, 03 Nov 2026 21:10:44 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/tags/xv6/index.xml" rel="self" type="application/rss+xml"/><item><title>MIT6.1810: Lab5 COW</title><link>https://Jiangmmh.github.io/posts/xv6-lab5-cow/</link><pubDate>Tue, 03 Nov 2026 21:10:44 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/xv6-lab5-cow/</guid><description>&lt;h1 id="一fork-的实现原理">一、fork 的实现原理&lt;/h1>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Xv6 on Minghan的博客</title><link>https://Jiangmmh.github.io/tags/xv6/</link><description>Recent content in Xv6 on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Thu, 05 Nov 2026 16:41:33 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/tags/xv6/index.xml" rel="self" type="application/rss+xml"/><item><title>MIT6.1810: Lab6 Lock</title><link>https://Jiangmmh.github.io/posts/xv6-lab6-lock/</link><pubDate>Thu, 05 Nov 2026 16:41:33 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/xv6-lab6-lock/</guid><description>&lt;h1 id="一memory-allocator-easy">一、Memory allocator (easy)&lt;/h1>
+&lt;h2 id="1-物理内存分配器现状">1. 物理内存分配器现状&lt;/h2>
+&lt;p>当前 xv6 的物理内存管理策略比较简单：&lt;/p>
+&lt;ul>
+&lt;li>将可用的物理内存划分为 4KB 大小的页面。&lt;/li>
+&lt;li>使用一个 freelist（空闲链表）将这些页面串联起来。&lt;/li>
+&lt;li>使用一个自旋锁保护 freelist，保证多核环境下链表操作的互斥性。&lt;/li>
+&lt;li>调用 &lt;code>kalloc()&lt;/code> 和 &lt;code>kfree()&lt;/code> 操作 freelist 之前先获取自旋锁，操作完成后释放锁。&lt;/li>
+&lt;/ul>
+&lt;p>更多细节可以参考我的&lt;a href="https://jiangmmh.github.io/posts/xv6-02/">这篇博客&lt;/a>。&lt;/p>
+&lt;p>按照实验要求，在 xv6 中运行 &lt;code>kalloctest&lt;/code>：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">$ kalloctest
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">start test1
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">test1 results:
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">--- lock kmem stats
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">lock: kmem: &lt;span class="c1">#test-and-set 67377 #acquire() 433136&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">--- top &lt;span class="m">5&lt;/span> contended locks:
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">lock: virtio_disk: &lt;span class="c1">#test-and-set 144638 #acquire() 183&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">lock: proc: &lt;span class="c1">#test-and-set 86684 #acquire() 667829&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">lock: proc: &lt;span class="c1">#test-and-set 78406 #acquire() 667827&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">lock: proc: &lt;span class="c1">#test-and-set 72893 #acquire() 270341&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">lock: kmem: &lt;span class="c1">#test-and-set 67377 #acquire() 433136&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nv">tot&lt;/span>&lt;span class="o">=&lt;/span> &lt;span class="m">67377&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">test1 FAIL
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">start test2
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">total free number of pages: &lt;span class="m">32465&lt;/span> &lt;span class="o">(&lt;/span>out of 32768&lt;span class="o">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">..........
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">test2 OK
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">start test3
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">..........child &lt;span class="k">done&lt;/span> &lt;span class="m">10000&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">test3 OK
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">start test4
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">............................child &lt;span class="k">done&lt;/span> &lt;span class="m">100000&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">.child &lt;span class="k">done&lt;/span> &lt;span class="m">100000&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">.child &lt;span class="k">done&lt;/span> &lt;span class="m">100000&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">--- lock kmem stats
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">lock: kmem: &lt;span class="c1">#test-and-set 989593 #acquire() 3377039&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">--- top &lt;span class="m">5&lt;/span> contended locks:
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">lock: wait_lock: &lt;span class="c1">#test-and-set 18470332 #acquire() 40032&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">lock: proc: &lt;span class="c1">#test-and-set 1525506 #acquire() 2552018&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">lock: kmem: &lt;span class="c1">#test-and-set 989593 #acquire() 3377039&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">lock: proc: &lt;span class="c1">#test-and-set 248206 #acquire() 1613804&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">lock: proc: &lt;span class="c1">#test-and-set 211798 #acquire() 1956210&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nv">tot&lt;/span>&lt;span class="o">=&lt;/span> &lt;span class="m">989593&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">test4 FAIL m &lt;span class="m">190242&lt;/span> n &lt;span class="m">989593&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="11-理解锁竞争统计">1.1 理解锁竞争统计&lt;/h3>
+&lt;p>在 lab lock 版本中，&lt;code>acquire()&lt;/code> 函数会记录两个指标：&lt;/p></description></item><item><title>MIT6.1810: Lab5 COW</title><link>https://Jiangmmh.github.io/posts/xv6-lab5-cow/</link><pubDate>Tue, 03 Nov 2026 21:10:44 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/xv6-lab5-cow/</guid><description>&lt;h1 id="一fork-的实现原理">一、fork 的实现原理&lt;/h1>
 &lt;p>在用户态调用 &lt;code>fork()&lt;/code> 后，程序通过系统调用进入内核，最终执行 &lt;code>sys_fork()&lt;/code>，并在其中调用 &lt;code>kfork()&lt;/code> 创建子进程。&lt;/p>
 &lt;p>&lt;code>kfork()&lt;/code> 的主要工作包括：&lt;/p>
 &lt;ul>
