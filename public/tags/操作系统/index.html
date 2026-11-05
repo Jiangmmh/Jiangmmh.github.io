@@ -196,6 +196,29 @@
 
 <article class="post-entry tag-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">xv6-shell详解
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>一、What &amp; Why？ Shell（命令解释器）是用户与操作系统交互的重要接口。我们平时在 Linux、macOS 中使用的 Bash、Zsh，以及其他 Unix Shell，本质上都是一个运行在用户态的程序。
+用户通过 Shell 输入命令，Shell 负责解析命令、组织进程、处理输入输出，并最终调用操作系统提供的系统调用完成任务。
+例如：
+$ ls -l | grep &#34;.c&#34; &gt; result.txt 这条命令包含了多个操作：
+执行 ls -l，列出当前目录下的文件； 将 ls 的标准输出连接到管道； 执行 grep &#34;.c&#34;，从管道读取数据并过滤； 将 grep 的输出重定向到 result.txt。 Shell 并不需要自己实现 ls、grep 等程序的功能，也不需要自己实现管道的数据传输。它只需要通过操作系统提供的系统调用，将这些程序组织起来。
+从操作系统的角度来看，Shell 最重要的工作可以归纳为：
+命令解析：将用户输入的字符串转换为结构化的命令描述； 进程管理：通过 fork()、exec()、wait() 等系统调用组织程序执行； 文件描述符管理：通过 open()、close()、dup() 等系统调用实现输入输出重定向； 进程间通信：通过 pipe() 创建管道，连接不同进程的输入输出； 作业控制：管理前台任务、后台任务以及进程组。 xv6 提供了一个非常精简的 Shell 实现。虽然它不支持现代 Shell 的全部功能，但已经包含了 Unix Shell 最核心的设计思想。
+因此，阅读 xv6 的 user/sh.c，实际上是在学习 Unix Shell 最基本的实现原理。
+二、xv6 Shell 的实现 xv6 的 Shell 源码位于：
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-11-05 20:00:00 +0800 CST'>November 5, 2026</span>&nbsp;·&nbsp;<span>9 min</span>&nbsp;·&nbsp;<span>1792 words</span></footer>
+  <a class="entry-link" aria-label="post link to xv6-shell详解" href="http://localhost:1313/posts/xv6-shell/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">论文阅读：Practical, Transparent Operating System Support for Superpages
     </h2>
   </header>

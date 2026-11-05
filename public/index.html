@@ -228,6 +228,60 @@
 
 <article class="post-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">关于Git的一切
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>一、为什么需要版本控制？ 1.1 从一个实际问题出发 假设你正在开发一个 C&#43;&#43; 项目。
+第一天，你实现了一个内存池，代码能够正常运行。第二天，你尝试优化内存分配算法，修改了大量代码。第三天，你发现优化后的版本存在严重的内存泄漏，而且已经无法确定究竟修改了哪些地方。
+你可能会想到一个简单的办法：定期复制整个项目。
+于是出现了这样的目录：
+memory-pool/ memory-pool-old/ memory-pool-new/ memory-pool-new2/ memory-pool-final/ memory-pool-final-v2/ memory-pool-final-really/ 这种方法很快就会暴露出问题：
+无法准确追踪变化：不知道某个文件究竟修改了什么。 难以回退：想恢复某个功能，需要找到正确的历史目录。 无法有效协作：多个人修改同一个项目，很难安全地合并各自的工作。 缺乏责任追踪：不知道是谁、在什么时候、因为什么原因修改了代码。 无法建立可靠的发布流程：难以确定某个版本究竟对应哪些代码。 这些问题实际上指向了软件开发中的一个基础需求：
+我们需要一种机制，能够记录项目随时间发生的变化，并允许我们查询、比较、恢复和协作。
+这就是版本控制系统（Version Control System，VCS）存在的原因。
+1.2 版本控制系统解决什么问题？ 版本控制系统的核心职责可以概括为四件事。
+1. 记录历史 每次提交（Commit）都记录一次有意义的项目状态变化。
+例如：
+commit 1: 初始化项目 commit 2: 实现内存分配器 commit 3: 添加线程安全支持 commit 4: 修复内存泄漏 commit 5: 优化空闲链表 我们可以随时查看历史记录：
+git log --oneline 也可以查看某次提交具体修改了什么：
+git show &lt;commit-id&gt; 2. 比较和回退 版本控制系统能够比较两个版本之间的差异。
+git diff git diff HEAD~1 HEAD 当某次修改引入了 Bug，可以恢复到之前的状态，或者创建一个新的提交来撤销错误修改。
+这使得软件开发从不可逆的文件修改过程，变成了可以安全探索和试错的过程。
+3. 并行开发 假设一个团队有三名开发人员：
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-11-05 20:23:00 +0800 CST'>November 5, 2026</span>&nbsp;·&nbsp;<span>14 min</span>&nbsp;·&nbsp;<span>2932 words</span></footer>
+  <a class="entry-link" aria-label="post link to 关于Git的一切" href="http://localhost:1313/posts/git-intro/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">再探xv6-shell详解
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>一、What &amp; Why？ Shell（命令解释器）是用户与操作系统交互的重要接口。我们平时在 Linux、macOS 中使用的 Bash、Zsh，以及其他 Unix Shell，本质上都是一个运行在用户态的程序。
+用户通过 Shell 输入命令，Shell 负责解析命令、组织进程、处理输入输出，并最终调用操作系统提供的系统调用完成任务。
+例如：
+$ ls -l | grep &#34;.c&#34; &gt; result.txt 这条命令包含了多个操作：
+执行 ls -l，列出当前目录下的文件； 将 ls 的标准输出连接到管道； 执行 grep &#34;.c&#34;，从管道读取数据并过滤； 将 grep 的输出重定向到 result.txt。 Shell 并不需要自己实现 ls、grep 等程序的功能，也不需要自己实现管道的数据传输。它只需要通过操作系统提供的系统调用，将这些程序组织起来。
+从操作系统的角度来看，Shell 最重要的工作可以归纳为：
+命令解析：将用户输入的字符串转换为结构化的命令描述； 进程管理：通过 fork()、exec()、wait() 等系统调用组织程序执行； 文件描述符管理：通过 open()、close()、dup() 等系统调用实现输入输出重定向； 进程间通信：通过 pipe() 创建管道，连接不同进程的输入输出； 作业控制：管理前台任务、后台任务以及进程组。 xv6 提供了一个非常精简的 Shell 实现。虽然它不支持现代 Shell 的全部功能，但已经包含了 Unix Shell 最核心的设计思想。
+因此，阅读 xv6 的 user/sh.c，实际上是在学习 Unix Shell 最基本的实现原理。
+二、xv6 Shell 的实现 xv6 的 Shell 源码位于：
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-11-05 20:00:00 +0800 CST'>November 5, 2026</span>&nbsp;·&nbsp;<span>9 min</span>&nbsp;·&nbsp;<span>1792 words</span></footer>
+  <a class="entry-link" aria-label="post link to 再探xv6-shell详解" href="http://localhost:1313/posts/xv6-shell/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">LevelDB源码学习: 调试环境
     </h2>
   </header>
@@ -363,6 +417,34 @@ int kfork(void) { int i, pid; struct proc *np; struct proc *p = myproc(); // All
 
 <article class="post-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">CMU 15-122 学习笔记（一）：契约式编程与循环不变式
+      <span class="entry-hint" title="Draft">
+        <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 -960 960 960" fill="currentColor">
+          <path
+            d="M160-410v-60h300v60H160Zm0-165v-60h470v60H160Zm0-165v-60h470v60H160Zm360 580v-123l221-220q9-9 20-13t22-4q12 0 23 4.5t20 13.5l37 37q9 9 13 20t4 22q0 11-4.5 22.5T862.09-380L643-160H520Zm300-263-37-37 37 37ZM580-220h38l121-122-18-19-19-18-122 121v38Zm141-141-19-18 37 37-18-19Z" />
+        </svg>
+      </span>
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>CMU15122课程地址：https://web2.qatar.cmu.edu/~mhhammou/15122-s23/index.html。
+Lecture1笔记 本节课的主题：在开发软件系统时，如何实现从直觉调试到形式化证明？
+在软件开发中，我们经常遇到这样的场景：编写了一段看似精妙的算法，测试了几个样例都通过了，但在某种特定输入下程序却悄悄返回了错误答案，或者陷入死循环。
+传统的方法是加 printf 或打断点一步步跟踪（Operational Reasoning）。但对于复杂的循环逻辑，单靠“脑补执行过程”不仅效率低下，而且极易遗漏边缘情况。
+这是 CMU 15-122（Principles of Imperative Computation）的核心思想。下面以一个经典的快速幂算法（Fast Exponentiation）为例，展示如何通过契约式编程（Contracts）与循环不变式（Loop Invariants），从原理上证明算法的正确性，并精准推导出代码中的隐藏 Bug。
+1. 问题背景：一个看似正确的快速幂实现 假设我们需要实现一个计算 xyx^yxy 的快速幂函数 f(x,y)f(x, y)f(x,y)（其中 y≥0y \ge 0y≥0）。
+通过不断拆分指数，我们可以在 O(log⁡y)O(\log y)O(logy) 的时间复杂度内完成计算。下面是最初的代码实现：
+// Specification function! int POW(int b, int e) //@requires e &gt;= 0; { if (e == 0) return 1; return POW(b, e-1) * b; } // 计算 x 的 y 次方 int f(int x, int y) //@requires y &gt;= 0; //@ensures \result == POW(x, y); { int b = x; int e = y; int r = 1; while (e &gt; 1) { if (e % 2 == 1) { r = b * r; } b = b * b; e = e / 2; } return r * b; } 契约（Contracts）说明： @requires y &gt;= 0;：前置条件（Precondition），调用者必须保证 y≥0y \ge 0y≥0。 @ensures \result == POW(x, y);：后置条件（Postcondition），函数必须保证返回结果等于数学上的 xyx^yxy。 运行测试： 如果我们测试 f(2, 8)：
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-11-03 11:25:28 +0800 CST'>November 3, 2026</span>&nbsp;·&nbsp;<span>6 min</span>&nbsp;·&nbsp;<span>1124 words</span></footer>
+  <a class="entry-link" aria-label="post link to CMU 15-122 学习笔记（一）：契约式编程与循环不变式" href="http://localhost:1313/posts/cmu-15122-01/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">MIT6.1810: Lab4 Trap
     </h2>
   </header>
@@ -382,95 +464,6 @@ printf的返回值是成功打印输出等字符总数，如果出错则返回�
 
 <span title='2026-11-01 10:27:29 +0800 CST'>November 1, 2026</span>&nbsp;·&nbsp;<span>3 min</span>&nbsp;·&nbsp;<span>575 words</span></footer>
   <a class="entry-link" aria-label="post link to MIT6.1810: Lab4 Trap" href="http://localhost:1313/posts/xv6-lab4-trap/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">Computer Networks P&amp;D 阅读笔记 Ch1
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>这是一本关于计算机网络的开源书籍，写得非常好。
-Preface “系统方法” 指的是计算机系统设计和实现领域的一个概念。计算机科学研究人员和从业者通常使用这个术语来研究构建复杂计算系统（例如操作系统、网络、分布式应用程序等）时出现的问题。
-系统方法的关键在于“全局观”：你需要关注系统的各个组件如何相互作用以实现整体结果，而不是仅仅优化每个组件。
-在网络领域，这通常意味着要超越传统的分层视角，思考如何以可能涉及多个层面的方式来最佳地解决问题。拥塞控制就是一个很好的例子，它涉及多个层面，并影响终端系统和网络设备。我们将拥塞这一系统级问题单独成章进行讨论，而不是试图将其硬塞进传输层等其他层级。
-1. 问题：如何构建计算机网络？ 假设让你来构建一个计算机网络，你会如何设计它？
-如果我们要构造一个未来可能扩展到全球规模，并支持远程会议、视频点播、电子商务、分布式计算和数字图书馆等各种应用的网络。
-有哪些现有技术可以作为底层构建模块？ 你会设计什么样的软件架构来将这些构建模块集成到一个高效的通信服务中？ 本书的主要目标就是回答这个问题：介绍现有的网络技术，并展示如何利用它们从零开始构建网络。
-计算机网络与其他类型的网络有何区别？
-计算机网络最重要的特性或许在于其通用性。其主要由通用可编程硬件（CPU）构建，并非针对特定应用。它们能够承载多种不同类型的数据，并支持广泛且不断增长的应用。
-2. 应用 计算机网络的应用包括：例如万维网、电子邮件、社交媒体、流媒体音乐或电影、视频会议、即时通讯、文件共享等等。
-使用计算机网络的群体：
-网络应用开发者 网络运维管理者 网络协议的设计和构建者 3. 要求 我们为自己设定了一个雄心勃勃的目标：从零开始构建计算机网络。
-为了实现这一目标，我们将从基本原理入手，然后提出在构建实际网络时自然会遇到的问题。
-计算机网络的要求如下：
-可扩展链接 高效的资源共享 支持通用服务 可管理性好 网络共享的基本概念：多路复用。
-时分多路复用，将时间分割成大小相等的量子，并以轮询的方式让每个数据流有机会通过物理链路发送数据。 频分多路复用，使用不同的频率通过物理链路传输每个数据流 如果其中一个流（主机对）没有数据要发送，那么它所占用的物理链路份额——即时间片或频率——就会处于空闲状态，即使其他流有数据要发送 统计复用，按需从每个数据流发送的，而不是在预定的时隙内发送。 为了保证每个数据流都能获得使用链路发送数据的机会，统计复用为每个数据流在给定时间允许传输的数据块大小设定了一个上限。这个大小受限的数据块通常被称为数据包，以区别于应用程序可能想要传输的任意大小的消息。 核心思想：按Packet发送数据，而不是任意长度 源端可能需要将消息分割成多个数据包，接收端再将这些数据包重新组装成原始消息。 4. 计算机网络的架构 抽象——即将实现细节隐藏在定义良好的接口之后——是系统设计者用来管理复杂性的基本工具。
-为了应对设计计算机网络系统的复杂性，网络设计者提出了网络架构的概念来指导网络的设计与实现。主要的计算机网络架构包括：
-OSI七层模型 TCP/IP四层模型 抽象自然而然地导致了分层，尤其是在网络系统中。其基本思路是，从底层硬件提供的服务入手，然后添加一系列层，每一层都提供更高（更抽象）的服务级别。高层提供的服务是根据底层提供的服务来实现的。
-分层提供了两个实用功能：
-将构建网络的问题分解成更易于管理的组件。与其实现一个包罗万象的单体软件，不如实现多个层，每个层解决问题的一部分。 提供了一种更模块化的设计。如果您决定添加一些新服务，可能只需要修改其中一层的功能，即可重用其他层提供的函数。 很多时候，系统的任何同一层级中提供了多种抽象，每种抽象都为更高层级提供不同的服务，但都基于相同的底层抽象，例如传输层的TCP和UDP协议，都以IP协议的服务为基础，但对上层提供不同的传输服务。
-构成网络系统各层的抽象对象称为协议。协议提供了一种通信服务，供更高层的对象（例如应用程序进程，或者更高层级的协议）交换消息。
-每个协议都定义了两个不同的接口：
-服务接口（纵向）*，*供同一台计算机上其他想要使用其通信服务的对象使用。 协议定义了与另一台机器上的对应节点（对等节点）之间的接口（横向）。 协议规定了如何在同层的对等节点之间传输数据，如何体现？本质就是在发送数据之前在其前面加上一个首部（Header），对等节点在收到数据后根据协议解析该首部，然后取出其中的数据发往上层。
-当我们说底层协议不解释它从高层协议接收到的消息时，指的是它不知道如何从消息中包含的数据中提取任何含义。
-当然，有时底层协议会对接收到的数据进行一些简单的转换，例如压缩或加密。
-多路复用与解多路复用
-因为计算机网络是多层的，且每层可能包含不止一种协议，因此在底层的首部中还要包含一个字段，用来表示该数据所属的上层协议。 几乎所有协议都实现了这种机制。 下面是OSI七层模型和TCP四层模型的架构图：
-虽然现在TCP四层模型成为了实际上的标准，但是OSI七层模型仍有其价值，因为会话层和表示层在开发应用软件时仍需要考虑到。
-会话层提供了一个命名空间，用于将构成单个应用程序的不同传输流连接起来。例如，它可以管理在远程会议应用程序中组合的音频流和视频流。 表示层，它负责处理对等方之间交换的数据格式。 5. 软件 了解如何实现网络软件是理解计算机网络的重要组成部分。虽然你不太可能被委派去实现像 IP 这样的底层协议，但你很有可能会遇到需要实现应用层协议的情况——这种梦寐以求的“杀手级应用”能为你带来难以想象的名利双收。
-...</p>
-  </div>
-  <footer class="entry-footer">
-
-<span title='2026-10-30 11:59:50 +0800 CST'>October 30, 2026</span>&nbsp;·&nbsp;<span>3 min</span>&nbsp;·&nbsp;<span>519 words</span></footer>
-  <a class="entry-link" aria-label="post link to Computer Networks P&D 阅读笔记 Ch1" href="http://localhost:1313/posts/net-sys1/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">一生一芯-E6阶段笔记
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>一、体验AM 先来阅读以下PA1中第一节的内容：
-一定要刻意训练自己针对问题，自行探索和学习基本原理，思考解决方案并落地解决问题的全流程能力。不要偷懒，等待别人的答案。
-PA的目的是要实现NEMU, 一款经过简化的全系统模拟器。所谓全系统模拟器就是其可以模拟完整的硬件，例如x86处理器、RISC-V处理器或红白机硬件。
-AM的设计非常巧妙，我们可以通过提供不同的ARCH参数, 来让同一个程序编译到不同的平台上. 例如, ARCH=native表示将程序编译到Linux本地。
-运行红白机模拟器，检查画面、按键和声音，没有问题。
-NEMU模拟了一个硬件的世界, 我们可以在这个硬件世界中执行程序。换句话说, 我们将要在PA中编写一个用来执行其它程序的程序! &#43;---------------------&#43; &#43;---------------------&#43; | NES Game | | &#34;Hello World&#34; | &#43;---------------------&#43; &#43;---------------------&#43; | Simulated NES | | Simulated | | hardware | | hardware | &#43;---------------------&#43; &#43;---------------------&#43; &#43;---------------------&#43; | &#34;Hello World&#34; | | NES Emulator | | NEMU | &#43;---------------------&#43; &#43;---------------------&#43; &#43;---------------------&#43; | GNU/Linux | | GNU/Linux | | GNU/Linux | &#43;---------------------&#43; &#43;---------------------&#43; &#43;---------------------&#43; | Real hardware | | Real hardware | | Real hardware | &#43;---------------------&#43; &#43;---------------------&#43; &#43;---------------------&#43; (a) (b) (c) (a) 直接在GNU/Linux中运行Hello World程序 (b) 在GNU/Linux中通过红白机模拟器，运行红白机游戏 (c) 在GNU/Linux中通过NEMU模拟其他硬件，并运行Hello World程序 二、运行第一个编译的程序 关键问题：为什么需要AM？
-...</p>
-  </div>
-  <footer class="entry-footer">
-
-<span title='2026-10-28 22:18:08 +0800 CST'>October 28, 2026</span>&nbsp;·&nbsp;<span>49 min</span>&nbsp;·&nbsp;<span>10410 words</span></footer>
-  <a class="entry-link" aria-label="post link to 一生一芯-E6阶段笔记" href="http://localhost:1313/posts/ysyx-e6/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">一生一芯-E5阶段笔记
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>在E4阶段中，我先使用Chisel（Verilog）实现了sISA，得到了sCPU，并在NVboard上进行了测试。然后为了提高调试效率，使用C/C&#43;&#43;实现了一个sISA的模拟器sEMU，并以sCPU为DUT，以sEMU为REF，进行了Differential Test。
-在这个阶段的内容中，我将实现一个仅支持8条指令（实际上是13条指令），但功能完备的RISC-V处理器（通过编译的方式使其模拟40条指令），它可以运行更多程序。
-在开始之前先总结一下处理器开发的思路：
-第一步：认真看手册！ 寄存器文件有多少个寄存器？位宽是多少？它们的功能？ 支持哪些指令？指令的格式与功能？ 第二步：画出处理器的结构图 画出架构图，描述清楚处理器各模块之间如何交互 第三步：使用Verilog/Chisel实现各组件 第四步：根据结构图将各组件连接起来 一、迷你RISC-V指令集 RV32I共有42条指令, 通过实现RV32I, 处理器已经足够完成绝大部分的计算工作。不过为了进一步降低开发的工作量, 我们提出了一个**“迷你RISC-V&#34;指令集minirv**, 从RV32I中选出了8条指令, 用它们来替代其他RV32I指令的功能, 使得RV32I能完成的工作, minirv也能完成。 这样, 我们就不必实现完整的42条RV32I指令, 也能让处理器运行更复杂的程序了。
-查看RISC-V手册，回答如下问题：
-RV32I 包含 40 条独特的指令，但一个简单的实现可能只需一条始终捕获异常的 SYSTEM 硬件指令即可涵盖 ECALL/EBREAK 指令，并且可能将 FENCE 指令实现为 NOP 指令，从而将基本指令总数减少到 38 条。
-问题一：PC寄存器的位宽是多少？
-RV32I有32 个x寄存器，均为 32 位宽，即XLEN=32。 寄存器的x0所有位均硬连线为 0。 通用寄存器x1-x31保存的值会被各种指令解释为布尔值集合、二进制补码有符号整数或无符号二进制整数。 还有一个额外的非特权寄存器：程序计数器pc 保存下一条指令的地址。
-回答：RV32I中的PC寄存器位宽为32。
-问题二：GPR共有多少个? 每个GPR的位宽是多少?
-回答：RV32I包含32个GPR（x0～x31），位宽均为32位。
-问题三：R[0]和sISA的R[0]有什么不同之处?
-...</p>
-  </div>
-  <footer class="entry-footer">
-
-<span title='2026-10-27 23:30:27 +0800 CST'>October 27, 2026</span>&nbsp;·&nbsp;<span>38 min</span>&nbsp;·&nbsp;<span>7978 words</span></footer>
-  <a class="entry-link" aria-label="post link to 一生一芯-E5阶段笔记" href="http://localhost:1313/posts/ysyx-e5/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">

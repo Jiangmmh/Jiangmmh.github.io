@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Shell on Minghan的博客</title>
+    <link>http://localhost:1313/tags/shell/</link>
+    <description>Recent content in Shell on Minghan的博客</description>
+    <generator>Hugo</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Thu, 05 Nov 2026 20:00:00 +0800</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/shell/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>xv6-shell详解</title>
+      <link>http://localhost:1313/posts/xv6-shell/</link>
+      <pubDate>Thu, 05 Nov 2026 20:00:00 +0800</pubDate>
+      <guid>http://localhost:1313/posts/xv6-shell/</guid>
+      <description>&lt;h1 id=&#34;一what--why&#34;&gt;一、What &amp;amp; Why？&lt;/h1&gt;
+&lt;p&gt;Shell（命令解释器）是用户与操作系统交互的重要接口。我们平时在 Linux、macOS 中使用的 Bash、Zsh，以及其他 Unix Shell，本质上都是一个运行在用户态的程序。&lt;/p&gt;
+&lt;p&gt;用户通过 Shell 输入命令，Shell 负责解析命令、组织进程、处理输入输出，并最终调用操作系统提供的系统调用完成任务。&lt;/p&gt;
+&lt;p&gt;例如：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ ls -l &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; grep &lt;span class=&#34;s2&#34;&gt;&amp;#34;.c&amp;#34;&lt;/span&gt; &amp;gt; result.txt
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;这条命令包含了多个操作：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;执行 &lt;code&gt;ls -l&lt;/code&gt;，列出当前目录下的文件；&lt;/li&gt;
+&lt;li&gt;将 &lt;code&gt;ls&lt;/code&gt; 的标准输出连接到管道；&lt;/li&gt;
+&lt;li&gt;执行 &lt;code&gt;grep &amp;quot;.c&amp;quot;&lt;/code&gt;，从管道读取数据并过滤；&lt;/li&gt;
+&lt;li&gt;将 &lt;code&gt;grep&lt;/code&gt; 的输出重定向到 &lt;code&gt;result.txt&lt;/code&gt;。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Shell 并不需要自己实现 &lt;code&gt;ls&lt;/code&gt;、&lt;code&gt;grep&lt;/code&gt; 等程序的功能，也不需要自己实现管道的数据传输。它只需要通过操作系统提供的系统调用，将这些程序组织起来。&lt;/p&gt;
+&lt;p&gt;从操作系统的角度来看，Shell 最重要的工作可以归纳为：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;命令解析&lt;/strong&gt;：将用户输入的字符串转换为结构化的命令描述；&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;进程管理&lt;/strong&gt;：通过 &lt;code&gt;fork()&lt;/code&gt;、&lt;code&gt;exec()&lt;/code&gt;、&lt;code&gt;wait()&lt;/code&gt; 等系统调用组织程序执行；&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;文件描述符管理&lt;/strong&gt;：通过 &lt;code&gt;open()&lt;/code&gt;、&lt;code&gt;close()&lt;/code&gt;、&lt;code&gt;dup()&lt;/code&gt; 等系统调用实现输入输出重定向；&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;进程间通信&lt;/strong&gt;：通过 &lt;code&gt;pipe()&lt;/code&gt; 创建管道，连接不同进程的输入输出；&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;作业控制&lt;/strong&gt;：管理前台任务、后台任务以及进程组。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;xv6 提供了一个非常精简的 Shell 实现。虽然它不支持现代 Shell 的全部功能，但已经包含了 Unix Shell 最核心的设计思想。&lt;/p&gt;
+&lt;p&gt;因此，阅读 xv6 的 &lt;code&gt;user/sh.c&lt;/code&gt;，实际上是在学习 Unix Shell 最基本的实现原理。&lt;/p&gt;
+&lt;h1 id=&#34;二xv6-shell-的实现&#34;&gt;二、xv6 Shell 的实现&lt;/h1&gt;
+&lt;p&gt;xv6 的 Shell 源码位于：&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

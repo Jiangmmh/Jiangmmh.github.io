@@ -194,6 +194,119 @@
 
 <article class="post-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">Leetecode 二叉树(二)
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>题目来自灵神的题单：二叉树题单。
+在上一篇文章中已经介绍了简单遍历和自顶向下DFS的思路，这篇文章主要介绍自底向上DFS的思路。
+一、自底向上 DFS（后序遍历） 在二叉树系列的前一篇博客中其实已经提到过了自顶向下和自底向上的区别了，这里再啰嗦一遍。
+自顶向下，指从根节点往叶子节点 “递”的过程中 更新结果 自底向上，指先递归处理叶子节点，在 “归“的过程中 更新结果 21. 二叉树的最大深度 自底向上的解法：
+先递归得到左右子树各自的最大深度，然后取大者&#43;1作为结果返回。
+时间复杂度：O(n)，空间复杂度：O(n)
+class Solution { public: int maxDepth(TreeNode* root) { // base case if (!root) return 0; // 递归求解左右子树的最大深度 int l = maxDepth(root-&gt;left); int r = maxDepth(root-&gt;right); return max(l, r) &#43; 1; } }; 22. 二叉树的最小深度 注意：最小深度必须从根到叶子，即当一个节点只有一个孩子时，不能直接返回，而是要继续递归直至叶子节点。
+自底向上的解法
+有这么几种情况：
+当前节点为空，直接返回0 左子树为空，右子树不为空，返回minDepth(root-&gt;right) &#43; 1 右子树为空，左子树不为空，返回minDepth(root-&gt;left) &#43; 1 左右子树均不为空，返回min(min_l, min_r)&#43;1 时间复杂度：O(n)，空间复杂度：O(n)
+class Solution { public: int minDepth(TreeNode* root) { if (!root) return 0; if (!root-&gt;left &amp;&amp; root-&gt;right) return minDepth(root-&gt;right) &#43; 1; if (!root-&gt;right &amp;&amp; root-&gt;left) return minDepth(root-&gt;left) &#43; 1; int min_l = minDepth(root-&gt;left); int min_r = minDepth(root-&gt;right); return min(min_l, min_r)&#43;1; } }; 23. 单值二叉树 题目要求判断树中各节点的值是否均相同，我的思路：
+使用变量rootval记录根节点的值（题目保证树非空） 准备一个初值为true的bool变量ans记录答案 遍历整棵二叉树，如果发现存在节点值不等于rootval，则将ans置为false 最后返回ans即可 class Solution { public: bool isUnivalTree(TreeNode* root) { // 树非空 int rootval = root-&gt;val; bool ans = true; auto dfs = [&amp;](auto&amp;&amp; self, TreeNode* node) { if (!node) return; if (node-&gt;val != rootval) { ans = false; return ; } self(self, node-&gt;left); self(self, node-&gt;right); }; dfs(dfs, root); return ans; } }; 24. 相同的树 题目要求：判断两棵树上对应节点的值是否完全相同
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-16 11:20:25 +0800 CST'>October 16, 2026</span>&nbsp;·&nbsp;<span>9 min</span>&nbsp;·&nbsp;<span>1829 words</span></footer>
+  <a class="entry-link" aria-label="post link to Leetecode 二叉树(二)" href="http://localhost:1313/posts/leetecode-tree02/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">UCLA Computer Architecture Lec2&amp;Lec3
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>1. Main objective of architecting a computer 关键目标：Make efficient computer.
+何谓高效？
+🌟性能（Performance） 低能耗（Power Consumption） 成本（Cost） 可靠&amp;安全（Reliable &amp; Secure） 2. 处理器的发展 注：这部分内容来自我过去的笔记。
+2.1 过去 摩尔定律: 集成电路上的晶体管数目大约每两年翻一番，而成本几乎不增加。虽名为“定律”，描述的却是一种经验关系，而非科学定律。
+下图的横轴为年份，纵轴为微处理器中即成的晶体管数量，可以看到从1970年代开始到当下一直呈现出线性增长的趋势。
+Dennard Scaling（登纳德缩放比例定律）： 当晶体管的尺寸（长宽高）每年缩小约 30%（即工艺节点推进一代）时，只要电压和电流也等比例地降低，芯片的功率密度（每平方毫米的功耗）将保持不变。
+Dennard Scaling定律量化了随着晶体管尺寸的缩小，其所需加上的电压和电流是多少。
+该定律揭示了：随着晶体管尺寸的缩小，所需的电压和电流也等比例降低，由功率计算公式：P = IV，只要晶体管尺寸能够持续缩小，即使在单位面积上放入更多的晶体管，功耗也不会增加，因而无需考虑散热等问题。
+Insight：根据摩尔定律和德纳德缩放定律，处理器每年都会更快、更便宜、能耗更低。
+2.2 现在和未来 晶体管本该像完美的开关，但尺寸太小后，即使处于“关断”状态，电子也会像漏水一样穿过去，产生静态功耗。
+等到了2005年左右，继续缩小晶体管的尺寸会导致静态功耗（static power leakage） 剧增。Dennard Scaling定律失效，无法继续降低电压，进而导致频率无法继续提高（功耗太大，发热无法解决）。
+随着Dennard Scaling定律的失效，处理器行业发生了急转弯：既然单个核心不能再快了，那就用多出来的晶体管，塞进更多的核心。
+程序性能的进一步提升要依赖于多核处理器、专用并行芯片和并行化的程序。
+Amdahl’s Law给出了程序性能提高的上限取决于该程序并行部分的比例（因为单核性能难以继续提高）。
+未来处理器发展的趋势如下：
+晶体管数量仍在不断增加 时钟频率难以继续提高 处理器Core的数量不断增加 结果：并行程序的性能随之增加，但串行程序的性能几乎不变 但是现在继续增多处理器核心的策略也遇到了瓶颈，见这篇文章：https://www.bohrium.com/sciencepedia/feynman/keyword/dark_silicon
+总结：
+3. 冯诺依曼机与RISC-V 这部分内容介绍了冯诺依曼机的特点（存储程序）、RISCV处理器与CISC处理器的区别、RISC-V处理器（寄存器、指令）。
+3.1 冯诺依曼机 冯诺依曼提出了一个重要观念：存储程序计算机。
+将内存视为一个按字节编址的数组 将程序（指令）与数据一起存储在内存中 然后让计算机自动地取指-执行。 冯诺依曼机的五大部件：
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-15 20:55:46 +0800 CST'>October 15, 2026</span>&nbsp;·&nbsp;<span>1 min</span>&nbsp;·&nbsp;<span>128 words</span></footer>
+  <a class="entry-link" aria-label="post link to UCLA Computer Architecture Lec2&Lec3" href="http://localhost:1313/posts/ucla-ca-02/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">UCLA Computer Architecture Lec1
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>最近在尝试自己实现一个RISC-V处理器，在实现的过程中遇到了一些问题，不得其解。
+遂找到了这门UCLA的计算机体系结构课，该课程正好是以RISC-V作为目标来讲解的，并且包含完整的Lectures、Slides、Homework和Programming Assignment。
+1. 课程介绍 课程网址：Computer Systems Architecture Fall 2025
+课程介绍：
+本课程旨在学习现代微处理器的基础知识及其与其他单元的交互，例如存储层次结构、GPU和I/O。在高层面上，计算机体系结构是选择和互连硬件组件以创建满足功能、性能和成本目标的计算机的科学与工程。更具体地说，在本课程中，你将学习架构计算机的基本原理和技术，包括设计指令集体系结构（ISA）、流水线和指令级并行。 你将通过使用C/C&#43;&#43;为一个简单的RISC ISA设计和实现一个多级流水线超标量处理器，来更详细地学习这些主题。此外，你将学习现代处理器设计中使用的各种体系结构技术，包括超标量设计、乱序执行、GPU体系结构和缓存层次结构。
+2. Why this course？ 两点重要原因:
+所有计算机科学家和工程师都需要知道：软件与底层硬件是如何交互的？ 系统设计非常非常非常重要！ 思考下面这两个问题？
+为什么机器学习的能力越来越强？ 为什么20年无法发明GPT？ 这张图中的三个要素解释了这一点:
+算力：并行计算硬件的发展为机器学习计算提供了“动力” 大数据：移动互联网/物联网的发展带来了海量数据 算法：深度学习算法的创新和发展 其中，正是计算硬件的性能提高，使得海量数据与算法创新能够真正地落地。
+Neural Scaling Law：Larger the model → better the performance.
+这条定律表达的是模型越大，能力越强。
+那么大模型的主要需求是什么？
+更快的算力 更大的内存 关键问题：How did we make hardware better?
+更多晶体管：往芯片中塞入更多的 transistor（晶体管） 支持更多的特性：包括流水线、乱序执行、缓存等 硬件专门化：为常用任务设计专门等硬件，例如矩阵运算 3. Course Workload 这门课将关注RISC-V ISA，包括RISC-V标准、微架构（实现）、实现策略（流水线、预测、并行）、存储的设计（缓存和主存）、多核设计（一致性）。 课程材料包括：
+Lectures，视频&#43;slides Homewokrs，5个书面作业 Projects，3个编程作业 CA1：使用C/C&#43;&#43;实现一个模拟器，模拟支持13条指令的单周期RISC-V处理器 CA2：设计一个branch predictor CA3：设计并实现一个模拟器，模拟支持out-of-order (OoO) 的超标量处理器 4. 软件工程已死？ 大模型和Agent的发展，使得软件开发的工作岗位正在逐渐减少。
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-15 15:53:21 +0800 CST'>October 15, 2026</span>&nbsp;·&nbsp;<span>1 min</span>&nbsp;·&nbsp;<span>84 words</span></footer>
+  <a class="entry-link" aria-label="post link to UCLA Computer Architecture Lec1" href="http://localhost:1313/posts/ucla-ca-01/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Leetecode 二叉树(一)
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>题目来自灵神的题单：二叉树题单。
+在做时带着问题去做下面的题目：
+一般来说，DFS 的递归边界是空节点。 在什么情况下，要额外把叶子节点作为递归边界？ 在什么情况下，DFS 需要有返回值？什么情况下不需要有返回值？ 在什么情况下，题目更适合用自顶向下的方法解决？ 什么情况下更适合用自底向上的方法解决？ C&#43;&#43;不同标准下，支持递归的Lambda表达式写法：
+C&#43;&#43;11标准起支持 #include &lt;functional&gt; std::function&lt;void(TreeNode*, string)&gt; dfs = [&amp;](TreeNode* node, string s) { if (!node) return; // ... dfs(node-&gt;left, s); // 直接用 dfs，因为 dfs 已经声明了 dfs(node-&gt;right, s); }; dfs(root, &#34;&#34;); C&#43;&#43;14标准支持 auto dfs = [&amp;](auto&amp;&amp; self, TreeNode* node, string s) -&gt; void { if (!node) return; // ... self(self, node-&gt;left, s); // 把自己作为参数传进去 self(self, node-&gt;right, s); }; dfs(dfs, root, &#34;&#34;); // 调用时也要把自己传进去 在我的解法实现中采用的是C&#43;&#43;14标准的写法。
+一、遍历二叉树 因为树本身就是递归定义的，即树的子树本身就是一棵树，所以树的算法大多通过递归来实现。
+1. 二叉树的前序遍历 法一：DFS 树的先序遍历的顺序是：根-左-右
+在遍历过程中:
+如果当前节点为空，直接返回； 如果当前节点非空，先访问当前节点，然后依次递归访问左右子树； class Solution { vector&lt;int&gt; ans; void dfs(TreeNode* root) { if (root) { ans.push_back(root-&gt;val); dfs(root-&gt;left); dfs(root-&gt;right); } } public: vector&lt;int&gt; preorderTraversal(TreeNode* root) { dfs(root); return ans; } }; 法二：非递归法
+使用一个栈来实现，对于每个节点先处理当前节点（中），然后依次压入右子树和左子树，根据栈的特点，得到的顺序是先左后右。
+class Solution { public: vector&lt;int&gt; preorderTraversal(TreeNode* root) { vector&lt;int&gt; ans; if (!root) return ans; stack&lt;TreeNode*&gt; st; st.push(root); while (!st.empty()) { auto node = st.top(); st.pop(); if (node) { ans.push_back(node-&gt;val); if (node-&gt;right) st.push(node-&gt;right); if (node-&gt;left) st.push(node-&gt;left); } } return ans; } }; 2. 二叉树的中序遍历 法一：DFS
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-14 22:02:01 +0800 CST'>October 14, 2026</span>&nbsp;·&nbsp;<span>8 min</span>&nbsp;·&nbsp;<span>1582 words</span></footer>
+  <a class="entry-link" aria-label="post link to Leetecode 二叉树(一)" href="http://localhost:1313/posts/leetecode-tree01/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">如何快速构建一个静态博客?
     </h2>
   </header>
