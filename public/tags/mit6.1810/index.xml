@@ -9,7 +9,7 @@
     <lastBuildDate>Thu, 05 Nov 2026 20:00:00 +0800</lastBuildDate>
     <atom:link href="http://localhost:1313/tags/mit6.1810/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>xv6-shell详解</title>
+      <title>再探xv6-shell详解</title>
       <link>http://localhost:1313/posts/xv6-shell/</link>
       <pubDate>Thu, 05 Nov 2026 20:00:00 +0800</pubDate>
       <guid>http://localhost:1313/posts/xv6-shell/</guid>

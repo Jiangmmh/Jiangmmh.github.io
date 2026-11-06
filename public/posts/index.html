@@ -206,7 +206,35 @@
 
 <article class="post-entry"> 
   <header class="entry-header">
-    <h2 class="entry-hint-parent">Git：从版本控制到分布式版本管理的设计与实践
+    <h2 class="entry-hint-parent">UCB CS186 Project 1：SQL 基础与查询实践
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>一、项目介绍 UCB CS186: Introduction to Database Systems 是加州大学伯克利分校开设的数据库系统课程。课程通过理论讲解与编程项目相结合的方式，帮助学生理解数据库系统的设计与实现。
+Project 1 主要围绕 SQL 展开，通过查询真实数据集，练习关系型数据库中最常用的查询操作。
+本项目使用 Lahman Baseball Database，包含了大量美国职业棒球运动员的个人信息、比赛记录、球队信息、薪资以及名人堂入选记录等数据。
+项目主要涉及以下 SQL 知识：
+基础查询：SELECT、WHERE、ORDER BY； 聚合查询：GROUP BY、HAVING、COUNT、SUM、AVG； 多表查询：INNER JOIN、LEFT JOIN； 子查询与公共表表达式：WITH、CTE； 窗口函数：LAG()； 条件表达式：CASE WHEN； 数据分桶与统计分析。 虽然这些内容都是 SQL 的基础知识，但通过本项目，可以进一步理解如何将实际业务需求转换为关系代数和 SQL 查询。
+1.1 环境准备 首先拉取项目仓库：
+git clone https://github.com/berkeley-cs186/sp26-proj1.git cd sp26-proj1 下载数据库文件：
+lahman.db
+将数据库文件放到项目要求的位置。
+本项目使用 SQLite，因此可以直接使用 SQLite 命令行工具查看数据库。
+sqlite3 lahman.db 查看数据库中的表：
+.tables 查看表结构：
+.schema people .schema batting .schema salaries 也可以直接查询部分数据：
+SELECT * FROM people LIMIT 10; 建议在正式开始之前，先了解数据表的结构以及表之间的关联关系。对于数据库查询任务而言，理解数据模型往往比直接编写 SQL 更重要。
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-11-06 20:57:50 +0800 CST'>November 6, 2026</span>&nbsp;·&nbsp;<span>9 min</span>&nbsp;·&nbsp;<span>1889 words</span></footer>
+  <a class="entry-link" aria-label="post link to UCB CS186 Project 1：SQL 基础与查询实践" href="http://localhost:1313/posts/cs186-proj1/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">关于Git的一切
     </h2>
   </header>
   <div class="entry-content">
@@ -232,12 +260,12 @@ git diff git diff HEAD~1 HEAD 当某次修改引入了 Bug，可以恢复到之�
   <footer class="entry-footer">
 
 <span title='2026-11-05 20:23:00 +0800 CST'>November 5, 2026</span>&nbsp;·&nbsp;<span>14 min</span>&nbsp;·&nbsp;<span>2932 words</span></footer>
-  <a class="entry-link" aria-label="post link to Git：从版本控制到分布式版本管理的设计与实践" href="http://localhost:1313/posts/git-intro/"></a>
+  <a class="entry-link" aria-label="post link to 关于Git的一切" href="http://localhost:1313/posts/git-intro/"></a>
 </article>
 
 <article class="post-entry"> 
   <header class="entry-header">
-    <h2 class="entry-hint-parent">xv6-shell详解
+    <h2 class="entry-hint-parent">再探xv6-shell详解
     </h2>
   </header>
   <div class="entry-content">
@@ -255,7 +283,7 @@ $ ls -l | grep &#34;.c&#34; &gt; result.txt 这条命令包含了多个操作：
   <footer class="entry-footer">
 
 <span title='2026-11-05 20:00:00 +0800 CST'>November 5, 2026</span>&nbsp;·&nbsp;<span>9 min</span>&nbsp;·&nbsp;<span>1792 words</span></footer>
-  <a class="entry-link" aria-label="post link to xv6-shell详解" href="http://localhost:1313/posts/xv6-shell/"></a>
+  <a class="entry-link" aria-label="post link to 再探xv6-shell详解" href="http://localhost:1313/posts/xv6-shell/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -391,34 +419,6 @@ int kfork(void) { int i, pid; struct proc *np; struct proc *p = myproc(); // All
 
 <span title='2026-11-03 21:10:44 +0800 CST'>November 3, 2026</span>&nbsp;·&nbsp;<span>10 min</span>&nbsp;·&nbsp;<span>2070 words</span></footer>
   <a class="entry-link" aria-label="post link to MIT6.1810: Lab5 COW" href="http://localhost:1313/posts/xv6-lab5-cow/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">CMU 15-122 学习笔记（一）：契约式编程与循环不变式
-      <span class="entry-hint" title="Draft">
-        <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 -960 960 960" fill="currentColor">
-          <path
-            d="M160-410v-60h300v60H160Zm0-165v-60h470v60H160Zm0-165v-60h470v60H160Zm360 580v-123l221-220q9-9 20-13t22-4q12 0 23 4.5t20 13.5l37 37q9 9 13 20t4 22q0 11-4.5 22.5T862.09-380L643-160H520Zm300-263-37-37 37 37ZM580-220h38l121-122-18-19-19-18-122 121v38Zm141-141-19-18 37 37-18-19Z" />
-        </svg>
-      </span>
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>CMU15122课程地址：https://web2.qatar.cmu.edu/~mhhammou/15122-s23/index.html。
-Lecture1笔记 本节课的主题：在开发软件系统时，如何实现从直觉调试到形式化证明？
-在软件开发中，我们经常遇到这样的场景：编写了一段看似精妙的算法，测试了几个样例都通过了，但在某种特定输入下程序却悄悄返回了错误答案，或者陷入死循环。
-传统的方法是加 printf 或打断点一步步跟踪（Operational Reasoning）。但对于复杂的循环逻辑，单靠“脑补执行过程”不仅效率低下，而且极易遗漏边缘情况。
-这是 CMU 15-122（Principles of Imperative Computation）的核心思想。下面以一个经典的快速幂算法（Fast Exponentiation）为例，展示如何通过契约式编程（Contracts）与循环不变式（Loop Invariants），从原理上证明算法的正确性，并精准推导出代码中的隐藏 Bug。
-1. 问题背景：一个看似正确的快速幂实现 假设我们需要实现一个计算 xyx^yxy 的快速幂函数 f(x,y)f(x, y)f(x,y)（其中 y≥0y \ge 0y≥0）。
-通过不断拆分指数，我们可以在 O(log⁡y)O(\log y)O(logy) 的时间复杂度内完成计算。下面是最初的代码实现：
-// Specification function! int POW(int b, int e) //@requires e &gt;= 0; { if (e == 0) return 1; return POW(b, e-1) * b; } // 计算 x 的 y 次方 int f(int x, int y) //@requires y &gt;= 0; //@ensures \result == POW(x, y); { int b = x; int e = y; int r = 1; while (e &gt; 1) { if (e % 2 == 1) { r = b * r; } b = b * b; e = e / 2; } return r * b; } 契约（Contracts）说明： @requires y &gt;= 0;：前置条件（Precondition），调用者必须保证 y≥0y \ge 0y≥0。 @ensures \result == POW(x, y);：后置条件（Postcondition），函数必须保证返回结果等于数学上的 xyx^yxy。 运行测试： 如果我们测试 f(2, 8)：
-...</p>
-  </div>
-  <footer class="entry-footer">
-
-<span title='2026-11-03 11:25:28 +0800 CST'>November 3, 2026</span>&nbsp;·&nbsp;<span>6 min</span>&nbsp;·&nbsp;<span>1124 words</span></footer>
-  <a class="entry-link" aria-label="post link to CMU 15-122 学习笔记（一）：契约式编程与循环不变式" href="http://localhost:1313/posts/cmu-15122-01/"></a>
 </article>
 
 <article class="post-entry"> 

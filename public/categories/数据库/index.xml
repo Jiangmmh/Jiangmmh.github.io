@@ -6,8 +6,49 @@
     <description>Recent content in 数据库 on Minghan的博客</description>
     <generator>Hugo</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Thu, 05 Nov 2026 17:36:38 +0800</lastBuildDate>
+    <lastBuildDate>Fri, 06 Nov 2026 20:57:50 +0800</lastBuildDate>
     <atom:link href="http://localhost:1313/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>UCB CS186 Project 1：SQL 基础与查询实践</title>
+      <link>http://localhost:1313/posts/cs186-proj1/</link>
+      <pubDate>Fri, 06 Nov 2026 20:57:50 +0800</pubDate>
+      <guid>http://localhost:1313/posts/cs186-proj1/</guid>
+      <description>&lt;h1 id=&#34;一项目介绍&#34;&gt;一、项目介绍&lt;/h1&gt;
+&lt;p&gt;&lt;a href=&#34;https://cs186berkeley.net/&#34;&gt;UCB CS186: Introduction to Database Systems&lt;/a&gt; 是加州大学伯克利分校开设的数据库系统课程。课程通过理论讲解与编程项目相结合的方式，帮助学生理解数据库系统的设计与实现。&lt;/p&gt;
+&lt;p&gt;Project 1 主要围绕 SQL 展开，通过查询真实数据集，练习关系型数据库中最常用的查询操作。&lt;/p&gt;
+&lt;p&gt;本项目使用 Lahman Baseball Database，包含了大量美国职业棒球运动员的个人信息、比赛记录、球队信息、薪资以及名人堂入选记录等数据。&lt;/p&gt;
+&lt;p&gt;项目主要涉及以下 SQL 知识：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;基础查询：&lt;code&gt;SELECT&lt;/code&gt;、&lt;code&gt;WHERE&lt;/code&gt;、&lt;code&gt;ORDER BY&lt;/code&gt;；&lt;/li&gt;
+&lt;li&gt;聚合查询：&lt;code&gt;GROUP BY&lt;/code&gt;、&lt;code&gt;HAVING&lt;/code&gt;、&lt;code&gt;COUNT&lt;/code&gt;、&lt;code&gt;SUM&lt;/code&gt;、&lt;code&gt;AVG&lt;/code&gt;；&lt;/li&gt;
+&lt;li&gt;多表查询：&lt;code&gt;INNER JOIN&lt;/code&gt;、&lt;code&gt;LEFT JOIN&lt;/code&gt;；&lt;/li&gt;
+&lt;li&gt;子查询与公共表表达式：&lt;code&gt;WITH&lt;/code&gt;、&lt;code&gt;CTE&lt;/code&gt;；&lt;/li&gt;
+&lt;li&gt;窗口函数：&lt;code&gt;LAG()&lt;/code&gt;；&lt;/li&gt;
+&lt;li&gt;条件表达式：&lt;code&gt;CASE WHEN&lt;/code&gt;；&lt;/li&gt;
+&lt;li&gt;数据分桶与统计分析。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;虽然这些内容都是 SQL 的基础知识，但通过本项目，可以进一步理解如何将实际业务需求转换为关系代数和 SQL 查询。&lt;/p&gt;
+&lt;h2 id=&#34;11-环境准备&#34;&gt;1.1 环境准备&lt;/h2&gt;
+&lt;p&gt;首先拉取项目仓库：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;git clone https://github.com/berkeley-cs186/sp26-proj1.git
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nb&#34;&gt;cd&lt;/span&gt; sp26-proj1
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;下载数据库文件：&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/songsi1111/CS186-proj1/blob/main/lahman.db&#34;&gt;lahman.db&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;将数据库文件放到项目要求的位置。&lt;/p&gt;
+&lt;p&gt;本项目使用 SQLite，因此可以直接使用 SQLite 命令行工具查看数据库。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sqlite3 lahman.db
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;查看数据库中的表：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;tables&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;查看表结构：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;schema&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;n&#34;&gt;people&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;schema&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;n&#34;&gt;batting&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;schema&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;n&#34;&gt;salaries&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;也可以直接查询部分数据：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;SELECT&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;o&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;FROM&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;n&#34;&gt;people&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;LIMIT&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;10&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;建议在正式开始之前，先了解数据表的结构以及表之间的关联关系。对于数据库查询任务而言，理解数据模型往往比直接编写 SQL 更重要。&lt;/p&gt;</description>
+    </item>
     <item>
       <title>LevelDB源码学习: 调试环境</title>
       <link>http://localhost:1313/posts/leveldb01/</link>

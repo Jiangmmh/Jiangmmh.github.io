@@ -1,7 +1,7 @@
 ---
 title: "CS161 Computer Security Lec1"
 date: '2026-10-20T10:34:06+08:00'
-draft: false
+draft: true
 tags: [UCB-CS161, Security, 安全原则]
 categories: [Computer Security]
 ---
