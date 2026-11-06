@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>UCB-CS186 on Minghan的博客</title><link>https://Jiangmmh.github.io/tags/ucb-cs186/</link><description>Recent content in UCB-CS186 on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Fri, 06 Nov 2026 20:57:50 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/tags/ucb-cs186/index.xml" rel="self" type="application/rss+xml"/><item><title>UCB CS186 Project 1：SQL</title><link>https://Jiangmmh.github.io/posts/cs186-proj1/</link><pubDate>Fri, 06 Nov 2026 20:57:50 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/cs186-proj1/</guid><description>&lt;h1 id="一项目介绍">一、项目介绍&lt;/h1>
+&lt;p>&lt;a href="https://cs186berkeley.net/">UCB CS186: Introduction to Database Systems&lt;/a> 是加州大学伯克利分校开设的数据库系统课程。课程通过理论讲解与编程项目相结合的方式，帮助学生理解数据库系统的设计与实现。&lt;/p>
+&lt;p>Project 1 主要围绕 SQL 展开，通过查询真实数据集，练习关系型数据库中最常用的查询操作。&lt;/p>
+&lt;p>本项目使用 Lahman Baseball Database，包含了大量美国职业棒球运动员的个人信息、比赛记录、球队信息、薪资以及名人堂入选记录等数据。&lt;/p>
+&lt;p>项目主要涉及以下 SQL 知识：&lt;/p>
+&lt;ul>
+&lt;li>基础查询：&lt;code>SELECT&lt;/code>、&lt;code>WHERE&lt;/code>、&lt;code>ORDER BY&lt;/code>；&lt;/li>
+&lt;li>聚合查询：&lt;code>GROUP BY&lt;/code>、&lt;code>HAVING&lt;/code>、&lt;code>COUNT&lt;/code>、&lt;code>SUM&lt;/code>、&lt;code>AVG&lt;/code>；&lt;/li>
+&lt;li>多表查询：&lt;code>INNER JOIN&lt;/code>、&lt;code>LEFT JOIN&lt;/code>；&lt;/li>
+&lt;li>子查询与公共表表达式：&lt;code>WITH&lt;/code>、&lt;code>CTE&lt;/code>；&lt;/li>
+&lt;li>窗口函数：&lt;code>LAG()&lt;/code>；&lt;/li>
+&lt;li>条件表达式：&lt;code>CASE WHEN&lt;/code>；&lt;/li>
+&lt;li>数据分桶与统计分析。&lt;/li>
+&lt;/ul>
+&lt;p>虽然这些内容都是 SQL 的基础知识，但通过本项目，可以进一步理解如何将实际业务需求转换为关系代数和 SQL 查询。&lt;/p>
+&lt;h2 id="11-环境准备">1.1 环境准备&lt;/h2>
+&lt;p>首先拉取项目仓库：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">git clone https://github.com/berkeley-cs186/sp26-proj1.git
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nb">cd&lt;/span> sp26-proj1
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>下载数据库文件：&lt;a href="https://github.com/songsi1111/CS186-proj1/blob/main/lahman.db">lahman.db&lt;/a>&lt;/p>
+&lt;p>将数据库文件放到项目要求的位置。&lt;/p>
+&lt;p>本项目使用 SQLite，因此可以直接使用 SQLite 命令行工具查看数据库。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sqlite3 lahman.db
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>查看数据库中的表：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-sql" data-lang="sql">&lt;span class="line">&lt;span class="cl">&lt;span class="p">.&lt;/span>&lt;span class="n">tables&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>查看表结构：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-sql" data-lang="sql">&lt;span class="line">&lt;span class="cl">&lt;span class="p">.&lt;/span>&lt;span class="k">schema&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">people&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="k">schema&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">batting&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="k">schema&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">salaries&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>也可以直接查询部分数据：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-sql" data-lang="sql">&lt;span class="line">&lt;span class="cl">&lt;span class="k">SELECT&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="k">FROM&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">people&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="k">LIMIT&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="mi">10&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>建议在正式开始之前，先了解数据表的结构以及表之间的关联关系。对于数据库查询任务而言，理解数据模型往往比直接编写 SQL 更重要。&lt;/p></description></item></channel></rss>
