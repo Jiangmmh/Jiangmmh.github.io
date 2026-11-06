@@ -1,7 +1,7 @@
 ---
 title: "Computer Networks P&D 阅读笔记 Ch1"
 date: '2026-10-30T11:59:50+08:00'
-draft: false
+draft: true
 tags: [TCP/IP, Computer Networks A Systems Approach]
 categories: [计算机网络]
 ---
