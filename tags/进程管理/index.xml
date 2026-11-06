@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>进程管理 on Minghan的博客</title><link>https://Jiangmmh.github.io/tags/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%86/</link><description>Recent content in 进程管理 on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Fri, 06 Nov 2026 21:07:12 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/tags/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%86/index.xml" rel="self" type="application/rss+xml"/><item><title>LKD阅读笔记-第三章</title><link>https://Jiangmmh.github.io/posts/lkd03/</link><pubDate>Fri, 06 Nov 2026 21:07:12 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/lkd03/</guid><description>&lt;h1 id="一进程是什么">一、进程是什么？&lt;/h1>
+&lt;p>进程（Process）是程序执行过程中的一个实例。&lt;/p>
+&lt;p>程序（Program）是存储在磁盘上的静态指令和数据，而进程是程序运行时的动态实体。一个程序可以对应多个进程；一个进程也不只是代码本身，它还拥有自己的运行状态、虚拟地址空间、打开的文件、信号处理信息以及处理器上下文等资源。&lt;/p>
+&lt;p>从操作系统的角度看，进程是资源分配和管理的重要单位，也是内核进行调度和管理的基本对象。&lt;/p>
+&lt;p>一个进程通常包含以下几个方面：&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>代码和数据&lt;/strong>：程序的指令以及全局变量、静态变量等。&lt;/li>
+&lt;li>&lt;strong>虚拟地址空间&lt;/strong>：进程可以访问的虚拟内存范围。&lt;/li>
+&lt;li>&lt;strong>打开的文件&lt;/strong>：进程持有的文件描述符及其对应的内核对象。&lt;/li>
+&lt;li>&lt;strong>处理器上下文&lt;/strong>：程序计数器、寄存器、栈指针等运行状态。&lt;/li>
+&lt;li>&lt;strong>进程控制信息&lt;/strong>：进程 ID、父进程、状态、调度信息等。&lt;/li>
+&lt;/ul>
+&lt;p>需要注意：&lt;strong>进程是内核管理的实体，而不是简单的一段代码。&lt;/strong>&lt;/p>
+&lt;h1 id="二进程描述符与-task_struct">二、进程描述符与 task_struct&lt;/h1>
+&lt;h2 id="21-什么是进程描述符">2.1 什么是进程描述符？&lt;/h2>
+&lt;p>内核需要一种数据结构来描述和管理进程。&lt;/p>
+&lt;p>Linux 使用 &lt;code>struct task_struct&lt;/code> 表示进程描述符（Process Descriptor）。它定义在：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-c" data-lang="c">&lt;span class="line">&lt;span class="cl">&lt;span class="n">include&lt;/span>&lt;span class="o">/&lt;/span>&lt;span class="n">linux&lt;/span>&lt;span class="o">/&lt;/span>&lt;span class="n">sched&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">h&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>每一个进程都有一个对应的 &lt;code>task_struct&lt;/code>，内核通过它获取进程的状态、调度信息、内存管理信息以及其他资源。&lt;/p>
+&lt;p>可以把 &lt;code>task_struct&lt;/code> 理解为内核管理进程的核心控制块，类似于其他操作系统中的 PCB（Process Control Block）。&lt;/p>
+&lt;p>Linux 的进程描述符包含大量信息，常见字段如下：&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>字段&lt;/th>
+&lt;th>作用&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>&lt;code>state&lt;/code>&lt;/td>
+&lt;td>进程当前状态&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>pid&lt;/code>&lt;/td>
+&lt;td>进程 ID&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>tgid&lt;/code>&lt;/td>
+&lt;td>线程组 ID&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>flags&lt;/code>&lt;/td>
+&lt;td>进程标志&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>prio&lt;/code>&lt;/td>
+&lt;td>动态优先级&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>static_prio&lt;/code>&lt;/td>
+&lt;td>静态优先级&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>normal_prio&lt;/code>&lt;/td>
+&lt;td>普通优先级&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>policy&lt;/code>&lt;/td>
+&lt;td>调度策略&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>mm&lt;/code>&lt;/td>
+&lt;td>进程内存描述符&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>active_mm&lt;/code>&lt;/td>
+&lt;td>当前活动地址空间&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>parent&lt;/code>&lt;/td>
+&lt;td>父进程&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>children&lt;/code>&lt;/td>
+&lt;td>子进程链表&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>real_parent&lt;/code>&lt;/td>
+&lt;td>实际父进程&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>files&lt;/code>&lt;/td>
+&lt;td>打开的文件信息&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>fs&lt;/code>&lt;/td>
+&lt;td>文件系统相关信息&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>signal&lt;/code>&lt;/td>
+&lt;td>信号相关信息&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>sighand&lt;/code>&lt;/td>
+&lt;td>信号处理信息&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>&lt;code>tasks&lt;/code>&lt;/td>
+&lt;td>进程任务链表节点&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>注意：这里列出的是帮助理解的代表性字段，不意味着不同 Linux 内核版本中的字段布局完全一致。Linux 内核数据结构会随着版本不断演进。&lt;/p></description></item></channel></rss>
