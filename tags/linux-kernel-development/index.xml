@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Linux Kernel Development on Minghan的博客</title><link>https://Jiangmmh.github.io/tags/linux-kernel-development/</link><description>Recent content in Linux Kernel Development on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Fri, 06 Nov 2026 21:07:12 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/tags/linux-kernel-development/index.xml" rel="self" type="application/rss+xml"/><item><title>LKD阅读笔记-第三章</title><link>https://Jiangmmh.github.io/posts/lkd03/</link><pubDate>Fri, 06 Nov 2026 21:07:12 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/lkd03/</guid><description>&lt;h1 id="一进程是什么">一、进程是什么？&lt;/h1>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Linux Kernel Development on Minghan的博客</title><link>https://Jiangmmh.github.io/tags/linux-kernel-development/</link><description>Recent content in Linux Kernel Development on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Fri, 06 Nov 2026 21:07:12 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/tags/linux-kernel-development/index.xml" rel="self" type="application/rss+xml"/><item><title>LKD阅读笔记-第三章-进程管理</title><link>https://Jiangmmh.github.io/posts/lkd03/</link><pubDate>Fri, 06 Nov 2026 21:07:12 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/lkd03/</guid><description>&lt;h1 id="一进程是什么">一、进程是什么？&lt;/h1>
 &lt;p>进程（Process）是程序执行过程中的一个实例。&lt;/p>
 &lt;p>程序（Program）是存储在磁盘上的静态指令和数据，而进程是程序运行时的动态实体。一个程序可以对应多个进程；一个进程也不只是代码本身，它还拥有自己的运行状态、虚拟地址空间、打开的文件、信号处理信息以及处理器上下文等资源。&lt;/p>
 &lt;p>从操作系统的角度看，进程是资源分配和管理的重要单位，也是内核进行调度和管理的基本对象。&lt;/p>
@@ -101,7 +101,7 @@
 &lt;/tr>
 &lt;/tbody>
 &lt;/table>
-&lt;p>注意：这里列出的是帮助理解的代表性字段，不意味着不同 Linux 内核版本中的字段布局完全一致。Linux 内核数据结构会随着版本不断演进。&lt;/p></description></item><item><title>LKD阅读笔记-第二章</title><link>https://Jiangmmh.github.io/posts/lkd02/</link><pubDate>Tue, 03 Nov 2026 22:11:04 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/lkd02/</guid><description>&lt;blockquote>
+&lt;p>注意：这里列出的是帮助理解的代表性字段，不意味着不同 Linux 内核版本中的字段布局完全一致。Linux 内核数据结构会随着版本不断演进。&lt;/p></description></item><item><title>LKD阅读笔记-第二章-获取内核</title><link>https://Jiangmmh.github.io/posts/lkd02/</link><pubDate>Tue, 03 Nov 2026 22:11:04 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/lkd02/</guid><description>&lt;blockquote>
 &lt;p>参考书籍：Robert Love, &lt;em>Linux Kernel Development&lt;/em>, Third Edition, Chapter 2: Getting Started with the Kernel。&lt;/p>&lt;/blockquote>
 &lt;h2 id="1-本章概览">1. 本章概览&lt;/h2>
 &lt;p>第一章介绍了 Linux 内核的历史、定位和整体设计，而第二章开始进入实际开发：如何获取内核源码、如何编译和安装内核，以及编写内核代码时需要遵循哪些特殊规则。&lt;/p>
@@ -130,7 +130,7 @@
 &lt;p>获取 Linus 主线仓库：&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">git clone https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nb">cd&lt;/span> linux
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>查看当前版本：&lt;/p></description></item><item><title>LKD阅读笔记-第一章</title><link>https://Jiangmmh.github.io/posts/lkd01/</link><pubDate>Tue, 03 Nov 2026 21:20:56 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/lkd01/</guid><description>&lt;blockquote>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>查看当前版本：&lt;/p></description></item><item><title>LKD阅读笔记-第一章-内核简介</title><link>https://Jiangmmh.github.io/posts/lkd01/</link><pubDate>Tue, 03 Nov 2026 21:20:56 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/lkd01/</guid><description>&lt;blockquote>
 &lt;p>参考书籍：Robert Love, &lt;em>Linux Kernel Development&lt;/em>, 3rd Edition, Chapter 1: Introduction to the Linux Kernel&lt;/p>&lt;/blockquote>
 &lt;h2 id="1-本章概览">1. 本章概览&lt;/h2>
 &lt;p>第一章主要介绍 Linux 内核的历史背景、基本概念、设计特点以及开发社区。&lt;/p>
