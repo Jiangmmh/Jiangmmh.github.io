@@ -194,45 +194,72 @@
 
 <article class="post-entry"> 
   <header class="entry-header">
-    <h2 class="entry-hint-parent">Computer Networks P&amp;D 阅读笔记 Ch1
+    <h2 class="entry-hint-parent">LKD阅读笔记-第一章-内核简介
     </h2>
   </header>
   <div class="entry-content">
-    <p>这是一本关于计算机网络的开源书籍，写得非常好。
-Preface “系统方法” 指的是计算机系统设计和实现领域的一个概念。计算机科学研究人员和从业者通常使用这个术语来研究构建复杂计算系统（例如操作系统、网络、分布式应用程序等）时出现的问题。
-系统方法的关键在于“全局观”：你需要关注系统的各个组件如何相互作用以实现整体结果，而不是仅仅优化每个组件。
-在网络领域，这通常意味着要超越传统的分层视角，思考如何以可能涉及多个层面的方式来最佳地解决问题。拥塞控制就是一个很好的例子，它涉及多个层面，并影响终端系统和网络设备。我们将拥塞这一系统级问题单独成章进行讨论，而不是试图将其硬塞进传输层等其他层级。
-1. 问题：如何构建计算机网络？ 假设让你来构建一个计算机网络，你会如何设计它？
-如果我们要构造一个未来可能扩展到全球规模，并支持远程会议、视频点播、电子商务、分布式计算和数字图书馆等各种应用的网络。
-有哪些现有技术可以作为底层构建模块？ 你会设计什么样的软件架构来将这些构建模块集成到一个高效的通信服务中？ 本书的主要目标就是回答这个问题：介绍现有的网络技术，并展示如何利用它们从零开始构建网络。
-计算机网络与其他类型的网络有何区别？
-计算机网络最重要的特性或许在于其通用性。其主要由通用可编程硬件（CPU）构建，并非针对特定应用。它们能够承载多种不同类型的数据，并支持广泛且不断增长的应用。
-2. 应用 计算机网络的应用包括：例如万维网、电子邮件、社交媒体、流媒体音乐或电影、视频会议、即时通讯、文件共享等等。
-使用计算机网络的群体：
-网络应用开发者 网络运维管理者 网络协议的设计和构建者 3. 要求 我们为自己设定了一个雄心勃勃的目标：从零开始构建计算机网络。
-为了实现这一目标，我们将从基本原理入手，然后提出在构建实际网络时自然会遇到的问题。
-计算机网络的要求如下：
-可扩展链接 高效的资源共享 支持通用服务 可管理性好 网络共享的基本概念：多路复用。
-时分多路复用，将时间分割成大小相等的量子，并以轮询的方式让每个数据流有机会通过物理链路发送数据。 频分多路复用，使用不同的频率通过物理链路传输每个数据流 如果其中一个流（主机对）没有数据要发送，那么它所占用的物理链路份额——即时间片或频率——就会处于空闲状态，即使其他流有数据要发送 统计复用，按需从每个数据流发送的，而不是在预定的时隙内发送。 为了保证每个数据流都能获得使用链路发送数据的机会，统计复用为每个数据流在给定时间允许传输的数据块大小设定了一个上限。这个大小受限的数据块通常被称为数据包，以区别于应用程序可能想要传输的任意大小的消息。 核心思想：按Packet发送数据，而不是任意长度 源端可能需要将消息分割成多个数据包，接收端再将这些数据包重新组装成原始消息。 4. 计算机网络的架构 抽象——即将实现细节隐藏在定义良好的接口之后——是系统设计者用来管理复杂性的基本工具。
-为了应对设计计算机网络系统的复杂性，网络设计者提出了网络架构的概念来指导网络的设计与实现。主要的计算机网络架构包括：
-OSI七层模型 TCP/IP四层模型 抽象自然而然地导致了分层，尤其是在网络系统中。其基本思路是，从底层硬件提供的服务入手，然后添加一系列层，每一层都提供更高（更抽象）的服务级别。高层提供的服务是根据底层提供的服务来实现的。
-分层提供了两个实用功能：
-将构建网络的问题分解成更易于管理的组件。与其实现一个包罗万象的单体软件，不如实现多个层，每个层解决问题的一部分。 提供了一种更模块化的设计。如果您决定添加一些新服务，可能只需要修改其中一层的功能，即可重用其他层提供的函数。 很多时候，系统的任何同一层级中提供了多种抽象，每种抽象都为更高层级提供不同的服务，但都基于相同的底层抽象，例如传输层的TCP和UDP协议，都以IP协议的服务为基础，但对上层提供不同的传输服务。
-构成网络系统各层的抽象对象称为协议。协议提供了一种通信服务，供更高层的对象（例如应用程序进程，或者更高层级的协议）交换消息。
-每个协议都定义了两个不同的接口：
-服务接口（纵向）*，*供同一台计算机上其他想要使用其通信服务的对象使用。 协议定义了与另一台机器上的对应节点（对等节点）之间的接口（横向）。 协议规定了如何在同层的对等节点之间传输数据，如何体现？本质就是在发送数据之前在其前面加上一个首部（Header），对等节点在收到数据后根据协议解析该首部，然后取出其中的数据发往上层。
-当我们说底层协议不解释它从高层协议接收到的消息时，指的是它不知道如何从消息中包含的数据中提取任何含义。
-当然，有时底层协议会对接收到的数据进行一些简单的转换，例如压缩或加密。
-多路复用与解多路复用
-因为计算机网络是多层的，且每层可能包含不止一种协议，因此在底层的首部中还要包含一个字段，用来表示该数据所属的上层协议。 几乎所有协议都实现了这种机制。 下面是OSI七层模型和TCP四层模型的架构图：
-虽然现在TCP四层模型成为了实际上的标准，但是OSI七层模型仍有其价值，因为会话层和表示层在开发应用软件时仍需要考虑到。
-会话层提供了一个命名空间，用于将构成单个应用程序的不同传输流连接起来。例如，它可以管理在远程会议应用程序中组合的音频流和视频流。 表示层，它负责处理对等方之间交换的数据格式。 5. 软件 了解如何实现网络软件是理解计算机网络的重要组成部分。虽然你不太可能被委派去实现像 IP 这样的底层协议，但你很有可能会遇到需要实现应用层协议的情况——这种梦寐以求的“杀手级应用”能为你带来难以想象的名利双收。
+    <p> 参考书籍：Robert Love, Linux Kernel Development, 3rd Edition, Chapter 1: Introduction to the Linux Kernel
+1. 本章概览 第一章主要介绍 Linux 内核的历史背景、基本概念、设计特点以及开发社区。
+本章并不会深入某个具体的内核子系统，而是先回答几个基础问题：
+Unix 是如何诞生的？Linux 与 Unix 有什么关系？ Linux 是什么？Linux 内核与 Linux 操作系统有什么区别？ 内核究竟负责什么工作？ Linux 内核与传统 Unix 内核相比，有哪些设计特点？ Linux 内核如何进行版本发布和协作开发？ 理解这些背景，有助于我们在后续阅读 Linux 源码时建立整体认识。
+2. Unix 的历史 2.1 Unix 的诞生 Unix 最初诞生于 1969 年的贝尔实验室（Bell Labs），主要开发者是 Ken Thompson 和 Dennis Ritchie。
+Unix 的出现与一个更早的操作系统项目有关：Multics。
+Multics 是一个由多个研究机构共同参与的大型操作系统项目，目标是构建一个支持多用户、多任务的计算环境。但由于项目过于复杂，开发进展缓慢，最终贝尔实验室退出了该项目。
+Ken Thompson 等人希望拥有一个更加简单、实用的交互式操作系统，于是开始在一台 PDP-7 计算机上实现新的操作系统。这项工作逐渐演变成 Unix。
+Unix 发展过程中有几个重要节点：
+时间 事件 1969 Unix 在贝尔实验室诞生 1971 Unix 被移植到 PDP-11 1973 Unix 使用 C 语言重新实现 1977 Unix System III 发布 1982 AT&amp;T 发布 Unix System V 其中，1973 年是 Unix 历史上非常重要的一个节点：Unix 从汇编语言实现转向 C 语言实现。
 ...</p>
   </div>
   <footer class="entry-footer">
 
-<span title='2026-10-30 11:59:50 +0800 CST'>October 30, 2026</span>&nbsp;·&nbsp;<span>3 min</span>&nbsp;·&nbsp;<span>519 words</span></footer>
-  <a class="entry-link" aria-label="post link to Computer Networks P&D 阅读笔记 Ch1" href="http://localhost:1313/posts/net-sys1/"></a>
+<span title='2026-11-03 21:20:56 +0800 CST'>November 3, 2026</span>&nbsp;·&nbsp;<span>4 min</span>&nbsp;·&nbsp;<span>738 words</span></footer>
+  <a class="entry-link" aria-label="post link to LKD阅读笔记-第一章-内核简介" href="http://localhost:1313/posts/lkd01/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">MIT6.1810: Lab5 COW
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>一、fork 的实现原理 在用户态调用 fork() 后，程序通过系统调用进入内核，最终执行 sys_fork()，并在其中调用 kfork() 创建子进程。
+kfork() 的主要工作包括：
+调用 allocproc() 分配一个新的进程结构体，并完成必要的初始化。 调用 uvmcopy() 将父进程的用户地址空间复制到子进程。 将父进程的 Trapframe 拷贝到子进程，使子进程拥有与父进程相同的寄存器上下文。 遍历父进程打开的文件描述符，在子进程中通过 filedup() 增加对应文件对象的引用计数。 设置子进程的父进程信息，并将其状态设置为 RUNNABLE。 这里有一个比较巧妙的细节：
+// Cause fork to return 0 in the child. np-&gt;trapframe-&gt;a0 = 0; 为什么需要单独修改子进程 Trapframe 中的 a0？
+在 RISC-V 调用约定中，a0 用于传递函数参数和返回值。系统调用返回时，内核会将 Trapframe 中保存的 a0 恢复到用户态寄存器中。
+因此：
+父进程继续执行 fork() 后面的代码，系统调用返回值是子进程的 PID。 子进程第一次被调度时，从保存的上下文继续执行，系统调用返回值是 0。 这样，父子进程就能够通过 fork() 的返回值判断自己所处的执行分支。
+下面是 kfork() 的核心实现（省略了部分与本实验无关的代码）：
+int kfork(void) { int i, pid; struct proc *np; struct proc *p = myproc(); // Allocate process. if ((np = allocproc()) == 0) return -1; // Copy user memory from parent to child. if (uvmcopy(p-&gt;pagetable, np-&gt;pagetable, p-&gt;sz) &lt; 0) { freeproc(np); release(&amp;np-&gt;lock); return -1; } np-&gt;sz = p-&gt;sz; // Copy saved user registers. *(np-&gt;trapframe) = *(p-&gt;trapframe); // Cause fork to return 0 in the child. np-&gt;trapframe-&gt;a0 = 0; // Duplicate open file descriptors. for (i = 0; i &lt; NOFILE; i&#43;&#43;) if (p-&gt;ofile[i]) np-&gt;ofile[i] = filedup(p-&gt;ofile[i]); np-&gt;cwd = idup(p-&gt;cwd); safestrcpy(np-&gt;name, p-&gt;name, sizeof(p-&gt;name)); pid = np-&gt;pid; release(&amp;np-&gt;lock); acquire(&amp;wait_lock); np-&gt;parent = p; release(&amp;wait_lock); acquire(&amp;np-&gt;lock); np-&gt;state = RUNNABLE; release(&amp;np-&gt;lock); return pid; } 这里最值得关注的是 uvmcopy()。
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-11-03 21:10:44 +0800 CST'>November 3, 2026</span>&nbsp;·&nbsp;<span>10 min</span>&nbsp;·&nbsp;<span>2070 words</span></footer>
+  <a class="entry-link" aria-label="post link to MIT6.1810: Lab5 COW" href="http://localhost:1313/posts/xv6-lab5-cow/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">MIT6.1810: Lab4 Trap
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>一、RISC-V assembly (easy) 先来看一下 user/call.asm：
+#include &#34;kernel/param.h&#34; #include &#34;kernel/types.h&#34; #include &#34;kernel/stat.h&#34; #include &#34;user/user.h&#34; int g(int x) { return x &#43; 3; } int f(int x) { return g(x); } void main(void) { printf(&#34;%d %d\n&#34;, f(8) &#43; 1, 13); exit(0); } Q1: 哪些寄存器存储着函数的参数？例如，在 main 函数调用printf时，哪个寄存器保存着参数 13 ？
+根据RISC-V的Calling Convention，参数依次存放在a0, a1和a2中。
+Q2: main 函数的汇编代码中，函数f 的调用在哪里 ？函数g的调用在哪里？（提示：编译器可能会内联函数。）
+下面是call.c对应的汇编代码，可以看到其中并没有调用函数f和函数g，因为对这两个函数的调用都被编译器内联了。
+void main(void) { 24:	1141 addi	sp,sp,-16 26:	e406 sd	ra,8(sp) 28:	e022 sd	s0,0(sp) 2a:	0800 addi	s0,sp,16 printf(&#34;%d %d\n&#34;, f(8) &#43; 1, 13); 2c:	4635 li	a2,13 2e:	45b1 li	a1,12 30:	00001517 auipc	a0,0x1 34:	8c050513 addi	a0,a0,-1856 # 8f0 &lt;malloc&#43;0xf2&gt; 38:	70e000ef jal	746 &lt;printf&gt; exit(0); 3c:	4501 li	a0,0 3e:	2ba000ef jal	2f8 &lt;exit&gt; Q3：printf 函数位于哪个地址？
+printf位于地址0x746处。
+Q4：main 函数中printf函数调用jarl 之后， 寄存器ra的值是多少？
+printf的返回值是成功打印输出等字符总数，如果出错则返回一个负数。
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-11-01 10:27:29 +0800 CST'>November 1, 2026</span>&nbsp;·&nbsp;<span>3 min</span>&nbsp;·&nbsp;<span>575 words</span></footer>
+  <a class="entry-link" aria-label="post link to MIT6.1810: Lab4 Trap" href="http://localhost:1313/posts/xv6-lab4-trap/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -389,58 +416,6 @@ void * kalloc(void) { struct run *r; acquire(&amp;kmem.lock); r = kmem.freelist;
 
 <span title='2026-10-26 11:55:00 +0800 CST'>October 26, 2026</span>&nbsp;·&nbsp;<span>8 min</span>&nbsp;·&nbsp;<span>1577 words</span></footer>
   <a class="entry-link" aria-label="post link to 再探xv6: 并发篇" href="http://localhost:1313/posts/xv6-03/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">再探xv6: 内存篇
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>一、简介 RISC-V的支持 RISC-V 指令（包括用户指令和内核指令）操作的是虚拟地址。而机器的RAM则需要使用物理地址来访问。RISC-V 页表硬件通过将每个虚拟地址映射到一个物理地址，将这两种地址连接起来。
-xv6使用RISC-V的Sv39模式，其仅使用64位虚拟地址中低39位。在该设置下：
-每个页面为4KB，使用低12位地址索引 采用三级页表，每级页表使用9位，共剩余27位进行索引 RISC-V 的设计为虚拟地址和物理地址的扩展都预留了空间。如果需要更多虚拟地址空间，RISC-V 支持 Sv48 模式，即 48 位虚拟地址。
-下面是页表项的构成，包括了上述的39位物理地址和低10位的标志位。
-PTE_V：指示了该PTE是否存在 PTE_R、PTE_W、PTE_X：指示可读、可写和可执行权限 PTE_U：控制该页面是否可以被用户程序访问 PTE_G、PTE_A：暂时未使用 RSW：还剩下两个保留位，可以根据需要来使用 每当执行RISC-V的访存指令时，就需要执行上述地址转换过程。在xv6的进程被调度上CPU时，会将进程根页目录表的地址存放到当前CPU的控制寄存器 satp 中。
-多级页表虽然节省内存，但是访问某个页面中的数据需要多次访问内存，为了尽可能避免从虚拟地址到物理地址转换过程中的访存开销，RISC-V硬件提供了TLB（Translation Look-aside Buffer）来缓存部分虚拟地址到物理地址到映射，其思想和Cache类似，都是通过局部性原理构建。
-内核地址空间 xv6 启动时会创建一个单页表，用于描述内核的地址空间，具体的布局定义见kernel/memlayout.h。
-QEMU 模拟一台计算机，该计算机包含从物理地址0x80000000开始，直至0x88000000 。
-其中大部分页面都采用对等映射（对等映射）实现（虚拟地址 == 物理地址），只有少数几个内核虚拟页面没有直接映射：
-跳转页（Trampoline）。它被映射到虚拟地址空间的顶部；用户页表也具有相同的映射关系。一个物理页（包含跳转代码）在内核的虚拟地址空间中被映射了两次：一次在虚拟地址空间的顶部，另一次是直接映射。 内核栈保护页。每个进程都有自己的内核栈，它映射到较高的内核虚拟地址，这样 xv6 可以在其下方留下一个未映射的保护页。保护页的页表项 (PTE) 无效（即PTE_V未设置），因此如果内核栈溢出，很可能会导致缺页错误，内核崩溃。如果没有保护页，溢出的栈会覆盖其他内核内存，导致运行异常。崩溃崩溃是更可取的。 二、物理内存源码分析 物理内存的初始化 在main()函数中，调用了kinit()函数来初始化物理内存子模块：
-void kinit() { initlock(&amp;kmem.lock, &#34;kmem&#34;); freerange(end, (void *)PHYSTOP); } 其中调用了freerange()函数，传入两个参数end和PHYSTOP，前者在链接脚本中被定义，位于 .text, .rodata, .data, .bss段之后的位置。后者的值为0x88000000，表示物理地址顶部。
-void freerange(void *pa_start, void *pa_end) { char *p; p = (char *)PGROUNDUP((uint64)pa_start); for (; p &#43; PGSIZE &lt;= (char *)pa_end; p &#43;= PGSIZE) { kfree(p); } } 其中通过反复调用kfree()构造出一个存储4KB物理页帧的freelist。
-struct run { struct run *next; }; struct { struct spinlock lock; struct run *freelist; } kmem; // Free the page of physical memory pointed at by pa, // which normally should have been returned by a // call to kalloc(). (The exception is when // initializing the allocator; see kinit above.) void kfree(void *pa) { struct run *r; if (((uint64)pa % PGSIZE) != 0 || (char *)pa &lt; end || (uint64)pa &gt;= PHYSTOP) panic(&#34;kfree&#34;); memset(pa, 1, PGSIZE); r = (struct run *)pa; acquire(&amp;kmem.lock); r-&gt;next = kmem.freelist; kmem.freelist = r; release(&amp;kmem.lock); } 物理页面的分配和释放 释放前面已经解释了。当内核需要物理内存时，会通过调用kalloc()从kmem头部取出一个物理页帧返回。
-...</p>
-  </div>
-  <footer class="entry-footer">
-
-<span title='2026-10-26 10:42:45 +0800 CST'>October 26, 2026</span>&nbsp;·&nbsp;<span>5 min</span>&nbsp;·&nbsp;<span>1016 words</span></footer>
-  <a class="entry-link" aria-label="post link to 再探xv6: 内存篇" href="http://localhost:1313/posts/xv6-02/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">MIT6.1810: Lab2 Syscall
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>在这个lab中我们将深入理解xv6（其他系统也差不多）的系统调用是如何实现的，并尝试根据功能需求实现自己的系统调用。
-关于xv6的概述和系统调用的逻辑可以看这篇文章，后面就不过多介绍了。
-一、Using gdb (easy) 这部分内容主要是介绍gdb的使用方法，略。
-二、Sandbox a command(moderate) 题目要求实现一个系统调用interpose，其接受两个参数：一个整数掩码和一个路径，前者指定了要屏蔽哪些系统调用，后者暂时不用管。如果要使用interpose屏蔽当前进程的open系统调用，用法如下：
-interpose(1 &lt;&lt; SYS_open, &#34;-&#34;) 现在开始实现该系统调用，首先是用户侧：
-在 user/user.h 中添加 interpose() 的声明 。 int interpose(int, const char *); 在 user/usys.pl 中添加一行内容用于生成系统调用入口函数的实现。 entry(“interpose”); 题目提供了两个程序sandbox.c和sbtest.c，我们需要在Makefile中将其加入编译：
-UPROGS=\ ...... $U/_sandbox\ $U/_sbtest\ 在内核侧：
-在 kernel/syscall.h 中添加 interpose 的系统调用号宏定义
-#define SYS_interpose 23 在 kernel/proc.h 的proc结构体中添加一个interpose_mask，记录屏蔽字
-int interpose_mask; 在 kernel/sysproc.c 中添加函数 sys_interpose() 处理interpose系统调用
-uint64 sys_interpose(void) { int interpose_mask; argint(0, &amp;interpose_mask); myproc()-&gt;interpose_mask = interpose_mask; return 0; } 为了使子进程能够继承父进程的屏蔽字，需要在创建子进程时拷贝interpose_mask，在 kernel/proc.c 中的 kfork() 函数的末尾添加 interpose_mask 的拷贝。
-...</p>
-  </div>
-  <footer class="entry-footer">
-
-<span title='2026-10-26 09:23:20 +0800 CST'>October 26, 2026</span>&nbsp;·&nbsp;<span>5 min</span>&nbsp;·&nbsp;<span>1044 words</span></footer>
-  <a class="entry-link" aria-label="post link to MIT6.1810: Lab2 Syscall" href="http://localhost:1313/posts/xv6-lab2-syscall/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">

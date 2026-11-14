@@ -196,6 +196,59 @@
 
 <article class="post-entry tag-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">LKD阅读笔记-第四章-进程调度
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>一、进程调度：What &amp; Why？ 上一章介绍了进程管理，讨论了 Linux 如何创建、管理和销毁进程。本章进一步讨论一个核心问题：
+当系统中存在多个可运行进程，但 CPU 资源有限时，内核应该选择哪个进程运行？
+这就是进程调度（Process Scheduling）。
+进程调度器（Process Scheduler）是内核中负责分配处理器时间的子系统，它决定：
+哪个进程获得 CPU？ 进程什么时候获得 CPU？ 进程可以运行多长时间？ 什么时候应该暂停当前进程，让其他进程运行？ 调度器是多任务操作系统的基础。它通过合理分配 CPU 时间，使多个进程能够交替执行，让用户感觉多个程序似乎在同时运行。
+1.1 调度器的基本目标 假设一台单核计算机上存在三个进程：
+进程 类型 当前状态 A 文本编辑器 等待键盘输入 B 视频编码 正在计算 C 后台任务 等待运行 CPU 在同一时刻只能执行一个进程。
+如果 A 正在等待用户输入，继续让 A 占用 CPU 显然没有意义；此时应该让 B 或 C 运行。
+因此，调度器的一个基本原则是：
+只要系统中存在可运行进程，CPU 就应该尽可能保持忙碌。
+注意，这里有一个重要概念：Runnable（可运行）不等于 Running（正在运行）。
+一个进程可能处于以下两种情况：
+正在 CPU 上执行。 已经具备执行条件，只是在等待 CPU 资源。 而正在等待磁盘 I/O、键盘输入、网络数据或其他事件的进程，属于阻塞状态（Blocked），暂时不参与 CPU 调度。
+例如，一个进程执行 read()，但磁盘数据尚未准备好，它就可能进入睡眠状态。此时调度器应该选择其他可运行进程，而不是让它不断占用 CPU 检查数据是否到达。
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-11-08 21:20:53 +0800 CST'>November 8, 2026</span>&nbsp;·&nbsp;<span>12 min</span>&nbsp;·&nbsp;<span>2409 words</span></footer>
+  <a class="entry-link" aria-label="post link to LKD阅读笔记-第四章-进程调度" href="http://localhost:1313/posts/lkd04/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">LKD阅读笔记-第三章-进程管理
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>一、进程是什么？ 进程（Process）是程序执行过程中的一个实例。
+程序（Program）是存储在磁盘上的静态指令和数据，而进程是程序运行时的动态实体。一个程序可以对应多个进程；一个进程也不只是代码本身，它还拥有自己的运行状态、虚拟地址空间、打开的文件、信号处理信息以及处理器上下文等资源。
+从操作系统的角度看，进程是资源分配和管理的重要单位，也是内核进行调度和管理的基本对象。
+一个进程通常包含以下几个方面：
+代码和数据：程序的指令以及全局变量、静态变量等。 虚拟地址空间：进程可以访问的虚拟内存范围。 打开的文件：进程持有的文件描述符及其对应的内核对象。 处理器上下文：程序计数器、寄存器、栈指针等运行状态。 进程控制信息：进程 ID、父进程、状态、调度信息等。 需要注意：进程是内核管理的实体，而不是简单的一段代码。
+二、进程描述符与 task_struct 2.1 什么是进程描述符？ 内核需要一种数据结构来描述和管理进程。
+Linux 使用 struct task_struct 表示进程描述符（Process Descriptor）。它定义在：
+include/linux/sched.h 每一个进程都有一个对应的 task_struct，内核通过它获取进程的状态、调度信息、内存管理信息以及其他资源。
+可以把 task_struct 理解为内核管理进程的核心控制块，类似于其他操作系统中的 PCB（Process Control Block）。
+Linux 的进程描述符包含大量信息，常见字段如下：
+字段 作用 state 进程当前状态 pid 进程 ID tgid 线程组 ID flags 进程标志 prio 动态优先级 static_prio 静态优先级 normal_prio 普通优先级 policy 调度策略 mm 进程内存描述符 active_mm 当前活动地址空间 parent 父进程 children 子进程链表 real_parent 实际父进程 files 打开的文件信息 fs 文件系统相关信息 signal 信号相关信息 sighand 信号处理信息 tasks 进程任务链表节点 注意：这里列出的是帮助理解的代表性字段，不意味着不同 Linux 内核版本中的字段布局完全一致。Linux 内核数据结构会随着版本不断演进。
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-11-06 21:07:12 +0800 CST'>November 6, 2026</span>&nbsp;·&nbsp;<span>6 min</span>&nbsp;·&nbsp;<span>1268 words</span></footer>
+  <a class="entry-link" aria-label="post link to LKD阅读笔记-第三章-进程管理" href="http://localhost:1313/posts/lkd03/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">再探xv6-shell详解
     </h2>
   </header>
@@ -262,7 +315,7 @@ $ kalloctest start test1 test1 results: --- lock kmem stats lock: kmem: #test-an
 
 <article class="post-entry tag-entry"> 
   <header class="entry-header">
-    <h2 class="entry-hint-parent">LKD阅读笔记-第二章
+    <h2 class="entry-hint-parent">LKD阅读笔记-第二章-获取内核
     </h2>
   </header>
   <div class="entry-content">
@@ -281,12 +334,12 @@ git clone https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git cd 
   <footer class="entry-footer">
 
 <span title='2026-11-03 22:11:04 +0800 CST'>November 3, 2026</span>&nbsp;·&nbsp;<span>6 min</span>&nbsp;·&nbsp;<span>1207 words</span></footer>
-  <a class="entry-link" aria-label="post link to LKD阅读笔记-第二章" href="http://localhost:1313/posts/lkd02/"></a>
+  <a class="entry-link" aria-label="post link to LKD阅读笔记-第二章-获取内核" href="http://localhost:1313/posts/lkd02/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
   <header class="entry-header">
-    <h2 class="entry-hint-parent">LKD阅读笔记-第一章
+    <h2 class="entry-hint-parent">LKD阅读笔记-第一章-内核简介
     </h2>
   </header>
   <div class="entry-content">
@@ -305,7 +358,7 @@ Unix 发展过程中有几个重要节点：
   <footer class="entry-footer">
 
 <span title='2026-11-03 21:20:56 +0800 CST'>November 3, 2026</span>&nbsp;·&nbsp;<span>4 min</span>&nbsp;·&nbsp;<span>738 words</span></footer>
-  <a class="entry-link" aria-label="post link to LKD阅读笔记-第一章" href="http://localhost:1313/posts/lkd01/"></a>
+  <a class="entry-link" aria-label="post link to LKD阅读笔记-第一章-内核简介" href="http://localhost:1313/posts/lkd01/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -382,46 +435,6 @@ UART 接收到新的输入数据。 磁盘控制器完成一次 I/O 操作。 �
 
 <span title='2026-10-27 11:14:45 +0800 CST'>October 27, 2026</span>&nbsp;·&nbsp;<span>7 min</span>&nbsp;·&nbsp;<span>1361 words</span></footer>
   <a class="entry-link" aria-label="post link to 再探xv6: 异常控制流篇" href="http://localhost:1313/posts/xv6-04/"></a>
-</article>
-
-<article class="post-entry tag-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">MIT6.1810: Lab3 Pagetable
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>一、Inspect a user-process page table (easy)· xv6提供了一个用户程序pgtbltest.c，其中调用print_pgtbl()打印了页表的前10个页面和后10页的页表项，因为页表属于内核管理的数据结构，所以想要获取页表项就必须通过系统调用才行。在该lab中xv6额外提供了几个系统调用，其中的pgpte()的作用就是根据虚拟地址va，得到其对应的PTE。
-int ugetpid(void); uint64 pgpte(void *); void vmprint(void); int pgaccess(void *base, int len, void *mask); int ksupernpte(uint64*, uint64 *); void print_pgtbl() { printf(&#34;print_pgtbl starting\n&#34;); for (uint64 i = 0; i &lt; 10; i&#43;&#43;) { print_pte(i * PGSIZE); } uint64 top = MAXVA / PGSIZE; for (uint64 i = top - 10; i &lt; top; i&#43;&#43;) { print_pte(i * PGSIZE); } printf(&#34;print_pgtbl: OK\n&#34;); } 启动xv6，运行程序pgtbltest打印页表：
-xv6 kernel is booting hart 1 starting hart 2 starting init: starting sh $ pgtbltest print_pgtbl starting va 0x0 pte 0x21FC885B pa 0x87F22000 perm 0x5B va 0x1000 pte 0x21FC7C17 pa 0x87F1F000 perm 0x17 va 0x2000 pte 0x21FC7807 pa 0x87F1E000 perm 0x7 va 0x3000 pte 0x21FC74D7 pa 0x87F1D000 perm 0xD7 va 0x4000 pte 0x0 pa 0x0 perm 0x0 va 0x5000 pte 0x0 pa 0x0 perm 0x0 va 0x6000 pte 0x0 pa 0x0 perm 0x0 va 0x7000 pte 0x0 pa 0x0 perm 0x0 va 0x8000 pte 0x0 pa 0x0 perm 0x0 va 0x9000 pte 0x0 pa 0x0 perm 0x0 va 0x3FFFFF6000 pte 0x0 pa 0x0 perm 0x0 va 0x3FFFFF7000 pte 0x0 pa 0x0 perm 0x0 va 0x3FFFFF8000 pte 0x0 pa 0x0 perm 0x0 va 0x3FFFFF9000 pte 0x0 pa 0x0 perm 0x0 va 0x3FFFFFA000 pte 0x0 pa 0x0 perm 0x0 va 0x3FFFFFB000 pte 0x0 pa 0x0 perm 0x0 va 0x3FFFFFC000 pte 0x0 pa 0x0 perm 0x0 va 0x3FFFFFD000 pte 0x0 pa 0x0 perm 0x0 va 0x3FFFFFE000 pte 0x21FD08C7 pa 0x87F42000 perm 0xC7 va 0x3FFFFFF000 pte 0x2000184B pa 0x80006000 perm 0x4B print_pgtbl: OK vmprint_test starting vmprint_test: done pgaccess_test starting pgtbltest: pgaccess_test failed: incorrect access bits set, pid=3 这个页表和用户进程的地址空间正好能对应上：
-...</p>
-  </div>
-  <footer class="entry-footer">
-
-<span title='2026-10-27 11:01:51 +0800 CST'>October 27, 2026</span>&nbsp;·&nbsp;<span>9 min</span>&nbsp;·&nbsp;<span>1733 words</span></footer>
-  <a class="entry-link" aria-label="post link to MIT6.1810: Lab3 Pagetable" href="http://localhost:1313/posts/xv6-lab3-pgtbl/"></a>
-</article>
-
-<article class="post-entry tag-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">再探xv6: 并发篇
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>上一篇讲的是内存，这一篇讲并发。并发是 xv6 里最容易写出 bug、也最难调试的部分：对多核的支持让两个 CPU 同时修改同一份数据，中断让内核代码在任意时刻被打断，进程切换又让同一个数据结构被不同的进程轮流访问。
-这一篇先回答&#34;为什么需要锁&#34;，再逐行拆解 xv6 里的两种锁（Spinlock 和 Sleeplock），最后对照 Linux 的并发机制，看看一个通用操作系统为了应付更复杂的场景，做了哪些 xv6 没做的设计。
-一、为什么要提供并发机制？ 1.1 并发的三个来源 并发不等于&#34;多核&#34;。只要存在两个执行流能同时访问同一份内存，并发就存在。在 xv6 里，它有三个来源：
-来源一：多核（SMP）。 kernel/param.h 中定义了 NCPU 8，即最多 8 个 hart（CPU 核）可以同时运行内核代码。它们共享同一片物理内存，也共享同一批外设（virtio 磁盘、uart）。两个核同时修改同一个内存地址，就是一次数据竞争。
-来源二：中断与抢占。 内核代码随时可能被中断打断，而中断处理程序与被中断的代码共享数据结构。最典型的例子在 kernel/console.c 里：键盘中断处理程序 consoleintr() 往输入缓冲区写字符，进程通过 consread() 从同一个缓冲区读字符，两者靠同一把 cons.lock 保护。
-来源三：进程切换。 多个进程通过系统调用共享文件、管道、inode 和页表。struct file 的引用计数、pipe 的环形缓冲区、inode 的引用计数，都会被多个进程并发访问。
-这三个来源有一个共同点：它们都会打断一段正在运行的代码。因此临界区里的代码必须假设&#34;我随时可能被打断，并且被打断后别人也在改同样的数据&#34;。
-1.2 没有同步会发生什么 竞态条件：结果依赖执行顺序 看 kernel/kalloc.c 里分配物理页的代码：
-void * kalloc(void) { struct run *r; acquire(&amp;kmem.lock); r = kmem.freelist; if (r) { kmem.freelist = r-&gt;next; } release(&amp;kmem.lock); if (r) memset((char *)r, 5, PGSIZE); // fill with junk return (void *)r; } 假设去掉 acquire/release。CPU0 和 CPU1 同时进入临界区，可能读到同一个 r：
-...</p>
-  </div>
-  <footer class="entry-footer">
-
-<span title='2026-10-26 11:55:00 +0800 CST'>October 26, 2026</span>&nbsp;·&nbsp;<span>8 min</span>&nbsp;·&nbsp;<span>1577 words</span></footer>
-  <a class="entry-link" aria-label="post link to 再探xv6: 并发篇" href="http://localhost:1313/posts/xv6-03/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">

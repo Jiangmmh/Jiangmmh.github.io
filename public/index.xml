@@ -6,8 +6,238 @@
     <description>Recent content on Minghan的博客</description>
     <generator>Hugo</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Fri, 06 Nov 2026 20:57:50 +0800</lastBuildDate>
+    <lastBuildDate>Sat, 14 Nov 2026 10:56:37 +0800</lastBuildDate>
     <atom:link href="http://localhost:1313/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Linux设备驱动开发-Ch2-Linux内核模块</title>
+      <link>http://localhost:1313/posts/lkdd2/</link>
+      <pubDate>Sat, 14 Nov 2026 10:56:37 +0800</pubDate>
+      <guid>http://localhost:1313/posts/lkdd2/</guid>
+      <description>&lt;h1 id=&#34;一内核模块简介&#34;&gt;一、内核模块简介&lt;/h1&gt;
+&lt;h2 id=&#34;11-什么是内核模块&#34;&gt;1.1 什么是内核模块？&lt;/h2&gt;
+&lt;p&gt;Linux 内核采用模块化设计，允许开发者通过添加独立的软件组件来扩展内核功能，而不需要每次修改内核都重新编译整个内核。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;内核模块（Kernel Module）&lt;/strong&gt; 是一种能够在运行时动态加载到 Linux 内核中，并在不再需要时动态卸载的软件组件。&lt;/p&gt;
+&lt;p&gt;当内核模块用于控制和管理特定硬件设备时，它通常被称为&lt;strong&gt;设备驱动程序（Device Driver）&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;例如：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;网络设备驱动程序：负责管理网卡，处理网络数据包。&lt;/li&gt;
+&lt;li&gt;块设备驱动程序：负责管理磁盘、SSD 等存储设备。&lt;/li&gt;
+&lt;li&gt;字符设备驱动程序：负责管理串口、终端等字符设备。&lt;/li&gt;
+&lt;li&gt;文件系统模块：为内核提供额外的文件系统支持。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;需要注意：并不是所有内核模块都是设备驱动程序。Linux 还使用模块实现文件系统、加密算法、网络协议以及其他可选内核功能。&lt;/p&gt;
+&lt;h2 id=&#34;12-静态模块与动态模块&#34;&gt;1.2 静态模块与动态模块&lt;/h2&gt;
+&lt;p&gt;Linux 内核功能可以通过两种方式集成到内核中。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;1. 静态模块（Built-in Modules）&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;静态模块也称为内置模块。在构建内核时，通过配置文件 &lt;code&gt;.config&lt;/code&gt; 选择需要启用的功能，并将对应源代码编译为目标文件，最终链接到内核映像文件中。&lt;/p&gt;
+&lt;p&gt;例如：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;CONFIG_EXT4_FS=y
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;CONFIG_E1000=y
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;其中 &lt;code&gt;y&lt;/code&gt; 表示将对应功能编译进内核。&lt;/p&gt;
+&lt;p&gt;优点：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;不需要额外执行模块加载操作。&lt;/li&gt;
+&lt;li&gt;内核启动时即可使用相关功能。&lt;/li&gt;
+&lt;li&gt;不存在模块加载和卸载带来的额外管理开销。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;缺点：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;修改代码后通常需要重新构建内核。&lt;/li&gt;
+&lt;li&gt;无法在运行时独立卸载某个内置功能。&lt;/li&gt;
+&lt;li&gt;内置功能通常会一直占用内核映像及相应的运行时资源。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;2. 动态模块（Loadable Kernel Modules，LKM）&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;动态模块与内核映像文件相互独立，通常以 &lt;code&gt;.ko&lt;/code&gt;（Kernel Object）作为文件扩展名。&lt;/p&gt;
+&lt;p&gt;它们可以在系统运行期间动态加载和卸载。&lt;/p&gt;
+&lt;p&gt;例如：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo insmod helloworld.ko
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo rmmod helloworld
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;优点：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;不需要重新编译和启动整个内核即可扩展功能。&lt;/li&gt;
+&lt;li&gt;可以按需加载功能，减少不必要的内核常驻代码。&lt;/li&gt;
+&lt;li&gt;便于开发和调试驱动程序。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;缺点：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;模块必须与目标内核的版本、配置及符号接口兼容。&lt;/li&gt;
+&lt;li&gt;模块加载、卸载以及模块间依赖需要额外管理。&lt;/li&gt;
+&lt;li&gt;模块运行在内核态，错误可能导致整个系统崩溃。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;补充：&lt;/strong&gt; 动态模块虽然能够独立加载，但并不意味着它完全不依赖内核。模块仍然需要使用目标内核提供的头文件、配置、符号和构建环境。&lt;/p&gt;
+&lt;h2 id=&#34;13-内核模块相关配置&#34;&gt;1.3 内核模块相关配置&lt;/h2&gt;
+&lt;p&gt;Linux 内核提供以下配置选项：&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>LKD阅读笔记-第四章-进程调度</title>
+      <link>http://localhost:1313/posts/lkd04/</link>
+      <pubDate>Sun, 08 Nov 2026 21:20:53 +0800</pubDate>
+      <guid>http://localhost:1313/posts/lkd04/</guid>
+      <description>&lt;h1 id=&#34;一进程调度what--why&#34;&gt;一、进程调度：What &amp;amp; Why？&lt;/h1&gt;
+&lt;p&gt;上一章介绍了进程管理，讨论了 Linux 如何创建、管理和销毁进程。本章进一步讨论一个核心问题：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;当系统中存在多个可运行进程，但 CPU 资源有限时，内核应该选择哪个进程运行？&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;这就是进程调度（Process Scheduling）。&lt;/p&gt;
+&lt;p&gt;进程调度器（Process Scheduler）是内核中负责分配处理器时间的子系统，它决定：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;哪个进程获得 CPU？&lt;/li&gt;
+&lt;li&gt;进程什么时候获得 CPU？&lt;/li&gt;
+&lt;li&gt;进程可以运行多长时间？&lt;/li&gt;
+&lt;li&gt;什么时候应该暂停当前进程，让其他进程运行？&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;调度器是多任务操作系统的基础。它通过合理分配 CPU 时间，使多个进程能够交替执行，让用户感觉多个程序似乎在同时运行。&lt;/p&gt;
+&lt;h2 id=&#34;11-调度器的基本目标&#34;&gt;1.1 调度器的基本目标&lt;/h2&gt;
+&lt;p&gt;假设一台单核计算机上存在三个进程：&lt;/p&gt;
+&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;进程&lt;/th&gt;
+					&lt;th&gt;类型&lt;/th&gt;
+					&lt;th&gt;当前状态&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;A&lt;/td&gt;
+					&lt;td&gt;文本编辑器&lt;/td&gt;
+					&lt;td&gt;等待键盘输入&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;B&lt;/td&gt;
+					&lt;td&gt;视频编码&lt;/td&gt;
+					&lt;td&gt;正在计算&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;C&lt;/td&gt;
+					&lt;td&gt;后台任务&lt;/td&gt;
+					&lt;td&gt;等待运行&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;CPU 在同一时刻只能执行一个进程。&lt;/p&gt;
+&lt;p&gt;如果 A 正在等待用户输入，继续让 A 占用 CPU 显然没有意义；此时应该让 B 或 C 运行。&lt;/p&gt;
+&lt;p&gt;因此，调度器的一个基本原则是：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;只要系统中存在可运行进程，CPU 就应该尽可能保持忙碌。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;注意，这里有一个重要概念：&lt;strong&gt;Runnable（可运行）不等于 Running（正在运行）&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;一个进程可能处于以下两种情况：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;正在 CPU 上执行。&lt;/li&gt;
+&lt;li&gt;已经具备执行条件，只是在等待 CPU 资源。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;而正在等待磁盘 I/O、键盘输入、网络数据或其他事件的进程，属于阻塞状态（Blocked），暂时不参与 CPU 调度。&lt;/p&gt;
+&lt;p&gt;例如，一个进程执行 &lt;code&gt;read()&lt;/code&gt;，但磁盘数据尚未准备好，它就可能进入睡眠状态。此时调度器应该选择其他可运行进程，而不是让它不断占用 CPU 检查数据是否到达。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>LKD阅读笔记-第三章-进程管理</title>
+      <link>http://localhost:1313/posts/lkd03/</link>
+      <pubDate>Fri, 06 Nov 2026 21:07:12 +0800</pubDate>
+      <guid>http://localhost:1313/posts/lkd03/</guid>
+      <description>&lt;h1 id=&#34;一进程是什么&#34;&gt;一、进程是什么？&lt;/h1&gt;
+&lt;p&gt;进程（Process）是程序执行过程中的一个实例。&lt;/p&gt;
+&lt;p&gt;程序（Program）是存储在磁盘上的静态指令和数据，而进程是程序运行时的动态实体。一个程序可以对应多个进程；一个进程也不只是代码本身，它还拥有自己的运行状态、虚拟地址空间、打开的文件、信号处理信息以及处理器上下文等资源。&lt;/p&gt;
+&lt;p&gt;从操作系统的角度看，进程是资源分配和管理的重要单位，也是内核进行调度和管理的基本对象。&lt;/p&gt;
+&lt;p&gt;一个进程通常包含以下几个方面：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;代码和数据&lt;/strong&gt;：程序的指令以及全局变量、静态变量等。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;虚拟地址空间&lt;/strong&gt;：进程可以访问的虚拟内存范围。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;打开的文件&lt;/strong&gt;：进程持有的文件描述符及其对应的内核对象。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;处理器上下文&lt;/strong&gt;：程序计数器、寄存器、栈指针等运行状态。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;进程控制信息&lt;/strong&gt;：进程 ID、父进程、状态、调度信息等。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;需要注意：&lt;strong&gt;进程是内核管理的实体，而不是简单的一段代码。&lt;/strong&gt;&lt;/p&gt;
+&lt;h1 id=&#34;二进程描述符与-task_struct&#34;&gt;二、进程描述符与 task_struct&lt;/h1&gt;
+&lt;h2 id=&#34;21-什么是进程描述符&#34;&gt;2.1 什么是进程描述符？&lt;/h2&gt;
+&lt;p&gt;内核需要一种数据结构来描述和管理进程。&lt;/p&gt;
+&lt;p&gt;Linux 使用 &lt;code&gt;struct task_struct&lt;/code&gt; 表示进程描述符（Process Descriptor）。它定义在：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;include&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;/&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;linux&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;/&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;sched&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;h&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;每一个进程都有一个对应的 &lt;code&gt;task_struct&lt;/code&gt;，内核通过它获取进程的状态、调度信息、内存管理信息以及其他资源。&lt;/p&gt;
+&lt;p&gt;可以把 &lt;code&gt;task_struct&lt;/code&gt; 理解为内核管理进程的核心控制块，类似于其他操作系统中的 PCB（Process Control Block）。&lt;/p&gt;
+&lt;p&gt;Linux 的进程描述符包含大量信息，常见字段如下：&lt;/p&gt;
+&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;字段&lt;/th&gt;
+					&lt;th&gt;作用&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;state&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;进程当前状态&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;pid&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;进程 ID&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;tgid&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;线程组 ID&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;flags&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;进程标志&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;prio&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;动态优先级&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;static_prio&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;静态优先级&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;normal_prio&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;普通优先级&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;policy&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;调度策略&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;mm&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;进程内存描述符&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;active_mm&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;当前活动地址空间&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;parent&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;父进程&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;children&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;子进程链表&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;real_parent&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;实际父进程&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;files&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;打开的文件信息&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;fs&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;文件系统相关信息&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;signal&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;信号相关信息&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;sighand&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;信号处理信息&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;tasks&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;进程任务链表节点&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;注意：这里列出的是帮助理解的代表性字段，不意味着不同 Linux 内核版本中的字段布局完全一致。Linux 内核数据结构会随着版本不断演进。&lt;/p&gt;</description>
+    </item>
     <item>
       <title>UCB CS186 Project 1：SQL </title>
       <link>http://localhost:1313/posts/cs186-proj1/</link>
@@ -277,7 +507,7 @@
 &lt;p&gt;虚拟内存系统通过页表（Page Table）将虚拟地址转换为物理地址。&lt;/p&gt;</description>
     </item>
     <item>
-      <title>LKD阅读笔记-第二章</title>
+      <title>LKD阅读笔记-第二章-获取内核</title>
       <link>http://localhost:1313/posts/lkd02/</link>
       <pubDate>Tue, 03 Nov 2026 22:11:04 +0800</pubDate>
       <guid>http://localhost:1313/posts/lkd02/</guid>
@@ -314,7 +544,7 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;查看当前版本：&lt;/p&gt;</description>
     </item>
     <item>
-      <title>LKD阅读笔记-第一章</title>
+      <title>LKD阅读笔记-第一章-内核简介</title>
       <link>http://localhost:1313/posts/lkd01/</link>
       <pubDate>Tue, 03 Nov 2026 21:20:56 +0800</pubDate>
       <guid>http://localhost:1313/posts/lkd01/</guid>
@@ -509,116 +739,6 @@
 &lt;p&gt;Q4：main 函数中printf函数调用jarl 之后， 寄存器ra的值是多少？&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;printf的返回值是成功打印输出等字符总数，如果出错则返回一个负数。&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>Computer Networks P&amp;D 阅读笔记 Ch1</title>
-      <link>http://localhost:1313/posts/net-sys1/</link>
-      <pubDate>Fri, 30 Oct 2026 11:59:50 +0800</pubDate>
-      <guid>http://localhost:1313/posts/net-sys1/</guid>
-      <description>&lt;p&gt;这是一本关于计算机网络的&lt;a href=&#34;https://book.systemsapproach.org/index.html&#34;&gt;开源书籍&lt;/a&gt;，写得非常好。&lt;/p&gt;
-&lt;h1 id=&#34;preface&#34;&gt;Preface&lt;/h1&gt;
-&lt;blockquote&gt;
-&lt;p&gt;“系统方法” 指的是计算机系统设计和实现领域的一个概念。计算机科学研究人员和从业者通常使用这个术语来研究构建复杂计算系统（例如操作系统、网络、分布式应用程序等）时出现的问题。&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;&lt;strong&gt;系统方法的关键在于“全局观”&lt;/strong&gt;：你需要关注系统的各个组件如何相互作用以实现整体结果，而不是仅仅优化每个组件。&lt;/p&gt;
-&lt;p&gt;在网络领域，这通常意味着要&lt;strong&gt;超越传统的分层视角&lt;/strong&gt;，思考如何以可能涉及多个层面的方式来最佳地解决问题。拥塞控制就是一个很好的例子，它涉及多个层面，并影响终端系统和网络设备。我们将拥塞这一系统级问题单独成章进行讨论，而不是试图将其硬塞进传输层等其他层级。&lt;/p&gt;
-&lt;h1 id=&#34;1-问题如何构建计算机网络&#34;&gt;1. 问题：如何构建计算机网络？&lt;/h1&gt;
-&lt;blockquote&gt;
-&lt;p&gt;假设让你来构建一个计算机网络，你会如何设计它？&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;如果我们要构造一个未来可能扩展到全球规模，并支持远程会议、视频点播、电子商务、分布式计算和数字图书馆等各种应用的网络。&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;有哪些&lt;strong&gt;现有技术&lt;/strong&gt;可以作为底层构建模块？&lt;/li&gt;
-&lt;li&gt;你会设计什么样的&lt;strong&gt;软件架构&lt;/strong&gt;来将这些构建模块集成到一个高效的通信服务中？&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;本书的主要目标就是回答这个问题：介绍现有的网络技术，并展示如何利用它们从零开始构建网络。&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;计算机网络与其他类型的网络有何区别？&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;计算机网络最重要的特性或许在于其通用性。其主要由通用可编程硬件（CPU）构建，并非针对特定应用。它们能够承载多种不同类型的数据，并支持广泛且不断增长的应用。&lt;/p&gt;
-&lt;h1 id=&#34;2-应用&#34;&gt;2. 应用&lt;/h1&gt;
-&lt;p&gt;计算机网络的应用包括：例如万维网、电子邮件、社交媒体、流媒体音乐或电影、视频会议、即时通讯、文件共享等等。&lt;/p&gt;
-&lt;p&gt;使用计算机网络的群体：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;网络应用开发者&lt;/li&gt;
-&lt;li&gt;网络运维管理者&lt;/li&gt;
-&lt;li&gt;网络协议的设计和构建者&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h1 id=&#34;3-要求&#34;&gt;3. 要求&lt;/h1&gt;
-&lt;blockquote&gt;
-&lt;p&gt;我们为自己设定了一个雄心勃勃的目标：从零开始构建计算机网络。&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;为了实现这一目标，我们将从基本原理入手，然后提出在构建实际网络时自然会遇到的问题。&lt;/p&gt;
-&lt;p&gt;计算机网络的要求如下：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;可扩展链接&lt;/li&gt;
-&lt;li&gt;高效的资源共享&lt;/li&gt;
-&lt;li&gt;支持通用服务&lt;/li&gt;
-&lt;li&gt;可管理性好&lt;/li&gt;
-&lt;/ul&gt;
-&lt;hr&gt;
-&lt;p&gt;&lt;strong&gt;网络共享的基本概念：多路复用。&lt;/strong&gt;&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;时分多路复用，将时间分割成大小相等的量子，并以轮询的方式让每个数据流有机会通过物理链路发送数据。&lt;/li&gt;
-&lt;li&gt;频分多路复用，使用不同的频率通过物理链路传输每个数据流
-&lt;ul&gt;
-&lt;li&gt;如果其中一个流（主机对）没有数据要发送，那么它所占用的物理链路份额——即时间片或频率——就会处于空闲状态，即使其他流有数据要发送&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;统计复用，按需从每个数据流发送的，而不是在预定的时隙内发送。
-&lt;ul&gt;
-&lt;li&gt;为了保证每个数据流都能获得使用链路发送数据的机会，统计复用为每个数据流在给定时间允许传输的数据块大小设定了一个上限。这个大小受限的数据块通常被称为&lt;strong&gt;数据&lt;em&gt;包&lt;/em&gt;&lt;/strong&gt;，以区别于应用程序可能想要传输的任意大小的&lt;em&gt;消息&lt;/em&gt;。&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;核心思想：按Packet发送数据，而不是任意长度&lt;/strong&gt;&lt;/li&gt;
-&lt;li&gt;源端可能需要将消息分割成多个数据包，接收端再将这些数据包重新组装成原始消息。&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h1 id=&#34;4-计算机网络的架构&#34;&gt;4. 计算机网络的架构&lt;/h1&gt;
-&lt;blockquote&gt;
-&lt;p&gt;抽象——即将实现细节隐藏在定义良好的接口之后——是系统设计者用来管理复杂性的基本工具。&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;为了应对设计计算机网络系统的复杂性，网络设计者提出了网络架构的概念来指导网络的设计与实现。主要的计算机网络架构包括：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;OSI七层模型&lt;/li&gt;
-&lt;li&gt;TCP/IP四层模型&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;抽象自然而然地导致了分层，尤其是在网络系统中。其基本思路是，从底层硬件提供的服务入手，然后添加一系列层，每一层都提供更高（更抽象）的服务级别。高层提供的服务是根据底层提供的服务来实现的。&lt;/p&gt;
-&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/net-sys1/image.png&#34;&gt;&lt;/p&gt;
-&lt;p&gt;分层提供了两个实用功能：&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;将构建网络的问题分解成更易于管理的组件。与其实现一个包罗万象的单体软件，不如实现多个层，每个层解决问题的一部分。&lt;/li&gt;
-&lt;li&gt;提供了一种更模块化的设计。如果您决定添加一些新服务，可能只需要修改其中一层的功能，即可重用其他层提供的函数。&lt;/li&gt;
-&lt;/ol&gt;
-&lt;p&gt;很多时候，系统的任何同一层级中提供了多种抽象，每种抽象都为更高层级提供不同的服务，但都基于相同的底层抽象，例如传输层的TCP和UDP协议，都以IP协议的服务为基础，但对上层提供不同的传输服务。&lt;/p&gt;
-&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/net-sys1/image%201.png&#34;&gt;&lt;/p&gt;
-&lt;p&gt;构成网络系统各层的抽象对象称为&lt;strong&gt;协议&lt;/strong&gt;。协议提供了一种通信服务，供更高层的对象（例如应用程序进程，或者更高层级的协议）交换消息。&lt;/p&gt;
-&lt;p&gt;每个协议都定义了两个不同的接口：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;服务接口（纵向）*，*供同一台计算机上其他想要使用其通信服务的对象使用。&lt;/li&gt;
-&lt;li&gt;协议定义了与另一台机器上的对应节点（对等节点）之间的接口（横向）。&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/net-sys1/image%202.png&#34;&gt;&lt;/p&gt;
-&lt;p&gt;协议规定了如何在同层的对等节点之间传输数据，如何体现？本质就是在发送数据之前在其前面加上一个首部（Header），对等节点在收到数据后根据协议解析该首部，然后取出其中的数据发往上层。&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;当我们说底层协议不解释它从高层协议接收到的消息时，指的是它不知道如何从消息中包含的数据中提取任何含义。&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;当然，有时底层协议会对接收到的数据进行一些简单的转换，例如压缩或加密。&lt;/p&gt;
-&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/net-sys1/image%203.png&#34;&gt;&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;多路复用与解多路复用&lt;/strong&gt;&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;因为计算机网络是多层的，且每层可能包含不止一种协议，因此在底层的首部中还要包含一个字段，用来表示该数据所属的上层协议。&lt;/li&gt;
-&lt;li&gt;几乎所有协议都实现了这种机制。&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;下面是OSI七层模型和TCP四层模型的架构图：&lt;/p&gt;
-&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/net-sys1/image%204.png&#34;&gt;&lt;/p&gt;
-&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/posts/net-sys1/image%205.png&#34;&gt;&lt;/p&gt;
-&lt;p&gt;虽然现在TCP四层模型成为了实际上的标准，但是OSI七层模型仍有其价值，因为会话层和表示层在开发应用软件时仍需要考虑到。&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;会话层提供了一个命名空间，用于将构成单个应用程序的不同传输流连接起来。例如，它可以管理在远程会议应用程序中组合的音频流和视频流。&lt;/li&gt;
-&lt;li&gt;表示层，它负责处理对等方之间交换的数据格式。&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h1 id=&#34;5-软件&#34;&gt;5. 软件&lt;/h1&gt;
-&lt;p&gt;了解如何实现网络软件是理解计算机网络的重要组成部分。虽然你不太可能被委派去实现像 IP 这样的底层协议，但你很有可能会遇到需要实现应用层协议的情况——这种梦寐以求的“杀手级应用”能为你带来难以想象的名利双收。&lt;/p&gt;</description>
     </item>
     <item>
       <title>understanding</title>

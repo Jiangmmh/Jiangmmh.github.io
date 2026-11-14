@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Linux Kernel on Minghan的博客</title>
+    <link>http://localhost:1313/tags/linux-kernel/</link>
+    <description>Recent content in Linux Kernel on Minghan的博客</description>
+    <generator>Hugo</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Fri, 06 Nov 2026 21:07:12 +0800</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/linux-kernel/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>LKD阅读笔记-第三章-进程管理</title>
+      <link>http://localhost:1313/posts/lkd03/</link>
+      <pubDate>Fri, 06 Nov 2026 21:07:12 +0800</pubDate>
+      <guid>http://localhost:1313/posts/lkd03/</guid>
+      <description>&lt;h1 id=&#34;一进程是什么&#34;&gt;一、进程是什么？&lt;/h1&gt;
+&lt;p&gt;进程（Process）是程序执行过程中的一个实例。&lt;/p&gt;
+&lt;p&gt;程序（Program）是存储在磁盘上的静态指令和数据，而进程是程序运行时的动态实体。一个程序可以对应多个进程；一个进程也不只是代码本身，它还拥有自己的运行状态、虚拟地址空间、打开的文件、信号处理信息以及处理器上下文等资源。&lt;/p&gt;
+&lt;p&gt;从操作系统的角度看，进程是资源分配和管理的重要单位，也是内核进行调度和管理的基本对象。&lt;/p&gt;
+&lt;p&gt;一个进程通常包含以下几个方面：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;代码和数据&lt;/strong&gt;：程序的指令以及全局变量、静态变量等。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;虚拟地址空间&lt;/strong&gt;：进程可以访问的虚拟内存范围。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;打开的文件&lt;/strong&gt;：进程持有的文件描述符及其对应的内核对象。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;处理器上下文&lt;/strong&gt;：程序计数器、寄存器、栈指针等运行状态。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;进程控制信息&lt;/strong&gt;：进程 ID、父进程、状态、调度信息等。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;需要注意：&lt;strong&gt;进程是内核管理的实体，而不是简单的一段代码。&lt;/strong&gt;&lt;/p&gt;
+&lt;h1 id=&#34;二进程描述符与-task_struct&#34;&gt;二、进程描述符与 task_struct&lt;/h1&gt;
+&lt;h2 id=&#34;21-什么是进程描述符&#34;&gt;2.1 什么是进程描述符？&lt;/h2&gt;
+&lt;p&gt;内核需要一种数据结构来描述和管理进程。&lt;/p&gt;
+&lt;p&gt;Linux 使用 &lt;code&gt;struct task_struct&lt;/code&gt; 表示进程描述符（Process Descriptor）。它定义在：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;include&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;/&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;linux&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;/&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;sched&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;h&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;每一个进程都有一个对应的 &lt;code&gt;task_struct&lt;/code&gt;，内核通过它获取进程的状态、调度信息、内存管理信息以及其他资源。&lt;/p&gt;
+&lt;p&gt;可以把 &lt;code&gt;task_struct&lt;/code&gt; 理解为内核管理进程的核心控制块，类似于其他操作系统中的 PCB（Process Control Block）。&lt;/p&gt;
+&lt;p&gt;Linux 的进程描述符包含大量信息，常见字段如下：&lt;/p&gt;
+&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;字段&lt;/th&gt;
+					&lt;th&gt;作用&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;state&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;进程当前状态&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;pid&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;进程 ID&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;tgid&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;线程组 ID&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;flags&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;进程标志&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;prio&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;动态优先级&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;static_prio&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;静态优先级&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;normal_prio&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;普通优先级&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;policy&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;调度策略&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;mm&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;进程内存描述符&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;active_mm&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;当前活动地址空间&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;parent&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;父进程&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;children&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;子进程链表&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;real_parent&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;实际父进程&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;files&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;打开的文件信息&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;fs&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;文件系统相关信息&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;signal&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;信号相关信息&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;sighand&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;信号处理信息&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;tasks&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;进程任务链表节点&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;注意：这里列出的是帮助理解的代表性字段，不意味着不同 Linux 内核版本中的字段布局完全一致。Linux 内核数据结构会随着版本不断演进。&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

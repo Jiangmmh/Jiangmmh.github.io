@@ -196,7 +196,35 @@
 
 <article class="post-entry tag-entry"> 
   <header class="entry-header">
-    <h2 class="entry-hint-parent">LKD阅读笔记-第二章
+    <h2 class="entry-hint-parent">LKD阅读笔记-第四章-进程调度
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>一、进程调度：What &amp; Why？ 上一章介绍了进程管理，讨论了 Linux 如何创建、管理和销毁进程。本章进一步讨论一个核心问题：
+当系统中存在多个可运行进程，但 CPU 资源有限时，内核应该选择哪个进程运行？
+这就是进程调度（Process Scheduling）。
+进程调度器（Process Scheduler）是内核中负责分配处理器时间的子系统，它决定：
+哪个进程获得 CPU？ 进程什么时候获得 CPU？ 进程可以运行多长时间？ 什么时候应该暂停当前进程，让其他进程运行？ 调度器是多任务操作系统的基础。它通过合理分配 CPU 时间，使多个进程能够交替执行，让用户感觉多个程序似乎在同时运行。
+1.1 调度器的基本目标 假设一台单核计算机上存在三个进程：
+进程 类型 当前状态 A 文本编辑器 等待键盘输入 B 视频编码 正在计算 C 后台任务 等待运行 CPU 在同一时刻只能执行一个进程。
+如果 A 正在等待用户输入，继续让 A 占用 CPU 显然没有意义；此时应该让 B 或 C 运行。
+因此，调度器的一个基本原则是：
+只要系统中存在可运行进程，CPU 就应该尽可能保持忙碌。
+注意，这里有一个重要概念：Runnable（可运行）不等于 Running（正在运行）。
+一个进程可能处于以下两种情况：
+正在 CPU 上执行。 已经具备执行条件，只是在等待 CPU 资源。 而正在等待磁盘 I/O、键盘输入、网络数据或其他事件的进程，属于阻塞状态（Blocked），暂时不参与 CPU 调度。
+例如，一个进程执行 read()，但磁盘数据尚未准备好，它就可能进入睡眠状态。此时调度器应该选择其他可运行进程，而不是让它不断占用 CPU 检查数据是否到达。
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-11-08 21:20:53 +0800 CST'>November 8, 2026</span>&nbsp;·&nbsp;<span>12 min</span>&nbsp;·&nbsp;<span>2409 words</span></footer>
+  <a class="entry-link" aria-label="post link to LKD阅读笔记-第四章-进程调度" href="http://localhost:1313/posts/lkd04/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">LKD阅读笔记-第二章-获取内核
     </h2>
   </header>
   <div class="entry-content">
@@ -215,12 +243,12 @@ git clone https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git cd 
   <footer class="entry-footer">
 
 <span title='2026-11-03 22:11:04 +0800 CST'>November 3, 2026</span>&nbsp;·&nbsp;<span>6 min</span>&nbsp;·&nbsp;<span>1207 words</span></footer>
-  <a class="entry-link" aria-label="post link to LKD阅读笔记-第二章" href="http://localhost:1313/posts/lkd02/"></a>
+  <a class="entry-link" aria-label="post link to LKD阅读笔记-第二章-获取内核" href="http://localhost:1313/posts/lkd02/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
   <header class="entry-header">
-    <h2 class="entry-hint-parent">LKD阅读笔记-第一章
+    <h2 class="entry-hint-parent">LKD阅读笔记-第一章-内核简介
     </h2>
   </header>
   <div class="entry-content">
@@ -239,7 +267,7 @@ Unix 发展过程中有几个重要节点：
   <footer class="entry-footer">
 
 <span title='2026-11-03 21:20:56 +0800 CST'>November 3, 2026</span>&nbsp;·&nbsp;<span>4 min</span>&nbsp;·&nbsp;<span>738 words</span></footer>
-  <a class="entry-link" aria-label="post link to LKD阅读笔记-第一章" href="http://localhost:1313/posts/lkd01/"></a>
+  <a class="entry-link" aria-label="post link to LKD阅读笔记-第一章-内核简介" href="http://localhost:1313/posts/lkd01/"></a>
 </article>
     </main>
     

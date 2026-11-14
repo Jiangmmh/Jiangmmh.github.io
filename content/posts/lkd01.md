@@ -1,5 +1,5 @@
 ---
-title: "LKD阅读笔记-第一章"
+title: "LKD阅读笔记-第一章-内核简介"
 date: '2026-11-03T21:20:56+08:00'
 draft: false
 tags: [Linux内核, Linux Kernel Development]

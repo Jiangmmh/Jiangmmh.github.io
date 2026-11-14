@@ -1,0 +1,1880 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Linux设备驱动开发-Ch2-Linux内核模块 | Minghan的博客</title>
+<meta name="keywords" content="内核模块, 驱动开发">
+<meta name="description" content="一、内核模块简介
+1.1 什么是内核模块？
+Linux 内核采用模块化设计，允许开发者通过添加独立的软件组件来扩展内核功能，而不需要每次修改内核都重新编译整个内核。
+内核模块（Kernel Module） 是一种能够在运行时动态加载到 Linux 内核中，并在不再需要时动态卸载的软件组件。
+当内核模块用于控制和管理特定硬件设备时，它通常被称为设备驱动程序（Device Driver）。
+例如：
+
+网络设备驱动程序：负责管理网卡，处理网络数据包。
+块设备驱动程序：负责管理磁盘、SSD 等存储设备。
+字符设备驱动程序：负责管理串口、终端等字符设备。
+文件系统模块：为内核提供额外的文件系统支持。
+
+需要注意：并不是所有内核模块都是设备驱动程序。Linux 还使用模块实现文件系统、加密算法、网络协议以及其他可选内核功能。
+1.2 静态模块与动态模块
+Linux 内核功能可以通过两种方式集成到内核中。
+1. 静态模块（Built-in Modules）
+静态模块也称为内置模块。在构建内核时，通过配置文件 .config 选择需要启用的功能，并将对应源代码编译为目标文件，最终链接到内核映像文件中。
+例如：
+CONFIG_EXT4_FS=y
+CONFIG_E1000=y
+其中 y 表示将对应功能编译进内核。
+优点：
+
+不需要额外执行模块加载操作。
+内核启动时即可使用相关功能。
+不存在模块加载和卸载带来的额外管理开销。
+
+缺点：
+
+修改代码后通常需要重新构建内核。
+无法在运行时独立卸载某个内置功能。
+内置功能通常会一直占用内核映像及相应的运行时资源。
+
+2. 动态模块（Loadable Kernel Modules，LKM）
+动态模块与内核映像文件相互独立，通常以 .ko（Kernel Object）作为文件扩展名。
+它们可以在系统运行期间动态加载和卸载。
+例如：
+sudo insmod helloworld.ko
+sudo rmmod helloworld
+优点：
+
+不需要重新编译和启动整个内核即可扩展功能。
+可以按需加载功能，减少不必要的内核常驻代码。
+便于开发和调试驱动程序。
+
+缺点：
+
+模块必须与目标内核的版本、配置及符号接口兼容。
+模块加载、卸载以及模块间依赖需要额外管理。
+模块运行在内核态，错误可能导致整个系统崩溃。
+
+补充： 动态模块虽然能够独立加载，但并不意味着它完全不依赖内核。模块仍然需要使用目标内核提供的头文件、配置、符号和构建环境。
+1.3 内核模块相关配置
+Linux 内核提供以下配置选项：">
+<meta name="author" content="">
+<link rel="canonical" href="http://localhost:1313/posts/lkdd2/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.f9490c4bd2e7d3fd9e21909b0bc528878329710db51c69d38b7057b37e889c1d.css" integrity="sha256-&#43;UkMS9Ln0/2eIZCbC8Uoh4MpcQ21HGnTi3BXs36InB0=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/lkdd2/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css"
+>
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/contrib/auto-render.min.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    if (typeof renderMathInElement !== "function") {
+      console.error("KaTeX auto-render 加载失败");
+      return;
+    }
+
+    document.querySelectorAll(".post-content, .book-content").forEach(function (element) {
+      renderMathInElement(element, {
+        delimiters: [
+          { left: "$$", right: "$$", display: true },
+          { left: "\\[", right: "\\]", display: true },
+          { left: "\\(", right: "\\)", display: false }
+        ],
+        throwOnError: false
+      });
+    });
+  });
+</script>
+
+<meta property="og:url" content="http://localhost:1313/posts/lkdd2/">
+  <meta property="og:site_name" content="Minghan的博客">
+  <meta property="og:title" content="Linux设备驱动开发-Ch2-Linux内核模块">
+  <meta property="og:description" content="一、内核模块简介 1.1 什么是内核模块？ Linux 内核采用模块化设计，允许开发者通过添加独立的软件组件来扩展内核功能，而不需要每次修改内核都重新编译整个内核。
+内核模块（Kernel Module） 是一种能够在运行时动态加载到 Linux 内核中，并在不再需要时动态卸载的软件组件。
+当内核模块用于控制和管理特定硬件设备时，它通常被称为设备驱动程序（Device Driver）。
+例如：
+网络设备驱动程序：负责管理网卡，处理网络数据包。 块设备驱动程序：负责管理磁盘、SSD 等存储设备。 字符设备驱动程序：负责管理串口、终端等字符设备。 文件系统模块：为内核提供额外的文件系统支持。 需要注意：并不是所有内核模块都是设备驱动程序。Linux 还使用模块实现文件系统、加密算法、网络协议以及其他可选内核功能。
+1.2 静态模块与动态模块 Linux 内核功能可以通过两种方式集成到内核中。
+1. 静态模块（Built-in Modules）
+静态模块也称为内置模块。在构建内核时，通过配置文件 .config 选择需要启用的功能，并将对应源代码编译为目标文件，最终链接到内核映像文件中。
+例如：
+CONFIG_EXT4_FS=y CONFIG_E1000=y 其中 y 表示将对应功能编译进内核。
+优点：
+不需要额外执行模块加载操作。 内核启动时即可使用相关功能。 不存在模块加载和卸载带来的额外管理开销。 缺点：
+修改代码后通常需要重新构建内核。 无法在运行时独立卸载某个内置功能。 内置功能通常会一直占用内核映像及相应的运行时资源。 2. 动态模块（Loadable Kernel Modules，LKM）
+动态模块与内核映像文件相互独立，通常以 .ko（Kernel Object）作为文件扩展名。
+它们可以在系统运行期间动态加载和卸载。
+例如：
+sudo insmod helloworld.ko sudo rmmod helloworld 优点：
+不需要重新编译和启动整个内核即可扩展功能。 可以按需加载功能，减少不必要的内核常驻代码。 便于开发和调试驱动程序。 缺点：
+模块必须与目标内核的版本、配置及符号接口兼容。 模块加载、卸载以及模块间依赖需要额外管理。 模块运行在内核态，错误可能导致整个系统崩溃。 补充： 动态模块虽然能够独立加载，但并不意味着它完全不依赖内核。模块仍然需要使用目标内核提供的头文件、配置、符号和构建环境。
+1.3 内核模块相关配置 Linux 内核提供以下配置选项：">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-11-14T10:56:37+08:00">
+    <meta property="article:modified_time" content="2026-11-14T10:56:37+08:00">
+    <meta property="article:tag" content="内核模块">
+    <meta property="article:tag" content="驱动开发">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Linux设备驱动开发-Ch2-Linux内核模块">
+  <meta name="twitter:description" content="一、内核模块简介 1.1 什么是内核模块？ Linux 内核采用模块化设计，允许开发者通过添加独立的软件组件来扩展内核功能，而不需要每次修改内核都重新编译整个内核。
+内核模块（Kernel Module） 是一种能够在运行时动态加载到 Linux 内核中，并在不再需要时动态卸载的软件组件。
+当内核模块用于控制和管理特定硬件设备时，它通常被称为设备驱动程序（Device Driver）。
+例如：
+网络设备驱动程序：负责管理网卡，处理网络数据包。 块设备驱动程序：负责管理磁盘、SSD 等存储设备。 字符设备驱动程序：负责管理串口、终端等字符设备。 文件系统模块：为内核提供额外的文件系统支持。 需要注意：并不是所有内核模块都是设备驱动程序。Linux 还使用模块实现文件系统、加密算法、网络协议以及其他可选内核功能。
+1.2 静态模块与动态模块 Linux 内核功能可以通过两种方式集成到内核中。
+1. 静态模块（Built-in Modules）
+静态模块也称为内置模块。在构建内核时，通过配置文件 .config 选择需要启用的功能，并将对应源代码编译为目标文件，最终链接到内核映像文件中。
+例如：
+CONFIG_EXT4_FS=y CONFIG_E1000=y 其中 y 表示将对应功能编译进内核。
+优点：
+不需要额外执行模块加载操作。 内核启动时即可使用相关功能。 不存在模块加载和卸载带来的额外管理开销。 缺点：
+修改代码后通常需要重新构建内核。 无法在运行时独立卸载某个内置功能。 内置功能通常会一直占用内核映像及相应的运行时资源。 2. 动态模块（Loadable Kernel Modules，LKM）
+动态模块与内核映像文件相互独立，通常以 .ko（Kernel Object）作为文件扩展名。
+它们可以在系统运行期间动态加载和卸载。
+例如：
+sudo insmod helloworld.ko sudo rmmod helloworld 优点：
+不需要重新编译和启动整个内核即可扩展功能。 可以按需加载功能，减少不必要的内核常驻代码。 便于开发和调试驱动程序。 缺点：
+模块必须与目标内核的版本、配置及符号接口兼容。 模块加载、卸载以及模块间依赖需要额外管理。 模块运行在内核态，错误可能导致整个系统崩溃。 补充： 动态模块虽然能够独立加载，但并不意味着它完全不依赖内核。模块仍然需要使用目标内核提供的头文件、配置、符号和构建环境。
+1.3 内核模块相关配置 Linux 内核提供以下配置选项：">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "http://localhost:1313/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Linux设备驱动开发-Ch2-Linux内核模块",
+      "item": "http://localhost:1313/posts/lkdd2/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Linux设备驱动开发-Ch2-Linux内核模块",
+  "name": "Linux设备驱动开发-Ch2-Linux内核模块",
+  "description": "一、内核模块简介 1.1 什么是内核模块？ Linux 内核采用模块化设计，允许开发者通过添加独立的软件组件来扩展内核功能，而不需要每次修改内核都重新编译整个内核。\n内核模块（Kernel Module） 是一种能够在运行时动态加载到 Linux 内核中，并在不再需要时动态卸载的软件组件。\n当内核模块用于控制和管理特定硬件设备时，它通常被称为设备驱动程序（Device Driver）。\n例如：\n网络设备驱动程序：负责管理网卡，处理网络数据包。 块设备驱动程序：负责管理磁盘、SSD 等存储设备。 字符设备驱动程序：负责管理串口、终端等字符设备。 文件系统模块：为内核提供额外的文件系统支持。 需要注意：并不是所有内核模块都是设备驱动程序。Linux 还使用模块实现文件系统、加密算法、网络协议以及其他可选内核功能。\n1.2 静态模块与动态模块 Linux 内核功能可以通过两种方式集成到内核中。\n1. 静态模块（Built-in Modules）\n静态模块也称为内置模块。在构建内核时，通过配置文件 .config 选择需要启用的功能，并将对应源代码编译为目标文件，最终链接到内核映像文件中。\n例如：\nCONFIG_EXT4_FS=y CONFIG_E1000=y 其中 y 表示将对应功能编译进内核。\n优点：\n不需要额外执行模块加载操作。 内核启动时即可使用相关功能。 不存在模块加载和卸载带来的额外管理开销。 缺点：\n修改代码后通常需要重新构建内核。 无法在运行时独立卸载某个内置功能。 内置功能通常会一直占用内核映像及相应的运行时资源。 2. 动态模块（Loadable Kernel Modules，LKM）\n动态模块与内核映像文件相互独立，通常以 .ko（Kernel Object）作为文件扩展名。\n它们可以在系统运行期间动态加载和卸载。\n例如：\nsudo insmod helloworld.ko sudo rmmod helloworld 优点：\n不需要重新编译和启动整个内核即可扩展功能。 可以按需加载功能，减少不必要的内核常驻代码。 便于开发和调试驱动程序。 缺点：\n模块必须与目标内核的版本、配置及符号接口兼容。 模块加载、卸载以及模块间依赖需要额外管理。 模块运行在内核态，错误可能导致整个系统崩溃。 补充： 动态模块虽然能够独立加载，但并不意味着它完全不依赖内核。模块仍然需要使用目标内核提供的头文件、配置、符号和构建环境。\n1.3 内核模块相关配置 Linux 内核提供以下配置选项：\n",
+  "keywords": [
+    "内核模块", "驱动开发"
+  ],
+  "articleBody": "一、内核模块简介 1.1 什么是内核模块？ Linux 内核采用模块化设计，允许开发者通过添加独立的软件组件来扩展内核功能，而不需要每次修改内核都重新编译整个内核。\n内核模块（Kernel Module） 是一种能够在运行时动态加载到 Linux 内核中，并在不再需要时动态卸载的软件组件。\n当内核模块用于控制和管理特定硬件设备时，它通常被称为设备驱动程序（Device Driver）。\n例如：\n网络设备驱动程序：负责管理网卡，处理网络数据包。 块设备驱动程序：负责管理磁盘、SSD 等存储设备。 字符设备驱动程序：负责管理串口、终端等字符设备。 文件系统模块：为内核提供额外的文件系统支持。 需要注意：并不是所有内核模块都是设备驱动程序。Linux 还使用模块实现文件系统、加密算法、网络协议以及其他可选内核功能。\n1.2 静态模块与动态模块 Linux 内核功能可以通过两种方式集成到内核中。\n1. 静态模块（Built-in Modules）\n静态模块也称为内置模块。在构建内核时，通过配置文件 .config 选择需要启用的功能，并将对应源代码编译为目标文件，最终链接到内核映像文件中。\n例如：\nCONFIG_EXT4_FS=y CONFIG_E1000=y 其中 y 表示将对应功能编译进内核。\n优点：\n不需要额外执行模块加载操作。 内核启动时即可使用相关功能。 不存在模块加载和卸载带来的额外管理开销。 缺点：\n修改代码后通常需要重新构建内核。 无法在运行时独立卸载某个内置功能。 内置功能通常会一直占用内核映像及相应的运行时资源。 2. 动态模块（Loadable Kernel Modules，LKM）\n动态模块与内核映像文件相互独立，通常以 .ko（Kernel Object）作为文件扩展名。\n它们可以在系统运行期间动态加载和卸载。\n例如：\nsudo insmod helloworld.ko sudo rmmod helloworld 优点：\n不需要重新编译和启动整个内核即可扩展功能。 可以按需加载功能，减少不必要的内核常驻代码。 便于开发和调试驱动程序。 缺点：\n模块必须与目标内核的版本、配置及符号接口兼容。 模块加载、卸载以及模块间依赖需要额外管理。 模块运行在内核态，错误可能导致整个系统崩溃。 补充： 动态模块虽然能够独立加载，但并不意味着它完全不依赖内核。模块仍然需要使用目标内核提供的头文件、配置、符号和构建环境。\n1.3 内核模块相关配置 Linux 内核提供以下配置选项：\n配置项 作用 CONFIG_MODULES 是否支持内核模块 CONFIG_MODULE_UNLOAD 是否支持卸载内核模块 CONFIG_MODULE_FORCE_UNLOAD 是否允许强制卸载正在使用的模块 例如：\nCONFIG_MODULES=y CONFIG_MODULE_UNLOAD=y CONFIG_MODULE_FORCE_UNLOAD=y 需要注意，强制卸载模块具有较高风险。它可能破坏正在使用模块的内核数据结构，导致系统崩溃，因此不应该在正常开发和生产环境中随意使用。\n二、编写第一个内核模块 2.1 Hello World 下面编写一个最简单的 Linux 内核模块：\n#include #include #include static int __init hello_world_init(void) { pr_info(\"Hello world!\\n\"); return 0; } static void __exit hello_world_exit(void) { pr_info(\"End of the world\\n\"); } module_init(hello_world_init); module_exit(hello_world_exit); MODULE_AUTHOR(\"John Madieu \"); MODULE_LICENSE(\"GPL\"); MODULE_DESCRIPTION(\"A simple Hello World kernel module\"); 头文件的作用 linux/init.h：提供 __init、__exit 等初始化和退出相关的标记。 linux/module.h：提供模块基础设施，包括 module_init、module_exit 和 MODULE_* 系列宏。 linux/kernel.h：提供内核常用接口，包括 pr_info 等日志打印宏。 实际开发中，还需要根据使用的接口包含相应头文件，例如：\nlinux/fs.h：文件系统及文件操作相关接口。 linux/interrupt.h：中断处理相关接口。 linux/pci.h：PCI 设备相关接口。 linux/slab.h：内核动态内存分配接口。 原则是使用什么接口，就包含对应的头文件，不要过度依赖其他头文件的间接包含。\n2.2 模块初始化函数 static int __init hello_world_init(void) { pr_info(\"Hello world!\\n\"); return 0; } 模块初始化函数在模块加载过程中执行，主要负责完成模块运行前的初始化工作。\n例如：\n申请内存。 注册字符设备。 注册中断处理程序。 初始化工作队列。 注册设备驱动程序。 其中有几个值得注意的地方。\nstatic：表示该函数具有内部链接属性，只能在当前源文件中使用。\n__init：表示该函数只在初始化阶段使用。\nLinux 内核通过链接脚本将带有 __init 标记的代码放入 .init.text 段。\n当初始化过程成功完成后，这部分内存可以被回收。\n对于动态模块来说，模块加载成功后，模块初始化代码占用的内存也可以被释放。\n返回值\n返回 0：初始化成功，模块可以正常加载。 返回非 0：初始化失败，内核拒绝加载模块，并将错误码返回给调用者。 这里有一个重要细节：\n如果初始化函数在执行过程中申请了资源，但随后某一步初始化失败，那么必须在返回错误之前释放已经申请的资源。\n例如：\nstatic int __init hello_world_init(void) { void *ptr; ptr = kmalloc(1024, GFP_KERNEL); if (!ptr) return -ENOMEM; if (some_init_function()) { kfree(ptr); return -EINVAL; } return 0; } 这里的 some_init_function() 仅作为示意。\n因为模块初始化失败后，模块不会进入正常运行状态，内核不会再调用该模块的退出函数替你清理已经申请的资源。\n2.3 模块退出函数 static void __exit hello_world_exit(void) { pr_info(\"End of the world\\n\"); } 模块退出函数在模块被正常卸载时执行，主要负责释放模块初始化和运行期间申请的资源。\n例如：\n释放动态分配的内存。 注销设备号。 释放中断资源。 注销设备驱动程序。 取消定时器和工作队列。 释放其他模块占用的资源。 __exit：表示该函数只在模块卸载阶段使用。\n如果内核不支持模块卸载（CONFIG_MODULE_UNLOAD=n），该函数通常会被丢弃，不需要保留在最终内核映像中。\n退出函数返回类型为 void，正常卸载过程不能通过返回值报告失败。\n需要注意，卸载模块前必须保证模块不再被其他内核组件使用，否则内核通常会拒绝卸载。\n2.4 注册模块入口和出口 module_init(hello_world_init); module_exit(hello_world_exit); 这两个宏用于向内核注册模块的初始化函数和退出函数。\n对于动态模块：\nmodule_init() 指定模块加载时执行的入口函数。 module_exit() 指定模块卸载时执行的清理函数。 对于内置代码，module_init() 会根据初始化级别转换为相应的内核初始化机制，而不是动态模块加载入口。\n2.5 内核日志打印 在示例中，我们使用了：\npr_info(\"Hello world!\\n\"); pr_info 是 Linux 内核提供的信息级别日志打印宏，其本质上是对 printk 的封装。\n可以简单理解为：\n#define pr_info(fmt, ...) \\ printk(KERN_INFO pr_fmt(fmt), ##__VA_ARGS__) 其中：\nprintk：内核提供的日志打印函数。 KERN_INFO：表示日志级别为 INFO。 pr_fmt：用于为日志添加统一的前缀。 Linux 内核定义了多个日志级别：\n宏 日志级别 含义 KERN_EMERG 0 系统不可用 KERN_ALERT 1 必须立即采取行动 KERN_CRIT 2 严重错误 KERN_ERR 3 错误 KERN_WARNING 4 警告 KERN_NOTICE 5 普通但重要的信息 KERN_INFO 6 一般信息 KERN_DEBUG 7 调试信息 常用打印宏：\npr_emerg(\"Emergency message\\n\"); pr_alert(\"Alert message\\n\"); pr_crit(\"Critical message\\n\"); pr_err(\"Error message\\n\"); pr_warn(\"Warning message\\n\"); pr_notice(\"Notice message\\n\"); pr_info(\"Information message\\n\"); pr_debug(\"Debug message\\n\"); 内核日志会写入内核环形缓冲区（Kernel Ring Buffer），可以使用 dmesg 查看。\n例如：\nsudo dmesg 也可以实时查看新产生的内核日志：\nsudo dmesg -w 需要注意，日志级别与日志是否显示在控制台是两个不同的概念。日志首先进入内核日志缓冲区，是否显示在控制台还受到 console_loglevel 等配置的影响。\n三、构建和加载内核模块 3.1 准备内核构建环境 编译内核模块需要使用与目标内核相匹配的构建环境。\n通常有两种方式：\n方式一：使用发行版提供的内核头文件\n例如 Ubuntu：\nsudo apt update sudo apt install build-essential linux-headers-$(uname -r) 其中：\n/lib/modules/$(uname -r)/build 通常是指向当前运行内核构建目录的符号链接。\n可以通过以下命令查看：\nls -l /lib/modules/$(uname -r)/build 方式二：使用自行编译的 Linux 内核源码\n如果正在研究 Linux 内核源码，或者使用自行编译的内核，就可以使用对应的内核源码和构建目录。\n需要注意：内核模块不仅依赖头文件，还依赖目标内核的配置、生成文件和符号版本信息。因此，不能随意使用另一个版本的内核源码来编译模块。\n3.2 编写 Makefile Linux 内核拥有一套专门的构建系统，称为 Kbuild。\n编写外部内核模块时，需要通过 Kbuild 完成编译和链接，而不是直接使用普通 GCC 命令。\n创建 Makefile：\nobj-m := helloworld.o KERNELDIR ?= /lib/modules/$(shell uname -r)/build PWD := $(shell pwd) all: $(MAKE) -C $(KERNELDIR) M=$(PWD) modules clean: $(MAKE) -C $(KERNELDIR) M=$(PWD) clean 解释一下：\n1. obj-m\n这是 Kbuild 提供的构建变量：\nobj-m := helloworld.o 表示将 helloworld.o 构建为一个可加载的内核模块，最终生成：\nhelloworld.ko 其中：\nobj-y：将目标文件编译进内核。 obj-m：将目标文件编译为独立的可加载模块。 2. KERNELDIR\nKERNELDIR ?= /lib/modules/$(shell uname -r)/build 指定目标内核的构建目录。\n?= 表示只有在变量尚未定义时才赋予默认值，因此可以通过命令行覆盖：\nmake KERNELDIR=/path/to/linux 3. make -C\n$(MAKE) -C $(KERNELDIR) M=$(PWD) modules 这里是整个 Makefile 的核心。\n-C $(KERNELDIR)：先切换到内核构建目录，使用内核自身的 Makefile。 M=$(PWD)：告诉 Kbuild，当前目录是外部模块的源代码目录。 modules：执行模块构建目标。 3.3 为什么必须使用 Kbuild？ 这是理解 Linux 内核模块构建机制的关键。\n普通 C 程序通常可以直接通过 GCC 编译：\ngcc main.c -o main 但是，内核模块不能简单地按照普通 C 程序的方式构建。\n主要有以下原因：\n1. 依赖内核内部头文件\n内核模块需要使用：\n#include #include 这些头文件位于 Linux 内核源码树中，需要由 Kbuild 管理包含路径。\n2. 依赖内核编译配置\n内核在构建时会使用大量特定编译选项，例如：\n-D__KERNEL__ -DMODULE 目标架构相关的编译选项。 栈保护和代码生成选项。 内核特定的编译器参数。 这些配置需要与目标内核保持一致。\n3. 需要额外的模块构建流程\n内核模块并不是简单地将 .o 文件链接成 .ko 文件。\nKbuild 还需要完成：\n生成模块元信息。 处理模块许可证、作者等信息。 处理模块依赖。 处理符号版本信息。 生成最终的 .ko 文件。 因此，只有内核自身的 Kbuild 才能正确处理这些细节。\n3.4 编译内核模块 执行：\nmake 成功后，目录中会生成：\nhelloworld.ko 此外，还可能看到：\nhelloworld.o helloworld.mod helloworld.mod.c helloworld.mod.o Module.symvers modules.order 其中：\n.ko：最终的内核模块文件。 .o：编译产生的目标文件。 .mod.c：由构建系统生成的模块元信息相关代码。 Module.symvers：记录模块构建过程中涉及的符号版本信息。 这些中间文件由 Kbuild 管理，通常不需要手动修改。\n3.5 加载和卸载模块 Linux 提供了多种模块管理工具。\n1. insmod：加载模块\nsudo insmod helloworld.ko insmod 直接加载指定的模块文件。\n它不会自动解析并加载模块所依赖的其他模块。\n2. rmmod：卸载模块\nsudo rmmod helloworld 注意，通常传入模块名称，而不是 .ko 文件路径。\n3. 查看内核日志\nsudo dmesg 输出：\n[15616.293043] Hello world! [15617.748606] End of the world 这说明模块初始化和退出函数都成功执行了。\n4. 查看当前已加载模块\nlsmod 或者：\ncat /proc/modules 5. modprobe：加载模块及其依赖\nsudo modprobe helloworld modprobe 与 insmod 的主要区别：\ninsmod：直接加载指定的模块文件，不负责自动解决模块依赖。 modprobe：根据模块依赖关系自动加载所需模块。 modprobe 主要依赖 /lib/modules/$(uname -r)/ 下的模块索引和依赖信息，这些信息可以通过 depmod 生成。\n因此，modprobe 通常用于系统正常运行时的模块管理，而 insmod 更适合模块开发和测试。\n四、内核模块参数 4.1 为什么需要模块参数？ 很多内核模块需要根据实际使用场景调整运行行为。\n例如：\n网络驱动程序可能需要配置缓冲区大小。 设备驱动程序可能需要指定设备参数。 调试模块可能需要开启或关闭调试日志。 如果每次修改参数都需要重新编译模块，就会降低开发效率。\n因此，Linux 提供了模块参数机制，允许在加载模块时传入参数。\n4.2 module_param 宏 使用 module_param() 宏定义模块参数：\nmodule_param(name, type, perm); 三个参数：\nname：模块参数对应的变量名称。 type：参数类型。 perm：参数在 /sys/module/模块名/parameters/ 下对应 sysfs 文件的访问权限。 常见参数类型：\n类型 含义 bool 布尔值 charp 字符指针 byte 字节 short 短整型 ushort 无符号短整型 int 整型 uint 无符号整型 long 长整型 ulong 无符号长整型 其中，charp 表示字符指针，适合接收字符串参数。\n4.3 参数权限 perm 用于指定模块参数对应 sysfs 文件的权限。\n常见权限宏：\nS_IRUSR：文件所有者可读。 S_IWUSR：文件所有者可写。 S_IXUSR：文件所有者可执行。 S_IRGRP：所属组可读。 S_IWGRP：所属组可写。 S_IROTH：其他用户可读。 S_IWOTH：其他用户可写。 例如：\nmodule_param(myint, int, 0444); 表示参数文件对所有用户只读。\n也可以使用：\nmodule_param(myint, int, 0644); 表示所有者可读写，其他用户只读。\n需要注意，旧代码中经常使用 S_IRUGO 表示所有用户可读，但现代内核开发更推荐直接使用八进制权限值，例如 0444。另外，参数是否能够在加载后修改，还取决于对应参数类型的设置操作及其权限。\n4.4 数组参数 对于数组类型的参数，可以使用：\nmodule_param_array(name, type, nump, perm); 其中：\nname：数组变量名称。 type：数组元素类型。 nump：用于保存实际传入的数组元素数量，可以设置为 NULL。 perm：sysfs 文件访问权限。 例如：\nstatic int myarr[3] = {0, 1, 2}; module_param_array(myarr, int, NULL, 0644); 4.5 MODULE_PARM_DESC 参数描述 为了让其他开发者了解模块参数的用途，可以使用：\nMODULE_PARM_DESC(name, description); 它为指定参数提供描述信息，可以通过 modinfo 查看。\n4.6 完整示例 #include #include #include #include static char *mystr = \"hello\"; static int myint = 1; static int myarr[3] = {0, 1, 2}; static int myarr_num; module_param(myint, int, 0444); module_param(mystr, charp, 0444); module_param_array(myarr, int, \u0026myarr_num, 0644); MODULE_PARM_DESC(myint, \"This is my int variable\"); MODULE_PARM_DESC(mystr, \"This is my char pointer variable\"); MODULE_PARM_DESC(myarr, \"This is my array of int\"); MODULE_INFO(my_field_name, \"What easy value\"); static int __init helloworld_init(void) { pr_info(\"Hello world with parameters!\\n\"); pr_info(\"mystr: %s\\n\", mystr); pr_info(\"myint: %d\\n\", myint); pr_info(\"myarr:\"); for (int i = 0; i \u003c myarr_num; i++) pr_cont(\" %d\", myarr[i]); pr_cont(\"\\n\"); return 0; } static void __exit helloworld_exit(void) { pr_info(\"End of the world\\n\"); } module_init(helloworld_init); module_exit(helloworld_exit); MODULE_AUTHOR(\"John Madieu \"); MODULE_LICENSE(\"GPL\"); MODULE_DESCRIPTION(\"A module with parameters\"); 这里还使用了 MODULE_INFO() 宏，它允许添加自定义模块元信息。\n与 MODULE_PARM_DESC() 不同，MODULE_INFO() 添加的是模块级别的元信息，而不是参数描述。\n4.7 查看和传递模块参数 编译模块后，可以通过 modinfo 查看模块信息：\nmodinfo ./helloworld-params.ko 部分输出：\nfilename: ./helloworld-params.ko license: GPL author: John Madieu my_field_name: What easy value name: helloworld_params vermagic: 5.15.0-203-generic SMP mod_unload modversions parm: myint:This is my int variable (int) parm: mystr:This is my char pointer variable (charp) parm: myarr:This is my array of int (array of int) 其中：\nlicense：模块许可证。 author：模块作者。 vermagic：模块构建时记录的内核版本及相关配置标识。 parm：模块参数及其描述。 加载模块时，可以通过命令行传递参数：\nsudo insmod helloworld-params.ko \\ mystr=\"packtpub\" \\ myint=15 \\ myarr=1,2,3 卸载模块：\nsudo rmmod helloworld_params 查看日志：\nsudo dmesg 预期输出：\nHello world with parameters! mystr: packtpub myint: 15 myarr: 1 2 3 End of the world 注意：参数名称必须与代码中定义的名称一致。\n例如，下面这种写法是错误的：\nsudo insmod helloworld-params.ko \\ mystring=\"packtpub\" \\ myint=15 \\ myArray=1,2,3 因为代码中定义的是 mystr 和 myarr，而不是 mystring 和 myArray。\n4.8 加载后的参数管理 模块加载成功后，还可以在 sysfs 中查看参数：\nls /sys/module/helloworld_params/parameters/ 读取参数：\ncat /sys/module/helloworld_params/parameters/myint 对于具有写权限的参数，也可以尝试在运行时修改：\necho 20 | sudo tee /sys/module/helloworld_params/parameters/myint 但这只会修改参数变量的当前值，并不意味着所有模块都支持安全的运行时参数修改。具体还取决于模块参数的类型、权限以及模块本身如何使用该变量。\n五、错误处理与消息打印 Linux 内核开发不是重复造轮子，而是在前人经验和已有内核基础设施之上进行开发。\nLinux 内核经过几十年的演进，已经形成了一套成熟的编程规范和基础设施。开发者应该优先理解并复用内核已经提供的机制，而不是自行设计一套重复的错误处理、日志打印和资源管理方式。\n本节重点讨论两个非常重要的方面：\n错误处理：如何正确报告错误，以及如何保证资源能够被正确释放。 消息打印：如何按照内核规范输出日志，以及如何选择合适的日志接口。 这两点与普通用户空间程序的开发存在明显区别。\n5.1 错误处理 5.1.1 为什么内核需要严格的错误处理？ 在用户空间编写程序时，发生错误通常可以通过返回错误码、释放资源或者退出进程来处理。\n但在内核中，情况要复杂得多。\n内核代码直接管理硬件设备、内存、进程和各种内核数据结构。一个错误如果没有被正确处理，可能导致：\n内存泄漏。 设备资源没有释放。 硬件处于不一致状态。 其他内核组件无法正常工作。 内核崩溃甚至整个系统无法运行。 因此，内核开发必须重视两个方面：\n正确报告错误：返回与实际错误相对应的错误码。 正确回滚操作：发生错误时，撤销此前已经完成的操作，释放所有已申请的资源。 5.1.2 内核预定义错误码 Linux 内核已经定义了大量标准错误码，可以覆盖绝大多数常见错误场景。\n这些错误码主要定义在：\ninclude/uapi/asm-generic/errno-base.h include/uapi/asm-generic/errno.h 其中，errno-base.h 定义了一些基础错误码：\n错误码 数值 含义 EPERM 1 Operation not permitted ENOENT 2 No such file or directory ESRCH 3 No such process EINTR 4 Interrupted system call EIO 5 I/O error ENXIO 6 No such device or address E2BIG 7 Argument list too long EBADF 9 Bad file number EAGAIN 11 Try again ENOMEM 12 Out of memory EACCES 13 Permission denied EFAULT 14 Bad address EBUSY 16 Device or resource busy EEXIST 17 File exists ENODEV 19 No such device 完整列表可以在上述头文件中查看。\n内核代码通常使用负数形式的错误码：\nreturn -ENOMEM; 而不是：\nreturn ENOMEM; 这是因为 Linux 内核通常约定：\n返回 0 表示成功。 返回负数表示失败，负数的绝对值对应具体错误码。 某些函数也会返回正数表示成功时的特殊结果或状态，具体取决于接口约定。 例如，设备初始化时发生 I/O 错误：\ndev = init_device(); if (!dev) return -EIO; 这里的 -EIO 表示设备初始化过程中发生了输入输出错误。\n核心原则：不要随意选择错误码。\n应该根据实际失败原因返回最合适的错误码，否则调用者可能对错误作出错误判断，进而执行不恰当的处理逻辑。\n5.1.3 错误码如何传递到用户空间？ 内核错误有时会跨越内核空间，传播到用户空间。\n例如，用户程序调用：\nopen() read() write() ioctl() mmap() 如果对应的系统调用发生错误，内核会将错误码转换为用户空间能够理解的形式。\n对于通过标准系统调用接口返回的错误，用户空间通常可以通过全局变量 errno 获取错误信息。\n例如：\n#include #include #include if (write(fd, buf, 1) \u003c 0) { printf(\"Something went wrong: %s\\n\", strerror(errno)); } 这里：\n内核返回负错误码，例如 -EIO。 系统调用边界将其转换为用户空间的失败返回值。 用户空间的 errno 被设置为对应的正数错误码。 strerror(errno) 将错误码转换为可读的错误描述。 需要注意，errno 是用户空间的错误处理机制，不应该直接在内核代码中使用。\n5.1.4 使用 goto 进行错误回滚 内核开发中，一个非常常见的场景是：函数需要依次申请多个资源，如果中间某一步失败，就必须释放之前已经成功申请的资源。\n例如：\nstatic int __init my_init(void) { int ret = 0; void *ptr; ptr = kmalloc(sizeof(device_t), GFP_KERNEL); if (!ptr) { ret = -ENOMEM; goto err_alloc; } if (init_device(ptr)) { ret = -EIO; goto err_init; } if (register_device(ptr)) { ret = -EBUSY; goto err_register; } return 0; err_register: cleanup_device(ptr); err_init: kfree(ptr); err_alloc: return ret; } 上面的代码展示了 Linux 内核中常见的错误处理方式：使用 goto 统一处理资源清理。\n这里需要特别注意清理标签的排列顺序：\nerr_register：清理设备初始化完成后的资源。 err_init：释放动态申请的内存。 err_alloc：返回错误码。 如果 register_device() 失败，就会从 err_register 开始依次执行清理操作。\n如果 init_device() 失败，则直接跳到 err_init，只释放已经成功申请的内存。\n如果内存分配失败，则直接返回，不需要清理任何资源。\n为什么内核开发中推荐使用 goto？\n假设一个函数需要依次完成四个初始化操作：\nif (ops1() == ERR) return -EIO; if (ops2() == ERR) return -EIO; if (ops3() == ERR) return -EIO; if (ops4() == ERR) return -EIO; 如果每一步都申请了资源，那么这种写法就会遇到问题：发生错误时，必须知道前面哪些操作已经成功，并逐一清理。\n一种容易使代码变得复杂的方式是多层嵌套：\nif (ops1() == SUCCESS) { if (ops2() == SUCCESS) { if (ops3() == SUCCESS) { if (ops4() == SUCCESS) { /* All operations succeeded */ } } } } 随着初始化步骤增加，代码缩进会越来越深，错误处理也越来越难以维护。\n而使用 goto，可以让正常执行路径保持线性，同时将错误处理集中在函数末尾：\nif (ops1() == ERR) goto error1; if (ops2() == ERR) goto error2; if (ops3() == ERR) goto error3; if (ops4() == ERR) goto error4; /* All operations succeeded */ return 0; error4: cleanup3(); error3: cleanup2(); error2: cleanup1(); error1: return -EIO; 这就是为什么 goto 在 Linux 内核中并不是一种应该避免的语法，而是一种被广泛采用的资源清理手段。\n不过，需要遵循以下原则：\n主要用于函数内部的错误处理和资源回滚。 通常只向后跳转到统一的清理标签。 清理顺序应当与资源申请顺序相反。 不应该使用 goto 代替正常循环或者复杂的流程控制。 本质上，goto 的价值在于让资源释放路径清晰、集中且不容易遗漏。\n5.1.5 错误指针：ERR_PTR、IS_ERR 和 PTR_ERR 在内核开发中，有时函数需要返回一个指针，但又需要同时表达操作失败的具体原因。\n如果函数仅仅返回 NULL，调用者只能知道操作失败，却无法知道失败的具体原因。\n例如：\nstruct device *create_device(void) { /* Allocation failed */ return NULL; } 调用者无法区分究竟是内存不足、设备不存在，还是其他原因。\n为此，Linux 内核提供了一套特殊的错误指针机制：\nERR_PTR(error) IS_ERR(ptr) PTR_ERR(ptr) 它们的定义可以在 include/linux/err.h 中找到。\n1. ERR_PTR()\n将负错误码编码为一个指针：\nreturn ERR_PTR(-ENOMEM); 可以理解为：使用指针返回值携带错误信息。\n2. IS_ERR()\n检查指针是否是错误指针：\nif (IS_ERR(ptr)) /* Handle error */ 3. PTR_ERR()\n从错误指针中提取原始错误码：\nreturn PTR_ERR(ptr); 例如：\nstatic struct iio_dev *indio_dev_setup(void) { struct iio_dev *indio_dev; indio_dev = devm_iio_device_alloc( \u0026data-\u003eclient-\u003edev, sizeof(data) ); if (!indio_dev) return ERR_PTR(-ENOMEM); return indio_dev; } 调用者：\nstatic int foo_probe(...) { struct iio_dev *my_indio_dev; my_indio_dev = indio_dev_setup(); if (IS_ERR(my_indio_dev)) return PTR_ERR(my_indio_dev); /* Continue initialization */ return 0; } 这样，函数就能够同时返回正常指针和具体错误信息。\n需要注意：\nERR_PTR() 只能用于符合内核错误指针约定的场景。 IS_ERR() 用于检查错误指针，不能用来检查普通的 NULL。 如果一个接口可能返回 NULL 或错误指针，就需要同时处理这两种情况。 不要直接解引用错误指针。 5.1.6 函数返回值的设计规范 Linux 内核开发中，还有一个值得注意的编码习惯：\n如果函数名称表示一个动作或命令，通常返回整型错误码；如果函数名称表示一个判断或谓词，通常返回布尔值。\n例如：\nint add_work(...); add_work() 表示执行一个动作，通常通过返回值报告执行结果。\n而：\nbool pci_dev_present(...); 表示判断某个条件是否成立，通常返回 true 或 false。\n需要注意，这是一种常见的设计习惯，而不是所有内核 API 都必须遵循的绝对规则。具体返回类型和返回值语义应以函数接口定义为准。\n5.2 消息打印 5.2.1 printk 与日志级别 除了向调用者返回错误码，消息打印也是内核开发中最重要的调试手段之一。\n在用户空间中，我们通常使用：\nprintf(\"Hello world\\n\"); 而在内核空间中，对应的底层日志接口是：\nprintk(KERN_INFO \"Hello world\\n\"); printk() 允许开发者根据消息的重要程度指定日志级别。\n日志级别定义在：\ninclude/linux/kern_levels.h 之前已经介绍过 KERN_EMERG 到 KERN_DEBUG 这八个级别。\n通过 dmesg 可以查看内核环形缓冲区中的日志。\n5.2.2 使用辅助打印接口 虽然 printk() 仍然是内核底层的日志打印 API，但在现代 Linux 内核开发中，通常推荐使用具有明确语义的辅助打印接口。\n这些接口可以根据不同的使用场景自动选择合适的日志级别，并且能够携带设备上下文信息。\n主要包括三类：\n1. pr_()：常规模块使用\n适用于普通内核模块和不需要特定设备上下文的代码。\n例如：\npr_emerg(\"Emergency message\\n\"); pr_alert(\"Alert message\\n\"); pr_crit(\"Critical message\\n\"); pr_err(\"Error message\\n\"); pr_warn(\"Warning message\\n\"); pr_notice(\"Notice message\\n\"); pr_info(\"Information message\\n\"); pr_debug(\"Debug message\\n\"); 例如：\nstatic int __init hello_init(void) { pr_info(\"Module initialized\\n\"); return 0; } 2. dev_()：设备驱动程序使用\n对于具有 struct device 设备上下文的驱动程序，推荐使用 dev_() 系列接口。\n例如：\ndev_info(dev, \"Device initialized\\n\"); dev_err(dev, \"Failed to initialize device\\n\"); dev_warn(dev, \"Unexpected device state\\n\"); dev_dbg(dev, \"Debug information\\n\"); 这里的 dev 是对应设备的 struct device * 指针。\n与普通 pr_info() 相比，dev_info() 可以自动携带设备相关信息，使日志更容易定位到具体设备。\n例如，在系统存在多个相同型号设备时，设备上下文尤其有用。\n3. netdev_()：网络设备驱动程序使用\n对于网络设备驱动程序，推荐使用 netdev_() 系列接口。\n例如：\nnetdev_info(dev, \"Network device initialized\\n\"); netdev_err(dev, \"Failed to initialize network device\\n\"); netdev_warn(dev, \"Unexpected network state\\n\"); netdev_dbg(dev, \"Debug information\\n\"); 这里的 dev 是 struct net_device * 类型的网络设备指针。\n这类接口能够自动携带网络设备名称等上下文信息。\n5.2.3 三类日志接口如何选择？ 使用场景 推荐接口 设备上下文 普通内核模块 pr_() 无 普通设备驱动 dev_() struct device * 网络设备驱动 netdev_() struct net_device * 例如：\n/* 普通内核模块 */ pr_info(\"Module loaded\\n\"); /* 普通设备驱动 */ dev_info(\u0026pdev-\u003edev, \"Device initialized\\n\"); /* 网络设备驱动 */ netdev_info(netdev, \"Network device started\\n\"); 对于普通设备驱动，使用 dev_*() 能够让日志自动携带设备上下文；对于网络驱动，则应该优先使用 netdev_*()。\n核心思想：日志不仅要说明发生了什么，还应该尽可能说明是哪个设备发生了什么。\n这样在多设备、多驱动的复杂系统中，才能更容易定位问题。\n六、符号导出与模块依赖 6.1 为什么需要符号导出？ Linux 内核由大量子系统和模块组成，它们之间经常需要相互调用函数或者访问共享数据。\n例如：\n模块 A：提供一个函数 my_func()。 模块 B：需要调用模块 A 中的 my_func()。 但是，内核默认不会允许一个模块直接访问另一个模块中所有的内部函数和变量。\n只有显式导出的符号，才能被其他模块引用。\nLinux 提供了两个常见宏：\nEXPORT_SYMBOL(symbol); EXPORT_SYMBOL_GPL(symbol); EXPORT_SYMBOL\n将指定符号导出，使其他模块可以引用。\nEXPORT_SYMBOL_GPL\n同样用于导出符号，但只允许 GPL 兼容许可证的模块使用。\n如果非 GPL 兼容模块尝试引用仅通过 EXPORT_SYMBOL_GPL 导出的符号，内核通常会拒绝加载。\n6.2 如何导出函数？ 模块 A：\n#include #include void my_func(void) { pr_info(\"my_func is called\\n\"); } EXPORT_SYMBOL(my_func); static int __init module_a_init(void) { pr_info(\"module A loaded\\n\"); return 0; } static void __exit module_a_exit(void) { pr_info(\"module A unloaded\\n\"); } module_init(module_a_init); module_exit(module_a_exit); MODULE_LICENSE(\"GPL\"); 6.3 模块 B 如何引用？ 创建公共头文件 my_export.h：\n#ifndef MY_EXPORT_H #define MY_EXPORT_H void my_func(void); #endif 模块 B：\n#include #include #include \"my_export.h\" static int __init module_b_init(void) { pr_info(\"module B loaded\\n\"); my_func(); return 0; } static void __exit module_b_exit(void) { pr_info(\"module B unloaded\\n\"); } module_init(module_b_init); module_exit(module_b_exit); MODULE_LICENSE(\"GPL\"); 这里需要区分两个概念：\n头文件中的函数声明解决编译阶段的类型检查问题。 EXPORT_SYMBOL() 解决模块之间的符号可见性问题。 仅仅在头文件中声明函数，并不能让其他模块真正获得该函数的实现。\n6.4 模块依赖关系 当模块 B 使用模块 A 导出的符号时，就意味着模块 B 依赖模块 A。\n因此：\n必须先加载模块 A。 然后才能加载模块 B。 如果模块 B 仍在使用模块 A 提供的符号，就不能正常卸载模块 A。 内核通过模块引用计数等机制管理这种依赖关系。\n6.5 Module.symvers 的作用 Module.symvers 记录内核或模块构建过程中导出的符号及其相关信息，特别是在启用 CONFIG_MODVERSIONS 时用于符号 CRC 版本检查。\n例如：\n0x12345678 my_func module_a EXPORT_SYMBOL 包含：\n符号 CRC。 符号名称。 符号所属模块。 导出类型。 注意：Module.symvers 不是运行时内核的全局符号表，而是构建阶段使用的符号信息文件。\n真正运行时的符号查找由内核模块加载机制完成。\n6.6 如何正确构建存在依赖关系的模块？ 如果模块 A 和模块 B 都是外部模块，可以将它们放在同一个 Kbuild Makefile 中：\nobj-m := module_a.o module_b.o KERNELDIR ?= /lib/modules/$(shell uname -r)/build all: $(MAKE) -C $(KERNELDIR) M=$(PWD) modules clean: $(MAKE) -C $(KERNELDIR) M=$(PWD) clean 如果模块 A 和模块 B 分开构建，则需要向模块 B 的构建过程提供模块 A 的 Module.symvers：\nKBUILD_EXTRA_SYMBOLS += /path/to/module_a/Module.symvers 模块安装到系统后，可以执行：\nsudo depmod -a 之后通过：\nsudo modprobe module_b 由 modprobe 根据依赖关系自动加载模块 A 和模块 B。\n七、常用内核模块管理命令 命令 作用 insmod 加载指定的模块文件 rmmod 卸载指定的内核模块 modprobe 加载模块并自动处理依赖 lsmod 查看当前已加载的模块 modinfo 查看模块元信息 depmod 生成或更新模块依赖及符号映射信息 dmesg 查看内核环形缓冲区日志 常见使用示例：\n# 编译模块 make # 加载模块 sudo insmod helloworld.ko # 查看模块信息 modinfo helloworld.ko # 查看已加载模块 lsmod # 查看模块依赖 modprobe --show-depends helloworld # 卸载模块 sudo rmmod helloworld # 查看内核日志 sudo dmesg # 实时监控内核日志 sudo dmesg -w # 更新模块依赖信息 sudo depmod -a # 清理构建文件 make clean 八、总结 本章主要介绍了 Linux 内核模块的基本开发流程，以及内核开发中需要遵循的一些重要规范。\n从开发角度来看，一个内核模块通常需要经历以下过程：\n编写模块源代码，定义初始化函数和退出函数。 使用 module_init() 和 module_exit() 注册模块入口和出口。 使用 Kbuild 编译模块，生成 .ko 文件。 使用 insmod 或 modprobe 加载模块。 模块初始化函数执行，完成资源申请和功能注册。 模块正常运行，通过日志和调试工具进行分析。 使用 rmmod 卸载模块，执行退出函数并释放资源。 需要重点理解的概念：\n内核模块是 Linux 内核实现模块化扩展的重要机制。 __init 和 __exit 用于标记模块初始化和退出阶段的代码。 module_init() 和 module_exit() 用于注册模块生命周期入口。 module_param() 和 module_param_array() 用于定义模块参数。 EXPORT_SYMBOL() 和 EXPORT_SYMBOL_GPL() 用于导出模块可以使用的符号。 Module.symvers 用于构建阶段的符号信息和版本检查。 Kbuild 是构建 Linux 内核及外部模块的核心构建系统。 内核错误处理必须保证错误码准确，并且正确回滚已经申请的资源。 内核日志应该根据使用场景选择 pr_*()、dev_*() 或 netdev_*()。 最后，内核开发不是重复造轮子，而是在前人积累的经验和内核已有基础设施之上进行开发。\n学习 Linux 内核时，不仅要理解某个 API 如何使用，更应该学会阅读内核源码，寻找已有子系统和驱动程序中的成熟实现，理解它们为什么采用这样的设计。\n",
+  "wordCount" : "1984",
+  "inLanguage": "en",
+  "datePublished": "2026-11-14T10:56:37+08:00",
+  "dateModified": "2026-11-14T10:56:37+08:00",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "http://localhost:1313/posts/lkdd2/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Minghan的博客",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "http://localhost:1313/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="header-nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="Minghan的博客 (Alt + H)">Minghan的博客</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" class="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg class="sun" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu" class="menu">
+            <li>
+                <a href="http://localhost:1313/posts/" title="文章">
+                    <span>文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/archives/" title="归档">
+                    <span>归档</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/categories/" title="分类">
+                    <span>分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="标签">
+                    <span>标签</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/moments/" title="随记">
+                    <span>随记</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/photos/" title="照片墙">
+                    <span>照片墙</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/books/" title="阅读">
+                    <span>阅读</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/about/" title="关于">
+                    <span>关于</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <nav class="breadcrumbs" role="navigation" aria-label="Breadcrumb">
+            <a href="/">Home</a>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+            <a href="/posts/">Posts</a>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+        <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+</nav>
+    <h1 class="post-title entry-hint-parent">
+      Linux设备驱动开发-Ch2-Linux内核模块
+    </h1>
+    <div class="post-meta">
+
+<span title='2026-11-14 10:56:37 +0800 CST'>November 14, 2026</span>&nbsp;·&nbsp;<span>10 min</span>&nbsp;·&nbsp;<span>1984 words</span>
+
+</div>
+  </header> <details class="toc"  open>
+    <summary accesskey="c" title="(Alt + C)">
+        <span class="title">Table of Contents</span>
+    </summary>
+
+    <div class="inner"><ul>
+            <li>
+                <a href="#%e4%b8%80%e5%86%85%e6%a0%b8%e6%a8%a1%e5%9d%97%e7%ae%80%e4%bb%8b" aria-label="一、内核模块简介">一、内核模块简介</a><ul>
+                    
+            <li>
+                <a href="#11-%e4%bb%80%e4%b9%88%e6%98%af%e5%86%85%e6%a0%b8%e6%a8%a1%e5%9d%97" aria-label="1.1 什么是内核模块？">1.1 什么是内核模块？</a></li>
+            <li>
+                <a href="#12-%e9%9d%99%e6%80%81%e6%a8%a1%e5%9d%97%e4%b8%8e%e5%8a%a8%e6%80%81%e6%a8%a1%e5%9d%97" aria-label="1.2 静态模块与动态模块">1.2 静态模块与动态模块</a></li>
+            <li>
+                <a href="#13-%e5%86%85%e6%a0%b8%e6%a8%a1%e5%9d%97%e7%9b%b8%e5%85%b3%e9%85%8d%e7%bd%ae" aria-label="1.3 内核模块相关配置">1.3 内核模块相关配置</a></li></ul>
+            </li>
+            <li>
+                <a href="#%e4%ba%8c%e7%bc%96%e5%86%99%e7%ac%ac%e4%b8%80%e4%b8%aa%e5%86%85%e6%a0%b8%e6%a8%a1%e5%9d%97" aria-label="二、编写第一个内核模块">二、编写第一个内核模块</a><ul>
+                    
+            <li>
+                <a href="#21-hello-world" aria-label="2.1 Hello World">2.1 Hello World</a><ul>
+                    
+            <li>
+                <a href="#%e5%a4%b4%e6%96%87%e4%bb%b6%e7%9a%84%e4%bd%9c%e7%94%a8" aria-label="头文件的作用">头文件的作用</a></li></ul>
+            </li>
+            <li>
+                <a href="#22-%e6%a8%a1%e5%9d%97%e5%88%9d%e5%a7%8b%e5%8c%96%e5%87%bd%e6%95%b0" aria-label="2.2 模块初始化函数">2.2 模块初始化函数</a></li>
+            <li>
+                <a href="#23-%e6%a8%a1%e5%9d%97%e9%80%80%e5%87%ba%e5%87%bd%e6%95%b0" aria-label="2.3 模块退出函数">2.3 模块退出函数</a></li>
+            <li>
+                <a href="#24-%e6%b3%a8%e5%86%8c%e6%a8%a1%e5%9d%97%e5%85%a5%e5%8f%a3%e5%92%8c%e5%87%ba%e5%8f%a3" aria-label="2.4 注册模块入口和出口">2.4 注册模块入口和出口</a></li>
+            <li>
+                <a href="#25-%e5%86%85%e6%a0%b8%e6%97%a5%e5%bf%97%e6%89%93%e5%8d%b0" aria-label="2.5 内核日志打印">2.5 内核日志打印</a></li></ul>
+            </li>
+            <li>
+                <a href="#%e4%b8%89%e6%9e%84%e5%bb%ba%e5%92%8c%e5%8a%a0%e8%bd%bd%e5%86%85%e6%a0%b8%e6%a8%a1%e5%9d%97" aria-label="三、构建和加载内核模块">三、构建和加载内核模块</a><ul>
+                    
+            <li>
+                <a href="#31-%e5%87%86%e5%a4%87%e5%86%85%e6%a0%b8%e6%9e%84%e5%bb%ba%e7%8e%af%e5%a2%83" aria-label="3.1 准备内核构建环境">3.1 准备内核构建环境</a></li>
+            <li>
+                <a href="#32-%e7%bc%96%e5%86%99-makefile" aria-label="3.2 编写 Makefile">3.2 编写 Makefile</a></li>
+            <li>
+                <a href="#33-%e4%b8%ba%e4%bb%80%e4%b9%88%e5%bf%85%e9%a1%bb%e4%bd%bf%e7%94%a8-kbuild" aria-label="3.3 为什么必须使用 Kbuild？">3.3 为什么必须使用 Kbuild？</a></li>
+            <li>
+                <a href="#34-%e7%bc%96%e8%af%91%e5%86%85%e6%a0%b8%e6%a8%a1%e5%9d%97" aria-label="3.4 编译内核模块">3.4 编译内核模块</a></li>
+            <li>
+                <a href="#35-%e5%8a%a0%e8%bd%bd%e5%92%8c%e5%8d%b8%e8%bd%bd%e6%a8%a1%e5%9d%97" aria-label="3.5 加载和卸载模块">3.5 加载和卸载模块</a></li></ul>
+            </li>
+            <li>
+                <a href="#%e5%9b%9b%e5%86%85%e6%a0%b8%e6%a8%a1%e5%9d%97%e5%8f%82%e6%95%b0" aria-label="四、内核模块参数">四、内核模块参数</a><ul>
+                    
+            <li>
+                <a href="#41-%e4%b8%ba%e4%bb%80%e4%b9%88%e9%9c%80%e8%a6%81%e6%a8%a1%e5%9d%97%e5%8f%82%e6%95%b0" aria-label="4.1 为什么需要模块参数？">4.1 为什么需要模块参数？</a></li>
+            <li>
+                <a href="#42-module_param-%e5%ae%8f" aria-label="4.2 module_param 宏">4.2 module_param 宏</a></li>
+            <li>
+                <a href="#43-%e5%8f%82%e6%95%b0%e6%9d%83%e9%99%90" aria-label="4.3 参数权限">4.3 参数权限</a></li>
+            <li>
+                <a href="#44-%e6%95%b0%e7%bb%84%e5%8f%82%e6%95%b0" aria-label="4.4 数组参数">4.4 数组参数</a></li>
+            <li>
+                <a href="#45-module_parm_desc-%e5%8f%82%e6%95%b0%e6%8f%8f%e8%bf%b0" aria-label="4.5 MODULE_PARM_DESC 参数描述">4.5 MODULE_PARM_DESC 参数描述</a></li>
+            <li>
+                <a href="#46-%e5%ae%8c%e6%95%b4%e7%a4%ba%e4%be%8b" aria-label="4.6 完整示例">4.6 完整示例</a></li>
+            <li>
+                <a href="#47-%e6%9f%a5%e7%9c%8b%e5%92%8c%e4%bc%a0%e9%80%92%e6%a8%a1%e5%9d%97%e5%8f%82%e6%95%b0" aria-label="4.7 查看和传递模块参数">4.7 查看和传递模块参数</a></li>
+            <li>
+                <a href="#48-%e5%8a%a0%e8%bd%bd%e5%90%8e%e7%9a%84%e5%8f%82%e6%95%b0%e7%ae%a1%e7%90%86" aria-label="4.8 加载后的参数管理">4.8 加载后的参数管理</a></li></ul>
+            </li>
+            <li>
+                <a href="#%e4%ba%94%e9%94%99%e8%af%af%e5%a4%84%e7%90%86%e4%b8%8e%e6%b6%88%e6%81%af%e6%89%93%e5%8d%b0" aria-label="五、错误处理与消息打印">五、错误处理与消息打印</a><ul>
+                    
+            <li>
+                <a href="#51-%e9%94%99%e8%af%af%e5%a4%84%e7%90%86" aria-label="5.1 错误处理">5.1 错误处理</a><ul>
+                    
+            <li>
+                <a href="#511-%e4%b8%ba%e4%bb%80%e4%b9%88%e5%86%85%e6%a0%b8%e9%9c%80%e8%a6%81%e4%b8%a5%e6%a0%bc%e7%9a%84%e9%94%99%e8%af%af%e5%a4%84%e7%90%86" aria-label="5.1.1 为什么内核需要严格的错误处理？">5.1.1 为什么内核需要严格的错误处理？</a></li>
+            <li>
+                <a href="#512-%e5%86%85%e6%a0%b8%e9%a2%84%e5%ae%9a%e4%b9%89%e9%94%99%e8%af%af%e7%a0%81" aria-label="5.1.2 内核预定义错误码">5.1.2 内核预定义错误码</a></li>
+            <li>
+                <a href="#513-%e9%94%99%e8%af%af%e7%a0%81%e5%a6%82%e4%bd%95%e4%bc%a0%e9%80%92%e5%88%b0%e7%94%a8%e6%88%b7%e7%a9%ba%e9%97%b4" aria-label="5.1.3 错误码如何传递到用户空间？">5.1.3 错误码如何传递到用户空间？</a></li>
+            <li>
+                <a href="#514-%e4%bd%bf%e7%94%a8-goto-%e8%bf%9b%e8%a1%8c%e9%94%99%e8%af%af%e5%9b%9e%e6%bb%9a" aria-label="5.1.4 使用 goto 进行错误回滚">5.1.4 使用 goto 进行错误回滚</a></li>
+            <li>
+                <a href="#515-%e9%94%99%e8%af%af%e6%8c%87%e9%92%88err_ptris_err-%e5%92%8c-ptr_err" aria-label="5.1.5 错误指针：ERR_PTR、IS_ERR 和 PTR_ERR">5.1.5 错误指针：ERR_PTR、IS_ERR 和 PTR_ERR</a></li>
+            <li>
+                <a href="#516-%e5%87%bd%e6%95%b0%e8%bf%94%e5%9b%9e%e5%80%bc%e7%9a%84%e8%ae%be%e8%ae%a1%e8%a7%84%e8%8c%83" aria-label="5.1.6 函数返回值的设计规范">5.1.6 函数返回值的设计规范</a></li></ul>
+            </li>
+            <li>
+                <a href="#52-%e6%b6%88%e6%81%af%e6%89%93%e5%8d%b0" aria-label="5.2 消息打印">5.2 消息打印</a><ul>
+                    
+            <li>
+                <a href="#521-printk-%e4%b8%8e%e6%97%a5%e5%bf%97%e7%ba%a7%e5%88%ab" aria-label="5.2.1 printk 与日志级别">5.2.1 printk 与日志级别</a></li>
+            <li>
+                <a href="#522-%e4%bd%bf%e7%94%a8%e8%be%85%e5%8a%a9%e6%89%93%e5%8d%b0%e6%8e%a5%e5%8f%a3" aria-label="5.2.2 使用辅助打印接口">5.2.2 使用辅助打印接口</a></li>
+            <li>
+                <a href="#523-%e4%b8%89%e7%b1%bb%e6%97%a5%e5%bf%97%e6%8e%a5%e5%8f%a3%e5%a6%82%e4%bd%95%e9%80%89%e6%8b%a9" aria-label="5.2.3 三类日志接口如何选择？">5.2.3 三类日志接口如何选择？</a></li></ul>
+            </li></ul>
+            </li>
+            <li>
+                <a href="#%e5%85%ad%e7%ac%a6%e5%8f%b7%e5%af%bc%e5%87%ba%e4%b8%8e%e6%a8%a1%e5%9d%97%e4%be%9d%e8%b5%96" aria-label="六、符号导出与模块依赖">六、符号导出与模块依赖</a><ul>
+                    
+            <li>
+                <a href="#61-%e4%b8%ba%e4%bb%80%e4%b9%88%e9%9c%80%e8%a6%81%e7%ac%a6%e5%8f%b7%e5%af%bc%e5%87%ba" aria-label="6.1 为什么需要符号导出？">6.1 为什么需要符号导出？</a></li>
+            <li>
+                <a href="#62-%e5%a6%82%e4%bd%95%e5%af%bc%e5%87%ba%e5%87%bd%e6%95%b0" aria-label="6.2 如何导出函数？">6.2 如何导出函数？</a></li>
+            <li>
+                <a href="#63-%e6%a8%a1%e5%9d%97-b-%e5%a6%82%e4%bd%95%e5%bc%95%e7%94%a8" aria-label="6.3 模块 B 如何引用？">6.3 模块 B 如何引用？</a></li>
+            <li>
+                <a href="#64-%e6%a8%a1%e5%9d%97%e4%be%9d%e8%b5%96%e5%85%b3%e7%b3%bb" aria-label="6.4 模块依赖关系">6.4 模块依赖关系</a></li>
+            <li>
+                <a href="#65-modulesymvers-%e7%9a%84%e4%bd%9c%e7%94%a8" aria-label="6.5 Module.symvers 的作用">6.5 Module.symvers 的作用</a></li>
+            <li>
+                <a href="#66-%e5%a6%82%e4%bd%95%e6%ad%a3%e7%a1%ae%e6%9e%84%e5%bb%ba%e5%ad%98%e5%9c%a8%e4%be%9d%e8%b5%96%e5%85%b3%e7%b3%bb%e7%9a%84%e6%a8%a1%e5%9d%97" aria-label="6.6 如何正确构建存在依赖关系的模块？">6.6 如何正确构建存在依赖关系的模块？</a></li></ul>
+            </li>
+            <li>
+                <a href="#%e4%b8%83%e5%b8%b8%e7%94%a8%e5%86%85%e6%a0%b8%e6%a8%a1%e5%9d%97%e7%ae%a1%e7%90%86%e5%91%bd%e4%bb%a4" aria-label="七、常用内核模块管理命令">七、常用内核模块管理命令</a></li>
+            <li>
+                <a href="#%e5%85%ab%e6%80%bb%e7%bb%93" aria-label="八、总结">八、总结</a>
+            </li>
+        </ul>
+    </div>
+</details>
+
+  <div class="post-content md-content"><h1 id="一内核模块简介">一、内核模块简介<a hidden class="anchor" aria-hidden="true" href="#一内核模块简介">#</a></h1>
+<h2 id="11-什么是内核模块">1.1 什么是内核模块？<a hidden class="anchor" aria-hidden="true" href="#11-什么是内核模块">#</a></h2>
+<p>Linux 内核采用模块化设计，允许开发者通过添加独立的软件组件来扩展内核功能，而不需要每次修改内核都重新编译整个内核。</p>
+<p><strong>内核模块（Kernel Module）</strong> 是一种能够在运行时动态加载到 Linux 内核中，并在不再需要时动态卸载的软件组件。</p>
+<p>当内核模块用于控制和管理特定硬件设备时，它通常被称为<strong>设备驱动程序（Device Driver）</strong>。</p>
+<p>例如：</p>
+<ul>
+<li>网络设备驱动程序：负责管理网卡，处理网络数据包。</li>
+<li>块设备驱动程序：负责管理磁盘、SSD 等存储设备。</li>
+<li>字符设备驱动程序：负责管理串口、终端等字符设备。</li>
+<li>文件系统模块：为内核提供额外的文件系统支持。</li>
+</ul>
+<p>需要注意：并不是所有内核模块都是设备驱动程序。Linux 还使用模块实现文件系统、加密算法、网络协议以及其他可选内核功能。</p>
+<h2 id="12-静态模块与动态模块">1.2 静态模块与动态模块<a hidden class="anchor" aria-hidden="true" href="#12-静态模块与动态模块">#</a></h2>
+<p>Linux 内核功能可以通过两种方式集成到内核中。</p>
+<p><strong>1. 静态模块（Built-in Modules）</strong></p>
+<p>静态模块也称为内置模块。在构建内核时，通过配置文件 <code>.config</code> 选择需要启用的功能，并将对应源代码编译为目标文件，最终链接到内核映像文件中。</p>
+<p>例如：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">CONFIG_EXT4_FS=y
+</span></span><span class="line"><span class="cl">CONFIG_E1000=y
+</span></span></code></pre></div><p>其中 <code>y</code> 表示将对应功能编译进内核。</p>
+<p>优点：</p>
+<ul>
+<li>不需要额外执行模块加载操作。</li>
+<li>内核启动时即可使用相关功能。</li>
+<li>不存在模块加载和卸载带来的额外管理开销。</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>修改代码后通常需要重新构建内核。</li>
+<li>无法在运行时独立卸载某个内置功能。</li>
+<li>内置功能通常会一直占用内核映像及相应的运行时资源。</li>
+</ul>
+<p><strong>2. 动态模块（Loadable Kernel Modules，LKM）</strong></p>
+<p>动态模块与内核映像文件相互独立，通常以 <code>.ko</code>（Kernel Object）作为文件扩展名。</p>
+<p>它们可以在系统运行期间动态加载和卸载。</p>
+<p>例如：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sudo insmod helloworld.ko
+</span></span><span class="line"><span class="cl">sudo rmmod helloworld
+</span></span></code></pre></div><p>优点：</p>
+<ul>
+<li>不需要重新编译和启动整个内核即可扩展功能。</li>
+<li>可以按需加载功能，减少不必要的内核常驻代码。</li>
+<li>便于开发和调试驱动程序。</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>模块必须与目标内核的版本、配置及符号接口兼容。</li>
+<li>模块加载、卸载以及模块间依赖需要额外管理。</li>
+<li>模块运行在内核态，错误可能导致整个系统崩溃。</li>
+</ul>
+<p><strong>补充：</strong> 动态模块虽然能够独立加载，但并不意味着它完全不依赖内核。模块仍然需要使用目标内核提供的头文件、配置、符号和构建环境。</p>
+<h2 id="13-内核模块相关配置">1.3 内核模块相关配置<a hidden class="anchor" aria-hidden="true" href="#13-内核模块相关配置">#</a></h2>
+<p>Linux 内核提供以下配置选项：</p>
+<table>
+	<thead>
+			<tr>
+					<th>配置项</th>
+					<th>作用</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>CONFIG_MODULES</code></td>
+					<td>是否支持内核模块</td>
+			</tr>
+			<tr>
+					<td><code>CONFIG_MODULE_UNLOAD</code></td>
+					<td>是否支持卸载内核模块</td>
+			</tr>
+			<tr>
+					<td><code>CONFIG_MODULE_FORCE_UNLOAD</code></td>
+					<td>是否允许强制卸载正在使用的模块</td>
+			</tr>
+	</tbody>
+</table>
+<p>例如：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">CONFIG_MODULES=y
+</span></span><span class="line"><span class="cl">CONFIG_MODULE_UNLOAD=y
+</span></span><span class="line"><span class="cl">CONFIG_MODULE_FORCE_UNLOAD=y
+</span></span></code></pre></div><p>需要注意，强制卸载模块具有较高风险。它可能破坏正在使用模块的内核数据结构，导致系统崩溃，因此不应该在正常开发和生产环境中随意使用。</p>
+<h1 id="二编写第一个内核模块">二、编写第一个内核模块<a hidden class="anchor" aria-hidden="true" href="#二编写第一个内核模块">#</a></h1>
+<h2 id="21-hello-world">2.1 Hello World<a hidden class="anchor" aria-hidden="true" href="#21-hello-world">#</a></h2>
+<p>下面编写一个最简单的 Linux 内核模块：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;linux/init.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;linux/module.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;linux/kernel.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">int</span> <span class="n">__init</span> <span class="nf">hello_world_init</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">pr_info</span><span class="p">(</span><span class="s">&#34;Hello world!</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="n">__exit</span> <span class="nf">hello_world_exit</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">pr_info</span><span class="p">(</span><span class="s">&#34;End of the world</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">module_init</span><span class="p">(</span><span class="n">hello_world_init</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">module_exit</span><span class="p">(</span><span class="n">hello_world_exit</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">MODULE_AUTHOR</span><span class="p">(</span><span class="s">&#34;John Madieu &lt;john.madieu@gmail.com&gt;&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">MODULE_LICENSE</span><span class="p">(</span><span class="s">&#34;GPL&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">MODULE_DESCRIPTION</span><span class="p">(</span><span class="s">&#34;A simple Hello World kernel module&#34;</span><span class="p">);</span>
+</span></span></code></pre></div><h3 id="头文件的作用">头文件的作用<a hidden class="anchor" aria-hidden="true" href="#头文件的作用">#</a></h3>
+<ul>
+<li><code>linux/init.h</code>：提供 <code>__init</code>、<code>__exit</code> 等初始化和退出相关的标记。</li>
+<li><code>linux/module.h</code>：提供模块基础设施，包括 <code>module_init</code>、<code>module_exit</code> 和 <code>MODULE_*</code> 系列宏。</li>
+<li><code>linux/kernel.h</code>：提供内核常用接口，包括 <code>pr_info</code> 等日志打印宏。</li>
+</ul>
+<p>实际开发中，还需要根据使用的接口包含相应头文件，例如：</p>
+<ul>
+<li><code>linux/fs.h</code>：文件系统及文件操作相关接口。</li>
+<li><code>linux/interrupt.h</code>：中断处理相关接口。</li>
+<li><code>linux/pci.h</code>：PCI 设备相关接口。</li>
+<li><code>linux/slab.h</code>：内核动态内存分配接口。</li>
+</ul>
+<p>原则是使用什么接口，就包含对应的头文件，不要过度依赖其他头文件的间接包含。</p>
+<h2 id="22-模块初始化函数">2.2 模块初始化函数<a hidden class="anchor" aria-hidden="true" href="#22-模块初始化函数">#</a></h2>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">int</span> <span class="n">__init</span> <span class="nf">hello_world_init</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">pr_info</span><span class="p">(</span><span class="s">&#34;Hello world!</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>模块初始化函数在模块加载过程中执行，主要负责完成模块运行前的初始化工作。</p>
+<p>例如：</p>
+<ul>
+<li>申请内存。</li>
+<li>注册字符设备。</li>
+<li>注册中断处理程序。</li>
+<li>初始化工作队列。</li>
+<li>注册设备驱动程序。</li>
+</ul>
+<p>其中有几个值得注意的地方。</p>
+<p><strong><code>static</code></strong>：表示该函数具有内部链接属性，只能在当前源文件中使用。</p>
+<p><strong><code>__init</code></strong>：表示该函数只在初始化阶段使用。</p>
+<p>Linux 内核通过链接脚本将带有 <code>__init</code> 标记的代码放入 <code>.init.text</code> 段。</p>
+<p>当初始化过程成功完成后，这部分内存可以被回收。</p>
+<p>对于动态模块来说，模块加载成功后，模块初始化代码占用的内存也可以被释放。</p>
+<p><strong>返回值</strong></p>
+<ul>
+<li>返回 <code>0</code>：初始化成功，模块可以正常加载。</li>
+<li>返回非 <code>0</code>：初始化失败，内核拒绝加载模块，并将错误码返回给调用者。</li>
+</ul>
+<p>这里有一个重要细节：</p>
+<p>如果初始化函数在执行过程中申请了资源，但随后某一步初始化失败，那么必须在返回错误之前释放已经申请的资源。</p>
+<p>例如：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">int</span> <span class="n">__init</span> <span class="nf">hello_world_init</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">void</span> <span class="o">*</span><span class="n">ptr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">ptr</span> <span class="o">=</span> <span class="nf">kmalloc</span><span class="p">(</span><span class="mi">1024</span><span class="p">,</span> <span class="n">GFP_KERNEL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">ptr</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="o">-</span><span class="n">ENOMEM</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="nf">some_init_function</span><span class="p">())</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">kfree</span><span class="p">(</span><span class="n">ptr</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="o">-</span><span class="n">EINVAL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>这里的 <code>some_init_function()</code> 仅作为示意。</p>
+<p>因为模块初始化失败后，模块不会进入正常运行状态，内核不会再调用该模块的退出函数替你清理已经申请的资源。</p>
+<h2 id="23-模块退出函数">2.3 模块退出函数<a hidden class="anchor" aria-hidden="true" href="#23-模块退出函数">#</a></h2>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="n">__exit</span> <span class="nf">hello_world_exit</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">pr_info</span><span class="p">(</span><span class="s">&#34;End of the world</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>模块退出函数在模块被正常卸载时执行，主要负责释放模块初始化和运行期间申请的资源。</p>
+<p>例如：</p>
+<ul>
+<li>释放动态分配的内存。</li>
+<li>注销设备号。</li>
+<li>释放中断资源。</li>
+<li>注销设备驱动程序。</li>
+<li>取消定时器和工作队列。</li>
+<li>释放其他模块占用的资源。</li>
+</ul>
+<p><strong><code>__exit</code></strong>：表示该函数只在模块卸载阶段使用。</p>
+<p>如果内核不支持模块卸载（<code>CONFIG_MODULE_UNLOAD=n</code>），该函数通常会被丢弃，不需要保留在最终内核映像中。</p>
+<p>退出函数返回类型为 <code>void</code>，正常卸载过程不能通过返回值报告失败。</p>
+<p>需要注意，卸载模块前必须保证模块不再被其他内核组件使用，否则内核通常会拒绝卸载。</p>
+<h2 id="24-注册模块入口和出口">2.4 注册模块入口和出口<a hidden class="anchor" aria-hidden="true" href="#24-注册模块入口和出口">#</a></h2>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">module_init</span><span class="p">(</span><span class="n">hello_world_init</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">module_exit</span><span class="p">(</span><span class="n">hello_world_exit</span><span class="p">);</span>
+</span></span></code></pre></div><p>这两个宏用于向内核注册模块的初始化函数和退出函数。</p>
+<p>对于动态模块：</p>
+<ul>
+<li><code>module_init()</code> 指定模块加载时执行的入口函数。</li>
+<li><code>module_exit()</code> 指定模块卸载时执行的清理函数。</li>
+</ul>
+<p>对于内置代码，<code>module_init()</code> 会根据初始化级别转换为相应的内核初始化机制，而不是动态模块加载入口。</p>
+<h2 id="25-内核日志打印">2.5 内核日志打印<a hidden class="anchor" aria-hidden="true" href="#25-内核日志打印">#</a></h2>
+<p>在示例中，我们使用了：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">pr_info</span><span class="p">(</span><span class="s">&#34;Hello world!</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span></code></pre></div><p><code>pr_info</code> 是 Linux 内核提供的信息级别日志打印宏，其本质上是对 <code>printk</code> 的封装。</p>
+<p>可以简单理解为：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#define pr_info(fmt, ...) \
+</span></span></span><span class="line"><span class="cl"><span class="cp">    printk(KERN_INFO pr_fmt(fmt), ##__VA_ARGS__)
+</span></span></span></code></pre></div><p>其中：</p>
+<ul>
+<li><code>printk</code>：内核提供的日志打印函数。</li>
+<li><code>KERN_INFO</code>：表示日志级别为 INFO。</li>
+<li><code>pr_fmt</code>：用于为日志添加统一的前缀。</li>
+</ul>
+<p>Linux 内核定义了多个日志级别：</p>
+<table>
+	<thead>
+			<tr>
+					<th>宏</th>
+					<th>日志级别</th>
+					<th>含义</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>KERN_EMERG</code></td>
+					<td>0</td>
+					<td>系统不可用</td>
+			</tr>
+			<tr>
+					<td><code>KERN_ALERT</code></td>
+					<td>1</td>
+					<td>必须立即采取行动</td>
+			</tr>
+			<tr>
+					<td><code>KERN_CRIT</code></td>
+					<td>2</td>
+					<td>严重错误</td>
+			</tr>
+			<tr>
+					<td><code>KERN_ERR</code></td>
+					<td>3</td>
+					<td>错误</td>
+			</tr>
+			<tr>
+					<td><code>KERN_WARNING</code></td>
+					<td>4</td>
+					<td>警告</td>
+			</tr>
+			<tr>
+					<td><code>KERN_NOTICE</code></td>
+					<td>5</td>
+					<td>普通但重要的信息</td>
+			</tr>
+			<tr>
+					<td><code>KERN_INFO</code></td>
+					<td>6</td>
+					<td>一般信息</td>
+			</tr>
+			<tr>
+					<td><code>KERN_DEBUG</code></td>
+					<td>7</td>
+					<td>调试信息</td>
+			</tr>
+	</tbody>
+</table>
+<p>常用打印宏：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">pr_emerg</span><span class="p">(</span><span class="s">&#34;Emergency message</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">pr_alert</span><span class="p">(</span><span class="s">&#34;Alert message</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">pr_crit</span><span class="p">(</span><span class="s">&#34;Critical message</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">pr_err</span><span class="p">(</span><span class="s">&#34;Error message</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">pr_warn</span><span class="p">(</span><span class="s">&#34;Warning message</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">pr_notice</span><span class="p">(</span><span class="s">&#34;Notice message</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">pr_info</span><span class="p">(</span><span class="s">&#34;Information message</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">pr_debug</span><span class="p">(</span><span class="s">&#34;Debug message</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span></code></pre></div><p>内核日志会写入内核环形缓冲区（Kernel Ring Buffer），可以使用 <code>dmesg</code> 查看。</p>
+<p>例如：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sudo dmesg
+</span></span></code></pre></div><p>也可以实时查看新产生的内核日志：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sudo dmesg -w
+</span></span></code></pre></div><p>需要注意，日志级别与日志是否显示在控制台是两个不同的概念。日志首先进入内核日志缓冲区，是否显示在控制台还受到 <code>console_loglevel</code> 等配置的影响。</p>
+<h1 id="三构建和加载内核模块">三、构建和加载内核模块<a hidden class="anchor" aria-hidden="true" href="#三构建和加载内核模块">#</a></h1>
+<h2 id="31-准备内核构建环境">3.1 准备内核构建环境<a hidden class="anchor" aria-hidden="true" href="#31-准备内核构建环境">#</a></h2>
+<p>编译内核模块需要使用与目标内核相匹配的构建环境。</p>
+<p>通常有两种方式：</p>
+<p><strong>方式一：使用发行版提供的内核头文件</strong></p>
+<p>例如 Ubuntu：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sudo apt update
+</span></span><span class="line"><span class="cl">sudo apt install build-essential linux-headers-<span class="k">$(</span>uname -r<span class="k">)</span>
+</span></span></code></pre></div><p>其中：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">/lib/modules/<span class="k">$(</span>uname -r<span class="k">)</span>/build
+</span></span></code></pre></div><p>通常是指向当前运行内核构建目录的符号链接。</p>
+<p>可以通过以下命令查看：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">ls -l /lib/modules/<span class="k">$(</span>uname -r<span class="k">)</span>/build
+</span></span></code></pre></div><p><strong>方式二：使用自行编译的 Linux 内核源码</strong></p>
+<p>如果正在研究 Linux 内核源码，或者使用自行编译的内核，就可以使用对应的内核源码和构建目录。</p>
+<p>需要注意：内核模块不仅依赖头文件，还依赖目标内核的配置、生成文件和符号版本信息。因此，不能随意使用另一个版本的内核源码来编译模块。</p>
+<h2 id="32-编写-makefile">3.2 编写 Makefile<a hidden class="anchor" aria-hidden="true" href="#32-编写-makefile">#</a></h2>
+<p>Linux 内核拥有一套专门的构建系统，称为 <strong>Kbuild</strong>。</p>
+<p>编写外部内核模块时，需要通过 Kbuild 完成编译和链接，而不是直接使用普通 GCC 命令。</p>
+<p>创建 Makefile：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-makefile" data-lang="makefile"><span class="line"><span class="cl"><span class="nv">obj-m</span> <span class="o">:=</span> helloworld.o
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nv">KERNELDIR</span> <span class="o">?=</span> /lib/modules/<span class="k">$(</span>shell uname -r<span class="k">)</span>/build
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nv">PWD</span> <span class="o">:=</span> <span class="k">$(</span>shell <span class="nb">pwd</span><span class="k">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">all</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">	<span class="k">$(</span>MAKE<span class="k">)</span> -C <span class="k">$(</span>KERNELDIR<span class="k">)</span> <span class="nv">M</span><span class="o">=</span><span class="k">$(</span>PWD<span class="k">)</span> modules
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">clean</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">	<span class="k">$(</span>MAKE<span class="k">)</span> -C <span class="k">$(</span>KERNELDIR<span class="k">)</span> <span class="nv">M</span><span class="o">=</span><span class="k">$(</span>PWD<span class="k">)</span> clean
+</span></span></code></pre></div><p>解释一下：</p>
+<p><strong>1. <code>obj-m</code></strong></p>
+<p>这是 Kbuild 提供的构建变量：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-makefile" data-lang="makefile"><span class="line"><span class="cl"><span class="nv">obj-m</span> <span class="o">:=</span> helloworld.o
+</span></span></code></pre></div><p>表示将 <code>helloworld.o</code> 构建为一个可加载的内核模块，最终生成：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">helloworld.ko
+</span></span></code></pre></div><p>其中：</p>
+<ul>
+<li><code>obj-y</code>：将目标文件编译进内核。</li>
+<li><code>obj-m</code>：将目标文件编译为独立的可加载模块。</li>
+</ul>
+<p><strong>2. <code>KERNELDIR</code></strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-makefile" data-lang="makefile"><span class="line"><span class="cl"><span class="nv">KERNELDIR</span> <span class="o">?=</span> /lib/modules/<span class="k">$(</span>shell uname -r<span class="k">)</span>/build
+</span></span></code></pre></div><p>指定目标内核的构建目录。</p>
+<p><code>?=</code> 表示只有在变量尚未定义时才赋予默认值，因此可以通过命令行覆盖：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">make <span class="nv">KERNELDIR</span><span class="o">=</span>/path/to/linux
+</span></span></code></pre></div><p><strong>3. <code>make -C</code></strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-makefile" data-lang="makefile"><span class="line"><span class="cl"><span class="k">$(</span><span class="nv">MAKE</span><span class="k">)</span> <span class="err">-C</span> <span class="k">$(</span><span class="nv">KERNELDIR</span><span class="k">)</span> <span class="nv">M</span><span class="o">=</span><span class="k">$(</span>PWD<span class="k">)</span> modules
+</span></span></code></pre></div><p>这里是整个 Makefile 的核心。</p>
+<ul>
+<li><code>-C $(KERNELDIR)</code>：先切换到内核构建目录，使用内核自身的 Makefile。</li>
+<li><code>M=$(PWD)</code>：告诉 Kbuild，当前目录是外部模块的源代码目录。</li>
+<li><code>modules</code>：执行模块构建目标。</li>
+</ul>
+<h2 id="33-为什么必须使用-kbuild">3.3 为什么必须使用 Kbuild？<a hidden class="anchor" aria-hidden="true" href="#33-为什么必须使用-kbuild">#</a></h2>
+<p>这是理解 Linux 内核模块构建机制的关键。</p>
+<p>普通 C 程序通常可以直接通过 GCC 编译：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">gcc main.c -o main
+</span></span></code></pre></div><p>但是，内核模块不能简单地按照普通 C 程序的方式构建。</p>
+<p>主要有以下原因：</p>
+<p><strong>1. 依赖内核内部头文件</strong></p>
+<p>内核模块需要使用：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;linux/module.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;linux/kernel.h&gt;</span><span class="cp">
+</span></span></span></code></pre></div><p>这些头文件位于 Linux 内核源码树中，需要由 Kbuild 管理包含路径。</p>
+<p><strong>2. 依赖内核编译配置</strong></p>
+<p>内核在构建时会使用大量特定编译选项，例如：</p>
+<ul>
+<li><code>-D__KERNEL__</code></li>
+<li><code>-DMODULE</code></li>
+<li>目标架构相关的编译选项。</li>
+<li>栈保护和代码生成选项。</li>
+<li>内核特定的编译器参数。</li>
+</ul>
+<p>这些配置需要与目标内核保持一致。</p>
+<p><strong>3. 需要额外的模块构建流程</strong></p>
+<p>内核模块并不是简单地将 <code>.o</code> 文件链接成 <code>.ko</code> 文件。</p>
+<p>Kbuild 还需要完成：</p>
+<ul>
+<li>生成模块元信息。</li>
+<li>处理模块许可证、作者等信息。</li>
+<li>处理模块依赖。</li>
+<li>处理符号版本信息。</li>
+<li>生成最终的 <code>.ko</code> 文件。</li>
+</ul>
+<p>因此，只有内核自身的 Kbuild 才能正确处理这些细节。</p>
+<h2 id="34-编译内核模块">3.4 编译内核模块<a hidden class="anchor" aria-hidden="true" href="#34-编译内核模块">#</a></h2>
+<p>执行：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">make
+</span></span></code></pre></div><p>成功后，目录中会生成：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">helloworld.ko
+</span></span></code></pre></div><p>此外，还可能看到：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">helloworld.o
+</span></span><span class="line"><span class="cl">helloworld.mod
+</span></span><span class="line"><span class="cl">helloworld.mod.c
+</span></span><span class="line"><span class="cl">helloworld.mod.o
+</span></span><span class="line"><span class="cl">Module.symvers
+</span></span><span class="line"><span class="cl">modules.order
+</span></span></code></pre></div><p>其中：</p>
+<ul>
+<li><code>.ko</code>：最终的内核模块文件。</li>
+<li><code>.o</code>：编译产生的目标文件。</li>
+<li><code>.mod.c</code>：由构建系统生成的模块元信息相关代码。</li>
+<li><code>Module.symvers</code>：记录模块构建过程中涉及的符号版本信息。</li>
+</ul>
+<p>这些中间文件由 Kbuild 管理，通常不需要手动修改。</p>
+<h2 id="35-加载和卸载模块">3.5 加载和卸载模块<a hidden class="anchor" aria-hidden="true" href="#35-加载和卸载模块">#</a></h2>
+<p>Linux 提供了多种模块管理工具。</p>
+<p><strong>1. insmod：加载模块</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sudo insmod helloworld.ko
+</span></span></code></pre></div><p><code>insmod</code> 直接加载指定的模块文件。</p>
+<p>它不会自动解析并加载模块所依赖的其他模块。</p>
+<p><strong>2. rmmod：卸载模块</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sudo rmmod helloworld
+</span></span></code></pre></div><p>注意，通常传入模块名称，而不是 <code>.ko</code> 文件路径。</p>
+<p><strong>3. 查看内核日志</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sudo dmesg
+</span></span></code></pre></div><p>输出：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">[15616.293043] Hello world!
+</span></span><span class="line"><span class="cl">[15617.748606] End of the world
+</span></span></code></pre></div><p>这说明模块初始化和退出函数都成功执行了。</p>
+<p><strong>4. 查看当前已加载模块</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">lsmod
+</span></span></code></pre></div><p>或者：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">cat /proc/modules
+</span></span></code></pre></div><p><strong>5. modprobe：加载模块及其依赖</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sudo modprobe helloworld
+</span></span></code></pre></div><p><code>modprobe</code> 与 <code>insmod</code> 的主要区别：</p>
+<ul>
+<li><code>insmod</code>：直接加载指定的模块文件，不负责自动解决模块依赖。</li>
+<li><code>modprobe</code>：根据模块依赖关系自动加载所需模块。</li>
+</ul>
+<p><code>modprobe</code> 主要依赖 <code>/lib/modules/$(uname -r)/</code> 下的模块索引和依赖信息，这些信息可以通过 <code>depmod</code> 生成。</p>
+<p>因此，<code>modprobe</code> 通常用于系统正常运行时的模块管理，而 <code>insmod</code> 更适合模块开发和测试。</p>
+<h1 id="四内核模块参数">四、内核模块参数<a hidden class="anchor" aria-hidden="true" href="#四内核模块参数">#</a></h1>
+<h2 id="41-为什么需要模块参数">4.1 为什么需要模块参数？<a hidden class="anchor" aria-hidden="true" href="#41-为什么需要模块参数">#</a></h2>
+<p>很多内核模块需要根据实际使用场景调整运行行为。</p>
+<p>例如：</p>
+<ul>
+<li>网络驱动程序可能需要配置缓冲区大小。</li>
+<li>设备驱动程序可能需要指定设备参数。</li>
+<li>调试模块可能需要开启或关闭调试日志。</li>
+</ul>
+<p>如果每次修改参数都需要重新编译模块，就会降低开发效率。</p>
+<p>因此，Linux 提供了模块参数机制，允许在加载模块时传入参数。</p>
+<h2 id="42-module_param-宏">4.2 module_param 宏<a hidden class="anchor" aria-hidden="true" href="#42-module_param-宏">#</a></h2>
+<p>使用 <code>module_param()</code> 宏定义模块参数：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">module_param</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">type</span><span class="p">,</span> <span class="n">perm</span><span class="p">);</span>
+</span></span></code></pre></div><p>三个参数：</p>
+<ul>
+<li><code>name</code>：模块参数对应的变量名称。</li>
+<li><code>type</code>：参数类型。</li>
+<li><code>perm</code>：参数在 <code>/sys/module/模块名/parameters/</code> 下对应 sysfs 文件的访问权限。</li>
+</ul>
+<p>常见参数类型：</p>
+<table>
+	<thead>
+			<tr>
+					<th>类型</th>
+					<th>含义</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>bool</code></td>
+					<td>布尔值</td>
+			</tr>
+			<tr>
+					<td><code>charp</code></td>
+					<td>字符指针</td>
+			</tr>
+			<tr>
+					<td><code>byte</code></td>
+					<td>字节</td>
+			</tr>
+			<tr>
+					<td><code>short</code></td>
+					<td>短整型</td>
+			</tr>
+			<tr>
+					<td><code>ushort</code></td>
+					<td>无符号短整型</td>
+			</tr>
+			<tr>
+					<td><code>int</code></td>
+					<td>整型</td>
+			</tr>
+			<tr>
+					<td><code>uint</code></td>
+					<td>无符号整型</td>
+			</tr>
+			<tr>
+					<td><code>long</code></td>
+					<td>长整型</td>
+			</tr>
+			<tr>
+					<td><code>ulong</code></td>
+					<td>无符号长整型</td>
+			</tr>
+	</tbody>
+</table>
+<p>其中，<code>charp</code> 表示字符指针，适合接收字符串参数。</p>
+<h2 id="43-参数权限">4.3 参数权限<a hidden class="anchor" aria-hidden="true" href="#43-参数权限">#</a></h2>
+<p><code>perm</code> 用于指定模块参数对应 sysfs 文件的权限。</p>
+<p>常见权限宏：</p>
+<ul>
+<li><code>S_IRUSR</code>：文件所有者可读。</li>
+<li><code>S_IWUSR</code>：文件所有者可写。</li>
+<li><code>S_IXUSR</code>：文件所有者可执行。</li>
+<li><code>S_IRGRP</code>：所属组可读。</li>
+<li><code>S_IWGRP</code>：所属组可写。</li>
+<li><code>S_IROTH</code>：其他用户可读。</li>
+<li><code>S_IWOTH</code>：其他用户可写。</li>
+</ul>
+<p>例如：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">module_param</span><span class="p">(</span><span class="n">myint</span><span class="p">,</span> <span class="kt">int</span><span class="p">,</span> <span class="mo">0444</span><span class="p">);</span>
+</span></span></code></pre></div><p>表示参数文件对所有用户只读。</p>
+<p>也可以使用：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">module_param</span><span class="p">(</span><span class="n">myint</span><span class="p">,</span> <span class="kt">int</span><span class="p">,</span> <span class="mo">0644</span><span class="p">);</span>
+</span></span></code></pre></div><p>表示所有者可读写，其他用户只读。</p>
+<p>需要注意，旧代码中经常使用 <code>S_IRUGO</code> 表示所有用户可读，但现代内核开发更推荐直接使用八进制权限值，例如 <code>0444</code>。另外，参数是否能够在加载后修改，还取决于对应参数类型的设置操作及其权限。</p>
+<h2 id="44-数组参数">4.4 数组参数<a hidden class="anchor" aria-hidden="true" href="#44-数组参数">#</a></h2>
+<p>对于数组类型的参数，可以使用：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">module_param_array</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">type</span><span class="p">,</span> <span class="n">nump</span><span class="p">,</span> <span class="n">perm</span><span class="p">);</span>
+</span></span></code></pre></div><p>其中：</p>
+<ul>
+<li><code>name</code>：数组变量名称。</li>
+<li><code>type</code>：数组元素类型。</li>
+<li><code>nump</code>：用于保存实际传入的数组元素数量，可以设置为 <code>NULL</code>。</li>
+<li><code>perm</code>：sysfs 文件访问权限。</li>
+</ul>
+<p>例如：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">int</span> <span class="n">myarr</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">module_param_array</span><span class="p">(</span><span class="n">myarr</span><span class="p">,</span> <span class="kt">int</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="mo">0644</span><span class="p">);</span>
+</span></span></code></pre></div><h2 id="45-module_parm_desc-参数描述">4.5 MODULE_PARM_DESC 参数描述<a hidden class="anchor" aria-hidden="true" href="#45-module_parm_desc-参数描述">#</a></h2>
+<p>为了让其他开发者了解模块参数的用途，可以使用：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">MODULE_PARM_DESC</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">description</span><span class="p">);</span>
+</span></span></code></pre></div><p>它为指定参数提供描述信息，可以通过 <code>modinfo</code> 查看。</p>
+<h2 id="46-完整示例">4.6 完整示例<a hidden class="anchor" aria-hidden="true" href="#46-完整示例">#</a></h2>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;linux/init.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;linux/module.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;linux/kernel.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;linux/moduleparam.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">char</span> <span class="o">*</span><span class="n">mystr</span> <span class="o">=</span> <span class="s">&#34;hello&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">int</span> <span class="n">myint</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">int</span> <span class="n">myarr</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">int</span> <span class="n">myarr_num</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">module_param</span><span class="p">(</span><span class="n">myint</span><span class="p">,</span> <span class="kt">int</span><span class="p">,</span> <span class="mo">0444</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">module_param</span><span class="p">(</span><span class="n">mystr</span><span class="p">,</span> <span class="n">charp</span><span class="p">,</span> <span class="mo">0444</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">module_param_array</span><span class="p">(</span><span class="n">myarr</span><span class="p">,</span> <span class="kt">int</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">myarr_num</span><span class="p">,</span> <span class="mo">0644</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">MODULE_PARM_DESC</span><span class="p">(</span><span class="n">myint</span><span class="p">,</span> <span class="s">&#34;This is my int variable&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">MODULE_PARM_DESC</span><span class="p">(</span><span class="n">mystr</span><span class="p">,</span> <span class="s">&#34;This is my char pointer variable&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">MODULE_PARM_DESC</span><span class="p">(</span><span class="n">myarr</span><span class="p">,</span> <span class="s">&#34;This is my array of int&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">MODULE_INFO</span><span class="p">(</span><span class="n">my_field_name</span><span class="p">,</span> <span class="s">&#34;What easy value&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">int</span> <span class="n">__init</span> <span class="nf">helloworld_init</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">pr_info</span><span class="p">(</span><span class="s">&#34;Hello world with parameters!</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">pr_info</span><span class="p">(</span><span class="s">&#34;mystr: %s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">mystr</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">pr_info</span><span class="p">(</span><span class="s">&#34;myint: %d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">myint</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">pr_info</span><span class="p">(</span><span class="s">&#34;myarr:&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">myarr_num</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">pr_cont</span><span class="p">(</span><span class="s">&#34; %d&#34;</span><span class="p">,</span> <span class="n">myarr</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">pr_cont</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="n">__exit</span> <span class="nf">helloworld_exit</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">pr_info</span><span class="p">(</span><span class="s">&#34;End of the world</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">module_init</span><span class="p">(</span><span class="n">helloworld_init</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">module_exit</span><span class="p">(</span><span class="n">helloworld_exit</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">MODULE_AUTHOR</span><span class="p">(</span><span class="s">&#34;John Madieu &lt;john.madieu@gmail.com&gt;&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">MODULE_LICENSE</span><span class="p">(</span><span class="s">&#34;GPL&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">MODULE_DESCRIPTION</span><span class="p">(</span><span class="s">&#34;A module with parameters&#34;</span><span class="p">);</span>
+</span></span></code></pre></div><p>这里还使用了 <code>MODULE_INFO()</code> 宏，它允许添加自定义模块元信息。</p>
+<p>与 <code>MODULE_PARM_DESC()</code> 不同，<code>MODULE_INFO()</code> 添加的是模块级别的元信息，而不是参数描述。</p>
+<h2 id="47-查看和传递模块参数">4.7 查看和传递模块参数<a hidden class="anchor" aria-hidden="true" href="#47-查看和传递模块参数">#</a></h2>
+<p>编译模块后，可以通过 <code>modinfo</code> 查看模块信息：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">modinfo ./helloworld-params.ko
+</span></span></code></pre></div><p>部分输出：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">filename:       ./helloworld-params.ko
+</span></span><span class="line"><span class="cl">license:        GPL
+</span></span><span class="line"><span class="cl">author:         John Madieu &lt;john.madieu@gmail.com&gt;
+</span></span><span class="line"><span class="cl">my_field_name:  What easy value
+</span></span><span class="line"><span class="cl">name:           helloworld_params
+</span></span><span class="line"><span class="cl">vermagic:       5.15.0-203-generic SMP mod_unload modversions
+</span></span><span class="line"><span class="cl">parm:           myint:This is my int variable (int)
+</span></span><span class="line"><span class="cl">parm:           mystr:This is my char pointer variable (charp)
+</span></span><span class="line"><span class="cl">parm:           myarr:This is my array of int (array of int)
+</span></span></code></pre></div><p>其中：</p>
+<ul>
+<li><code>license</code>：模块许可证。</li>
+<li><code>author</code>：模块作者。</li>
+<li><code>vermagic</code>：模块构建时记录的内核版本及相关配置标识。</li>
+<li><code>parm</code>：模块参数及其描述。</li>
+</ul>
+<p>加载模块时，可以通过命令行传递参数：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sudo insmod helloworld-params.ko <span class="se">\
+</span></span></span><span class="line"><span class="cl">    <span class="nv">mystr</span><span class="o">=</span><span class="s2">&#34;packtpub&#34;</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl">    <span class="nv">myint</span><span class="o">=</span><span class="m">15</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl">    <span class="nv">myarr</span><span class="o">=</span>1,2,3
+</span></span></code></pre></div><p>卸载模块：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sudo rmmod helloworld_params
+</span></span></code></pre></div><p>查看日志：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sudo dmesg
+</span></span></code></pre></div><p>预期输出：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">Hello world with parameters!
+</span></span><span class="line"><span class="cl">mystr: packtpub
+</span></span><span class="line"><span class="cl">myint: 15
+</span></span><span class="line"><span class="cl">myarr: 1 2 3
+</span></span><span class="line"><span class="cl">End of the world
+</span></span></code></pre></div><p><strong>注意：参数名称必须与代码中定义的名称一致。</strong></p>
+<p>例如，下面这种写法是错误的：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sudo insmod helloworld-params.ko <span class="se">\
+</span></span></span><span class="line"><span class="cl">    <span class="nv">mystring</span><span class="o">=</span><span class="s2">&#34;packtpub&#34;</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl">    <span class="nv">myint</span><span class="o">=</span><span class="m">15</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl">    <span class="nv">myArray</span><span class="o">=</span>1,2,3
+</span></span></code></pre></div><p>因为代码中定义的是 <code>mystr</code> 和 <code>myarr</code>，而不是 <code>mystring</code> 和 <code>myArray</code>。</p>
+<h2 id="48-加载后的参数管理">4.8 加载后的参数管理<a hidden class="anchor" aria-hidden="true" href="#48-加载后的参数管理">#</a></h2>
+<p>模块加载成功后，还可以在 sysfs 中查看参数：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">ls /sys/module/helloworld_params/parameters/
+</span></span></code></pre></div><p>读取参数：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">cat /sys/module/helloworld_params/parameters/myint
+</span></span></code></pre></div><p>对于具有写权限的参数，也可以尝试在运行时修改：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nb">echo</span> <span class="m">20</span> <span class="p">|</span> sudo tee /sys/module/helloworld_params/parameters/myint
+</span></span></code></pre></div><p>但这只会修改参数变量的当前值，并不意味着所有模块都支持安全的运行时参数修改。具体还取决于模块参数的类型、权限以及模块本身如何使用该变量。</p>
+<h1 id="五错误处理与消息打印">五、错误处理与消息打印<a hidden class="anchor" aria-hidden="true" href="#五错误处理与消息打印">#</a></h1>
+<p>Linux 内核开发不是重复造轮子，而是在前人经验和已有内核基础设施之上进行开发。</p>
+<p>Linux 内核经过几十年的演进，已经形成了一套成熟的编程规范和基础设施。开发者应该优先理解并复用内核已经提供的机制，而不是自行设计一套重复的错误处理、日志打印和资源管理方式。</p>
+<p>本节重点讨论两个非常重要的方面：</p>
+<ol>
+<li>错误处理：如何正确报告错误，以及如何保证资源能够被正确释放。</li>
+<li>消息打印：如何按照内核规范输出日志，以及如何选择合适的日志接口。</li>
+</ol>
+<p>这两点与普通用户空间程序的开发存在明显区别。</p>
+<h2 id="51-错误处理">5.1 错误处理<a hidden class="anchor" aria-hidden="true" href="#51-错误处理">#</a></h2>
+<h3 id="511-为什么内核需要严格的错误处理">5.1.1 为什么内核需要严格的错误处理？<a hidden class="anchor" aria-hidden="true" href="#511-为什么内核需要严格的错误处理">#</a></h3>
+<p>在用户空间编写程序时，发生错误通常可以通过返回错误码、释放资源或者退出进程来处理。</p>
+<p>但在内核中，情况要复杂得多。</p>
+<p>内核代码直接管理硬件设备、内存、进程和各种内核数据结构。一个错误如果没有被正确处理，可能导致：</p>
+<ul>
+<li>内存泄漏。</li>
+<li>设备资源没有释放。</li>
+<li>硬件处于不一致状态。</li>
+<li>其他内核组件无法正常工作。</li>
+<li>内核崩溃甚至整个系统无法运行。</li>
+</ul>
+<p>因此，内核开发必须重视两个方面：</p>
+<ul>
+<li><strong>正确报告错误</strong>：返回与实际错误相对应的错误码。</li>
+<li><strong>正确回滚操作</strong>：发生错误时，撤销此前已经完成的操作，释放所有已申请的资源。</li>
+</ul>
+<h3 id="512-内核预定义错误码">5.1.2 内核预定义错误码<a hidden class="anchor" aria-hidden="true" href="#512-内核预定义错误码">#</a></h3>
+<p>Linux 内核已经定义了大量标准错误码，可以覆盖绝大多数常见错误场景。</p>
+<p>这些错误码主要定义在：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">include/uapi/asm-generic/errno-base.h
+</span></span><span class="line"><span class="cl">include/uapi/asm-generic/errno.h
+</span></span></code></pre></div><p>其中，<code>errno-base.h</code> 定义了一些基础错误码：</p>
+<table>
+	<thead>
+			<tr>
+					<th>错误码</th>
+					<th style="text-align: right">数值</th>
+					<th>含义</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>EPERM</code></td>
+					<td style="text-align: right">1</td>
+					<td>Operation not permitted</td>
+			</tr>
+			<tr>
+					<td><code>ENOENT</code></td>
+					<td style="text-align: right">2</td>
+					<td>No such file or directory</td>
+			</tr>
+			<tr>
+					<td><code>ESRCH</code></td>
+					<td style="text-align: right">3</td>
+					<td>No such process</td>
+			</tr>
+			<tr>
+					<td><code>EINTR</code></td>
+					<td style="text-align: right">4</td>
+					<td>Interrupted system call</td>
+			</tr>
+			<tr>
+					<td><code>EIO</code></td>
+					<td style="text-align: right">5</td>
+					<td>I/O error</td>
+			</tr>
+			<tr>
+					<td><code>ENXIO</code></td>
+					<td style="text-align: right">6</td>
+					<td>No such device or address</td>
+			</tr>
+			<tr>
+					<td><code>E2BIG</code></td>
+					<td style="text-align: right">7</td>
+					<td>Argument list too long</td>
+			</tr>
+			<tr>
+					<td><code>EBADF</code></td>
+					<td style="text-align: right">9</td>
+					<td>Bad file number</td>
+			</tr>
+			<tr>
+					<td><code>EAGAIN</code></td>
+					<td style="text-align: right">11</td>
+					<td>Try again</td>
+			</tr>
+			<tr>
+					<td><code>ENOMEM</code></td>
+					<td style="text-align: right">12</td>
+					<td>Out of memory</td>
+			</tr>
+			<tr>
+					<td><code>EACCES</code></td>
+					<td style="text-align: right">13</td>
+					<td>Permission denied</td>
+			</tr>
+			<tr>
+					<td><code>EFAULT</code></td>
+					<td style="text-align: right">14</td>
+					<td>Bad address</td>
+			</tr>
+			<tr>
+					<td><code>EBUSY</code></td>
+					<td style="text-align: right">16</td>
+					<td>Device or resource busy</td>
+			</tr>
+			<tr>
+					<td><code>EEXIST</code></td>
+					<td style="text-align: right">17</td>
+					<td>File exists</td>
+			</tr>
+			<tr>
+					<td><code>ENODEV</code></td>
+					<td style="text-align: right">19</td>
+					<td>No such device</td>
+			</tr>
+	</tbody>
+</table>
+<p>完整列表可以在上述头文件中查看。</p>
+<p>内核代码通常使用负数形式的错误码：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">return</span> <span class="o">-</span><span class="n">ENOMEM</span><span class="p">;</span>
+</span></span></code></pre></div><p>而不是：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">return</span> <span class="n">ENOMEM</span><span class="p">;</span>
+</span></span></code></pre></div><p>这是因为 Linux 内核通常约定：</p>
+<ul>
+<li>返回 <code>0</code> 表示成功。</li>
+<li>返回负数表示失败，负数的绝对值对应具体错误码。</li>
+<li>某些函数也会返回正数表示成功时的特殊结果或状态，具体取决于接口约定。</li>
+</ul>
+<p>例如，设备初始化时发生 I/O 错误：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">dev</span> <span class="o">=</span> <span class="nf">init_device</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">dev</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="o">-</span><span class="n">EIO</span><span class="p">;</span>
+</span></span></code></pre></div><p>这里的 <code>-EIO</code> 表示设备初始化过程中发生了输入输出错误。</p>
+<p><strong>核心原则：不要随意选择错误码。</strong></p>
+<p>应该根据实际失败原因返回最合适的错误码，否则调用者可能对错误作出错误判断，进而执行不恰当的处理逻辑。</p>
+<h3 id="513-错误码如何传递到用户空间">5.1.3 错误码如何传递到用户空间？<a hidden class="anchor" aria-hidden="true" href="#513-错误码如何传递到用户空间">#</a></h3>
+<p>内核错误有时会跨越内核空间，传播到用户空间。</p>
+<p>例如，用户程序调用：</p>
+<ul>
+<li><code>open()</code></li>
+<li><code>read()</code></li>
+<li><code>write()</code></li>
+<li><code>ioctl()</code></li>
+<li><code>mmap()</code></li>
+</ul>
+<p>如果对应的系统调用发生错误，内核会将错误码转换为用户空间能够理解的形式。</p>
+<p>对于通过标准系统调用接口返回的错误，用户空间通常可以通过全局变量 <code>errno</code> 获取错误信息。</p>
+<p>例如：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;errno.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;string.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="nf">write</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">buf</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;Something went wrong: %s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="nf">strerror</span><span class="p">(</span><span class="n">errno</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>这里：</p>
+<ul>
+<li>内核返回负错误码，例如 <code>-EIO</code>。</li>
+<li>系统调用边界将其转换为用户空间的失败返回值。</li>
+<li>用户空间的 <code>errno</code> 被设置为对应的正数错误码。</li>
+<li><code>strerror(errno)</code> 将错误码转换为可读的错误描述。</li>
+</ul>
+<p>需要注意，<code>errno</code> 是用户空间的错误处理机制，不应该直接在内核代码中使用。</p>
+<h3 id="514-使用-goto-进行错误回滚">5.1.4 使用 goto 进行错误回滚<a hidden class="anchor" aria-hidden="true" href="#514-使用-goto-进行错误回滚">#</a></h3>
+<p>内核开发中，一个非常常见的场景是：函数需要依次申请多个资源，如果中间某一步失败，就必须释放之前已经成功申请的资源。</p>
+<p>例如：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">int</span> <span class="n">__init</span> <span class="nf">my_init</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">void</span> <span class="o">*</span><span class="n">ptr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">ptr</span> <span class="o">=</span> <span class="nf">kmalloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">device_t</span><span class="p">),</span> <span class="n">GFP_KERNEL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">ptr</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">ret</span> <span class="o">=</span> <span class="o">-</span><span class="n">ENOMEM</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">goto</span> <span class="n">err_alloc</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="nf">init_device</span><span class="p">(</span><span class="n">ptr</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">ret</span> <span class="o">=</span> <span class="o">-</span><span class="n">EIO</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">goto</span> <span class="n">err_init</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="nf">register_device</span><span class="p">(</span><span class="n">ptr</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">ret</span> <span class="o">=</span> <span class="o">-</span><span class="n">EBUSY</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">goto</span> <span class="n">err_register</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nl">err_register</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">cleanup_device</span><span class="p">(</span><span class="n">ptr</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nl">err_init</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">kfree</span><span class="p">(</span><span class="n">ptr</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nl">err_alloc</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">ret</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>上面的代码展示了 Linux 内核中常见的错误处理方式：使用 <code>goto</code> 统一处理资源清理。</p>
+<p>这里需要特别注意清理标签的排列顺序：</p>
+<ul>
+<li><code>err_register</code>：清理设备初始化完成后的资源。</li>
+<li><code>err_init</code>：释放动态申请的内存。</li>
+<li><code>err_alloc</code>：返回错误码。</li>
+</ul>
+<p>如果 <code>register_device()</code> 失败，就会从 <code>err_register</code> 开始依次执行清理操作。</p>
+<p>如果 <code>init_device()</code> 失败，则直接跳到 <code>err_init</code>，只释放已经成功申请的内存。</p>
+<p>如果内存分配失败，则直接返回，不需要清理任何资源。</p>
+<p><strong>为什么内核开发中推荐使用 goto？</strong></p>
+<p>假设一个函数需要依次完成四个初始化操作：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="nf">ops1</span><span class="p">()</span> <span class="o">==</span> <span class="n">ERR</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="o">-</span><span class="n">EIO</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="nf">ops2</span><span class="p">()</span> <span class="o">==</span> <span class="n">ERR</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="o">-</span><span class="n">EIO</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="nf">ops3</span><span class="p">()</span> <span class="o">==</span> <span class="n">ERR</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="o">-</span><span class="n">EIO</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="nf">ops4</span><span class="p">()</span> <span class="o">==</span> <span class="n">ERR</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="o">-</span><span class="n">EIO</span><span class="p">;</span>
+</span></span></code></pre></div><p>如果每一步都申请了资源，那么这种写法就会遇到问题：发生错误时，必须知道前面哪些操作已经成功，并逐一清理。</p>
+<p>一种容易使代码变得复杂的方式是多层嵌套：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="nf">ops1</span><span class="p">()</span> <span class="o">==</span> <span class="n">SUCCESS</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="nf">ops2</span><span class="p">()</span> <span class="o">==</span> <span class="n">SUCCESS</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="nf">ops3</span><span class="p">()</span> <span class="o">==</span> <span class="n">SUCCESS</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="nf">ops4</span><span class="p">()</span> <span class="o">==</span> <span class="n">SUCCESS</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="cm">/* All operations succeeded */</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>随着初始化步骤增加，代码缩进会越来越深，错误处理也越来越难以维护。</p>
+<p>而使用 <code>goto</code>，可以让正常执行路径保持线性，同时将错误处理集中在函数末尾：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="nf">ops1</span><span class="p">()</span> <span class="o">==</span> <span class="n">ERR</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">goto</span> <span class="n">error1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="nf">ops2</span><span class="p">()</span> <span class="o">==</span> <span class="n">ERR</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">goto</span> <span class="n">error2</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="nf">ops3</span><span class="p">()</span> <span class="o">==</span> <span class="n">ERR</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">goto</span> <span class="n">error3</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="nf">ops4</span><span class="p">()</span> <span class="o">==</span> <span class="n">ERR</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">goto</span> <span class="n">error4</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* All operations succeeded */</span>
+</span></span><span class="line"><span class="cl"><span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nl">error4</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">cleanup3</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="nl">error3</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">cleanup2</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="nl">error2</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">cleanup1</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="nl">error1</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="o">-</span><span class="n">EIO</span><span class="p">;</span>
+</span></span></code></pre></div><p>这就是为什么 <code>goto</code> 在 Linux 内核中并不是一种应该避免的语法，而是一种被广泛采用的资源清理手段。</p>
+<p>不过，需要遵循以下原则：</p>
+<ul>
+<li>主要用于函数内部的错误处理和资源回滚。</li>
+<li>通常只向后跳转到统一的清理标签。</li>
+<li>清理顺序应当与资源申请顺序相反。</li>
+<li>不应该使用 <code>goto</code> 代替正常循环或者复杂的流程控制。</li>
+</ul>
+<p><strong>本质上，goto 的价值在于让资源释放路径清晰、集中且不容易遗漏。</strong></p>
+<h3 id="515-错误指针err_ptris_err-和-ptr_err">5.1.5 错误指针：ERR_PTR、IS_ERR 和 PTR_ERR<a hidden class="anchor" aria-hidden="true" href="#515-错误指针err_ptris_err-和-ptr_err">#</a></h3>
+<p>在内核开发中，有时函数需要返回一个指针，但又需要同时表达操作失败的具体原因。</p>
+<p>如果函数仅仅返回 <code>NULL</code>，调用者只能知道操作失败，却无法知道失败的具体原因。</p>
+<p>例如：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">struct</span> <span class="n">device</span> <span class="o">*</span><span class="nf">create_device</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* Allocation failed */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>调用者无法区分究竟是内存不足、设备不存在，还是其他原因。</p>
+<p>为此，Linux 内核提供了一套特殊的错误指针机制：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">ERR_PTR</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="nf">IS_ERR</span><span class="p">(</span><span class="n">ptr</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="nf">PTR_ERR</span><span class="p">(</span><span class="n">ptr</span><span class="p">)</span>
+</span></span></code></pre></div><p>它们的定义可以在 <code>include/linux/err.h</code> 中找到。</p>
+<p><strong>1. ERR_PTR()</strong></p>
+<p>将负错误码编码为一个指针：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">return</span> <span class="nf">ERR_PTR</span><span class="p">(</span><span class="o">-</span><span class="n">ENOMEM</span><span class="p">);</span>
+</span></span></code></pre></div><p>可以理解为：使用指针返回值携带错误信息。</p>
+<p><strong>2. IS_ERR()</strong></p>
+<p>检查指针是否是错误指针：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="nf">IS_ERR</span><span class="p">(</span><span class="n">ptr</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* Handle error */</span>
+</span></span></code></pre></div><p><strong>3. PTR_ERR()</strong></p>
+<p>从错误指针中提取原始错误码：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">return</span> <span class="nf">PTR_ERR</span><span class="p">(</span><span class="n">ptr</span><span class="p">);</span>
+</span></span></code></pre></div><p>例如：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">static</span> <span class="k">struct</span> <span class="n">iio_dev</span> <span class="o">*</span><span class="nf">indio_dev_setup</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">struct</span> <span class="n">iio_dev</span> <span class="o">*</span><span class="n">indio_dev</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">indio_dev</span> <span class="o">=</span> <span class="nf">devm_iio_device_alloc</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="o">&amp;</span><span class="n">data</span><span class="o">-&gt;</span><span class="n">client</span><span class="o">-&gt;</span><span class="n">dev</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="k">sizeof</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">indio_dev</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nf">ERR_PTR</span><span class="p">(</span><span class="o">-</span><span class="n">ENOMEM</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">indio_dev</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>调用者：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">int</span> <span class="nf">foo_probe</span><span class="p">(...)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">struct</span> <span class="n">iio_dev</span> <span class="o">*</span><span class="n">my_indio_dev</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">my_indio_dev</span> <span class="o">=</span> <span class="nf">indio_dev_setup</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="nf">IS_ERR</span><span class="p">(</span><span class="n">my_indio_dev</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nf">PTR_ERR</span><span class="p">(</span><span class="n">my_indio_dev</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* Continue initialization */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>这样，函数就能够同时返回正常指针和具体错误信息。</p>
+<p><strong>需要注意：</strong></p>
+<ul>
+<li><code>ERR_PTR()</code> 只能用于符合内核错误指针约定的场景。</li>
+<li><code>IS_ERR()</code> 用于检查错误指针，不能用来检查普通的 <code>NULL</code>。</li>
+<li>如果一个接口可能返回 <code>NULL</code> 或错误指针，就需要同时处理这两种情况。</li>
+<li>不要直接解引用错误指针。</li>
+</ul>
+<h3 id="516-函数返回值的设计规范">5.1.6 函数返回值的设计规范<a hidden class="anchor" aria-hidden="true" href="#516-函数返回值的设计规范">#</a></h3>
+<p>Linux 内核开发中，还有一个值得注意的编码习惯：</p>
+<p><strong>如果函数名称表示一个动作或命令，通常返回整型错误码；如果函数名称表示一个判断或谓词，通常返回布尔值。</strong></p>
+<p>例如：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">add_work</span><span class="p">(...);</span>
+</span></span></code></pre></div><p><code>add_work()</code> 表示执行一个动作，通常通过返回值报告执行结果。</p>
+<p>而：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">bool</span> <span class="nf">pci_dev_present</span><span class="p">(...);</span>
+</span></span></code></pre></div><p>表示判断某个条件是否成立，通常返回 <code>true</code> 或 <code>false</code>。</p>
+<p>需要注意，这是一种常见的设计习惯，而不是所有内核 API 都必须遵循的绝对规则。具体返回类型和返回值语义应以函数接口定义为准。</p>
+<h2 id="52-消息打印">5.2 消息打印<a hidden class="anchor" aria-hidden="true" href="#52-消息打印">#</a></h2>
+<h3 id="521-printk-与日志级别">5.2.1 printk 与日志级别<a hidden class="anchor" aria-hidden="true" href="#521-printk-与日志级别">#</a></h3>
+<p>除了向调用者返回错误码，消息打印也是内核开发中最重要的调试手段之一。</p>
+<p>在用户空间中，我们通常使用：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">printf</span><span class="p">(</span><span class="s">&#34;Hello world</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span></code></pre></div><p>而在内核空间中，对应的底层日志接口是：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">printk</span><span class="p">(</span><span class="n">KERN_INFO</span> <span class="s">&#34;Hello world</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span></code></pre></div><p><code>printk()</code> 允许开发者根据消息的重要程度指定日志级别。</p>
+<p>日志级别定义在：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">include/linux/kern_levels.h
+</span></span></code></pre></div><p>之前已经介绍过 <code>KERN_EMERG</code> 到 <code>KERN_DEBUG</code> 这八个级别。</p>
+<p>通过 <code>dmesg</code> 可以查看内核环形缓冲区中的日志。</p>
+<h3 id="522-使用辅助打印接口">5.2.2 使用辅助打印接口<a hidden class="anchor" aria-hidden="true" href="#522-使用辅助打印接口">#</a></h3>
+<p>虽然 <code>printk()</code> 仍然是内核底层的日志打印 API，但在现代 Linux 内核开发中，通常推荐使用具有明确语义的辅助打印接口。</p>
+<p>这些接口可以根据不同的使用场景自动选择合适的日志级别，并且能够携带设备上下文信息。</p>
+<p>主要包括三类：</p>
+<p><strong>1. pr_<!-- raw HTML omitted -->()：常规模块使用</strong></p>
+<p>适用于普通内核模块和不需要特定设备上下文的代码。</p>
+<p>例如：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">pr_emerg</span><span class="p">(</span><span class="s">&#34;Emergency message</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">pr_alert</span><span class="p">(</span><span class="s">&#34;Alert message</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">pr_crit</span><span class="p">(</span><span class="s">&#34;Critical message</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">pr_err</span><span class="p">(</span><span class="s">&#34;Error message</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">pr_warn</span><span class="p">(</span><span class="s">&#34;Warning message</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">pr_notice</span><span class="p">(</span><span class="s">&#34;Notice message</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">pr_info</span><span class="p">(</span><span class="s">&#34;Information message</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">pr_debug</span><span class="p">(</span><span class="s">&#34;Debug message</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span></code></pre></div><p>例如：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">int</span> <span class="n">__init</span> <span class="nf">hello_init</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">pr_info</span><span class="p">(</span><span class="s">&#34;Module initialized</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p><strong>2. dev_<!-- raw HTML omitted -->()：设备驱动程序使用</strong></p>
+<p>对于具有 <code>struct device</code> 设备上下文的驱动程序，推荐使用 <code>dev_&lt;level&gt;()</code> 系列接口。</p>
+<p>例如：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">dev_info</span><span class="p">(</span><span class="n">dev</span><span class="p">,</span> <span class="s">&#34;Device initialized</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">dev_err</span><span class="p">(</span><span class="n">dev</span><span class="p">,</span> <span class="s">&#34;Failed to initialize device</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">dev_warn</span><span class="p">(</span><span class="n">dev</span><span class="p">,</span> <span class="s">&#34;Unexpected device state</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">dev_dbg</span><span class="p">(</span><span class="n">dev</span><span class="p">,</span> <span class="s">&#34;Debug information</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span></code></pre></div><p>这里的 <code>dev</code> 是对应设备的 <code>struct device *</code> 指针。</p>
+<p>与普通 <code>pr_info()</code> 相比，<code>dev_info()</code> 可以自动携带设备相关信息，使日志更容易定位到具体设备。</p>
+<p>例如，在系统存在多个相同型号设备时，设备上下文尤其有用。</p>
+<p><strong>3. netdev_<!-- raw HTML omitted -->()：网络设备驱动程序使用</strong></p>
+<p>对于网络设备驱动程序，推荐使用 <code>netdev_&lt;level&gt;()</code> 系列接口。</p>
+<p>例如：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">netdev_info</span><span class="p">(</span><span class="n">dev</span><span class="p">,</span> <span class="s">&#34;Network device initialized</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">netdev_err</span><span class="p">(</span><span class="n">dev</span><span class="p">,</span> <span class="s">&#34;Failed to initialize network device</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">netdev_warn</span><span class="p">(</span><span class="n">dev</span><span class="p">,</span> <span class="s">&#34;Unexpected network state</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">netdev_dbg</span><span class="p">(</span><span class="n">dev</span><span class="p">,</span> <span class="s">&#34;Debug information</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span></code></pre></div><p>这里的 <code>dev</code> 是 <code>struct net_device *</code> 类型的网络设备指针。</p>
+<p>这类接口能够自动携带网络设备名称等上下文信息。</p>
+<h3 id="523-三类日志接口如何选择">5.2.3 三类日志接口如何选择？<a hidden class="anchor" aria-hidden="true" href="#523-三类日志接口如何选择">#</a></h3>
+<table>
+	<thead>
+			<tr>
+					<th>使用场景</th>
+					<th>推荐接口</th>
+					<th>设备上下文</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>普通内核模块</td>
+					<td><code>pr_&lt;level&gt;()</code></td>
+					<td>无</td>
+			</tr>
+			<tr>
+					<td>普通设备驱动</td>
+					<td><code>dev_&lt;level&gt;()</code></td>
+					<td><code>struct device *</code></td>
+			</tr>
+			<tr>
+					<td>网络设备驱动</td>
+					<td><code>netdev_&lt;level&gt;()</code></td>
+					<td><code>struct net_device *</code></td>
+			</tr>
+	</tbody>
+</table>
+<p>例如：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cm">/* 普通内核模块 */</span>
+</span></span><span class="line"><span class="cl"><span class="nf">pr_info</span><span class="p">(</span><span class="s">&#34;Module loaded</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 普通设备驱动 */</span>
+</span></span><span class="line"><span class="cl"><span class="nf">dev_info</span><span class="p">(</span><span class="o">&amp;</span><span class="n">pdev</span><span class="o">-&gt;</span><span class="n">dev</span><span class="p">,</span> <span class="s">&#34;Device initialized</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 网络设备驱动 */</span>
+</span></span><span class="line"><span class="cl"><span class="nf">netdev_info</span><span class="p">(</span><span class="n">netdev</span><span class="p">,</span> <span class="s">&#34;Network device started</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span></code></pre></div><p>对于普通设备驱动，使用 <code>dev_*()</code> 能够让日志自动携带设备上下文；对于网络驱动，则应该优先使用 <code>netdev_*()</code>。</p>
+<p><strong>核心思想：日志不仅要说明发生了什么，还应该尽可能说明是哪个设备发生了什么。</strong></p>
+<p>这样在多设备、多驱动的复杂系统中，才能更容易定位问题。</p>
+<h1 id="六符号导出与模块依赖">六、符号导出与模块依赖<a hidden class="anchor" aria-hidden="true" href="#六符号导出与模块依赖">#</a></h1>
+<h2 id="61-为什么需要符号导出">6.1 为什么需要符号导出？<a hidden class="anchor" aria-hidden="true" href="#61-为什么需要符号导出">#</a></h2>
+<p>Linux 内核由大量子系统和模块组成，它们之间经常需要相互调用函数或者访问共享数据。</p>
+<p>例如：</p>
+<ul>
+<li>模块 A：提供一个函数 <code>my_func()</code>。</li>
+<li>模块 B：需要调用模块 A 中的 <code>my_func()</code>。</li>
+</ul>
+<p>但是，内核默认不会允许一个模块直接访问另一个模块中所有的内部函数和变量。</p>
+<p>只有显式导出的符号，才能被其他模块引用。</p>
+<p>Linux 提供了两个常见宏：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">EXPORT_SYMBOL</span><span class="p">(</span><span class="n">symbol</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">EXPORT_SYMBOL_GPL</span><span class="p">(</span><span class="n">symbol</span><span class="p">);</span>
+</span></span></code></pre></div><p><strong>EXPORT_SYMBOL</strong></p>
+<p>将指定符号导出，使其他模块可以引用。</p>
+<p><strong>EXPORT_SYMBOL_GPL</strong></p>
+<p>同样用于导出符号，但只允许 GPL 兼容许可证的模块使用。</p>
+<p>如果非 GPL 兼容模块尝试引用仅通过 <code>EXPORT_SYMBOL_GPL</code> 导出的符号，内核通常会拒绝加载。</p>
+<h2 id="62-如何导出函数">6.2 如何导出函数？<a hidden class="anchor" aria-hidden="true" href="#62-如何导出函数">#</a></h2>
+<p>模块 A：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;linux/module.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;linux/kernel.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">my_func</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">pr_info</span><span class="p">(</span><span class="s">&#34;my_func is called</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">EXPORT_SYMBOL</span><span class="p">(</span><span class="n">my_func</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">int</span> <span class="n">__init</span> <span class="nf">module_a_init</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">pr_info</span><span class="p">(</span><span class="s">&#34;module A loaded</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="n">__exit</span> <span class="nf">module_a_exit</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">pr_info</span><span class="p">(</span><span class="s">&#34;module A unloaded</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">module_init</span><span class="p">(</span><span class="n">module_a_init</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">module_exit</span><span class="p">(</span><span class="n">module_a_exit</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">MODULE_LICENSE</span><span class="p">(</span><span class="s">&#34;GPL&#34;</span><span class="p">);</span>
+</span></span></code></pre></div><h2 id="63-模块-b-如何引用">6.3 模块 B 如何引用？<a hidden class="anchor" aria-hidden="true" href="#63-模块-b-如何引用">#</a></h2>
+<p>创建公共头文件 <code>my_export.h</code>：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#ifndef MY_EXPORT_H
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define MY_EXPORT_H
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">my_func</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#endif
+</span></span></span></code></pre></div><p>模块 B：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;linux/module.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;linux/kernel.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;my_export.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">int</span> <span class="n">__init</span> <span class="nf">module_b_init</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">pr_info</span><span class="p">(</span><span class="s">&#34;module B loaded</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">my_func</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="n">__exit</span> <span class="nf">module_b_exit</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">pr_info</span><span class="p">(</span><span class="s">&#34;module B unloaded</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">module_init</span><span class="p">(</span><span class="n">module_b_init</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">module_exit</span><span class="p">(</span><span class="n">module_b_exit</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">MODULE_LICENSE</span><span class="p">(</span><span class="s">&#34;GPL&#34;</span><span class="p">);</span>
+</span></span></code></pre></div><p>这里需要区分两个概念：</p>
+<ul>
+<li>头文件中的函数声明解决编译阶段的类型检查问题。</li>
+<li><code>EXPORT_SYMBOL()</code> 解决模块之间的符号可见性问题。</li>
+</ul>
+<p>仅仅在头文件中声明函数，并不能让其他模块真正获得该函数的实现。</p>
+<h2 id="64-模块依赖关系">6.4 模块依赖关系<a hidden class="anchor" aria-hidden="true" href="#64-模块依赖关系">#</a></h2>
+<p>当模块 B 使用模块 A 导出的符号时，就意味着模块 B 依赖模块 A。</p>
+<p>因此：</p>
+<ol>
+<li>必须先加载模块 A。</li>
+<li>然后才能加载模块 B。</li>
+<li>如果模块 B 仍在使用模块 A 提供的符号，就不能正常卸载模块 A。</li>
+</ol>
+<p>内核通过模块引用计数等机制管理这种依赖关系。</p>
+<h2 id="65-modulesymvers-的作用">6.5 Module.symvers 的作用<a hidden class="anchor" aria-hidden="true" href="#65-modulesymvers-的作用">#</a></h2>
+<p><code>Module.symvers</code> 记录内核或模块构建过程中导出的符号及其相关信息，特别是在启用 <code>CONFIG_MODVERSIONS</code> 时用于符号 CRC 版本检查。</p>
+<p>例如：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">0x12345678    my_func    module_a    EXPORT_SYMBOL
+</span></span></code></pre></div><p>包含：</p>
+<ul>
+<li>符号 CRC。</li>
+<li>符号名称。</li>
+<li>符号所属模块。</li>
+<li>导出类型。</li>
+</ul>
+<p>注意：<code>Module.symvers</code> 不是运行时内核的全局符号表，而是构建阶段使用的符号信息文件。</p>
+<p>真正运行时的符号查找由内核模块加载机制完成。</p>
+<h2 id="66-如何正确构建存在依赖关系的模块">6.6 如何正确构建存在依赖关系的模块？<a hidden class="anchor" aria-hidden="true" href="#66-如何正确构建存在依赖关系的模块">#</a></h2>
+<p>如果模块 A 和模块 B 都是外部模块，可以将它们放在同一个 Kbuild Makefile 中：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-makefile" data-lang="makefile"><span class="line"><span class="cl"><span class="nv">obj-m</span> <span class="o">:=</span> module_a.o module_b.o
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nv">KERNELDIR</span> <span class="o">?=</span> /lib/modules/<span class="k">$(</span>shell uname -r<span class="k">)</span>/build
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">all</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">	<span class="k">$(</span>MAKE<span class="k">)</span> -C <span class="k">$(</span>KERNELDIR<span class="k">)</span> <span class="nv">M</span><span class="o">=</span><span class="k">$(</span>PWD<span class="k">)</span> modules
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">clean</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">	<span class="k">$(</span>MAKE<span class="k">)</span> -C <span class="k">$(</span>KERNELDIR<span class="k">)</span> <span class="nv">M</span><span class="o">=</span><span class="k">$(</span>PWD<span class="k">)</span> clean
+</span></span></code></pre></div><p>如果模块 A 和模块 B 分开构建，则需要向模块 B 的构建过程提供模块 A 的 <code>Module.symvers</code>：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-makefile" data-lang="makefile"><span class="line"><span class="cl"><span class="nv">KBUILD_EXTRA_SYMBOLS</span> <span class="o">+=</span> /path/to/module_a/Module.symvers
+</span></span></code></pre></div><p>模块安装到系统后，可以执行：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sudo depmod -a
+</span></span></code></pre></div><p>之后通过：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sudo modprobe module_b
+</span></span></code></pre></div><p>由 <code>modprobe</code> 根据依赖关系自动加载模块 A 和模块 B。</p>
+<h1 id="七常用内核模块管理命令">七、常用内核模块管理命令<a hidden class="anchor" aria-hidden="true" href="#七常用内核模块管理命令">#</a></h1>
+<table>
+	<thead>
+			<tr>
+					<th>命令</th>
+					<th>作用</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>insmod</code></td>
+					<td>加载指定的模块文件</td>
+			</tr>
+			<tr>
+					<td><code>rmmod</code></td>
+					<td>卸载指定的内核模块</td>
+			</tr>
+			<tr>
+					<td><code>modprobe</code></td>
+					<td>加载模块并自动处理依赖</td>
+			</tr>
+			<tr>
+					<td><code>lsmod</code></td>
+					<td>查看当前已加载的模块</td>
+			</tr>
+			<tr>
+					<td><code>modinfo</code></td>
+					<td>查看模块元信息</td>
+			</tr>
+			<tr>
+					<td><code>depmod</code></td>
+					<td>生成或更新模块依赖及符号映射信息</td>
+			</tr>
+			<tr>
+					<td><code>dmesg</code></td>
+					<td>查看内核环形缓冲区日志</td>
+			</tr>
+	</tbody>
+</table>
+<p>常见使用示例：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 编译模块</span>
+</span></span><span class="line"><span class="cl">make
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 加载模块</span>
+</span></span><span class="line"><span class="cl">sudo insmod helloworld.ko
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 查看模块信息</span>
+</span></span><span class="line"><span class="cl">modinfo helloworld.ko
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 查看已加载模块</span>
+</span></span><span class="line"><span class="cl">lsmod
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 查看模块依赖</span>
+</span></span><span class="line"><span class="cl">modprobe --show-depends helloworld
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 卸载模块</span>
+</span></span><span class="line"><span class="cl">sudo rmmod helloworld
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 查看内核日志</span>
+</span></span><span class="line"><span class="cl">sudo dmesg
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 实时监控内核日志</span>
+</span></span><span class="line"><span class="cl">sudo dmesg -w
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 更新模块依赖信息</span>
+</span></span><span class="line"><span class="cl">sudo depmod -a
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 清理构建文件</span>
+</span></span><span class="line"><span class="cl">make clean
+</span></span></code></pre></div><h1 id="八总结">八、总结<a hidden class="anchor" aria-hidden="true" href="#八总结">#</a></h1>
+<p>本章主要介绍了 Linux 内核模块的基本开发流程，以及内核开发中需要遵循的一些重要规范。</p>
+<p>从开发角度来看，一个内核模块通常需要经历以下过程：</p>
+<ol>
+<li>编写模块源代码，定义初始化函数和退出函数。</li>
+<li>使用 <code>module_init()</code> 和 <code>module_exit()</code> 注册模块入口和出口。</li>
+<li>使用 Kbuild 编译模块，生成 <code>.ko</code> 文件。</li>
+<li>使用 <code>insmod</code> 或 <code>modprobe</code> 加载模块。</li>
+<li>模块初始化函数执行，完成资源申请和功能注册。</li>
+<li>模块正常运行，通过日志和调试工具进行分析。</li>
+<li>使用 <code>rmmod</code> 卸载模块，执行退出函数并释放资源。</li>
+</ol>
+<p>需要重点理解的概念：</p>
+<ul>
+<li>内核模块是 Linux 内核实现模块化扩展的重要机制。</li>
+<li><code>__init</code> 和 <code>__exit</code> 用于标记模块初始化和退出阶段的代码。</li>
+<li><code>module_init()</code> 和 <code>module_exit()</code> 用于注册模块生命周期入口。</li>
+<li><code>module_param()</code> 和 <code>module_param_array()</code> 用于定义模块参数。</li>
+<li><code>EXPORT_SYMBOL()</code> 和 <code>EXPORT_SYMBOL_GPL()</code> 用于导出模块可以使用的符号。</li>
+<li><code>Module.symvers</code> 用于构建阶段的符号信息和版本检查。</li>
+<li>Kbuild 是构建 Linux 内核及外部模块的核心构建系统。</li>
+<li>内核错误处理必须保证错误码准确，并且正确回滚已经申请的资源。</li>
+<li>内核日志应该根据使用场景选择 <code>pr_*()</code>、<code>dev_*()</code> 或 <code>netdev_*()</code>。</li>
+</ul>
+<p><strong>最后，内核开发不是重复造轮子，而是在前人积累的经验和内核已有基础设施之上进行开发。</strong></p>
+<p>学习 Linux 内核时，不仅要理解某个 API 如何使用，更应该学会阅读内核源码，寻找已有子系统和驱动程序中的成熟实现，理解它们为什么采用这样的设计。</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="http://localhost:1313/tags/%E5%86%85%E6%A0%B8%E6%A8%A1%E5%9D%97/">内核模块</a></li>
+      <li><a href="http://localhost:1313/tags/%E9%A9%B1%E5%8A%A8%E5%BC%80%E5%8F%91/">驱动开发</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="next" href="http://localhost:1313/posts/lkd04/">
+    <span class="title">Next »</span>
+    <span>LKD阅读笔记-第四章-进程调度</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="http://localhost:1313/">Minghan的博客</a></span> · 
+
+    
+    
+    <span>
+        Powered by
+        <a href="https://gohugo.io/?utm_source=papermod" rel="noopener" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" id="top-link" class="top-link hidden" aria-label="go to top" title="Go to Top (Alt + G)" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevrons-up">
+        <polyline points="17 11 12 6 7 11"></polyline>
+        <polyline points="17 18 12 13 7 18"></polyline>
+    </svg>
+</a><script src="/js/toc-scrollspy.js" defer></script>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var toplink = document.getElementById("top-link");
+    window.onscroll = function () {
+        const scrollThreshold = window.innerHeight;
+        if (document.body.scrollTop > scrollThreshold || document.documentElement.scrollTop > scrollThreshold) {
+            toplink.classList.remove("hidden");
+        } else {
+            toplink.classList.add("hidden");
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

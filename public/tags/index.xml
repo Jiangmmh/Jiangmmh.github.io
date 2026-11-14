@@ -6,8 +6,64 @@
     <description>Recent content in Tags on Minghan的博客</description>
     <generator>Hugo</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Fri, 06 Nov 2026 20:57:50 +0800</lastBuildDate>
+    <lastBuildDate>Sat, 14 Nov 2026 10:56:37 +0800</lastBuildDate>
     <atom:link href="http://localhost:1313/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>内核模块</title>
+      <link>http://localhost:1313/tags/%E5%86%85%E6%A0%B8%E6%A8%A1%E5%9D%97/</link>
+      <pubDate>Sat, 14 Nov 2026 10:56:37 +0800</pubDate>
+      <guid>http://localhost:1313/tags/%E5%86%85%E6%A0%B8%E6%A8%A1%E5%9D%97/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>驱动开发</title>
+      <link>http://localhost:1313/tags/%E9%A9%B1%E5%8A%A8%E5%BC%80%E5%8F%91/</link>
+      <pubDate>Sat, 14 Nov 2026 10:56:37 +0800</pubDate>
+      <guid>http://localhost:1313/tags/%E9%A9%B1%E5%8A%A8%E5%BC%80%E5%8F%91/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>CFS</title>
+      <link>http://localhost:1313/tags/cfs/</link>
+      <pubDate>Sun, 08 Nov 2026 21:20:53 +0800</pubDate>
+      <guid>http://localhost:1313/tags/cfs/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Linux内核</title>
+      <link>http://localhost:1313/tags/linux%E5%86%85%E6%A0%B8/</link>
+      <pubDate>Sun, 08 Nov 2026 21:20:53 +0800</pubDate>
+      <guid>http://localhost:1313/tags/linux%E5%86%85%E6%A0%B8/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>进程调度</title>
+      <link>http://localhost:1313/tags/%E8%BF%9B%E7%A8%8B%E8%B0%83%E5%BA%A6/</link>
+      <pubDate>Sun, 08 Nov 2026 21:20:53 +0800</pubDate>
+      <guid>http://localhost:1313/tags/%E8%BF%9B%E7%A8%8B%E8%B0%83%E5%BA%A6/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Linux Kernel</title>
+      <link>http://localhost:1313/tags/linux-kernel/</link>
+      <pubDate>Fri, 06 Nov 2026 21:07:12 +0800</pubDate>
+      <guid>http://localhost:1313/tags/linux-kernel/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Linux Kernel Development</title>
+      <link>http://localhost:1313/tags/linux-kernel-development/</link>
+      <pubDate>Fri, 06 Nov 2026 21:07:12 +0800</pubDate>
+      <guid>http://localhost:1313/tags/linux-kernel-development/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>进程管理</title>
+      <link>http://localhost:1313/tags/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%86/</link>
+      <pubDate>Fri, 06 Nov 2026 21:07:12 +0800</pubDate>
+      <guid>http://localhost:1313/tags/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%86/</guid>
+      <description></description>
+    </item>
     <item>
       <title>SQL</title>
       <link>http://localhost:1313/tags/sql/</link>
@@ -170,20 +226,6 @@
       <description></description>
     </item>
     <item>
-      <title>Linux内核</title>
-      <link>http://localhost:1313/tags/linux%E5%86%85%E6%A0%B8/</link>
-      <pubDate>Tue, 03 Nov 2026 22:11:04 +0800</pubDate>
-      <guid>http://localhost:1313/tags/linux%E5%86%85%E6%A0%B8/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>Unix</title>
-      <link>http://localhost:1313/tags/unix/</link>
-      <pubDate>Tue, 03 Nov 2026 21:20:56 +0800</pubDate>
-      <guid>http://localhost:1313/tags/unix/</guid>
-      <description></description>
-    </item>
-    <item>
       <title>Cow-Fork</title>
       <link>http://localhost:1313/tags/cow-fork/</link>
       <pubDate>Tue, 03 Nov 2026 21:10:44 +0800</pubDate>
@@ -195,27 +237,6 @@
       <link>http://localhost:1313/tags/trap/</link>
       <pubDate>Sun, 01 Nov 2026 10:27:29 +0800</pubDate>
       <guid>http://localhost:1313/tags/trap/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>Computer Networks a Systems Approach</title>
-      <link>http://localhost:1313/tags/computer-networks-a-systems-approach/</link>
-      <pubDate>Fri, 30 Oct 2026 11:59:50 +0800</pubDate>
-      <guid>http://localhost:1313/tags/computer-networks-a-systems-approach/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>TCP</title>
-      <link>http://localhost:1313/tags/tcp/</link>
-      <pubDate>Fri, 30 Oct 2026 11:59:50 +0800</pubDate>
-      <guid>http://localhost:1313/tags/tcp/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>TCP/IP</title>
-      <link>http://localhost:1313/tags/tcp/ip/</link>
-      <pubDate>Fri, 30 Oct 2026 11:59:50 +0800</pubDate>
-      <guid>http://localhost:1313/tags/tcp/ip/</guid>
       <description></description>
     </item>
     <item>
@@ -384,6 +405,13 @@
       <link>http://localhost:1313/tags/socket/</link>
       <pubDate>Thu, 22 Oct 2026 15:33:34 +0800</pubDate>
       <guid>http://localhost:1313/tags/socket/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>TCP</title>
+      <link>http://localhost:1313/tags/tcp/</link>
+      <pubDate>Thu, 22 Oct 2026 15:33:34 +0800</pubDate>
+      <guid>http://localhost:1313/tags/tcp/</guid>
       <description></description>
     </item>
     <item>

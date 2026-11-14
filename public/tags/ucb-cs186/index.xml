@@ -9,7 +9,7 @@
     <lastBuildDate>Fri, 06 Nov 2026 20:57:50 +0800</lastBuildDate>
     <atom:link href="http://localhost:1313/tags/ucb-cs186/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>UCB CS186 Project 1：SQL 基础与查询实践</title>
+      <title>UCB CS186 Project 1：SQL </title>
       <link>http://localhost:1313/posts/cs186-proj1/</link>
       <pubDate>Fri, 06 Nov 2026 20:57:50 +0800</pubDate>
       <guid>http://localhost:1313/posts/cs186-proj1/</guid>
@@ -32,8 +32,7 @@
 &lt;p&gt;首先拉取项目仓库：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;git clone https://github.com/berkeley-cs186/sp26-proj1.git
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nb&#34;&gt;cd&lt;/span&gt; sp26-proj1
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;下载数据库文件：&lt;/p&gt;
-&lt;p&gt;&lt;a href=&#34;https://github.com/songsi1111/CS186-proj1/blob/main/lahman.db&#34;&gt;lahman.db&lt;/a&gt;&lt;/p&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;下载数据库文件：&lt;a href=&#34;https://github.com/songsi1111/CS186-proj1/blob/main/lahman.db&#34;&gt;lahman.db&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;将数据库文件放到项目要求的位置。&lt;/p&gt;
 &lt;p&gt;本项目使用 SQLite，因此可以直接使用 SQLite 命令行工具查看数据库。&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sqlite3 lahman.db

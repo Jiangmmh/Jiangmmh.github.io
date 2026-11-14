@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>进程调度 on Minghan的博客</title>
+    <link>http://localhost:1313/tags/%E8%BF%9B%E7%A8%8B%E8%B0%83%E5%BA%A6/</link>
+    <description>Recent content in 进程调度 on Minghan的博客</description>
+    <generator>Hugo</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Sun, 08 Nov 2026 21:20:53 +0800</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/%E8%BF%9B%E7%A8%8B%E8%B0%83%E5%BA%A6/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>LKD阅读笔记-第四章-进程调度</title>
+      <link>http://localhost:1313/posts/lkd04/</link>
+      <pubDate>Sun, 08 Nov 2026 21:20:53 +0800</pubDate>
+      <guid>http://localhost:1313/posts/lkd04/</guid>
+      <description>&lt;h1 id=&#34;一进程调度what--why&#34;&gt;一、进程调度：What &amp;amp; Why？&lt;/h1&gt;
+&lt;p&gt;上一章介绍了进程管理，讨论了 Linux 如何创建、管理和销毁进程。本章进一步讨论一个核心问题：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;当系统中存在多个可运行进程，但 CPU 资源有限时，内核应该选择哪个进程运行？&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;这就是进程调度（Process Scheduling）。&lt;/p&gt;
+&lt;p&gt;进程调度器（Process Scheduler）是内核中负责分配处理器时间的子系统，它决定：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;哪个进程获得 CPU？&lt;/li&gt;
+&lt;li&gt;进程什么时候获得 CPU？&lt;/li&gt;
+&lt;li&gt;进程可以运行多长时间？&lt;/li&gt;
+&lt;li&gt;什么时候应该暂停当前进程，让其他进程运行？&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;调度器是多任务操作系统的基础。它通过合理分配 CPU 时间，使多个进程能够交替执行，让用户感觉多个程序似乎在同时运行。&lt;/p&gt;
+&lt;h2 id=&#34;11-调度器的基本目标&#34;&gt;1.1 调度器的基本目标&lt;/h2&gt;
+&lt;p&gt;假设一台单核计算机上存在三个进程：&lt;/p&gt;
+&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;进程&lt;/th&gt;
+					&lt;th&gt;类型&lt;/th&gt;
+					&lt;th&gt;当前状态&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;A&lt;/td&gt;
+					&lt;td&gt;文本编辑器&lt;/td&gt;
+					&lt;td&gt;等待键盘输入&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;B&lt;/td&gt;
+					&lt;td&gt;视频编码&lt;/td&gt;
+					&lt;td&gt;正在计算&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;C&lt;/td&gt;
+					&lt;td&gt;后台任务&lt;/td&gt;
+					&lt;td&gt;等待运行&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;CPU 在同一时刻只能执行一个进程。&lt;/p&gt;
+&lt;p&gt;如果 A 正在等待用户输入，继续让 A 占用 CPU 显然没有意义；此时应该让 B 或 C 运行。&lt;/p&gt;
+&lt;p&gt;因此，调度器的一个基本原则是：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;只要系统中存在可运行进程，CPU 就应该尽可能保持忙碌。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;注意，这里有一个重要概念：&lt;strong&gt;Runnable（可运行）不等于 Running（正在运行）&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;一个进程可能处于以下两种情况：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;正在 CPU 上执行。&lt;/li&gt;
+&lt;li&gt;已经具备执行条件，只是在等待 CPU 资源。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;而正在等待磁盘 I/O、键盘输入、网络数据或其他事件的进程，属于阻塞状态（Blocked），暂时不参与 CPU 调度。&lt;/p&gt;
+&lt;p&gt;例如，一个进程执行 &lt;code&gt;read()&lt;/code&gt;，但磁盘数据尚未准备好，它就可能进入睡眠状态。此时调度器应该选择其他可运行进程，而不是让它不断占用 CPU 检查数据是否到达。&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

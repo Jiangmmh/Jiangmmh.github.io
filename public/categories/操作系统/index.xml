@@ -6,8 +6,178 @@
     <description>Recent content in 操作系统 on Minghan的博客</description>
     <generator>Hugo</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Thu, 05 Nov 2026 20:00:00 +0800</lastBuildDate>
+    <lastBuildDate>Sun, 08 Nov 2026 21:20:53 +0800</lastBuildDate>
     <atom:link href="http://localhost:1313/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>LKD阅读笔记-第四章-进程调度</title>
+      <link>http://localhost:1313/posts/lkd04/</link>
+      <pubDate>Sun, 08 Nov 2026 21:20:53 +0800</pubDate>
+      <guid>http://localhost:1313/posts/lkd04/</guid>
+      <description>&lt;h1 id=&#34;一进程调度what--why&#34;&gt;一、进程调度：What &amp;amp; Why？&lt;/h1&gt;
+&lt;p&gt;上一章介绍了进程管理，讨论了 Linux 如何创建、管理和销毁进程。本章进一步讨论一个核心问题：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;当系统中存在多个可运行进程，但 CPU 资源有限时，内核应该选择哪个进程运行？&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;这就是进程调度（Process Scheduling）。&lt;/p&gt;
+&lt;p&gt;进程调度器（Process Scheduler）是内核中负责分配处理器时间的子系统，它决定：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;哪个进程获得 CPU？&lt;/li&gt;
+&lt;li&gt;进程什么时候获得 CPU？&lt;/li&gt;
+&lt;li&gt;进程可以运行多长时间？&lt;/li&gt;
+&lt;li&gt;什么时候应该暂停当前进程，让其他进程运行？&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;调度器是多任务操作系统的基础。它通过合理分配 CPU 时间，使多个进程能够交替执行，让用户感觉多个程序似乎在同时运行。&lt;/p&gt;
+&lt;h2 id=&#34;11-调度器的基本目标&#34;&gt;1.1 调度器的基本目标&lt;/h2&gt;
+&lt;p&gt;假设一台单核计算机上存在三个进程：&lt;/p&gt;
+&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;进程&lt;/th&gt;
+					&lt;th&gt;类型&lt;/th&gt;
+					&lt;th&gt;当前状态&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;A&lt;/td&gt;
+					&lt;td&gt;文本编辑器&lt;/td&gt;
+					&lt;td&gt;等待键盘输入&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;B&lt;/td&gt;
+					&lt;td&gt;视频编码&lt;/td&gt;
+					&lt;td&gt;正在计算&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;C&lt;/td&gt;
+					&lt;td&gt;后台任务&lt;/td&gt;
+					&lt;td&gt;等待运行&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;CPU 在同一时刻只能执行一个进程。&lt;/p&gt;
+&lt;p&gt;如果 A 正在等待用户输入，继续让 A 占用 CPU 显然没有意义；此时应该让 B 或 C 运行。&lt;/p&gt;
+&lt;p&gt;因此，调度器的一个基本原则是：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;只要系统中存在可运行进程，CPU 就应该尽可能保持忙碌。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;注意，这里有一个重要概念：&lt;strong&gt;Runnable（可运行）不等于 Running（正在运行）&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;一个进程可能处于以下两种情况：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;正在 CPU 上执行。&lt;/li&gt;
+&lt;li&gt;已经具备执行条件，只是在等待 CPU 资源。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;而正在等待磁盘 I/O、键盘输入、网络数据或其他事件的进程，属于阻塞状态（Blocked），暂时不参与 CPU 调度。&lt;/p&gt;
+&lt;p&gt;例如，一个进程执行 &lt;code&gt;read()&lt;/code&gt;，但磁盘数据尚未准备好，它就可能进入睡眠状态。此时调度器应该选择其他可运行进程，而不是让它不断占用 CPU 检查数据是否到达。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>LKD阅读笔记-第三章-进程管理</title>
+      <link>http://localhost:1313/posts/lkd03/</link>
+      <pubDate>Fri, 06 Nov 2026 21:07:12 +0800</pubDate>
+      <guid>http://localhost:1313/posts/lkd03/</guid>
+      <description>&lt;h1 id=&#34;一进程是什么&#34;&gt;一、进程是什么？&lt;/h1&gt;
+&lt;p&gt;进程（Process）是程序执行过程中的一个实例。&lt;/p&gt;
+&lt;p&gt;程序（Program）是存储在磁盘上的静态指令和数据，而进程是程序运行时的动态实体。一个程序可以对应多个进程；一个进程也不只是代码本身，它还拥有自己的运行状态、虚拟地址空间、打开的文件、信号处理信息以及处理器上下文等资源。&lt;/p&gt;
+&lt;p&gt;从操作系统的角度看，进程是资源分配和管理的重要单位，也是内核进行调度和管理的基本对象。&lt;/p&gt;
+&lt;p&gt;一个进程通常包含以下几个方面：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;代码和数据&lt;/strong&gt;：程序的指令以及全局变量、静态变量等。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;虚拟地址空间&lt;/strong&gt;：进程可以访问的虚拟内存范围。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;打开的文件&lt;/strong&gt;：进程持有的文件描述符及其对应的内核对象。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;处理器上下文&lt;/strong&gt;：程序计数器、寄存器、栈指针等运行状态。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;进程控制信息&lt;/strong&gt;：进程 ID、父进程、状态、调度信息等。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;需要注意：&lt;strong&gt;进程是内核管理的实体，而不是简单的一段代码。&lt;/strong&gt;&lt;/p&gt;
+&lt;h1 id=&#34;二进程描述符与-task_struct&#34;&gt;二、进程描述符与 task_struct&lt;/h1&gt;
+&lt;h2 id=&#34;21-什么是进程描述符&#34;&gt;2.1 什么是进程描述符？&lt;/h2&gt;
+&lt;p&gt;内核需要一种数据结构来描述和管理进程。&lt;/p&gt;
+&lt;p&gt;Linux 使用 &lt;code&gt;struct task_struct&lt;/code&gt; 表示进程描述符（Process Descriptor）。它定义在：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;include&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;/&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;linux&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;/&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;sched&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;h&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;每一个进程都有一个对应的 &lt;code&gt;task_struct&lt;/code&gt;，内核通过它获取进程的状态、调度信息、内存管理信息以及其他资源。&lt;/p&gt;
+&lt;p&gt;可以把 &lt;code&gt;task_struct&lt;/code&gt; 理解为内核管理进程的核心控制块，类似于其他操作系统中的 PCB（Process Control Block）。&lt;/p&gt;
+&lt;p&gt;Linux 的进程描述符包含大量信息，常见字段如下：&lt;/p&gt;
+&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;字段&lt;/th&gt;
+					&lt;th&gt;作用&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;state&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;进程当前状态&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;pid&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;进程 ID&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;tgid&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;线程组 ID&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;flags&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;进程标志&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;prio&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;动态优先级&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;static_prio&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;静态优先级&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;normal_prio&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;普通优先级&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;policy&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;调度策略&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;mm&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;进程内存描述符&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;active_mm&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;当前活动地址空间&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;parent&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;父进程&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;children&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;子进程链表&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;real_parent&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;实际父进程&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;files&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;打开的文件信息&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;fs&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;文件系统相关信息&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;signal&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;信号相关信息&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;sighand&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;信号处理信息&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;tasks&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;进程任务链表节点&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;注意：这里列出的是帮助理解的代表性字段，不意味着不同 Linux 内核版本中的字段布局完全一致。Linux 内核数据结构会随着版本不断演进。&lt;/p&gt;</description>
+    </item>
     <item>
       <title>再探xv6-shell详解</title>
       <link>http://localhost:1313/posts/xv6-shell/</link>
@@ -121,7 +291,7 @@
 &lt;p&gt;虚拟内存系统通过页表（Page Table）将虚拟地址转换为物理地址。&lt;/p&gt;</description>
     </item>
     <item>
-      <title>LKD阅读笔记-第二章</title>
+      <title>LKD阅读笔记-第二章-获取内核</title>
       <link>http://localhost:1313/posts/lkd02/</link>
       <pubDate>Tue, 03 Nov 2026 22:11:04 +0800</pubDate>
       <guid>http://localhost:1313/posts/lkd02/</guid>
@@ -158,7 +328,7 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;查看当前版本：&lt;/p&gt;</description>
     </item>
     <item>
-      <title>LKD阅读笔记-第一章</title>
+      <title>LKD阅读笔记-第一章-内核简介</title>
       <link>http://localhost:1313/posts/lkd01/</link>
       <pubDate>Tue, 03 Nov 2026 21:20:56 +0800</pubDate>
       <guid>http://localhost:1313/posts/lkd01/</guid>

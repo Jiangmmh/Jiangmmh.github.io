@@ -1,0 +1,2473 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>LKD阅读笔记-第四章-进程调度 | Minghan的博客</title>
+<meta name="keywords" content="Linux内核, 进程调度, CFS">
+<meta name="description" content="一、进程调度：What &amp; Why？
+上一章介绍了进程管理，讨论了 Linux 如何创建、管理和销毁进程。本章进一步讨论一个核心问题：
+当系统中存在多个可运行进程，但 CPU 资源有限时，内核应该选择哪个进程运行？
+这就是进程调度（Process Scheduling）。
+进程调度器（Process Scheduler）是内核中负责分配处理器时间的子系统，它决定：
+
+哪个进程获得 CPU？
+进程什么时候获得 CPU？
+进程可以运行多长时间？
+什么时候应该暂停当前进程，让其他进程运行？
+
+调度器是多任务操作系统的基础。它通过合理分配 CPU 时间，使多个进程能够交替执行，让用户感觉多个程序似乎在同时运行。
+1.1 调度器的基本目标
+假设一台单核计算机上存在三个进程：
+
+	
+			
+					进程
+					类型
+					当前状态
+			
+	
+	
+			
+					A
+					文本编辑器
+					等待键盘输入
+			
+			
+					B
+					视频编码
+					正在计算
+			
+			
+					C
+					后台任务
+					等待运行
+			
+	
+
+CPU 在同一时刻只能执行一个进程。
+如果 A 正在等待用户输入，继续让 A 占用 CPU 显然没有意义；此时应该让 B 或 C 运行。
+因此，调度器的一个基本原则是：
+
+只要系统中存在可运行进程，CPU 就应该尽可能保持忙碌。
+
+注意，这里有一个重要概念：Runnable（可运行）不等于 Running（正在运行）。
+一个进程可能处于以下两种情况：
+
+正在 CPU 上执行。
+已经具备执行条件，只是在等待 CPU 资源。
+
+而正在等待磁盘 I/O、键盘输入、网络数据或其他事件的进程，属于阻塞状态（Blocked），暂时不参与 CPU 调度。
+例如，一个进程执行 read()，但磁盘数据尚未准备好，它就可能进入睡眠状态。此时调度器应该选择其他可运行进程，而不是让它不断占用 CPU 检查数据是否到达。">
+<meta name="author" content="">
+<link rel="canonical" href="http://localhost:1313/posts/lkd04/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.f9490c4bd2e7d3fd9e21909b0bc528878329710db51c69d38b7057b37e889c1d.css" integrity="sha256-&#43;UkMS9Ln0/2eIZCbC8Uoh4MpcQ21HGnTi3BXs36InB0=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/lkd04/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css"
+>
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/contrib/auto-render.min.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    if (typeof renderMathInElement !== "function") {
+      console.error("KaTeX auto-render 加载失败");
+      return;
+    }
+
+    document.querySelectorAll(".post-content, .book-content").forEach(function (element) {
+      renderMathInElement(element, {
+        delimiters: [
+          { left: "$$", right: "$$", display: true },
+          { left: "\\[", right: "\\]", display: true },
+          { left: "\\(", right: "\\)", display: false }
+        ],
+        throwOnError: false
+      });
+    });
+  });
+</script>
+
+<meta property="og:url" content="http://localhost:1313/posts/lkd04/">
+  <meta property="og:site_name" content="Minghan的博客">
+  <meta property="og:title" content="LKD阅读笔记-第四章-进程调度">
+  <meta property="og:description" content="一、进程调度：What &amp; Why？ 上一章介绍了进程管理，讨论了 Linux 如何创建、管理和销毁进程。本章进一步讨论一个核心问题：
+当系统中存在多个可运行进程，但 CPU 资源有限时，内核应该选择哪个进程运行？
+这就是进程调度（Process Scheduling）。
+进程调度器（Process Scheduler）是内核中负责分配处理器时间的子系统，它决定：
+哪个进程获得 CPU？ 进程什么时候获得 CPU？ 进程可以运行多长时间？ 什么时候应该暂停当前进程，让其他进程运行？ 调度器是多任务操作系统的基础。它通过合理分配 CPU 时间，使多个进程能够交替执行，让用户感觉多个程序似乎在同时运行。
+1.1 调度器的基本目标 假设一台单核计算机上存在三个进程：
+进程 类型 当前状态 A 文本编辑器 等待键盘输入 B 视频编码 正在计算 C 后台任务 等待运行 CPU 在同一时刻只能执行一个进程。
+如果 A 正在等待用户输入，继续让 A 占用 CPU 显然没有意义；此时应该让 B 或 C 运行。
+因此，调度器的一个基本原则是：
+只要系统中存在可运行进程，CPU 就应该尽可能保持忙碌。
+注意，这里有一个重要概念：Runnable（可运行）不等于 Running（正在运行）。
+一个进程可能处于以下两种情况：
+正在 CPU 上执行。 已经具备执行条件，只是在等待 CPU 资源。 而正在等待磁盘 I/O、键盘输入、网络数据或其他事件的进程，属于阻塞状态（Blocked），暂时不参与 CPU 调度。
+例如，一个进程执行 read()，但磁盘数据尚未准备好，它就可能进入睡眠状态。此时调度器应该选择其他可运行进程，而不是让它不断占用 CPU 检查数据是否到达。">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-11-08T21:20:53+08:00">
+    <meta property="article:modified_time" content="2026-11-08T21:20:53+08:00">
+    <meta property="article:tag" content="Linux内核">
+    <meta property="article:tag" content="进程调度">
+    <meta property="article:tag" content="CFS">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="LKD阅读笔记-第四章-进程调度">
+  <meta name="twitter:description" content="一、进程调度：What &amp; Why？ 上一章介绍了进程管理，讨论了 Linux 如何创建、管理和销毁进程。本章进一步讨论一个核心问题：
+当系统中存在多个可运行进程，但 CPU 资源有限时，内核应该选择哪个进程运行？
+这就是进程调度（Process Scheduling）。
+进程调度器（Process Scheduler）是内核中负责分配处理器时间的子系统，它决定：
+哪个进程获得 CPU？ 进程什么时候获得 CPU？ 进程可以运行多长时间？ 什么时候应该暂停当前进程，让其他进程运行？ 调度器是多任务操作系统的基础。它通过合理分配 CPU 时间，使多个进程能够交替执行，让用户感觉多个程序似乎在同时运行。
+1.1 调度器的基本目标 假设一台单核计算机上存在三个进程：
+进程 类型 当前状态 A 文本编辑器 等待键盘输入 B 视频编码 正在计算 C 后台任务 等待运行 CPU 在同一时刻只能执行一个进程。
+如果 A 正在等待用户输入，继续让 A 占用 CPU 显然没有意义；此时应该让 B 或 C 运行。
+因此，调度器的一个基本原则是：
+只要系统中存在可运行进程，CPU 就应该尽可能保持忙碌。
+注意，这里有一个重要概念：Runnable（可运行）不等于 Running（正在运行）。
+一个进程可能处于以下两种情况：
+正在 CPU 上执行。 已经具备执行条件，只是在等待 CPU 资源。 而正在等待磁盘 I/O、键盘输入、网络数据或其他事件的进程，属于阻塞状态（Blocked），暂时不参与 CPU 调度。
+例如，一个进程执行 read()，但磁盘数据尚未准备好，它就可能进入睡眠状态。此时调度器应该选择其他可运行进程，而不是让它不断占用 CPU 检查数据是否到达。">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "http://localhost:1313/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "LKD阅读笔记-第四章-进程调度",
+      "item": "http://localhost:1313/posts/lkd04/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "LKD阅读笔记-第四章-进程调度",
+  "name": "LKD阅读笔记-第四章-进程调度",
+  "description": "一、进程调度：What \u0026amp; Why？ 上一章介绍了进程管理，讨论了 Linux 如何创建、管理和销毁进程。本章进一步讨论一个核心问题：\n当系统中存在多个可运行进程，但 CPU 资源有限时，内核应该选择哪个进程运行？\n这就是进程调度（Process Scheduling）。\n进程调度器（Process Scheduler）是内核中负责分配处理器时间的子系统，它决定：\n哪个进程获得 CPU？ 进程什么时候获得 CPU？ 进程可以运行多长时间？ 什么时候应该暂停当前进程，让其他进程运行？ 调度器是多任务操作系统的基础。它通过合理分配 CPU 时间，使多个进程能够交替执行，让用户感觉多个程序似乎在同时运行。\n1.1 调度器的基本目标 假设一台单核计算机上存在三个进程：\n进程 类型 当前状态 A 文本编辑器 等待键盘输入 B 视频编码 正在计算 C 后台任务 等待运行 CPU 在同一时刻只能执行一个进程。\n如果 A 正在等待用户输入，继续让 A 占用 CPU 显然没有意义；此时应该让 B 或 C 运行。\n因此，调度器的一个基本原则是：\n只要系统中存在可运行进程，CPU 就应该尽可能保持忙碌。\n注意，这里有一个重要概念：Runnable（可运行）不等于 Running（正在运行）。\n一个进程可能处于以下两种情况：\n正在 CPU 上执行。 已经具备执行条件，只是在等待 CPU 资源。 而正在等待磁盘 I/O、键盘输入、网络数据或其他事件的进程，属于阻塞状态（Blocked），暂时不参与 CPU 调度。\n例如，一个进程执行 read()，但磁盘数据尚未准备好，它就可能进入睡眠状态。此时调度器应该选择其他可运行进程，而不是让它不断占用 CPU 检查数据是否到达。\n",
+  "keywords": [
+    "Linux内核", "进程调度", "CFS"
+  ],
+  "articleBody": "一、进程调度：What \u0026 Why？ 上一章介绍了进程管理，讨论了 Linux 如何创建、管理和销毁进程。本章进一步讨论一个核心问题：\n当系统中存在多个可运行进程，但 CPU 资源有限时，内核应该选择哪个进程运行？\n这就是进程调度（Process Scheduling）。\n进程调度器（Process Scheduler）是内核中负责分配处理器时间的子系统，它决定：\n哪个进程获得 CPU？ 进程什么时候获得 CPU？ 进程可以运行多长时间？ 什么时候应该暂停当前进程，让其他进程运行？ 调度器是多任务操作系统的基础。它通过合理分配 CPU 时间，使多个进程能够交替执行，让用户感觉多个程序似乎在同时运行。\n1.1 调度器的基本目标 假设一台单核计算机上存在三个进程：\n进程 类型 当前状态 A 文本编辑器 等待键盘输入 B 视频编码 正在计算 C 后台任务 等待运行 CPU 在同一时刻只能执行一个进程。\n如果 A 正在等待用户输入，继续让 A 占用 CPU 显然没有意义；此时应该让 B 或 C 运行。\n因此，调度器的一个基本原则是：\n只要系统中存在可运行进程，CPU 就应该尽可能保持忙碌。\n注意，这里有一个重要概念：Runnable（可运行）不等于 Running（正在运行）。\n一个进程可能处于以下两种情况：\n正在 CPU 上执行。 已经具备执行条件，只是在等待 CPU 资源。 而正在等待磁盘 I/O、键盘输入、网络数据或其他事件的进程，属于阻塞状态（Blocked），暂时不参与 CPU 调度。\n例如，一个进程执行 read()，但磁盘数据尚未准备好，它就可能进入睡眠状态。此时调度器应该选择其他可运行进程，而不是让它不断占用 CPU 检查数据是否到达。\n1.2 多任务机制：协作式与抢占式 多任务操作系统主要有两种实现方式。\n协作式多任务（Cooperative Multitasking） 协作式多任务要求进程主动放弃 CPU。\n例如：\nwhile (1) { do_work(); yield(); } 进程执行完一部分工作后，主动调用 yield()，告诉操作系统自己愿意让出 CPU。\n这种机制的问题在于：操作系统无法强制一个进程让出 CPU。\n如果某个进程一直执行死循环，不主动调用 yield()，其他进程就可能长期得不到执行机会。\n因此，协作式多任务存在明显的局限：\n进程可以长时间独占 CPU。 调度器无法主动控制进程运行时间。 一个失去响应的进程可能严重影响整个系统。 抢占式多任务（Preemptive Multitasking） 现代 Linux 使用抢占式多任务。\n在这种机制下，操作系统可以主动暂停正在运行的进程，将 CPU 分配给其他进程。\n这个过程称为抢占（Preemption）。\n例如：\n进程 A 正在运行 | v 时钟中断发生 | v 内核检查是否需要重新调度 | v 发现进程 B 应该运行 | v 暂停 A，切换到 B 抢占式调度避免了进程长期占用 CPU 的问题。\n通常，调度器会通过时间片（Timeslice）或其他运行时间控制机制限制进程连续占用 CPU 的时间。\n需要注意：\nyield() 是进程主动让出 CPU。 Preemption 是操作系统主动暂停进程。 Context Switch 是从一个进程切换到另一个进程的执行上下文。 三者相关，但不是同一个概念。\n二、Linux 的进程调度器 2.1 Linux 调度器的发展历史 Linux 调度器经历了多次重要演进。\n理解这段历史，有助于理解为什么 Linux 最终采用 CFS。\n内核版本 调度器 主要特点 Linux 1.x ～ 2.4 早期调度器 实现简单，但扩展性不足 Linux 2.5 O(1) Scheduler 常数时间调度，支持多处理器扩展 Linux 2.6.23 CFS 引入公平调度思想 Linux 6.6 起 EEVDF 演进 在公平性基础上进一步考虑延迟与虚拟截止时间 早期 Linux 调度器 Linux 早期使用比较简单的调度算法。\n随着系统中进程数量和 CPU 数量增加，原有调度器在性能和可扩展性方面逐渐暴露问题。\n特别是当系统中存在大量可运行进程时，调度器需要考虑如何高效地完成进程选择。\nO(1) Scheduler Linux 2.5 开发周期对调度器进行了重大改造，引入了 O(1) Scheduler。\nO(1) 指的是调度器某些核心操作具有常数时间复杂度，不会随着可运行进程数量增加而线性增长。\n其主要改进包括：\n使用优先级数组管理可运行进程。 使用活动队列和过期队列管理时间片。 通过位图快速定位具有可运行进程的优先级。 为每个 CPU 设置独立运行队列（Per-CPU Runqueue）。 这些设计显著提高了调度器的可扩展性。\n但是，O(1) Scheduler 也存在问题。\n它虽然在大量服务器负载下表现不错，却在某些交互式负载下表现不理想。\n例如，桌面环境中的文本编辑器、终端和图形界面程序需要快速响应用户操作。仅仅保证调度算法的执行效率，并不意味着能够保证良好的交互体验。\nCFS：Completely Fair Scheduler 为改善交互式任务的调度延迟，Linux 社区探索了其他调度方案。\n其中，Rotating Staircase Deadline Scheduler（RSDL）引入了公平调度思想，对后来的 CFS 产生了重要影响。\nLinux 2.6.23 正式引入 CFS，替代了原有的 O(1) 调度器。\nCFS 的核心思想是：\n不再简单地为每个进程指定一个固定的绝对时间片，而是根据进程权重，动态分配其应该获得的 CPU 份额。\n后面将详细解释这一设计。\n2.2 调度策略（Scheduling Policy） 调度策略决定在什么情况下应该运行哪个进程。\n不同调度策略会直接影响系统的响应速度、吞吐量和资源分配公平性。\n调度器需要平衡两个重要目标：\n响应时间（Response Time / Latency）：任务从就绪到获得 CPU 的等待时间。 吞吐量（Throughput）：单位时间内系统完成的工作量。 这两个目标有时是冲突的。\n例如：\n如果频繁切换进程，交互式任务可能得到更快响应，但上下文切换开销增加。 如果让 CPU 密集型任务长时间运行，可以减少切换开销，但其他任务可能等待很久。 因此，调度器需要根据任务特征设计合适的策略。\n2.3 I/O-Bound 与 Processor-Bound 根据进程使用 CPU 和等待 I/O 的行为，可以将进程大致分为两类。\nI/O-Bound Process（I/O 密集型进程） I/O 密集型进程的大部分时间都在等待某种外部事件。\n这里的 I/O 不仅包括磁盘读写，还包括：\n键盘输入。 网络数据。 用户交互。 设备操作。 定时器事件。 例如文本编辑器：\n等待用户输入 | v 用户按下键盘 | v 处理输入 | v 更新界面 | v 再次等待用户输入 它只有在收到输入时才需要 CPU，大部分时间处于阻塞状态。\n因此，I/O 密集型进程通常具有以下特征：\nCPU Burst 较短。 经常进入睡眠状态。 被唤醒后希望尽快获得 CPU。 对调度延迟比较敏感。 Processor-Bound Process（CPU 密集型进程） CPU 密集型进程的大部分时间都在执行计算，很少主动等待 I/O。\n例如：\n视频编码。 矩阵计算。 科学计算。 密码学运算。 大规模数据处理。 其典型特征：\nCPU Burst 较长。 很少主动阻塞。 只要获得 CPU，就倾向于持续运行。 对立即响应的要求相对较低。 两类进程的调度需求 对比 I/O-Bound Processor-Bound CPU 使用特点 短时间运行 长时间运行 阻塞频率 较高 较低 响应延迟要求 高 相对低 典型场景 文本编辑器、网络服务 视频编码、科学计算 调度偏好 频繁获得 CPU 尽可能持续运行 需要注意，这两类进程并不是绝对互斥的。\n例如，文本编辑器平时等待用户输入，但在执行复杂拼写检查时，也可能短时间变成 CPU 密集型任务。\n调度器需要适应进程行为的动态变化，而不是简单地给进程贴上永久标签。\n2.4 进程优先级（Process Priority） 优先级调度是一种经典调度方式。\n基本思想是：\n优先级较高的进程具有更强的 CPU 竞争优势。 优先级相同的进程可以采用轮转方式调度。 某些调度器还会根据优先级分配不同长度的时间片。 Linux 提供两类重要的优先级机制：\nNice Value：普通进程的优先级控制。 Real-Time Priority：实时进程的优先级控制。 Nice Value Nice 值的范围是：\n-20 ~ +19 默认值为 0。\n需要特别注意：Nice 值越大，优先级越低。\nNice 值 优先级 -20 最高 -10 较高 0 默认 +10 较低 +19 最低 之所以叫 Nice，是因为一个进程可以通过提高 Nice 值，降低自己与其他进程竞争 CPU 的优势。\n例如：\n# 以较低优先级启动进程 nice -n 10 ./program # 修改已有进程的 nice 值 renice 10 -p 1234 # 查看进程优先级 ps -el 在 Linux 的公平调度机制中，Nice 值主要影响进程的 CPU 权重，而不是直接决定一个固定的运行时间。\nReal-Time Priority 实时进程使用另一套优先级体系。\n在原书讨论的 Linux 2.6 环境中，实时优先级通常为：\n0 ~ 99 与 Nice 值不同，实时优先级越大，优先级越高。\n实时任务的调度优先级高于普通任务。\n例如：\n实时优先级 99 | 实时优先级 80 | 实时优先级 10 | 普通进程 SCHED_NORMAL | Idle 这里展示的是调度优先级的概念关系，并非所有现代调度类的完整内部优先级列表。\n普通任务的 Nice 值和实时任务的优先级属于不同的用户接口，不能直接将二者的数值进行比较。\n2.5 时间片（Timeslice） 时间片表示一个进程连续占用 CPU 的时间额度。\n例如：\nCPU 时间轴： |--- A ---|--- B ---|--- C ---|--- A ---| 10ms 10ms 10ms 10ms 时间片机制能够避免某个进程无限期占用 CPU。\n但是，时间片长度并不是越长越好，也不是越短越好。\n时间片太长：\n其他进程需要等待更久。 交互式任务的响应速度下降。 系统的并发体验变差。 时间片太短：\n上下文切换次数增加。 CPU 时间被切换开销消耗。 Cache 局部性可能受到破坏。 CPU 密集型任务难以持续利用缓存。 因此，调度器需要在响应延迟和切换开销之间进行权衡。\n传统调度器通常会为不同优先级设置不同的时间片。\n而 CFS 采用了不同的思路：它不直接给普通进程规定固定的绝对时间片，而是按照权重分配 CPU 时间比例。\n三、Linux 调度算法：从传统 Unix 到 CFS 本章的核心是理解为什么 Linux 需要从传统的优先级与时间片模型，转向公平调度。\n3.1 传统 Unix 系统中的进程调度 传统 Unix 调度器通常结合两个概念：\nPriority：进程优先级。 Timeslice：进程一次可以运行的时间。 Nice 值被用来表达普通进程的优先级。\n听起来非常自然：\n优先级越高，进程获得的时间片越长，或者获得 CPU 的频率越高。\n但这种设计存在一些问题。\n问题一：绝对时间片导致切换行为不理想 假设我们设计如下规则：\nNice 值 时间片 0 100ms +20 5ms 现在系统中只有两个可运行进程：\nA：Nice = 0，时间片 100ms。 B：Nice = +20，时间片 5ms。 一个调度周期中：\nT=100+5=105ms T=100+5=105ms T=100+5=105msA 获得 CPU 的比例：\n100105≈95.24% \\frac{100}{105}\\approx95.24\\% 105100​≈95.24%B 获得 CPU 的比例：\n5105≈4.76% \\frac{5}{105}\\approx4.76\\% 1055​≈4.76%从资源分配比例来看，这个结果是符合预期的。\n但是，如果系统中只有两个 Nice = +20 的进程：\n进程 时间片 B 5ms C 5ms 那么它们各自获得 50% CPU。\n问题在于：\n两个普通优先级进程，各自运行 100ms 后切换。 两个低优先级进程，各自运行 5ms 后切换。 也就是说，即使最终 CPU 份额相同，不同优先级进程组合却可能导致完全不同的上下文切换频率。\n这很不理想。\n尤其是低优先级进程通常是后台 CPU 密集型任务，它们可能更适合长时间运行，而不是频繁发生上下文切换。\n问题二：Nice 值的相对变化不够合理 继续考虑 Nice 值与时间片的映射：\nNice 值 时间片 0 100ms 1 95ms 18 10ms 19 5ms 比较两组情况：\n第一组：\nNice = 0 -\u003e 100ms Nice = 1 -\u003e 95ms 时间片比例为：\n100:95 100:95 100:95第二组：\nNice = 18 -\u003e 10ms Nice = 19 -\u003e 5ms 时间片比例为：\n10:5 10:5 10:5虽然两组进程的 Nice 值都相差 1，但它们的 CPU 竞争优势变化完全不同。\n这意味着 Nice 值每增加 1 所产生的影响，取决于进程原来的 Nice 值。\n而 Nice 值在实际使用中往往是通过相对增量进行调整的，因此这种映射方式并不理想。\n问题三：时间片受到系统时钟 Tick 粒度限制 传统调度器通常通过时钟中断进行时间记账。\n例如：\nHZ = 100 每秒产生 100 次时钟 Tick 每个 Tick 的周期： 1 / 100 = 10ms 如果时间片通过 Tick 计数，那么时间片通常需要是 Tick 周期的整数倍。\n这带来几个问题：\n最小时间片受到 Tick 周期限制。 相邻 Nice 值对应的时间片差异受到 Tick 粒度限制。 修改系统时钟频率可能改变时间片的实际粒度。 显然，这种设计不够灵活。\n问题四：睡眠和唤醒机制可能被利用 为了改善交互式任务的响应速度，传统优先级调度器可能会对刚刚唤醒的任务进行优先级提升。\n例如：\n进程 A 正在执行 | v 进程 B 被唤醒 | v 提升 B 的优先级 | v B 抢占 A 这有利于交互式任务。\n但是，某些进程可能通过频繁睡眠和唤醒，反复获得额外的调度优势。\n例如：\n运行一小段时间 | v 主动睡眠 | v 很快唤醒 | v 重新获得优先级提升 | v 重复 这种行为称为 Scheduler Gaming（调度器博弈）。\n它可能导致某些进程获得不公平的 CPU 资源。\n传统调度模型的根本问题 前面四个问题看起来各不相同，但它们指向同一个设计缺陷：\n传统调度器先为不同优先级指定绝对时间片，再通过这些时间片间接决定 CPU 资源分配比例。\n这种设计使时间片长度、Nice 值、系统负载和时钟粒度相互耦合。\n作者由此引出 CFS 的核心思想：\n不再直接为每个 Nice 值分配固定的绝对时间片，而是为每个进程分配 CPU 的相对份额。\n3.2 公平调度（Fair Scheduling） CFS 全称为 Completely Fair Scheduler。\n它的核心思想是模拟一个理想的、可以完美并行执行多个任务的处理器。\n理想的多任务处理器 假设系统中存在两个可运行进程：\nA B 在普通单核 CPU 上，我们只能交替运行它们：\n时间轴： |---- A ----|---- B ----|---- A ----|---- B ----| 每个进程在自己运行时独占 CPU。\n而在理想的完美多任务处理器上：\n时间轴： A：================================ B：================================ 两个进程可以同时运行，每个进程获得 50% 的处理器能力。\n如果有 n 个相同优先级的可运行进程，那么理想情况下：\nCPU Sharei=1n CPU\\ Share_i=\\frac{1}{n} CPU Sharei​=n1​例如：\n可运行进程数 每个进程获得的 CPU 份额 1 100% 2 50% 4 25% 10 10% 当然，真实的单核 CPU 无法真正做到无限细粒度的并行执行。\n进程切换本身也有成本，包括：\n保存和恢复执行上下文。 切换地址空间。 Cache 局部性受到影响。 调度器自身的执行开销。 因此，CFS 并不是让进程无限频繁地切换，而是通过记录每个进程的运行情况，尽可能逼近理想的公平分配。\n引入 Nice 权重 前面假设所有进程优先级相同。\n如果优先级不同，就需要引入权重（Weight）。\nLinux 为不同 Nice 值分配不同的权重。\n权重越大，进程应该获得的 CPU 份额越多。\n假设有三个进程：\n进程 Nice Weight A 0 1024 B 5 335 C 5 335 总权重：\nW=1024+335+335=1694 W=1024+335+335=1694 W=1024+335+335=1694每个进程的 CPU 份额为：\nSharei=wi∑jwj Share_i=\\frac{w_i}{\\sum_j w_j} Sharei​=∑j​wj​wi​​因此：\nShareA=10241694≈60.45% Share_A=\\frac{1024}{1694}\\approx60.45\\% ShareA​=16941024​≈60.45%ShareB=ShareC=3351694≈19.78% Share_B=Share_C=\\frac{335}{1694}\\approx19.78\\% ShareB​=ShareC​=1694335​≈19.78%这说明：\nA 获得约 60.45% 的 CPU。 B 获得约 19.78% 的 CPU。 C 获得约 19.78% 的 CPU。 这里有一个非常重要的认识：\nNice 值影响的是 CPU 份额，而不是直接决定某个进程每次运行多少毫秒。\n而且，CPU 份额是相对于当前竞争的可运行实体而言的。\n如果一个进程进入睡眠状态，它不再参与当前的 CPU 竞争，其他可运行进程就可以利用空闲出来的 CPU。\n四、CFS 的实现原理 前面介绍了 CFS 的设计思想，现在进一步研究它如何在 Linux 内核中实现。\n原书主要围绕四个方面展开：\nTime Accounting：运行时间记账。 Process Selection：进程选择。 Scheduler Entry Point：调度器入口。 Sleeping and Waking Up：睡眠与唤醒。 4.1 Time Accounting：时间记账 传统调度器通常通过时间片记录进程运行时间。\n例如：\n进程 A 的时间片：100ms 每次时钟 Tick： timeslice -= TICK_PERIOD 当 timeslice == 0： 抢占进程 A CFS 没有为普通任务使用传统意义上的固定时间片，但仍然必须记录每个进程实际运行了多长时间。\n否则，调度器无法判断一个进程是否已经获得了应有的 CPU 份额。\n为此，CFS 使用了 struct sched_entity。\n4.2 Scheduler Entity Structure 在原书对应的 Linux 2.6 实现中，调度实体定义在 中。\n简化后的结构如下：\nstruct sched_entity { struct load_weight load; struct rb_node run_node; unsigned int on_rq; u64 exec_start; u64 sum_exec_runtime; u64 vruntime; u64 prev_sum_exec_runtime; }; 其中几个字段非常重要：\n字段 含义 load 调度实体的权重信息 run_node 红黑树节点 on_rq 是否位于运行队列 exec_start 本次开始执行的时间 sum_exec_runtime 累计实际运行时间 vruntime 虚拟运行时间 prev_sum_exec_runtime 上一次记录的累计运行时间 struct sched_entity 嵌入在 task_struct 中，作为进程调度相关的数据结构。\n因此：\ntask_struct | +---- se (sched_entity) | +---- load | +---- run_node | +---- exec_start | +---- sum_exec_runtime | +---- vruntime 这体现了 Linux 内核一个重要的设计思想：\n进程管理信息与调度信息分开组织，调度器通过调度实体访问任务的调度状态。\n4.3 Virtual Runtime：虚拟运行时间 这是理解 CFS 最关键的概念。\nvruntime 是对进程实际运行时间进行权重归一化后得到的虚拟运行时间。\n它用于衡量进程相对于其应得 CPU 份额，已经获得了多少 CPU 资源。\n简化公式：\nΔvruntime=Δruntime×NICE_0_LOADweight \\Delta vruntime = \\Delta runtime \\times \\frac{NICE\\_0\\_LOAD}{weight} Δvruntime=Δruntime×weightNICE_0_LOAD​其中：\nΔruntime\\Delta runtimeΔruntime：进程实际运行时间。 weightweightweight：进程的调度权重。 NICE_0_LOADNICE\\_0\\_LOADNICE_0_LOAD：默认 Nice 值对应的权重，通常为 1024。 注意：这是帮助理解的简化表达，内核实际使用整数运算和权重缩放函数完成计算。\n为什么需要归一化？ 假设存在两个进程：\n进程 Nice Weight A 0 1024 B 5 335 现在两个进程实际运行时间都是 10ms。\n对于 A：\nΔvruntimeA=10×10241024=10ms \\Delta vruntime_A =10\\times\\frac{1024}{1024} =10ms ΔvruntimeA​=10×10241024​=10ms对于 B：\nΔvruntimeB=10×1024335≈30.57ms \\Delta vruntime_B =10\\times\\frac{1024}{335} \\approx30.57ms ΔvruntimeB​=10×3351024​≈30.57ms可以看到：\n虽然两个进程实际运行时间相同，但 B 的虚拟运行时间增长更多。\n原因是 B 的权重更低，理论上应该获得更少的 CPU 时间。\n因此，相同的实际运行时间对低权重进程来说，意味着它消耗了更多相对于自身份额的 CPU 资源。\n反过来说：\n高权重进程：运行相同时间，vruntime 增长较慢。 低权重进程：运行相同时间，vruntime 增长较快。 调度器就可以通过比较 vruntime，判断哪个进程相对来说更应该获得 CPU。\nIdeal Multitasking Processor 与 vruntime 可以从理想处理器的角度理解 vruntime。\n如果系统可以完美地让所有进程同时运行，那么相同权重的进程应该获得相同的虚拟运行进度。\n但真实 CPU 只能交替运行进程。\n于是，CFS 通过 vruntime 记录每个进程的运行进度，尽可能模拟理想处理器。\nvruntime 与 Timer Tick 还有一个重要细节：\nvruntime 使用纳秒作为单位。\n它并不依赖传统的系统时钟 Tick 作为计量粒度。\n这意味着 CFS 能够更精细地记录进程运行时间，避免传统时间片模型中时间片必须依赖 Tick 整数倍的问题。\n在原书对应的代码中，update_curr() 负责更新当前调度实体的运行时间。\n简化逻辑如下：\nstatic void update_curr(struct cfs_rq *cfs_rq) { struct sched_entity *curr = cfs_rq-\u003ecurr; u64 now = rq_of(cfs_rq)-\u003eclock; unsigned long delta_exec; if (!curr) return; delta_exec = now - curr-\u003eexec_start; if (!delta_exec) return; __update_curr(cfs_rq, curr, delta_exec); curr-\u003eexec_start = now; } 真正的关键在于：\ndelta_exec_weighted = calc_delta_fair(delta_exec, curr); curr-\u003evruntime += delta_exec_weighted; 这段代码完成了：\n计算当前进程实际运行时间。 根据权重归一化运行时间。 更新当前进程的虚拟运行时间。 这样，调度器就能够持续掌握每个进程的 CPU 使用情况。\n4.4 Process Selection：进程选择 理解了 vruntime，接下来就很容易理解 CFS 如何选择进程。\n核心规则只有一句话：\n选择 vruntime 最小的可运行调度实体。\n为什么？\n因为 vruntime 最小的进程，相对于自己的权重而言，获得的 CPU 资源最少，应该优先得到 CPU。\n那么如何高效地找到 vruntime 最小的进程？\nCFS 使用红黑树（Red-Black Tree）。\n为什么使用红黑树？ 假设有四个进程：\n进程 vruntime A 10 B 20 C 30 D 40 可以按照 vruntime 将这些进程组织成一棵二叉搜索树：\nB(20) / \\ A(10) C(30) \\ D(40) 在二叉搜索树中，最左边的节点具有最小的 key。\n因此：\n最左节点 = vruntime 最小的进程 红黑树是一种自平衡二叉搜索树，能够保证树的高度为对数级别。\n其基本操作复杂度为：\n操作 时间复杂度 查找 O(log N) 插入 O(log N) 删除 O(log N) 在原书介绍的 CFS 实现中，内核还缓存了最左节点：\nstruct rb_node *rb_leftmost; 这样选择最小 vruntime 的进程时，不需要每次重新遍历整棵树。\n对应的核心函数是：\nstatic struct sched_entity * __pick_next_entity(struct cfs_rq *cfs_rq) { struct rb_node *left = cfs_rq-\u003erb_leftmost; if (!left) return NULL; return rb_entry(left, struct sched_entity, run_node); } 它的逻辑非常简单：\n获取缓存的最左节点。 如果没有节点，说明没有可运行的公平调度实体。 否则，将红黑树节点转换成 sched_entity。 返回对应的调度实体。 进程如何加入红黑树？ 当一个进程第一次创建并进入可运行状态，或者从睡眠状态被唤醒时，需要重新加入运行队列。\n原书对应的函数包括：\nenqueue_entity() __enqueue_entity() 主要工作：\n更新当前进程的运行时间。 更新调度实体的相关统计信息。 根据 vruntime 找到红黑树中的插入位置。 插入红黑树。 必要时更新最左节点缓存。 进程如何从红黑树删除？ 当进程阻塞或者退出时，它不再参与当前 CPU 的公平调度。\n对应的函数包括：\ndequeue_entity() __dequeue_entity() 主要工作：\n更新当前运行时间。 更新调度统计信息。 从红黑树中删除对应节点。 更新运行队列的统计信息。 必要时更新 min_vruntime。 这里需要注意：\nmin_vruntime 是运行队列维护的虚拟运行时间基准，它用于维持运行实体的相对时间位置，并帮助处理任务唤醒、迁移等情况。\n不要简单地把它理解为红黑树当前最左节点的 vruntime；二者在概念上相关，但不是同一个变量。\n4.5 Scheduler Entry Point：调度器入口 上面介绍了 CFS 内部如何选择进程。\n但内核中的其他子系统如何触发调度？\nLinux 提供了一个重要的调度入口：\nschedule() 在原书对应的 Linux 2.6 实现中，schedule() 位于 kernel/sched.c。\n它负责协调不同的调度类，并选择下一个运行的进程。\n简化调用关系：\nschedule() | v pick_next_task() | v 遍历调度类 | +---- 实时调度类 | +---- CFS 调度类 | +---- Idle 调度类 | v 选择下一个进程 | v context_switch() 这里引出了一个重要概念：Scheduler Classes。\nScheduler Classes：调度类 Linux 使用模块化设计，让不同类型的进程采用不同的调度算法。\n每个调度类负责管理特定类型的任务，并实现相应的调度操作。\n原书介绍的主要调度类包括：\n调度类 作用 CFS 普通任务 Real-Time 实时任务 Idle 空闲任务 每个调度类都有自己的优先级。\n通用调度器按照调度类的优先级依次询问它们：\n最高优先级调度类 | v 是否存在可运行进程？ | +---+---+ | | 有 无 | | v v 选择任务 检查下一个调度类 一旦某个调度类返回了可运行任务，调度器就选择该任务。\n这种设计的优点是：\n不同调度策略可以独立实现。 可以支持普通任务和实时任务。 通用调度器不必了解每种算法的具体实现。 新的调度策略可以通过调度类机制接入。 这是一种典型的面向接口的模块化设计。\n4.6 Sleeping and Waking Up：睡眠与唤醒 进程调度不仅仅是选择下一个进程，还必须处理进程什么时候退出运行队列，以及什么时候重新进入运行队列。\n例如：\n一个进程调用 read() 读取文件，但数据尚未准备好。\n此时进程不能继续执行，必须等待事件发生。\nLinux 通过等待队列（Wait Queue）管理这种等待关系。\nWait Queue 等待队列是一个保存等待某个事件发生的任务的队列。\n例如：\n磁盘数据尚未准备好 进程 A | v 加入等待队列 | v 设置状态为 TASK_INTERRUPTIBLE | v 调用 schedule() | v CPU 执行其他进程 等待的事件发生后：\n磁盘数据准备完成 | v 调用 wake_up() | v 唤醒等待队列中的进程 | v 进程状态变为 TASK_RUNNING | v 重新加入运行队列 需要注意：\nTASK_RUNNING 在 Linux 中既可以表示正在运行，也可以表示可运行但正在等待 CPU。\n它并不等同于进程此刻一定正在 CPU 上执行。\n睡眠的基本流程 原书介绍了一种典型的等待队列使用模式：\nDEFINE_WAIT(wait); add_wait_queue(q, \u0026wait); while (!condition) { prepare_to_wait(\u0026q, \u0026wait, TASK_INTERRUPTIBLE); if (signal_pending(current)) break; schedule(); } finish_wait(\u0026q, \u0026wait); 理解这段代码需要注意几个细节：\nDEFINE_WAIT()：创建等待队列项。 add_wait_queue()：将当前任务加入等待队列。 prepare_to_wait()：设置当前任务的睡眠状态，并确保其处于等待队列中。 schedule()：主动让出 CPU。 finish_wait()：结束等待，清理等待队列项。 为什么必须使用 while 检查条件，而不是简单使用 if？\n因为可能发生两种情况：\n第一种：虚假唤醒（Spurious Wakeup）\n进程被唤醒，不代表它等待的事件一定已经发生。\n因此，醒来之后必须重新检查条件。\n第二种：避免丢失唤醒（Lost Wakeup）\n假设进程刚刚检查完条件，事件就发生了，而进程随后才进入睡眠。\n如果等待队列和状态设置的顺序不正确，就可能导致事件已经发生，进程却仍然睡眠。\n因此，内核必须正确协调条件检查、等待队列登记和任务状态切换，避免竞态条件。\n实际内核代码还需要根据具体场景使用适当的锁和内存顺序保证。\n唤醒过程 唤醒通常通过：\nwake_up() 完成。\n它会进一步调用相关的唤醒逻辑，使等待任务重新进入可运行状态。\n简化过程：\n事件发生 | v wake_up() | v try_to_wake_up() | v 设置 TASK_RUNNING | v 加入运行队列 | v 必要时设置 need_resched 这里要注意：\n唤醒进程不意味着它立即开始执行。\n唤醒只意味着它重新具备了运行资格。\n至于什么时候获得 CPU，还需要由调度器决定。\n五、抢占与上下文切换 前面介绍了调度器如何选择下一个进程。\n接下来需要回答：\n内核如何从当前进程切换到下一个进程？\n5.1 Context Switch 上下文切换（Context Switch）是从一个正在运行的任务切换到另一个任务的过程。\n在原书介绍的 Linux 2.6 实现中，主要由：\ncontext_switch() 完成。\n它主要执行两项工作。\n1. 切换内存地址空间 switch_mm() 当切换到使用不同地址空间的进程时，内核需要切换相应的内存映射上下文。\n例如：\n进程 A | v 地址空间 A | v 切换到进程 B | v 地址空间 B 实际是否需要切换页表等底层状态，还取决于新旧任务是否共享地址空间以及体系结构的实现。\n2. 切换处理器上下文 switch_to() 它负责切换与任务执行相关的处理器状态，例如：\n内核栈。 CPU 寄存器。 指令执行上下文。 体系结构相关的其他状态。 可以将其理解为：\n保存旧任务的执行现场，恢复新任务上一次被暂停时的执行现场。\n因此，一个进程被切换出去之后，并不是从头开始执行，而是可以从之前暂停的位置继续执行。\n5.2 need_resched：是否需要重新调度 内核什么时候应该调用 schedule()？\n如果只在代码显式调用 schedule() 时才发生调度，那么一个始终不主动阻塞的用户进程可能长期占用 CPU。\n因此，Linux 使用 need_resched 标志表示当前任务是否需要重新调度。\n例如：\n进程 A 正在运行 | v 时钟中断发生 | v scheduler_tick() | v 发现应该重新调度 | v 设置 need_resched | v 到达安全调度点 | v 调用 schedule() 此外，当更合适的任务被唤醒时，也可能设置该标志。\n例如：\n进程 A 正在运行 | v 高优先级进程 B 被唤醒 | v 设置 need_resched | v 内核在合适时机重新调度 | v B 获得 CPU need_resched 的作用是通知内核：\n当前任务应该尽快让出 CPU，调度器需要重新选择任务。\n它本身并不执行上下文切换。\n5.3 User Preemption 用户态抢占比较容易理解。\n当内核准备从系统调用或中断返回用户态时，会检查当前任务是否需要重新调度。\n例如：\n用户态进程 A | v 发生时钟中断 | v 进入内核处理中断 | v 检查 need_resched | v 需要重新调度 | v schedule() | v 切换到进程 B 为什么选择在返回用户态时进行检查？\n因为此时内核已经处于一个适合切换任务的安全边界。\n5.4 Kernel Preemption Linux 还有一个重要特点：内核本身也支持抢占。\n这意味着进程即使正在执行内核代码，也可能被另一个任务抢占。\n但并不是任何时候都可以抢占。\n例如，当前进程正在持有自旋锁并访问共享数据结构，此时强行切换任务可能导致并发问题。\n因此，Linux 使用 preempt_count 控制内核抢占。\n其基本逻辑是：\n获取锁 | v preempt_count 增加 | v 进入不可抢占区 | v 执行临界区代码 | v 释放锁 | v preempt_count 减少 | v 可以抢占 当 preempt_count 为零时，内核代码处于可抢占状态。\n如果此时：\nneed_resched == 1 那么内核就可以在合适的时机执行重新调度。\n原书介绍的内核抢占发生场景包括：\n中断处理程序退出时。 内核代码重新变得可抢占时。 进程显式调用 schedule() 时。 进程在内核中阻塞时。 这里需要建立一个重要认识：\n抢占式内核不意味着内核代码可以在任意指令位置被无条件切换。锁、抢占计数和安全点共同保证内核并发执行的正确性。\n六、实时调度策略（Real-Time Scheduling Policies） 前面介绍的 CFS 面向普通任务。\n但是，一些任务对执行时间有更严格的要求。\n例如：\n工业控制。 音视频处理。 机器人控制。 实时数据采集。 这些任务可能需要更明确的优先级和调度行为。\nLinux 提供了实时调度策略。\n原书主要介绍：\nSCHED_FIFO SCHED_RR 6.1 SCHED_FIFO FIFO 是 First In, First Out。\n它采用固定优先级的先进先出调度策略。\n基本规则：\n实时任务优先级高于普通任务。 高优先级实时任务可以抢占低优先级实时任务。 相同优先级的 FIFO 任务按照队列顺序执行。 FIFO 任务没有普通意义上的时间片。 任务会持续运行，直到主动阻塞、主动让出 CPU，或者被更高优先级任务抢占。 例如：\n实时任务 A：Priority 90 实时任务 B：Priority 80 普通任务 C：SCHED_NORMAL 如果 A 一直处于可运行状态，那么 B 和 C 都无法获得 CPU。\n这也是 FIFO 使用时必须谨慎的原因：一个不主动阻塞的高优先级实时任务，可能让普通任务长期得不到执行机会。\n6.2 SCHED_RR RR 是 Round Robin。\n它与 FIFO 非常相似，但增加了时间片机制。\n例如：\nA：Priority 80 B：Priority 80 C：Priority 70 A 和 B 属于同一优先级。\n当 A 的时间片耗尽时，调度器会让 B 运行。\n但是，C 的优先级较低，即使 A 的时间片耗尽，C 也不能因此抢占 A 或 B。\n因此：\nSCHED_RR 可以理解为带有时间片的实时 FIFO 调度。\n6.3 SCHED_FIFO 与 SCHED_RR 对比 特性 SCHED_FIFO SCHED_RR 固定实时优先级 是 是 时间片 无 有 同优先级任务 按队列顺序执行 时间片轮转 高优先级任务抢占低优先级任务 支持 支持 低优先级任务抢占高优先级任务 不支持 不支持 6.4 Soft Real-Time 与 Hard Real-Time 这里还有一个容易混淆的概念。\nLinux 的传统实时调度策略主要提供软实时能力（Soft Real-Time）。\n软实时意味着：\n系统尽可能满足任务的时间要求，但不能保证每次都严格在截止时间之前完成。\n硬实时（Hard Real-Time）则要求：\n在规定的系统假设和约束下，任务必须满足严格的时间截止要求，违反截止时间可能意味着系统失效。\n因此：\n使用 SCHED_FIFO 不代表系统就变成了硬实时系统。 使用 SCHED_RR 也不代表可以保证任务一定在截止时间前执行。 现代 Linux 还提供 SCHED_DEADLINE，使用 EDF（Earliest Deadline First）和 CBS（Constant Bandwidth Server）相关机制，为实时任务提供更明确的调度和带宽控制能力。\n七、调度相关系统调用（Scheduler-Related System Calls） Linux 提供了一系列系统调用，让用户程序能够查询和修改调度参数。\n7.1 Nice 相关接口 nice(int inc); 用于调整当前进程的 Nice 值。\n命令行也可以使用：\nnice -n 10 ./program renice 5 -p 1234 注意，Nice 值越大，普通进程的 CPU 竞争权重越低。\n7.2 调度策略相关接口 sched_setscheduler() 设置进程的调度策略和优先级。\nint sched_setscheduler( pid_t pid, int policy, const struct sched_param *param ); 常见策略包括：\nSCHED_OTHER SCHED_FIFO SCHED_RR 现代 Linux 还提供其他调度策略。\nsched_getscheduler() 获取指定进程当前的调度策略。\nint sched_getscheduler(pid_t pid); sched_setparam() 设置进程的调度参数。\n通常用于设置实时调度优先级。\nsched_getparam() 获取进程当前的调度参数。\n7.3 CPU Affinity：处理器亲和性 Linux 允许用户限制一个进程可以在哪些 CPU 上运行。\n相关接口：\nsched_setaffinity() sched_getaffinity() 例如：\n# 将进程限制在 CPU 0 和 CPU 1 上运行 taskset -c 0,1 ./program 为什么需要 CPU Affinity？\n在多核系统中，进程迁移可能带来额外开销：\nCache 数据可能不再命中。 CPU 局部性受到影响。 NUMA 系统可能访问远端内存。 因此，有些高性能应用会限制进程的 CPU 运行范围。\n当然，CPU Affinity 也不是越严格越好。过度限制可能造成 CPU 负载不均衡。\n7.4 sched_yield() 主动放弃当前 CPU。\nsched_yield(); 它与 schedule() 不同：\nschedule() 是内核内部用于触发调度的函数。 sched_yield() 是用户空间可调用的接口，用来主动让出 CPU。 八、本章知识串联：从进程就绪到上下文切换 学习完第四章后，应该能够把调度器各个部分串起来。\n下面以一个进程等待 I/O，随后被唤醒为例。\n进程 A 正在运行 | v 执行 read() | v 数据尚未准备好 | v 设置睡眠状态 | v 加入等待队列 | v schedule() | v 选择进程 B | v context_switch() | v 进程 B 运行 | | I/O 操作完成 | v wake_up() | v try_to_wake_up() | v A 重新变为可运行 | v 加入运行队列 | v 调度器重新评估任务 | v 选择合适的进程 | v context_switch() | v 进程 A 恢复执行 需要区分三个不同的数据结构：\n数据结构 作用 Wait Queue 管理等待某个事件的进程 Runqueue 管理可运行任务 CFS Red-Black Tree 在公平调度类中组织可运行调度实体 它们共同组成了进程从运行、阻塞、唤醒到重新获得 CPU 的完整流程。\n九、从 LKD 过渡到现代 Linux：CFS 与 EEVDF 这里需要特别强调版本问题。\n《Linux Kernel Development》第三版出版于 2010 年，主要讲解 Linux 2.6 时代的调度器实现。\n书中介绍的 CFS 在 Linux 2.6.23 引入，是理解现代公平调度思想的重要基础。\n但是，不能将原书中的代码直接视为现代 Linux 的完整实现。\nLinux 6.6 开始引入 EEVDF（Earliest Eligible Virtual Deadline First），公平调度器逐步从传统 CFS 向 EEVDF 演进。\n9.1 CFS 的局限与进一步演进 CFS 的基本策略是：\n根据权重更新 vruntime | v 选择 vruntime 最小的任务 | v 运行任务 | v 更新 vruntime 它很好地解决了按权重分配 CPU 份额的问题。\n但在实际系统中，除了公平性，还需要考虑任务的延迟需求。\n例如：\n交互式任务希望尽快获得 CPU。 音频任务希望获得较短的调度延迟。 后台任务更关注吞吐量。 EEVDF 在公平调度基础上引入了两个关键概念：\nLag（滞后量）\n表示任务实际获得的 CPU 时间与其应得 CPU 时间之间的差异。\n正 Lag：任务还应该获得 CPU 时间。 负 Lag：任务已经获得了超过应得份额的 CPU 时间。 Virtual Deadline（虚拟截止时间）\n在满足调度资格的任务中，根据虚拟截止时间选择下一个任务。\nEEVDF 的核心过程可以概括为：\n计算任务的 Lag | v 判断任务是否具有调度资格 | v 计算虚拟截止时间 | v 选择最早虚拟截止时间的合格任务 | v 运行任务 与 CFS 相比，EEVDF 在公平性之外，更明确地考虑了调度延迟和任务的时间需求。\n它是理解现代 Linux 普通任务调度机制的重要入口。\n十、本章总结 本章的核心并不是记住某几个调度函数，而是理解 Linux 调度器背后的设计思想。\n可以将本章知识归纳为以下几个层次：\n层次 核心概念 需要掌握的内容 多任务机制 Cooperative / Preemptive 为什么需要抢占 调度策略 I/O-Bound / CPU-Bound 响应延迟与吞吐量的权衡 优先级 Nice / Real-Time Priority 如何影响 CPU 竞争 公平调度 CFS 根据权重分配 CPU 份额 时间记账 vruntime 如何衡量进程获得的 CPU 资源 进程选择 Red-Black Tree 如何高效选择下一个进程 进程状态 Wait Queue 睡眠、唤醒与运行队列 调度执行 schedule / context_switch 如何完成任务切换 抢占机制 need_resched / preempt_count 何时可以重新调度 实时调度 FIFO / RR 如何支持固定优先级实时任务 建议重点记住以下五个问题：\n为什么传统 Unix 的绝对时间片分配方式存在问题？ 为什么 CFS 使用虚拟运行时间，而不是简单使用实际运行时间？ 为什么 CFS 选择 vruntime 最小的进程？ 为什么睡眠队列与运行队列必须分开管理？ 为什么 Linux 需要同时支持普通调度类和实时调度类？ 如果能够清楚解释这五个问题，就基本掌握了本章的核心设计思想。\n十一、源码阅读与实践建议 本章最好的学习方式是结合源码追踪，而不是停留在概念层面。\n需要注意，下面的函数和文件主要对应原书介绍的 Linux 2.6 实现。现代内核的文件组织、数据结构和函数实现已经发生变化。\n11.1 原书对应的源码 文件 重点内容 kernel/sched.c 通用调度器、schedule()、上下文切换 kernel/sched_fair.c CFS 实现 kernel/sched_rt.c 实时调度 include/linux/sched.h task_struct、sched_entity 等数据结构 建议按照以下顺序追踪：\nschedule() | v pick_next_task() | v 调度类选择 | v pick_next_task_fair() | v __pick_next_entity() | v 选择 vruntime 最小的实体 | v context_switch() | v switch_mm() / switch_to() 然后再单独研究睡眠与唤醒路径：\nprepare_to_wait() | v schedule() | v 任务阻塞 事件发生 | v wake_up() | v try_to_wake_up() | v 任务重新进入运行队列 11.2 建议的实验 实验一：观察 Nice 值对 CPU 份额的影响\n创建两个持续消耗 CPU 的进程：\nnice -n 0 ./cpu_task \u0026 nice -n 10 ./cpu_task \u0026 观察它们的 CPU 使用情况。\n可以使用：\ntop -H ps -eo pid,ni,pri,psr,stat,comm 尝试改变 Nice 值，观察 CPU 竞争结果。\n注意：实际结果会受到其他进程、CPU 核数、调度组和系统负载等因素影响。\n实验二：观察 CPU Affinity\ntaskset -c 0 ./cpu_task taskset -c 1 ./cpu_task 观察进程被限制在不同 CPU 上运行时的情况。\n实验三：观察上下文切换\nvmstat 1 重点观察：\nr：等待运行或正在运行的进程数。 b：不可中断睡眠进程数。 cs：每秒上下文切换次数。 还可以使用：\nsudo perf sched record -- sleep 5 sudo perf sched timehist 观察调度延迟和进程切换情况。\n实验四：使用 ftrace 观察调度事件\nsudo trace-cmd record \\ -e sched:sched_switch \\ -e sched:sched_wakeup \\ sleep 5 sudo trace-cmd report 可以观察：\n进程什么时候被唤醒。 进程什么时候发生上下文切换。 哪个进程被切出。 哪个进程被切入。 通过这些实验，可以把本章介绍的抽象调度流程与真实 Linux 内核行为联系起来。\n11.3 推荐后续阅读 Linux Kernel Documentation：CFS Scheduler Linux Kernel Documentation：EEVDF Scheduler Linux Kernel Source：kernel/sched MIT 6.1810：Operating System Engineering 学习建议：先理解 LKD 中 CFS 的设计思想，再阅读现代 Linux 的 EEVDF 实现。不要一开始就试图把 2010 年的源码与最新内核逐行对应。\n",
+  "wordCount" : "2409",
+  "inLanguage": "en",
+  "datePublished": "2026-11-08T21:20:53+08:00",
+  "dateModified": "2026-11-08T21:20:53+08:00",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "http://localhost:1313/posts/lkd04/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Minghan的博客",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "http://localhost:1313/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="header-nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="Minghan的博客 (Alt + H)">Minghan的博客</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" class="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg class="sun" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu" class="menu">
+            <li>
+                <a href="http://localhost:1313/posts/" title="文章">
+                    <span>文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/archives/" title="归档">
+                    <span>归档</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/categories/" title="分类">
+                    <span>分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="标签">
+                    <span>标签</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/moments/" title="随记">
+                    <span>随记</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/photos/" title="照片墙">
+                    <span>照片墙</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/books/" title="阅读">
+                    <span>阅读</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/about/" title="关于">
+                    <span>关于</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <nav class="breadcrumbs" role="navigation" aria-label="Breadcrumb">
+            <a href="/">Home</a>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+            <a href="/posts/">Posts</a>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+        <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+</nav>
+    <h1 class="post-title entry-hint-parent">
+      LKD阅读笔记-第四章-进程调度
+    </h1>
+    <div class="post-meta">
+
+<span title='2026-11-08 21:20:53 +0800 CST'>November 8, 2026</span>&nbsp;·&nbsp;<span>12 min</span>&nbsp;·&nbsp;<span>2409 words</span>
+
+</div>
+  </header> <details class="toc"  open>
+    <summary accesskey="c" title="(Alt + C)">
+        <span class="title">Table of Contents</span>
+    </summary>
+
+    <div class="inner"><ul>
+            <li>
+                <a href="#%e4%b8%80%e8%bf%9b%e7%a8%8b%e8%b0%83%e5%ba%a6what--why" aria-label="一、进程调度：What &amp; Why？">一、进程调度：What &amp; Why？</a><ul>
+                    
+            <li>
+                <a href="#11-%e8%b0%83%e5%ba%a6%e5%99%a8%e7%9a%84%e5%9f%ba%e6%9c%ac%e7%9b%ae%e6%a0%87" aria-label="1.1 调度器的基本目标">1.1 调度器的基本目标</a></li>
+            <li>
+                <a href="#12-%e5%a4%9a%e4%bb%bb%e5%8a%a1%e6%9c%ba%e5%88%b6%e5%8d%8f%e4%bd%9c%e5%bc%8f%e4%b8%8e%e6%8a%a2%e5%8d%a0%e5%bc%8f" aria-label="1.2 多任务机制：协作式与抢占式">1.2 多任务机制：协作式与抢占式</a><ul>
+                    
+            <li>
+                <a href="#%e5%8d%8f%e4%bd%9c%e5%bc%8f%e5%a4%9a%e4%bb%bb%e5%8a%a1cooperative-multitasking" aria-label="协作式多任务（Cooperative Multitasking）">协作式多任务（Cooperative Multitasking）</a></li>
+            <li>
+                <a href="#%e6%8a%a2%e5%8d%a0%e5%bc%8f%e5%a4%9a%e4%bb%bb%e5%8a%a1preemptive-multitasking" aria-label="抢占式多任务（Preemptive Multitasking）">抢占式多任务（Preemptive Multitasking）</a></li></ul>
+            </li></ul>
+            </li>
+            <li>
+                <a href="#%e4%ba%8clinux-%e7%9a%84%e8%bf%9b%e7%a8%8b%e8%b0%83%e5%ba%a6%e5%99%a8" aria-label="二、Linux 的进程调度器">二、Linux 的进程调度器</a><ul>
+                    
+            <li>
+                <a href="#21-linux-%e8%b0%83%e5%ba%a6%e5%99%a8%e7%9a%84%e5%8f%91%e5%b1%95%e5%8e%86%e5%8f%b2" aria-label="2.1 Linux 调度器的发展历史">2.1 Linux 调度器的发展历史</a><ul>
+                    
+            <li>
+                <a href="#%e6%97%a9%e6%9c%9f-linux-%e8%b0%83%e5%ba%a6%e5%99%a8" aria-label="早期 Linux 调度器">早期 Linux 调度器</a></li>
+            <li>
+                <a href="#o1-scheduler" aria-label="O(1) Scheduler">O(1) Scheduler</a></li>
+            <li>
+                <a href="#cfscompletely-fair-scheduler" aria-label="CFS：Completely Fair Scheduler">CFS：Completely Fair Scheduler</a></li></ul>
+            </li>
+            <li>
+                <a href="#22-%e8%b0%83%e5%ba%a6%e7%ad%96%e7%95%a5scheduling-policy" aria-label="2.2 调度策略（Scheduling Policy）">2.2 调度策略（Scheduling Policy）</a></li>
+            <li>
+                <a href="#23-io-bound-%e4%b8%8e-processor-bound" aria-label="2.3 I/O-Bound 与 Processor-Bound">2.3 I/O-Bound 与 Processor-Bound</a><ul>
+                    
+            <li>
+                <a href="#io-bound-processio-%e5%af%86%e9%9b%86%e5%9e%8b%e8%bf%9b%e7%a8%8b" aria-label="I/O-Bound Process（I/O 密集型进程）">I/O-Bound Process（I/O 密集型进程）</a></li>
+            <li>
+                <a href="#processor-bound-processcpu-%e5%af%86%e9%9b%86%e5%9e%8b%e8%bf%9b%e7%a8%8b" aria-label="Processor-Bound Process（CPU 密集型进程）">Processor-Bound Process（CPU 密集型进程）</a></li>
+            <li>
+                <a href="#%e4%b8%a4%e7%b1%bb%e8%bf%9b%e7%a8%8b%e7%9a%84%e8%b0%83%e5%ba%a6%e9%9c%80%e6%b1%82" aria-label="两类进程的调度需求">两类进程的调度需求</a></li></ul>
+            </li>
+            <li>
+                <a href="#24-%e8%bf%9b%e7%a8%8b%e4%bc%98%e5%85%88%e7%ba%a7process-priority" aria-label="2.4 进程优先级（Process Priority）">2.4 进程优先级（Process Priority）</a><ul>
+                    
+            <li>
+                <a href="#nice-value" aria-label="Nice Value">Nice Value</a></li>
+            <li>
+                <a href="#real-time-priority" aria-label="Real-Time Priority">Real-Time Priority</a></li></ul>
+            </li>
+            <li>
+                <a href="#25-%e6%97%b6%e9%97%b4%e7%89%87timeslice" aria-label="2.5 时间片（Timeslice）">2.5 时间片（Timeslice）</a></li></ul>
+            </li>
+            <li>
+                <a href="#%e4%b8%89linux-%e8%b0%83%e5%ba%a6%e7%ae%97%e6%b3%95%e4%bb%8e%e4%bc%a0%e7%bb%9f-unix-%e5%88%b0-cfs" aria-label="三、Linux 调度算法：从传统 Unix 到 CFS">三、Linux 调度算法：从传统 Unix 到 CFS</a><ul>
+                    
+            <li>
+                <a href="#31-%e4%bc%a0%e7%bb%9f-unix-%e7%b3%bb%e7%bb%9f%e4%b8%ad%e7%9a%84%e8%bf%9b%e7%a8%8b%e8%b0%83%e5%ba%a6" aria-label="3.1 传统 Unix 系统中的进程调度">3.1 传统 Unix 系统中的进程调度</a><ul>
+                    
+            <li>
+                <a href="#%e9%97%ae%e9%a2%98%e4%b8%80%e7%bb%9d%e5%af%b9%e6%97%b6%e9%97%b4%e7%89%87%e5%af%bc%e8%87%b4%e5%88%87%e6%8d%a2%e8%a1%8c%e4%b8%ba%e4%b8%8d%e7%90%86%e6%83%b3" aria-label="问题一：绝对时间片导致切换行为不理想">问题一：绝对时间片导致切换行为不理想</a></li>
+            <li>
+                <a href="#%e9%97%ae%e9%a2%98%e4%ba%8cnice-%e5%80%bc%e7%9a%84%e7%9b%b8%e5%af%b9%e5%8f%98%e5%8c%96%e4%b8%8d%e5%a4%9f%e5%90%88%e7%90%86" aria-label="问题二：Nice 值的相对变化不够合理">问题二：Nice 值的相对变化不够合理</a></li>
+            <li>
+                <a href="#%e9%97%ae%e9%a2%98%e4%b8%89%e6%97%b6%e9%97%b4%e7%89%87%e5%8f%97%e5%88%b0%e7%b3%bb%e7%bb%9f%e6%97%b6%e9%92%9f-tick-%e7%b2%92%e5%ba%a6%e9%99%90%e5%88%b6" aria-label="问题三：时间片受到系统时钟 Tick 粒度限制">问题三：时间片受到系统时钟 Tick 粒度限制</a></li>
+            <li>
+                <a href="#%e9%97%ae%e9%a2%98%e5%9b%9b%e7%9d%a1%e7%9c%a0%e5%92%8c%e5%94%a4%e9%86%92%e6%9c%ba%e5%88%b6%e5%8f%af%e8%83%bd%e8%a2%ab%e5%88%a9%e7%94%a8" aria-label="问题四：睡眠和唤醒机制可能被利用">问题四：睡眠和唤醒机制可能被利用</a></li>
+            <li>
+                <a href="#%e4%bc%a0%e7%bb%9f%e8%b0%83%e5%ba%a6%e6%a8%a1%e5%9e%8b%e7%9a%84%e6%a0%b9%e6%9c%ac%e9%97%ae%e9%a2%98" aria-label="传统调度模型的根本问题">传统调度模型的根本问题</a></li></ul>
+            </li>
+            <li>
+                <a href="#32-%e5%85%ac%e5%b9%b3%e8%b0%83%e5%ba%a6fair-scheduling" aria-label="3.2 公平调度（Fair Scheduling）">3.2 公平调度（Fair Scheduling）</a><ul>
+                    
+            <li>
+                <a href="#%e7%90%86%e6%83%b3%e7%9a%84%e5%a4%9a%e4%bb%bb%e5%8a%a1%e5%a4%84%e7%90%86%e5%99%a8" aria-label="理想的多任务处理器">理想的多任务处理器</a></li>
+            <li>
+                <a href="#%e5%bc%95%e5%85%a5-nice-%e6%9d%83%e9%87%8d" aria-label="引入 Nice 权重">引入 Nice 权重</a></li></ul>
+            </li></ul>
+            </li>
+            <li>
+                <a href="#%e5%9b%9bcfs-%e7%9a%84%e5%ae%9e%e7%8e%b0%e5%8e%9f%e7%90%86" aria-label="四、CFS 的实现原理">四、CFS 的实现原理</a><ul>
+                    
+            <li>
+                <a href="#41-time-accounting%e6%97%b6%e9%97%b4%e8%ae%b0%e8%b4%a6" aria-label="4.1 Time Accounting：时间记账">4.1 Time Accounting：时间记账</a></li>
+            <li>
+                <a href="#42-scheduler-entity-structure" aria-label="4.2 Scheduler Entity Structure">4.2 Scheduler Entity Structure</a></li>
+            <li>
+                <a href="#43-virtual-runtime%e8%99%9a%e6%8b%9f%e8%bf%90%e8%a1%8c%e6%97%b6%e9%97%b4" aria-label="4.3 Virtual Runtime：虚拟运行时间">4.3 Virtual Runtime：虚拟运行时间</a><ul>
+                    
+            <li>
+                <a href="#%e4%b8%ba%e4%bb%80%e4%b9%88%e9%9c%80%e8%a6%81%e5%bd%92%e4%b8%80%e5%8c%96" aria-label="为什么需要归一化？">为什么需要归一化？</a></li>
+            <li>
+                <a href="#ideal-multitasking-processor-%e4%b8%8e-vruntime" aria-label="Ideal Multitasking Processor 与 vruntime">Ideal Multitasking Processor 与 vruntime</a></li>
+            <li>
+                <a href="#vruntime-%e4%b8%8e-timer-tick" aria-label="vruntime 与 Timer Tick">vruntime 与 Timer Tick</a></li></ul>
+            </li>
+            <li>
+                <a href="#44-process-selection%e8%bf%9b%e7%a8%8b%e9%80%89%e6%8b%a9" aria-label="4.4 Process Selection：进程选择">4.4 Process Selection：进程选择</a><ul>
+                    
+            <li>
+                <a href="#%e4%b8%ba%e4%bb%80%e4%b9%88%e4%bd%bf%e7%94%a8%e7%ba%a2%e9%bb%91%e6%a0%91" aria-label="为什么使用红黑树？">为什么使用红黑树？</a></li>
+            <li>
+                <a href="#%e8%bf%9b%e7%a8%8b%e5%a6%82%e4%bd%95%e5%8a%a0%e5%85%a5%e7%ba%a2%e9%bb%91%e6%a0%91" aria-label="进程如何加入红黑树？">进程如何加入红黑树？</a></li>
+            <li>
+                <a href="#%e8%bf%9b%e7%a8%8b%e5%a6%82%e4%bd%95%e4%bb%8e%e7%ba%a2%e9%bb%91%e6%a0%91%e5%88%a0%e9%99%a4" aria-label="进程如何从红黑树删除？">进程如何从红黑树删除？</a></li></ul>
+            </li>
+            <li>
+                <a href="#45-scheduler-entry-point%e8%b0%83%e5%ba%a6%e5%99%a8%e5%85%a5%e5%8f%a3" aria-label="4.5 Scheduler Entry Point：调度器入口">4.5 Scheduler Entry Point：调度器入口</a><ul>
+                    
+            <li>
+                <a href="#scheduler-classes%e8%b0%83%e5%ba%a6%e7%b1%bb" aria-label="Scheduler Classes：调度类">Scheduler Classes：调度类</a></li></ul>
+            </li>
+            <li>
+                <a href="#46-sleeping-and-waking-up%e7%9d%a1%e7%9c%a0%e4%b8%8e%e5%94%a4%e9%86%92" aria-label="4.6 Sleeping and Waking Up：睡眠与唤醒">4.6 Sleeping and Waking Up：睡眠与唤醒</a><ul>
+                    
+            <li>
+                <a href="#wait-queue" aria-label="Wait Queue">Wait Queue</a></li>
+            <li>
+                <a href="#%e7%9d%a1%e7%9c%a0%e7%9a%84%e5%9f%ba%e6%9c%ac%e6%b5%81%e7%a8%8b" aria-label="睡眠的基本流程">睡眠的基本流程</a></li>
+            <li>
+                <a href="#%e5%94%a4%e9%86%92%e8%bf%87%e7%a8%8b" aria-label="唤醒过程">唤醒过程</a></li></ul>
+            </li></ul>
+            </li>
+            <li>
+                <a href="#%e4%ba%94%e6%8a%a2%e5%8d%a0%e4%b8%8e%e4%b8%8a%e4%b8%8b%e6%96%87%e5%88%87%e6%8d%a2" aria-label="五、抢占与上下文切换">五、抢占与上下文切换</a><ul>
+                    
+            <li>
+                <a href="#51-context-switch" aria-label="5.1 Context Switch">5.1 Context Switch</a><ul>
+                    
+            <li>
+                <a href="#1-%e5%88%87%e6%8d%a2%e5%86%85%e5%ad%98%e5%9c%b0%e5%9d%80%e7%a9%ba%e9%97%b4" aria-label="1. 切换内存地址空间">1. 切换内存地址空间</a></li>
+            <li>
+                <a href="#2-%e5%88%87%e6%8d%a2%e5%a4%84%e7%90%86%e5%99%a8%e4%b8%8a%e4%b8%8b%e6%96%87" aria-label="2. 切换处理器上下文">2. 切换处理器上下文</a></li></ul>
+            </li>
+            <li>
+                <a href="#52-need_resched%e6%98%af%e5%90%a6%e9%9c%80%e8%a6%81%e9%87%8d%e6%96%b0%e8%b0%83%e5%ba%a6" aria-label="5.2 need_resched：是否需要重新调度">5.2 need_resched：是否需要重新调度</a></li>
+            <li>
+                <a href="#53-user-preemption" aria-label="5.3 User Preemption">5.3 User Preemption</a></li>
+            <li>
+                <a href="#54-kernel-preemption" aria-label="5.4 Kernel Preemption">5.4 Kernel Preemption</a></li></ul>
+            </li>
+            <li>
+                <a href="#%e5%85%ad%e5%ae%9e%e6%97%b6%e8%b0%83%e5%ba%a6%e7%ad%96%e7%95%a5real-time-scheduling-policies" aria-label="六、实时调度策略（Real-Time Scheduling Policies）">六、实时调度策略（Real-Time Scheduling Policies）</a><ul>
+                    
+            <li>
+                <a href="#61-sched_fifo" aria-label="6.1 SCHED_FIFO">6.1 SCHED_FIFO</a></li>
+            <li>
+                <a href="#62-sched_rr" aria-label="6.2 SCHED_RR">6.2 SCHED_RR</a></li>
+            <li>
+                <a href="#63-sched_fifo-%e4%b8%8e-sched_rr-%e5%af%b9%e6%af%94" aria-label="6.3 SCHED_FIFO 与 SCHED_RR 对比">6.3 SCHED_FIFO 与 SCHED_RR 对比</a></li>
+            <li>
+                <a href="#64-soft-real-time-%e4%b8%8e-hard-real-time" aria-label="6.4 Soft Real-Time 与 Hard Real-Time">6.4 Soft Real-Time 与 Hard Real-Time</a></li></ul>
+            </li>
+            <li>
+                <a href="#%e4%b8%83%e8%b0%83%e5%ba%a6%e7%9b%b8%e5%85%b3%e7%b3%bb%e7%bb%9f%e8%b0%83%e7%94%a8scheduler-related-system-calls" aria-label="七、调度相关系统调用（Scheduler-Related System Calls）">七、调度相关系统调用（Scheduler-Related System Calls）</a><ul>
+                    
+            <li>
+                <a href="#71-nice-%e7%9b%b8%e5%85%b3%e6%8e%a5%e5%8f%a3" aria-label="7.1 Nice 相关接口">7.1 Nice 相关接口</a></li>
+            <li>
+                <a href="#72-%e8%b0%83%e5%ba%a6%e7%ad%96%e7%95%a5%e7%9b%b8%e5%85%b3%e6%8e%a5%e5%8f%a3" aria-label="7.2 调度策略相关接口">7.2 调度策略相关接口</a><ul>
+                    
+            <li>
+                <a href="#sched_setscheduler" aria-label="sched_setscheduler()">sched_setscheduler()</a></li>
+            <li>
+                <a href="#sched_getscheduler" aria-label="sched_getscheduler()">sched_getscheduler()</a></li>
+            <li>
+                <a href="#sched_setparam" aria-label="sched_setparam()">sched_setparam()</a></li>
+            <li>
+                <a href="#sched_getparam" aria-label="sched_getparam()">sched_getparam()</a></li></ul>
+            </li>
+            <li>
+                <a href="#73-cpu-affinity%e5%a4%84%e7%90%86%e5%99%a8%e4%ba%b2%e5%92%8c%e6%80%a7" aria-label="7.3 CPU Affinity：处理器亲和性">7.3 CPU Affinity：处理器亲和性</a></li>
+            <li>
+                <a href="#74-sched_yield" aria-label="7.4 sched_yield()">7.4 sched_yield()</a></li></ul>
+            </li>
+            <li>
+                <a href="#%e5%85%ab%e6%9c%ac%e7%ab%a0%e7%9f%a5%e8%af%86%e4%b8%b2%e8%81%94%e4%bb%8e%e8%bf%9b%e7%a8%8b%e5%b0%b1%e7%bb%aa%e5%88%b0%e4%b8%8a%e4%b8%8b%e6%96%87%e5%88%87%e6%8d%a2" aria-label="八、本章知识串联：从进程就绪到上下文切换">八、本章知识串联：从进程就绪到上下文切换</a></li>
+            <li>
+                <a href="#%e4%b9%9d%e4%bb%8e-lkd-%e8%bf%87%e6%b8%a1%e5%88%b0%e7%8e%b0%e4%bb%a3-linuxcfs-%e4%b8%8e-eevdf" aria-label="九、从 LKD 过渡到现代 Linux：CFS 与 EEVDF">九、从 LKD 过渡到现代 Linux：CFS 与 EEVDF</a><ul>
+                    
+            <li>
+                <a href="#91-cfs-%e7%9a%84%e5%b1%80%e9%99%90%e4%b8%8e%e8%bf%9b%e4%b8%80%e6%ad%a5%e6%bc%94%e8%bf%9b" aria-label="9.1 CFS 的局限与进一步演进">9.1 CFS 的局限与进一步演进</a></li></ul>
+            </li>
+            <li>
+                <a href="#%e5%8d%81%e6%9c%ac%e7%ab%a0%e6%80%bb%e7%bb%93" aria-label="十、本章总结">十、本章总结</a></li>
+            <li>
+                <a href="#%e5%8d%81%e4%b8%80%e6%ba%90%e7%a0%81%e9%98%85%e8%af%bb%e4%b8%8e%e5%ae%9e%e8%b7%b5%e5%bb%ba%e8%ae%ae" aria-label="十一、源码阅读与实践建议">十一、源码阅读与实践建议</a><ul>
+                    
+            <li>
+                <a href="#111-%e5%8e%9f%e4%b9%a6%e5%af%b9%e5%ba%94%e7%9a%84%e6%ba%90%e7%a0%81" aria-label="11.1 原书对应的源码">11.1 原书对应的源码</a></li>
+            <li>
+                <a href="#112-%e5%bb%ba%e8%ae%ae%e7%9a%84%e5%ae%9e%e9%aa%8c" aria-label="11.2 建议的实验">11.2 建议的实验</a></li>
+            <li>
+                <a href="#113-%e6%8e%a8%e8%8d%90%e5%90%8e%e7%bb%ad%e9%98%85%e8%af%bb" aria-label="11.3 推荐后续阅读">11.3 推荐后续阅读</a>
+            </li>
+        </ul>
+        </li>
+        </ul>
+    </div>
+</details>
+
+  <div class="post-content md-content"><h1 id="一进程调度what--why">一、进程调度：What &amp; Why？<a hidden class="anchor" aria-hidden="true" href="#一进程调度what--why">#</a></h1>
+<p>上一章介绍了进程管理，讨论了 Linux 如何创建、管理和销毁进程。本章进一步讨论一个核心问题：</p>
+<p><strong>当系统中存在多个可运行进程，但 CPU 资源有限时，内核应该选择哪个进程运行？</strong></p>
+<p>这就是进程调度（Process Scheduling）。</p>
+<p>进程调度器（Process Scheduler）是内核中负责分配处理器时间的子系统，它决定：</p>
+<ul>
+<li>哪个进程获得 CPU？</li>
+<li>进程什么时候获得 CPU？</li>
+<li>进程可以运行多长时间？</li>
+<li>什么时候应该暂停当前进程，让其他进程运行？</li>
+</ul>
+<p>调度器是多任务操作系统的基础。它通过合理分配 CPU 时间，使多个进程能够交替执行，让用户感觉多个程序似乎在同时运行。</p>
+<h2 id="11-调度器的基本目标">1.1 调度器的基本目标<a hidden class="anchor" aria-hidden="true" href="#11-调度器的基本目标">#</a></h2>
+<p>假设一台单核计算机上存在三个进程：</p>
+<table>
+	<thead>
+			<tr>
+					<th>进程</th>
+					<th>类型</th>
+					<th>当前状态</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>A</td>
+					<td>文本编辑器</td>
+					<td>等待键盘输入</td>
+			</tr>
+			<tr>
+					<td>B</td>
+					<td>视频编码</td>
+					<td>正在计算</td>
+			</tr>
+			<tr>
+					<td>C</td>
+					<td>后台任务</td>
+					<td>等待运行</td>
+			</tr>
+	</tbody>
+</table>
+<p>CPU 在同一时刻只能执行一个进程。</p>
+<p>如果 A 正在等待用户输入，继续让 A 占用 CPU 显然没有意义；此时应该让 B 或 C 运行。</p>
+<p>因此，调度器的一个基本原则是：</p>
+<blockquote>
+<p>只要系统中存在可运行进程，CPU 就应该尽可能保持忙碌。</p>
+</blockquote>
+<p>注意，这里有一个重要概念：<strong>Runnable（可运行）不等于 Running（正在运行）</strong>。</p>
+<p>一个进程可能处于以下两种情况：</p>
+<ul>
+<li>正在 CPU 上执行。</li>
+<li>已经具备执行条件，只是在等待 CPU 资源。</li>
+</ul>
+<p>而正在等待磁盘 I/O、键盘输入、网络数据或其他事件的进程，属于阻塞状态（Blocked），暂时不参与 CPU 调度。</p>
+<p>例如，一个进程执行 <code>read()</code>，但磁盘数据尚未准备好，它就可能进入睡眠状态。此时调度器应该选择其他可运行进程，而不是让它不断占用 CPU 检查数据是否到达。</p>
+<h2 id="12-多任务机制协作式与抢占式">1.2 多任务机制：协作式与抢占式<a hidden class="anchor" aria-hidden="true" href="#12-多任务机制协作式与抢占式">#</a></h2>
+<p>多任务操作系统主要有两种实现方式。</p>
+<h3 id="协作式多任务cooperative-multitasking">协作式多任务（Cooperative Multitasking）<a hidden class="anchor" aria-hidden="true" href="#协作式多任务cooperative-multitasking">#</a></h3>
+<p>协作式多任务要求进程主动放弃 CPU。</p>
+<p>例如：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">do_work</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">yield</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>进程执行完一部分工作后，主动调用 <code>yield()</code>，告诉操作系统自己愿意让出 CPU。</p>
+<p>这种机制的问题在于：操作系统无法强制一个进程让出 CPU。</p>
+<p>如果某个进程一直执行死循环，不主动调用 <code>yield()</code>，其他进程就可能长期得不到执行机会。</p>
+<p>因此，协作式多任务存在明显的局限：</p>
+<ul>
+<li>进程可以长时间独占 CPU。</li>
+<li>调度器无法主动控制进程运行时间。</li>
+<li>一个失去响应的进程可能严重影响整个系统。</li>
+</ul>
+<h3 id="抢占式多任务preemptive-multitasking">抢占式多任务（Preemptive Multitasking）<a hidden class="anchor" aria-hidden="true" href="#抢占式多任务preemptive-multitasking">#</a></h3>
+<p>现代 Linux 使用抢占式多任务。</p>
+<p>在这种机制下，操作系统可以主动暂停正在运行的进程，将 CPU 分配给其他进程。</p>
+<p>这个过程称为抢占（Preemption）。</p>
+<p>例如：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">进程 A 正在运行
+</span></span><span class="line"><span class="cl">       |
+</span></span><span class="line"><span class="cl">       v
+</span></span><span class="line"><span class="cl">时钟中断发生
+</span></span><span class="line"><span class="cl">       |
+</span></span><span class="line"><span class="cl">       v
+</span></span><span class="line"><span class="cl">内核检查是否需要重新调度
+</span></span><span class="line"><span class="cl">       |
+</span></span><span class="line"><span class="cl">       v
+</span></span><span class="line"><span class="cl">发现进程 B 应该运行
+</span></span><span class="line"><span class="cl">       |
+</span></span><span class="line"><span class="cl">       v
+</span></span><span class="line"><span class="cl">暂停 A，切换到 B
+</span></span></code></pre></div><p>抢占式调度避免了进程长期占用 CPU 的问题。</p>
+<p>通常，调度器会通过时间片（Timeslice）或其他运行时间控制机制限制进程连续占用 CPU 的时间。</p>
+<p>需要注意：</p>
+<ul>
+<li><code>yield()</code> 是进程主动让出 CPU。</li>
+<li>Preemption 是操作系统主动暂停进程。</li>
+<li>Context Switch 是从一个进程切换到另一个进程的执行上下文。</li>
+</ul>
+<p>三者相关，但不是同一个概念。</p>
+<hr>
+<h1 id="二linux-的进程调度器">二、Linux 的进程调度器<a hidden class="anchor" aria-hidden="true" href="#二linux-的进程调度器">#</a></h1>
+<h2 id="21-linux-调度器的发展历史">2.1 Linux 调度器的发展历史<a hidden class="anchor" aria-hidden="true" href="#21-linux-调度器的发展历史">#</a></h2>
+<p>Linux 调度器经历了多次重要演进。</p>
+<p>理解这段历史，有助于理解为什么 Linux 最终采用 CFS。</p>
+<table>
+	<thead>
+			<tr>
+					<th>内核版本</th>
+					<th>调度器</th>
+					<th>主要特点</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>Linux 1.x ～ 2.4</td>
+					<td>早期调度器</td>
+					<td>实现简单，但扩展性不足</td>
+			</tr>
+			<tr>
+					<td>Linux 2.5</td>
+					<td>O(1) Scheduler</td>
+					<td>常数时间调度，支持多处理器扩展</td>
+			</tr>
+			<tr>
+					<td>Linux 2.6.23</td>
+					<td>CFS</td>
+					<td>引入公平调度思想</td>
+			</tr>
+			<tr>
+					<td>Linux 6.6 起</td>
+					<td>EEVDF 演进</td>
+					<td>在公平性基础上进一步考虑延迟与虚拟截止时间</td>
+			</tr>
+	</tbody>
+</table>
+<h3 id="早期-linux-调度器">早期 Linux 调度器<a hidden class="anchor" aria-hidden="true" href="#早期-linux-调度器">#</a></h3>
+<p>Linux 早期使用比较简单的调度算法。</p>
+<p>随着系统中进程数量和 CPU 数量增加，原有调度器在性能和可扩展性方面逐渐暴露问题。</p>
+<p>特别是当系统中存在大量可运行进程时，调度器需要考虑如何高效地完成进程选择。</p>
+<h3 id="o1-scheduler">O(1) Scheduler<a hidden class="anchor" aria-hidden="true" href="#o1-scheduler">#</a></h3>
+<p>Linux 2.5 开发周期对调度器进行了重大改造，引入了 O(1) Scheduler。</p>
+<p>O(1) 指的是调度器某些核心操作具有常数时间复杂度，不会随着可运行进程数量增加而线性增长。</p>
+<p>其主要改进包括：</p>
+<ol>
+<li>使用优先级数组管理可运行进程。</li>
+<li>使用活动队列和过期队列管理时间片。</li>
+<li>通过位图快速定位具有可运行进程的优先级。</li>
+<li>为每个 CPU 设置独立运行队列（Per-CPU Runqueue）。</li>
+</ol>
+<p>这些设计显著提高了调度器的可扩展性。</p>
+<p>但是，O(1) Scheduler 也存在问题。</p>
+<p>它虽然在大量服务器负载下表现不错，却在某些交互式负载下表现不理想。</p>
+<p>例如，桌面环境中的文本编辑器、终端和图形界面程序需要快速响应用户操作。仅仅保证调度算法的执行效率，并不意味着能够保证良好的交互体验。</p>
+<h3 id="cfscompletely-fair-scheduler">CFS：Completely Fair Scheduler<a hidden class="anchor" aria-hidden="true" href="#cfscompletely-fair-scheduler">#</a></h3>
+<p>为改善交互式任务的调度延迟，Linux 社区探索了其他调度方案。</p>
+<p>其中，Rotating Staircase Deadline Scheduler（RSDL）引入了公平调度思想，对后来的 CFS 产生了重要影响。</p>
+<p>Linux 2.6.23 正式引入 CFS，替代了原有的 O(1) 调度器。</p>
+<p>CFS 的核心思想是：</p>
+<p><strong>不再简单地为每个进程指定一个固定的绝对时间片，而是根据进程权重，动态分配其应该获得的 CPU 份额。</strong></p>
+<p>后面将详细解释这一设计。</p>
+<h2 id="22-调度策略scheduling-policy">2.2 调度策略（Scheduling Policy）<a hidden class="anchor" aria-hidden="true" href="#22-调度策略scheduling-policy">#</a></h2>
+<p>调度策略决定在什么情况下应该运行哪个进程。</p>
+<p>不同调度策略会直接影响系统的响应速度、吞吐量和资源分配公平性。</p>
+<p>调度器需要平衡两个重要目标：</p>
+<ul>
+<li>响应时间（Response Time / Latency）：任务从就绪到获得 CPU 的等待时间。</li>
+<li>吞吐量（Throughput）：单位时间内系统完成的工作量。</li>
+</ul>
+<p>这两个目标有时是冲突的。</p>
+<p>例如：</p>
+<ul>
+<li>如果频繁切换进程，交互式任务可能得到更快响应，但上下文切换开销增加。</li>
+<li>如果让 CPU 密集型任务长时间运行，可以减少切换开销，但其他任务可能等待很久。</li>
+</ul>
+<p>因此，调度器需要根据任务特征设计合适的策略。</p>
+<h2 id="23-io-bound-与-processor-bound">2.3 I/O-Bound 与 Processor-Bound<a hidden class="anchor" aria-hidden="true" href="#23-io-bound-与-processor-bound">#</a></h2>
+<p>根据进程使用 CPU 和等待 I/O 的行为，可以将进程大致分为两类。</p>
+<h3 id="io-bound-processio-密集型进程">I/O-Bound Process（I/O 密集型进程）<a hidden class="anchor" aria-hidden="true" href="#io-bound-processio-密集型进程">#</a></h3>
+<p>I/O 密集型进程的大部分时间都在等待某种外部事件。</p>
+<p>这里的 I/O 不仅包括磁盘读写，还包括：</p>
+<ul>
+<li>键盘输入。</li>
+<li>网络数据。</li>
+<li>用户交互。</li>
+<li>设备操作。</li>
+<li>定时器事件。</li>
+</ul>
+<p>例如文本编辑器：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">等待用户输入
+</span></span><span class="line"><span class="cl">      |
+</span></span><span class="line"><span class="cl">      v
+</span></span><span class="line"><span class="cl">用户按下键盘
+</span></span><span class="line"><span class="cl">      |
+</span></span><span class="line"><span class="cl">      v
+</span></span><span class="line"><span class="cl">处理输入
+</span></span><span class="line"><span class="cl">      |
+</span></span><span class="line"><span class="cl">      v
+</span></span><span class="line"><span class="cl">更新界面
+</span></span><span class="line"><span class="cl">      |
+</span></span><span class="line"><span class="cl">      v
+</span></span><span class="line"><span class="cl">再次等待用户输入
+</span></span></code></pre></div><p>它只有在收到输入时才需要 CPU，大部分时间处于阻塞状态。</p>
+<p>因此，I/O 密集型进程通常具有以下特征：</p>
+<ul>
+<li>CPU Burst 较短。</li>
+<li>经常进入睡眠状态。</li>
+<li>被唤醒后希望尽快获得 CPU。</li>
+<li>对调度延迟比较敏感。</li>
+</ul>
+<h3 id="processor-bound-processcpu-密集型进程">Processor-Bound Process（CPU 密集型进程）<a hidden class="anchor" aria-hidden="true" href="#processor-bound-processcpu-密集型进程">#</a></h3>
+<p>CPU 密集型进程的大部分时间都在执行计算，很少主动等待 I/O。</p>
+<p>例如：</p>
+<ul>
+<li>视频编码。</li>
+<li>矩阵计算。</li>
+<li>科学计算。</li>
+<li>密码学运算。</li>
+<li>大规模数据处理。</li>
+</ul>
+<p>其典型特征：</p>
+<ul>
+<li>CPU Burst 较长。</li>
+<li>很少主动阻塞。</li>
+<li>只要获得 CPU，就倾向于持续运行。</li>
+<li>对立即响应的要求相对较低。</li>
+</ul>
+<h3 id="两类进程的调度需求">两类进程的调度需求<a hidden class="anchor" aria-hidden="true" href="#两类进程的调度需求">#</a></h3>
+<table>
+	<thead>
+			<tr>
+					<th>对比</th>
+					<th>I/O-Bound</th>
+					<th>Processor-Bound</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>CPU 使用特点</td>
+					<td>短时间运行</td>
+					<td>长时间运行</td>
+			</tr>
+			<tr>
+					<td>阻塞频率</td>
+					<td>较高</td>
+					<td>较低</td>
+			</tr>
+			<tr>
+					<td>响应延迟要求</td>
+					<td>高</td>
+					<td>相对低</td>
+			</tr>
+			<tr>
+					<td>典型场景</td>
+					<td>文本编辑器、网络服务</td>
+					<td>视频编码、科学计算</td>
+			</tr>
+			<tr>
+					<td>调度偏好</td>
+					<td>频繁获得 CPU</td>
+					<td>尽可能持续运行</td>
+			</tr>
+	</tbody>
+</table>
+<p>需要注意，这两类进程并不是绝对互斥的。</p>
+<p>例如，文本编辑器平时等待用户输入，但在执行复杂拼写检查时，也可能短时间变成 CPU 密集型任务。</p>
+<p>调度器需要适应进程行为的动态变化，而不是简单地给进程贴上永久标签。</p>
+<h2 id="24-进程优先级process-priority">2.4 进程优先级（Process Priority）<a hidden class="anchor" aria-hidden="true" href="#24-进程优先级process-priority">#</a></h2>
+<p>优先级调度是一种经典调度方式。</p>
+<p>基本思想是：</p>
+<ul>
+<li>优先级较高的进程具有更强的 CPU 竞争优势。</li>
+<li>优先级相同的进程可以采用轮转方式调度。</li>
+<li>某些调度器还会根据优先级分配不同长度的时间片。</li>
+</ul>
+<p>Linux 提供两类重要的优先级机制：</p>
+<ol>
+<li>Nice Value：普通进程的优先级控制。</li>
+<li>Real-Time Priority：实时进程的优先级控制。</li>
+</ol>
+<h3 id="nice-value">Nice Value<a hidden class="anchor" aria-hidden="true" href="#nice-value">#</a></h3>
+<p>Nice 值的范围是：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">-20 ~ +19
+</span></span></code></pre></div><p>默认值为 0。</p>
+<p>需要特别注意：<strong>Nice 值越大，优先级越低。</strong></p>
+<table>
+	<thead>
+			<tr>
+					<th style="text-align: right">Nice 值</th>
+					<th>优先级</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: right">-20</td>
+					<td>最高</td>
+			</tr>
+			<tr>
+					<td style="text-align: right">-10</td>
+					<td>较高</td>
+			</tr>
+			<tr>
+					<td style="text-align: right">0</td>
+					<td>默认</td>
+			</tr>
+			<tr>
+					<td style="text-align: right">+10</td>
+					<td>较低</td>
+			</tr>
+			<tr>
+					<td style="text-align: right">+19</td>
+					<td>最低</td>
+			</tr>
+	</tbody>
+</table>
+<p>之所以叫 Nice，是因为一个进程可以通过提高 Nice 值，降低自己与其他进程竞争 CPU 的优势。</p>
+<p>例如：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 以较低优先级启动进程</span>
+</span></span><span class="line"><span class="cl">nice -n <span class="m">10</span> ./program
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 修改已有进程的 nice 值</span>
+</span></span><span class="line"><span class="cl">renice <span class="m">10</span> -p <span class="m">1234</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 查看进程优先级</span>
+</span></span><span class="line"><span class="cl">ps -el
+</span></span></code></pre></div><p>在 Linux 的公平调度机制中，Nice 值主要影响进程的 CPU 权重，而不是直接决定一个固定的运行时间。</p>
+<h3 id="real-time-priority">Real-Time Priority<a hidden class="anchor" aria-hidden="true" href="#real-time-priority">#</a></h3>
+<p>实时进程使用另一套优先级体系。</p>
+<p>在原书讨论的 Linux 2.6 环境中，实时优先级通常为：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">0 ~ 99
+</span></span></code></pre></div><p>与 Nice 值不同，实时优先级越大，优先级越高。</p>
+<p>实时任务的调度优先级高于普通任务。</p>
+<p>例如：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">实时优先级 99
+</span></span><span class="line"><span class="cl">       |
+</span></span><span class="line"><span class="cl">实时优先级 80
+</span></span><span class="line"><span class="cl">       |
+</span></span><span class="line"><span class="cl">实时优先级 10
+</span></span><span class="line"><span class="cl">       |
+</span></span><span class="line"><span class="cl">普通进程 SCHED_NORMAL
+</span></span><span class="line"><span class="cl">       |
+</span></span><span class="line"><span class="cl">Idle
+</span></span></code></pre></div><p>这里展示的是调度优先级的概念关系，并非所有现代调度类的完整内部优先级列表。</p>
+<p>普通任务的 Nice 值和实时任务的优先级属于不同的用户接口，不能直接将二者的数值进行比较。</p>
+<h2 id="25-时间片timeslice">2.5 时间片（Timeslice）<a hidden class="anchor" aria-hidden="true" href="#25-时间片timeslice">#</a></h2>
+<p>时间片表示一个进程连续占用 CPU 的时间额度。</p>
+<p>例如：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">CPU 时间轴：
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">|--- A ---|--- B ---|--- C ---|--- A ---|
+</span></span><span class="line"><span class="cl">   10ms      10ms      10ms      10ms
+</span></span></code></pre></div><p>时间片机制能够避免某个进程无限期占用 CPU。</p>
+<p>但是，时间片长度并不是越长越好，也不是越短越好。</p>
+<p><strong>时间片太长：</strong></p>
+<ul>
+<li>其他进程需要等待更久。</li>
+<li>交互式任务的响应速度下降。</li>
+<li>系统的并发体验变差。</li>
+</ul>
+<p><strong>时间片太短：</strong></p>
+<ul>
+<li>上下文切换次数增加。</li>
+<li>CPU 时间被切换开销消耗。</li>
+<li>Cache 局部性可能受到破坏。</li>
+<li>CPU 密集型任务难以持续利用缓存。</li>
+</ul>
+<p>因此，调度器需要在响应延迟和切换开销之间进行权衡。</p>
+<p>传统调度器通常会为不同优先级设置不同的时间片。</p>
+<p>而 CFS 采用了不同的思路：它不直接给普通进程规定固定的绝对时间片，而是按照权重分配 CPU 时间比例。</p>
+<hr>
+<h1 id="三linux-调度算法从传统-unix-到-cfs">三、Linux 调度算法：从传统 Unix 到 CFS<a hidden class="anchor" aria-hidden="true" href="#三linux-调度算法从传统-unix-到-cfs">#</a></h1>
+<p>本章的核心是理解为什么 Linux 需要从传统的优先级与时间片模型，转向公平调度。</p>
+<h2 id="31-传统-unix-系统中的进程调度">3.1 传统 Unix 系统中的进程调度<a hidden class="anchor" aria-hidden="true" href="#31-传统-unix-系统中的进程调度">#</a></h2>
+<p>传统 Unix 调度器通常结合两个概念：</p>
+<ul>
+<li>Priority：进程优先级。</li>
+<li>Timeslice：进程一次可以运行的时间。</li>
+</ul>
+<p>Nice 值被用来表达普通进程的优先级。</p>
+<p>听起来非常自然：</p>
+<p>优先级越高，进程获得的时间片越长，或者获得 CPU 的频率越高。</p>
+<p>但这种设计存在一些问题。</p>
+<h3 id="问题一绝对时间片导致切换行为不理想">问题一：绝对时间片导致切换行为不理想<a hidden class="anchor" aria-hidden="true" href="#问题一绝对时间片导致切换行为不理想">#</a></h3>
+<p>假设我们设计如下规则：</p>
+<table>
+	<thead>
+			<tr>
+					<th style="text-align: right">Nice 值</th>
+					<th style="text-align: right">时间片</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: right">0</td>
+					<td style="text-align: right">100ms</td>
+			</tr>
+			<tr>
+					<td style="text-align: right">+20</td>
+					<td style="text-align: right">5ms</td>
+			</tr>
+	</tbody>
+</table>
+<p>现在系统中只有两个可运行进程：</p>
+<ul>
+<li>A：Nice = 0，时间片 100ms。</li>
+<li>B：Nice = +20，时间片 5ms。</li>
+</ul>
+<p>一个调度周期中：</p>
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>T</mi><mo>=</mo><mn>100</mn><mo>+</mo><mn>5</mn><mo>=</mo><mn>105</mn><mi>m</mi><mi>s</mi></mrow><annotation encoding="application/x-tex">
+T=100+5=105ms
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">T</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">100</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">5</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">105</span><span class="mord mathnormal">m</span><span class="mord mathnormal">s</span></span></span></span></span><p>A 获得 CPU 的比例：</p>
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mfrac><mn>100</mn><mn>105</mn></mfrac><mo>≈</mo><mn>95.24</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">
+\frac{100}{105}\approx95.24\%
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:2.0074em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3214em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">105</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">100</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≈</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">95.24%</span></span></span></span></span><p>B 获得 CPU 的比例：</p>
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mfrac><mn>5</mn><mn>105</mn></mfrac><mo>≈</mo><mn>4.76</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">
+\frac{5}{105}\approx4.76\%
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:2.0074em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3214em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">105</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">5</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≈</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">4.76%</span></span></span></span></span><p>从资源分配比例来看，这个结果是符合预期的。</p>
+<p>但是，如果系统中只有两个 Nice = +20 的进程：</p>
+<table>
+	<thead>
+			<tr>
+					<th>进程</th>
+					<th style="text-align: right">时间片</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>B</td>
+					<td style="text-align: right">5ms</td>
+			</tr>
+			<tr>
+					<td>C</td>
+					<td style="text-align: right">5ms</td>
+			</tr>
+	</tbody>
+</table>
+<p>那么它们各自获得 50% CPU。</p>
+<p>问题在于：</p>
+<ul>
+<li>两个普通优先级进程，各自运行 100ms 后切换。</li>
+<li>两个低优先级进程，各自运行 5ms 后切换。</li>
+</ul>
+<p>也就是说，即使最终 CPU 份额相同，不同优先级进程组合却可能导致完全不同的上下文切换频率。</p>
+<p>这很不理想。</p>
+<p>尤其是低优先级进程通常是后台 CPU 密集型任务，它们可能更适合长时间运行，而不是频繁发生上下文切换。</p>
+<h3 id="问题二nice-值的相对变化不够合理">问题二：Nice 值的相对变化不够合理<a hidden class="anchor" aria-hidden="true" href="#问题二nice-值的相对变化不够合理">#</a></h3>
+<p>继续考虑 Nice 值与时间片的映射：</p>
+<table>
+	<thead>
+			<tr>
+					<th style="text-align: right">Nice 值</th>
+					<th style="text-align: right">时间片</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: right">0</td>
+					<td style="text-align: right">100ms</td>
+			</tr>
+			<tr>
+					<td style="text-align: right">1</td>
+					<td style="text-align: right">95ms</td>
+			</tr>
+			<tr>
+					<td style="text-align: right">18</td>
+					<td style="text-align: right">10ms</td>
+			</tr>
+			<tr>
+					<td style="text-align: right">19</td>
+					<td style="text-align: right">5ms</td>
+			</tr>
+	</tbody>
+</table>
+<p>比较两组情况：</p>
+<p>第一组：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">Nice = 0  -&gt; 100ms
+</span></span><span class="line"><span class="cl">Nice = 1  -&gt;  95ms
+</span></span></code></pre></div><p>时间片比例为：</p>
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mn>100</mn><mo>:</mo><mn>95</mn></mrow><annotation encoding="application/x-tex">
+100:95
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">100</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">:</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">95</span></span></span></span></span><p>第二组：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">Nice = 18 -&gt; 10ms
+</span></span><span class="line"><span class="cl">Nice = 19 -&gt; 5ms
+</span></span></code></pre></div><p>时间片比例为：</p>
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mn>10</mn><mo>:</mo><mn>5</mn></mrow><annotation encoding="application/x-tex">
+10:5
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">10</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">:</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">5</span></span></span></span></span><p>虽然两组进程的 Nice 值都相差 1，但它们的 CPU 竞争优势变化完全不同。</p>
+<p>这意味着 Nice 值每增加 1 所产生的影响，取决于进程原来的 Nice 值。</p>
+<p>而 Nice 值在实际使用中往往是通过相对增量进行调整的，因此这种映射方式并不理想。</p>
+<h3 id="问题三时间片受到系统时钟-tick-粒度限制">问题三：时间片受到系统时钟 Tick 粒度限制<a hidden class="anchor" aria-hidden="true" href="#问题三时间片受到系统时钟-tick-粒度限制">#</a></h3>
+<p>传统调度器通常通过时钟中断进行时间记账。</p>
+<p>例如：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">HZ = 100
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">每秒产生 100 次时钟 Tick
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">每个 Tick 的周期：
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">1 / 100 = 10ms
+</span></span></code></pre></div><p>如果时间片通过 Tick 计数，那么时间片通常需要是 Tick 周期的整数倍。</p>
+<p>这带来几个问题：</p>
+<ol>
+<li>最小时间片受到 Tick 周期限制。</li>
+<li>相邻 Nice 值对应的时间片差异受到 Tick 粒度限制。</li>
+<li>修改系统时钟频率可能改变时间片的实际粒度。</li>
+</ol>
+<p>显然，这种设计不够灵活。</p>
+<h3 id="问题四睡眠和唤醒机制可能被利用">问题四：睡眠和唤醒机制可能被利用<a hidden class="anchor" aria-hidden="true" href="#问题四睡眠和唤醒机制可能被利用">#</a></h3>
+<p>为了改善交互式任务的响应速度，传统优先级调度器可能会对刚刚唤醒的任务进行优先级提升。</p>
+<p>例如：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">进程 A 正在执行
+</span></span><span class="line"><span class="cl">       |
+</span></span><span class="line"><span class="cl">       v
+</span></span><span class="line"><span class="cl">进程 B 被唤醒
+</span></span><span class="line"><span class="cl">       |
+</span></span><span class="line"><span class="cl">       v
+</span></span><span class="line"><span class="cl">提升 B 的优先级
+</span></span><span class="line"><span class="cl">       |
+</span></span><span class="line"><span class="cl">       v
+</span></span><span class="line"><span class="cl">B 抢占 A
+</span></span></code></pre></div><p>这有利于交互式任务。</p>
+<p>但是，某些进程可能通过频繁睡眠和唤醒，反复获得额外的调度优势。</p>
+<p>例如：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">运行一小段时间
+</span></span><span class="line"><span class="cl">      |
+</span></span><span class="line"><span class="cl">      v
+</span></span><span class="line"><span class="cl">主动睡眠
+</span></span><span class="line"><span class="cl">      |
+</span></span><span class="line"><span class="cl">      v
+</span></span><span class="line"><span class="cl">很快唤醒
+</span></span><span class="line"><span class="cl">      |
+</span></span><span class="line"><span class="cl">      v
+</span></span><span class="line"><span class="cl">重新获得优先级提升
+</span></span><span class="line"><span class="cl">      |
+</span></span><span class="line"><span class="cl">      v
+</span></span><span class="line"><span class="cl">重复
+</span></span></code></pre></div><p>这种行为称为 Scheduler Gaming（调度器博弈）。</p>
+<p>它可能导致某些进程获得不公平的 CPU 资源。</p>
+<h3 id="传统调度模型的根本问题">传统调度模型的根本问题<a hidden class="anchor" aria-hidden="true" href="#传统调度模型的根本问题">#</a></h3>
+<p>前面四个问题看起来各不相同，但它们指向同一个设计缺陷：</p>
+<p><strong>传统调度器先为不同优先级指定绝对时间片，再通过这些时间片间接决定 CPU 资源分配比例。</strong></p>
+<p>这种设计使时间片长度、Nice 值、系统负载和时钟粒度相互耦合。</p>
+<p>作者由此引出 CFS 的核心思想：</p>
+<p>不再直接为每个 Nice 值分配固定的绝对时间片，而是为每个进程分配 CPU 的相对份额。</p>
+<h2 id="32-公平调度fair-scheduling">3.2 公平调度（Fair Scheduling）<a hidden class="anchor" aria-hidden="true" href="#32-公平调度fair-scheduling">#</a></h2>
+<p>CFS 全称为 Completely Fair Scheduler。</p>
+<p>它的核心思想是模拟一个理想的、可以完美并行执行多个任务的处理器。</p>
+<h3 id="理想的多任务处理器">理想的多任务处理器<a hidden class="anchor" aria-hidden="true" href="#理想的多任务处理器">#</a></h3>
+<p>假设系统中存在两个可运行进程：</p>
+<ul>
+<li>A</li>
+<li>B</li>
+</ul>
+<p>在普通单核 CPU 上，我们只能交替运行它们：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">时间轴：
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">|---- A ----|---- B ----|---- A ----|---- B ----|
+</span></span></code></pre></div><p>每个进程在自己运行时独占 CPU。</p>
+<p>而在理想的完美多任务处理器上：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">时间轴：
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">A：================================
+</span></span><span class="line"><span class="cl">B：================================
+</span></span></code></pre></div><p>两个进程可以同时运行，每个进程获得 50% 的处理器能力。</p>
+<p>如果有 n 个相同优先级的可运行进程，那么理想情况下：</p>
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>C</mi><mi>P</mi><mi>U</mi><mtext> </mtext><mi>S</mi><mi>h</mi><mi>a</mi><mi>r</mi><msub><mi>e</mi><mi>i</mi></msub><mo>=</mo><mfrac><mn>1</mn><mi>n</mi></mfrac></mrow><annotation encoding="application/x-tex">
+CPU\ Share_i=\frac{1}{n}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">CP</span><span class="mord mathnormal" style="margin-right:0.10903em;">U</span><span class="mspace"> </span><span class="mord mathnormal" style="margin-right:0.05764em;">S</span><span class="mord mathnormal">ha</span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="mord"><span class="mord mathnormal">e</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.0074em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3214em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">n</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span><p>例如：</p>
+<table>
+	<thead>
+			<tr>
+					<th style="text-align: right">可运行进程数</th>
+					<th style="text-align: right">每个进程获得的 CPU 份额</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: right">1</td>
+					<td style="text-align: right">100%</td>
+			</tr>
+			<tr>
+					<td style="text-align: right">2</td>
+					<td style="text-align: right">50%</td>
+			</tr>
+			<tr>
+					<td style="text-align: right">4</td>
+					<td style="text-align: right">25%</td>
+			</tr>
+			<tr>
+					<td style="text-align: right">10</td>
+					<td style="text-align: right">10%</td>
+			</tr>
+	</tbody>
+</table>
+<p>当然，真实的单核 CPU 无法真正做到无限细粒度的并行执行。</p>
+<p>进程切换本身也有成本，包括：</p>
+<ul>
+<li>保存和恢复执行上下文。</li>
+<li>切换地址空间。</li>
+<li>Cache 局部性受到影响。</li>
+<li>调度器自身的执行开销。</li>
+</ul>
+<p>因此，CFS 并不是让进程无限频繁地切换，而是通过记录每个进程的运行情况，尽可能逼近理想的公平分配。</p>
+<h3 id="引入-nice-权重">引入 Nice 权重<a hidden class="anchor" aria-hidden="true" href="#引入-nice-权重">#</a></h3>
+<p>前面假设所有进程优先级相同。</p>
+<p>如果优先级不同，就需要引入权重（Weight）。</p>
+<p>Linux 为不同 Nice 值分配不同的权重。</p>
+<p>权重越大，进程应该获得的 CPU 份额越多。</p>
+<p>假设有三个进程：</p>
+<table>
+	<thead>
+			<tr>
+					<th>进程</th>
+					<th style="text-align: right">Nice</th>
+					<th style="text-align: right">Weight</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>A</td>
+					<td style="text-align: right">0</td>
+					<td style="text-align: right">1024</td>
+			</tr>
+			<tr>
+					<td>B</td>
+					<td style="text-align: right">5</td>
+					<td style="text-align: right">335</td>
+			</tr>
+			<tr>
+					<td>C</td>
+					<td style="text-align: right">5</td>
+					<td style="text-align: right">335</td>
+			</tr>
+	</tbody>
+</table>
+<p>总权重：</p>
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>W</mi><mo>=</mo><mn>1024</mn><mo>+</mo><mn>335</mn><mo>+</mo><mn>335</mn><mo>=</mo><mn>1694</mn></mrow><annotation encoding="application/x-tex">
+W=1024+335+335=1694
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">W</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">1024</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">335</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">335</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1694</span></span></span></span></span><p>每个进程的 CPU 份额为：</p>
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>S</mi><mi>h</mi><mi>a</mi><mi>r</mi><msub><mi>e</mi><mi>i</mi></msub><mo>=</mo><mfrac><msub><mi>w</mi><mi>i</mi></msub><mrow><munder><mo>∑</mo><mi>j</mi></munder><msub><mi>w</mi><mi>j</mi></msub></mrow></mfrac></mrow><annotation encoding="application/x-tex">
+Share_i=\frac{w_i}{\sum_j w_j}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord mathnormal" style="margin-right:0.05764em;">S</span><span class="mord mathnormal">ha</span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="mord"><span class="mord mathnormal">e</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.2294em;vertical-align:-1.1218em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.1076em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mop"><span class="mop op-symbol small-op" style="position:relative;top:0em;">∑</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.162em;"><span style="top:-2.4003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.4358em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02691em;">w</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0269em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal" style="margin-right:0.02691em;">w</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0269em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.1218em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span><p>因此：</p>
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>S</mi><mi>h</mi><mi>a</mi><mi>r</mi><msub><mi>e</mi><mi>A</mi></msub><mo>=</mo><mfrac><mn>1024</mn><mn>1694</mn></mfrac><mo>≈</mo><mn>60.45</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">
+Share_A=\frac{1024}{1694}\approx60.45\%
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord mathnormal" style="margin-right:0.05764em;">S</span><span class="mord mathnormal">ha</span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="mord"><span class="mord mathnormal">e</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">A</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.0074em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3214em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1694</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1024</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≈</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">60.45%</span></span></span></span></span><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>S</mi><mi>h</mi><mi>a</mi><mi>r</mi><msub><mi>e</mi><mi>B</mi></msub><mo>=</mo><mi>S</mi><mi>h</mi><mi>a</mi><mi>r</mi><msub><mi>e</mi><mi>C</mi></msub><mo>=</mo><mfrac><mn>335</mn><mn>1694</mn></mfrac><mo>≈</mo><mn>19.78</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">
+Share_B=Share_C=\frac{335}{1694}\approx19.78\%
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord mathnormal" style="margin-right:0.05764em;">S</span><span class="mord mathnormal">ha</span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="mord"><span class="mord mathnormal">e</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05017em;">B</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord mathnormal" style="margin-right:0.05764em;">S</span><span class="mord mathnormal">ha</span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="mord"><span class="mord mathnormal">e</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.07153em;">C</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.0074em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3214em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1694</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">335</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≈</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">19.78%</span></span></span></span></span><p>这说明：</p>
+<ul>
+<li>A 获得约 60.45% 的 CPU。</li>
+<li>B 获得约 19.78% 的 CPU。</li>
+<li>C 获得约 19.78% 的 CPU。</li>
+</ul>
+<p>这里有一个非常重要的认识：</p>
+<p><strong>Nice 值影响的是 CPU 份额，而不是直接决定某个进程每次运行多少毫秒。</strong></p>
+<p>而且，CPU 份额是相对于当前竞争的可运行实体而言的。</p>
+<p>如果一个进程进入睡眠状态，它不再参与当前的 CPU 竞争，其他可运行进程就可以利用空闲出来的 CPU。</p>
+<hr>
+<h1 id="四cfs-的实现原理">四、CFS 的实现原理<a hidden class="anchor" aria-hidden="true" href="#四cfs-的实现原理">#</a></h1>
+<p>前面介绍了 CFS 的设计思想，现在进一步研究它如何在 Linux 内核中实现。</p>
+<p>原书主要围绕四个方面展开：</p>
+<ol>
+<li>Time Accounting：运行时间记账。</li>
+<li>Process Selection：进程选择。</li>
+<li>Scheduler Entry Point：调度器入口。</li>
+<li>Sleeping and Waking Up：睡眠与唤醒。</li>
+</ol>
+<h2 id="41-time-accounting时间记账">4.1 Time Accounting：时间记账<a hidden class="anchor" aria-hidden="true" href="#41-time-accounting时间记账">#</a></h2>
+<p>传统调度器通常通过时间片记录进程运行时间。</p>
+<p>例如：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">进程 A 的时间片：100ms
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">每次时钟 Tick：
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">timeslice -= TICK_PERIOD
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">当 timeslice == 0：
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">抢占进程 A
+</span></span></code></pre></div><p>CFS 没有为普通任务使用传统意义上的固定时间片，但仍然必须记录每个进程实际运行了多长时间。</p>
+<p>否则，调度器无法判断一个进程是否已经获得了应有的 CPU 份额。</p>
+<p>为此，CFS 使用了 <code>struct sched_entity</code>。</p>
+<h2 id="42-scheduler-entity-structure">4.2 Scheduler Entity Structure<a hidden class="anchor" aria-hidden="true" href="#42-scheduler-entity-structure">#</a></h2>
+<p>在原书对应的 Linux 2.6 实现中，调度实体定义在 <code>&lt;linux/sched.h&gt;</code> 中。</p>
+<p>简化后的结构如下：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">struct</span> <span class="n">sched_entity</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">struct</span> <span class="n">load_weight</span> <span class="n">load</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">struct</span> <span class="n">rb_node</span> <span class="n">run_node</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">on_rq</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">u64</span> <span class="n">exec_start</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">u64</span> <span class="n">sum_exec_runtime</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">u64</span> <span class="n">vruntime</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">u64</span> <span class="n">prev_sum_exec_runtime</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></div><p>其中几个字段非常重要：</p>
+<table>
+	<thead>
+			<tr>
+					<th>字段</th>
+					<th>含义</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>load</code></td>
+					<td>调度实体的权重信息</td>
+			</tr>
+			<tr>
+					<td><code>run_node</code></td>
+					<td>红黑树节点</td>
+			</tr>
+			<tr>
+					<td><code>on_rq</code></td>
+					<td>是否位于运行队列</td>
+			</tr>
+			<tr>
+					<td><code>exec_start</code></td>
+					<td>本次开始执行的时间</td>
+			</tr>
+			<tr>
+					<td><code>sum_exec_runtime</code></td>
+					<td>累计实际运行时间</td>
+			</tr>
+			<tr>
+					<td><code>vruntime</code></td>
+					<td>虚拟运行时间</td>
+			</tr>
+			<tr>
+					<td><code>prev_sum_exec_runtime</code></td>
+					<td>上一次记录的累计运行时间</td>
+			</tr>
+	</tbody>
+</table>
+<p><code>struct sched_entity</code> 嵌入在 <code>task_struct</code> 中，作为进程调度相关的数据结构。</p>
+<p>因此：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">task_struct
+</span></span><span class="line"><span class="cl">    |
+</span></span><span class="line"><span class="cl">    +---- se (sched_entity)
+</span></span><span class="line"><span class="cl">              |
+</span></span><span class="line"><span class="cl">              +---- load
+</span></span><span class="line"><span class="cl">              |
+</span></span><span class="line"><span class="cl">              +---- run_node
+</span></span><span class="line"><span class="cl">              |
+</span></span><span class="line"><span class="cl">              +---- exec_start
+</span></span><span class="line"><span class="cl">              |
+</span></span><span class="line"><span class="cl">              +---- sum_exec_runtime
+</span></span><span class="line"><span class="cl">              |
+</span></span><span class="line"><span class="cl">              +---- vruntime
+</span></span></code></pre></div><p>这体现了 Linux 内核一个重要的设计思想：</p>
+<p>进程管理信息与调度信息分开组织，调度器通过调度实体访问任务的调度状态。</p>
+<h2 id="43-virtual-runtime虚拟运行时间">4.3 Virtual Runtime：虚拟运行时间<a hidden class="anchor" aria-hidden="true" href="#43-virtual-runtime虚拟运行时间">#</a></h2>
+<p>这是理解 CFS 最关键的概念。</p>
+<p><code>vruntime</code> 是对进程实际运行时间进行权重归一化后得到的虚拟运行时间。</p>
+<p>它用于衡量进程相对于其应得 CPU 份额，已经获得了多少 CPU 资源。</p>
+<p>简化公式：</p>
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi mathvariant="normal">Δ</mi><mi>v</mi><mi>r</mi><mi>u</mi><mi>n</mi><mi>t</mi><mi>i</mi><mi>m</mi><mi>e</mi><mo>=</mo><mi mathvariant="normal">Δ</mi><mi>r</mi><mi>u</mi><mi>n</mi><mi>t</mi><mi>i</mi><mi>m</mi><mi>e</mi><mo>×</mo><mfrac><mrow><mi>N</mi><mi>I</mi><mi>C</mi><mi>E</mi><mi mathvariant="normal">_</mi><mn>0</mn><mi mathvariant="normal">_</mi><mi>L</mi><mi>O</mi><mi>A</mi><mi>D</mi></mrow><mrow><mi>w</mi><mi>e</mi><mi>i</mi><mi>g</mi><mi>h</mi><mi>t</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">
+\Delta vruntime =
+\Delta runtime \times
+\frac{NICE\_0\_LOAD}{weight}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord">Δ</span><span class="mord mathnormal" style="margin-right:0.03588em;">v</span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="mord mathnormal">u</span><span class="mord mathnormal">n</span><span class="mord mathnormal">t</span><span class="mord mathnormal">im</span><span class="mord mathnormal">e</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.7667em;vertical-align:-0.0833em;"></span><span class="mord">Δ</span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="mord mathnormal">u</span><span class="mord mathnormal">n</span><span class="mord mathnormal">t</span><span class="mord mathnormal">im</span><span class="mord mathnormal">e</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:2.2638em;vertical-align:-0.8804em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3833em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02691em;">w</span><span class="mord mathnormal">e</span><span class="mord mathnormal">i</span><span class="mord mathnormal" style="margin-right:0.03588em;">g</span><span class="mord mathnormal">h</span><span class="mord mathnormal">t</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.7em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.10903em;">N</span><span class="mord mathnormal" style="margin-right:0.07847em;">I</span><span class="mord mathnormal" style="margin-right:0.05764em;">CE</span><span class="mord" style="margin-right:0.02778em;">_0_</span><span class="mord mathnormal">L</span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mord mathnormal">A</span><span class="mord mathnormal" style="margin-right:0.02778em;">D</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.8804em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span><p>其中：</p>
+<ul>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">Δ</mi><mi>r</mi><mi>u</mi><mi>n</mi><mi>t</mi><mi>i</mi><mi>m</mi><mi>e</mi></mrow><annotation encoding="application/x-tex">\Delta runtime</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord">Δ</span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="mord mathnormal">u</span><span class="mord mathnormal">n</span><span class="mord mathnormal">t</span><span class="mord mathnormal">im</span><span class="mord mathnormal">e</span></span></span></span>：进程实际运行时间。</li>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>w</mi><mi>e</mi><mi>i</mi><mi>g</mi><mi>h</mi><mi>t</mi></mrow><annotation encoding="application/x-tex">weight</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.02691em;">w</span><span class="mord mathnormal">e</span><span class="mord mathnormal">i</span><span class="mord mathnormal" style="margin-right:0.03588em;">g</span><span class="mord mathnormal">h</span><span class="mord mathnormal">t</span></span></span></span>：进程的调度权重。</li>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mi>I</mi><mi>C</mi><mi>E</mi><mi mathvariant="normal">_</mi><mn>0</mn><mi mathvariant="normal">_</mi><mi>L</mi><mi>O</mi><mi>A</mi><mi>D</mi></mrow><annotation encoding="application/x-tex">NICE\_0\_LOAD</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9933em;vertical-align:-0.31em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span><span class="mord mathnormal" style="margin-right:0.07847em;">I</span><span class="mord mathnormal" style="margin-right:0.05764em;">CE</span><span class="mord" style="margin-right:0.02778em;">_0_</span><span class="mord mathnormal">L</span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mord mathnormal">A</span><span class="mord mathnormal" style="margin-right:0.02778em;">D</span></span></span></span>：默认 Nice 值对应的权重，通常为 1024。</li>
+</ul>
+<p>注意：这是帮助理解的简化表达，内核实际使用整数运算和权重缩放函数完成计算。</p>
+<h3 id="为什么需要归一化">为什么需要归一化？<a hidden class="anchor" aria-hidden="true" href="#为什么需要归一化">#</a></h3>
+<p>假设存在两个进程：</p>
+<table>
+	<thead>
+			<tr>
+					<th>进程</th>
+					<th style="text-align: right">Nice</th>
+					<th style="text-align: right">Weight</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>A</td>
+					<td style="text-align: right">0</td>
+					<td style="text-align: right">1024</td>
+			</tr>
+			<tr>
+					<td>B</td>
+					<td style="text-align: right">5</td>
+					<td style="text-align: right">335</td>
+			</tr>
+	</tbody>
+</table>
+<p>现在两个进程实际运行时间都是 10ms。</p>
+<p>对于 A：</p>
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi mathvariant="normal">Δ</mi><mi>v</mi><mi>r</mi><mi>u</mi><mi>n</mi><mi>t</mi><mi>i</mi><mi>m</mi><msub><mi>e</mi><mi>A</mi></msub><mo>=</mo><mn>10</mn><mo>×</mo><mfrac><mn>1024</mn><mn>1024</mn></mfrac><mo>=</mo><mn>10</mn><mi>m</mi><mi>s</mi></mrow><annotation encoding="application/x-tex">
+\Delta vruntime_A
+=10\times\frac{1024}{1024}
+=10ms
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord">Δ</span><span class="mord mathnormal" style="margin-right:0.03588em;">v</span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="mord mathnormal">u</span><span class="mord mathnormal">n</span><span class="mord mathnormal">t</span><span class="mord mathnormal">im</span><span class="mord"><span class="mord mathnormal">e</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">A</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">10</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:2.0074em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3214em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1024</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1024</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">10</span><span class="mord mathnormal">m</span><span class="mord mathnormal">s</span></span></span></span></span><p>对于 B：</p>
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi mathvariant="normal">Δ</mi><mi>v</mi><mi>r</mi><mi>u</mi><mi>n</mi><mi>t</mi><mi>i</mi><mi>m</mi><msub><mi>e</mi><mi>B</mi></msub><mo>=</mo><mn>10</mn><mo>×</mo><mfrac><mn>1024</mn><mn>335</mn></mfrac><mo>≈</mo><mn>30.57</mn><mi>m</mi><mi>s</mi></mrow><annotation encoding="application/x-tex">
+\Delta vruntime_B
+=10\times\frac{1024}{335}
+\approx30.57ms
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord">Δ</span><span class="mord mathnormal" style="margin-right:0.03588em;">v</span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="mord mathnormal">u</span><span class="mord mathnormal">n</span><span class="mord mathnormal">t</span><span class="mord mathnormal">im</span><span class="mord"><span class="mord mathnormal">e</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05017em;">B</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">10</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:2.0074em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3214em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">335</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1024</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≈</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">30.57</span><span class="mord mathnormal">m</span><span class="mord mathnormal">s</span></span></span></span></span><p>可以看到：</p>
+<p>虽然两个进程实际运行时间相同，但 B 的虚拟运行时间增长更多。</p>
+<p>原因是 B 的权重更低，理论上应该获得更少的 CPU 时间。</p>
+<p>因此，相同的实际运行时间对低权重进程来说，意味着它消耗了更多相对于自身份额的 CPU 资源。</p>
+<p>反过来说：</p>
+<ul>
+<li>高权重进程：运行相同时间，vruntime 增长较慢。</li>
+<li>低权重进程：运行相同时间，vruntime 增长较快。</li>
+</ul>
+<p>调度器就可以通过比较 vruntime，判断哪个进程相对来说更应该获得 CPU。</p>
+<h3 id="ideal-multitasking-processor-与-vruntime">Ideal Multitasking Processor 与 vruntime<a hidden class="anchor" aria-hidden="true" href="#ideal-multitasking-processor-与-vruntime">#</a></h3>
+<p>可以从理想处理器的角度理解 vruntime。</p>
+<p>如果系统可以完美地让所有进程同时运行，那么相同权重的进程应该获得相同的虚拟运行进度。</p>
+<p>但真实 CPU 只能交替运行进程。</p>
+<p>于是，CFS 通过 <code>vruntime</code> 记录每个进程的运行进度，尽可能模拟理想处理器。</p>
+<h3 id="vruntime-与-timer-tick">vruntime 与 Timer Tick<a hidden class="anchor" aria-hidden="true" href="#vruntime-与-timer-tick">#</a></h3>
+<p>还有一个重要细节：</p>
+<p><code>vruntime</code> 使用纳秒作为单位。</p>
+<p>它并不依赖传统的系统时钟 Tick 作为计量粒度。</p>
+<p>这意味着 CFS 能够更精细地记录进程运行时间，避免传统时间片模型中时间片必须依赖 Tick 整数倍的问题。</p>
+<p>在原书对应的代码中，<code>update_curr()</code> 负责更新当前调度实体的运行时间。</p>
+<p>简化逻辑如下：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">update_curr</span><span class="p">(</span><span class="k">struct</span> <span class="n">cfs_rq</span> <span class="o">*</span><span class="n">cfs_rq</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">struct</span> <span class="n">sched_entity</span> <span class="o">*</span><span class="n">curr</span> <span class="o">=</span> <span class="n">cfs_rq</span><span class="o">-&gt;</span><span class="n">curr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">u64</span> <span class="n">now</span> <span class="o">=</span> <span class="nf">rq_of</span><span class="p">(</span><span class="n">cfs_rq</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">clock</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">delta_exec</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">curr</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">delta_exec</span> <span class="o">=</span> <span class="n">now</span> <span class="o">-</span> <span class="n">curr</span><span class="o">-&gt;</span><span class="n">exec_start</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">delta_exec</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">__update_curr</span><span class="p">(</span><span class="n">cfs_rq</span><span class="p">,</span> <span class="n">curr</span><span class="p">,</span> <span class="n">delta_exec</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">curr</span><span class="o">-&gt;</span><span class="n">exec_start</span> <span class="o">=</span> <span class="n">now</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>真正的关键在于：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">delta_exec_weighted</span> <span class="o">=</span> <span class="nf">calc_delta_fair</span><span class="p">(</span><span class="n">delta_exec</span><span class="p">,</span> <span class="n">curr</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">curr</span><span class="o">-&gt;</span><span class="n">vruntime</span> <span class="o">+=</span> <span class="n">delta_exec_weighted</span><span class="p">;</span>
+</span></span></code></pre></div><p>这段代码完成了：</p>
+<ol>
+<li>计算当前进程实际运行时间。</li>
+<li>根据权重归一化运行时间。</li>
+<li>更新当前进程的虚拟运行时间。</li>
+</ol>
+<p>这样，调度器就能够持续掌握每个进程的 CPU 使用情况。</p>
+<h2 id="44-process-selection进程选择">4.4 Process Selection：进程选择<a hidden class="anchor" aria-hidden="true" href="#44-process-selection进程选择">#</a></h2>
+<p>理解了 vruntime，接下来就很容易理解 CFS 如何选择进程。</p>
+<p>核心规则只有一句话：</p>
+<p><strong>选择 vruntime 最小的可运行调度实体。</strong></p>
+<p>为什么？</p>
+<p>因为 vruntime 最小的进程，相对于自己的权重而言，获得的 CPU 资源最少，应该优先得到 CPU。</p>
+<p>那么如何高效地找到 vruntime 最小的进程？</p>
+<p>CFS 使用红黑树（Red-Black Tree）。</p>
+<h3 id="为什么使用红黑树">为什么使用红黑树？<a hidden class="anchor" aria-hidden="true" href="#为什么使用红黑树">#</a></h3>
+<p>假设有四个进程：</p>
+<table>
+	<thead>
+			<tr>
+					<th>进程</th>
+					<th style="text-align: right">vruntime</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>A</td>
+					<td style="text-align: right">10</td>
+			</tr>
+			<tr>
+					<td>B</td>
+					<td style="text-align: right">20</td>
+			</tr>
+			<tr>
+					<td>C</td>
+					<td style="text-align: right">30</td>
+			</tr>
+			<tr>
+					<td>D</td>
+					<td style="text-align: right">40</td>
+			</tr>
+	</tbody>
+</table>
+<p>可以按照 vruntime 将这些进程组织成一棵二叉搜索树：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">             B(20)
+</span></span><span class="line"><span class="cl">            /     \
+</span></span><span class="line"><span class="cl">        A(10)     C(30)
+</span></span><span class="line"><span class="cl">                      \
+</span></span><span class="line"><span class="cl">                      D(40)
+</span></span></code></pre></div><p>在二叉搜索树中，最左边的节点具有最小的 key。</p>
+<p>因此：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">最左节点 = vruntime 最小的进程
+</span></span></code></pre></div><p>红黑树是一种自平衡二叉搜索树，能够保证树的高度为对数级别。</p>
+<p>其基本操作复杂度为：</p>
+<table>
+	<thead>
+			<tr>
+					<th>操作</th>
+					<th>时间复杂度</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>查找</td>
+					<td>O(log N)</td>
+			</tr>
+			<tr>
+					<td>插入</td>
+					<td>O(log N)</td>
+			</tr>
+			<tr>
+					<td>删除</td>
+					<td>O(log N)</td>
+			</tr>
+	</tbody>
+</table>
+<p>在原书介绍的 CFS 实现中，内核还缓存了最左节点：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">struct</span> <span class="n">rb_node</span> <span class="o">*</span><span class="n">rb_leftmost</span><span class="p">;</span>
+</span></span></code></pre></div><p>这样选择最小 vruntime 的进程时，不需要每次重新遍历整棵树。</p>
+<p>对应的核心函数是：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">static</span> <span class="k">struct</span> <span class="n">sched_entity</span> <span class="o">*</span>
+</span></span><span class="line"><span class="cl"><span class="nf">__pick_next_entity</span><span class="p">(</span><span class="k">struct</span> <span class="n">cfs_rq</span> <span class="o">*</span><span class="n">cfs_rq</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">struct</span> <span class="n">rb_node</span> <span class="o">*</span><span class="n">left</span> <span class="o">=</span> <span class="n">cfs_rq</span><span class="o">-&gt;</span><span class="n">rb_leftmost</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">left</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="nf">rb_entry</span><span class="p">(</span><span class="n">left</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                    <span class="k">struct</span> <span class="n">sched_entity</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">run_node</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>它的逻辑非常简单：</p>
+<ol>
+<li>获取缓存的最左节点。</li>
+<li>如果没有节点，说明没有可运行的公平调度实体。</li>
+<li>否则，将红黑树节点转换成 <code>sched_entity</code>。</li>
+<li>返回对应的调度实体。</li>
+</ol>
+<h3 id="进程如何加入红黑树">进程如何加入红黑树？<a hidden class="anchor" aria-hidden="true" href="#进程如何加入红黑树">#</a></h3>
+<p>当一个进程第一次创建并进入可运行状态，或者从睡眠状态被唤醒时，需要重新加入运行队列。</p>
+<p>原书对应的函数包括：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">enqueue_entity</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"><span class="nf">__enqueue_entity</span><span class="p">()</span>
+</span></span></code></pre></div><p>主要工作：</p>
+<ol>
+<li>更新当前进程的运行时间。</li>
+<li>更新调度实体的相关统计信息。</li>
+<li>根据 vruntime 找到红黑树中的插入位置。</li>
+<li>插入红黑树。</li>
+<li>必要时更新最左节点缓存。</li>
+</ol>
+<h3 id="进程如何从红黑树删除">进程如何从红黑树删除？<a hidden class="anchor" aria-hidden="true" href="#进程如何从红黑树删除">#</a></h3>
+<p>当进程阻塞或者退出时，它不再参与当前 CPU 的公平调度。</p>
+<p>对应的函数包括：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">dequeue_entity</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"><span class="nf">__dequeue_entity</span><span class="p">()</span>
+</span></span></code></pre></div><p>主要工作：</p>
+<ol>
+<li>更新当前运行时间。</li>
+<li>更新调度统计信息。</li>
+<li>从红黑树中删除对应节点。</li>
+<li>更新运行队列的统计信息。</li>
+<li>必要时更新 <code>min_vruntime</code>。</li>
+</ol>
+<p>这里需要注意：</p>
+<p><code>min_vruntime</code> 是运行队列维护的虚拟运行时间基准，它用于维持运行实体的相对时间位置，并帮助处理任务唤醒、迁移等情况。</p>
+<p>不要简单地把它理解为红黑树当前最左节点的 vruntime；二者在概念上相关，但不是同一个变量。</p>
+<h2 id="45-scheduler-entry-point调度器入口">4.5 Scheduler Entry Point：调度器入口<a hidden class="anchor" aria-hidden="true" href="#45-scheduler-entry-point调度器入口">#</a></h2>
+<p>上面介绍了 CFS 内部如何选择进程。</p>
+<p>但内核中的其他子系统如何触发调度？</p>
+<p>Linux 提供了一个重要的调度入口：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">schedule</span><span class="p">()</span>
+</span></span></code></pre></div><p>在原书对应的 Linux 2.6 实现中，<code>schedule()</code> 位于 <code>kernel/sched.c</code>。</p>
+<p>它负责协调不同的调度类，并选择下一个运行的进程。</p>
+<p>简化调用关系：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">schedule()
+</span></span><span class="line"><span class="cl">    |
+</span></span><span class="line"><span class="cl">    v
+</span></span><span class="line"><span class="cl">pick_next_task()
+</span></span><span class="line"><span class="cl">    |
+</span></span><span class="line"><span class="cl">    v
+</span></span><span class="line"><span class="cl">遍历调度类
+</span></span><span class="line"><span class="cl">    |
+</span></span><span class="line"><span class="cl">    +---- 实时调度类
+</span></span><span class="line"><span class="cl">    |
+</span></span><span class="line"><span class="cl">    +---- CFS 调度类
+</span></span><span class="line"><span class="cl">    |
+</span></span><span class="line"><span class="cl">    +---- Idle 调度类
+</span></span><span class="line"><span class="cl">    |
+</span></span><span class="line"><span class="cl">    v
+</span></span><span class="line"><span class="cl">选择下一个进程
+</span></span><span class="line"><span class="cl">    |
+</span></span><span class="line"><span class="cl">    v
+</span></span><span class="line"><span class="cl">context_switch()
+</span></span></code></pre></div><p>这里引出了一个重要概念：Scheduler Classes。</p>
+<h3 id="scheduler-classes调度类">Scheduler Classes：调度类<a hidden class="anchor" aria-hidden="true" href="#scheduler-classes调度类">#</a></h3>
+<p>Linux 使用模块化设计，让不同类型的进程采用不同的调度算法。</p>
+<p>每个调度类负责管理特定类型的任务，并实现相应的调度操作。</p>
+<p>原书介绍的主要调度类包括：</p>
+<table>
+	<thead>
+			<tr>
+					<th>调度类</th>
+					<th>作用</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>CFS</td>
+					<td>普通任务</td>
+			</tr>
+			<tr>
+					<td>Real-Time</td>
+					<td>实时任务</td>
+			</tr>
+			<tr>
+					<td>Idle</td>
+					<td>空闲任务</td>
+			</tr>
+	</tbody>
+</table>
+<p>每个调度类都有自己的优先级。</p>
+<p>通用调度器按照调度类的优先级依次询问它们：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">最高优先级调度类
+</span></span><span class="line"><span class="cl">       |
+</span></span><span class="line"><span class="cl">       v
+</span></span><span class="line"><span class="cl">是否存在可运行进程？
+</span></span><span class="line"><span class="cl">       |
+</span></span><span class="line"><span class="cl">   +---+---+
+</span></span><span class="line"><span class="cl">   |       |
+</span></span><span class="line"><span class="cl">  有       无
+</span></span><span class="line"><span class="cl">   |       |
+</span></span><span class="line"><span class="cl">   v       v
+</span></span><span class="line"><span class="cl">选择任务  检查下一个调度类
+</span></span></code></pre></div><p>一旦某个调度类返回了可运行任务，调度器就选择该任务。</p>
+<p>这种设计的优点是：</p>
+<ul>
+<li>不同调度策略可以独立实现。</li>
+<li>可以支持普通任务和实时任务。</li>
+<li>通用调度器不必了解每种算法的具体实现。</li>
+<li>新的调度策略可以通过调度类机制接入。</li>
+</ul>
+<p>这是一种典型的面向接口的模块化设计。</p>
+<h2 id="46-sleeping-and-waking-up睡眠与唤醒">4.6 Sleeping and Waking Up：睡眠与唤醒<a hidden class="anchor" aria-hidden="true" href="#46-sleeping-and-waking-up睡眠与唤醒">#</a></h2>
+<p>进程调度不仅仅是选择下一个进程，还必须处理进程什么时候退出运行队列，以及什么时候重新进入运行队列。</p>
+<p>例如：</p>
+<p>一个进程调用 <code>read()</code> 读取文件，但数据尚未准备好。</p>
+<p>此时进程不能继续执行，必须等待事件发生。</p>
+<p>Linux 通过等待队列（Wait Queue）管理这种等待关系。</p>
+<h3 id="wait-queue">Wait Queue<a hidden class="anchor" aria-hidden="true" href="#wait-queue">#</a></h3>
+<p>等待队列是一个保存等待某个事件发生的任务的队列。</p>
+<p>例如：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">磁盘数据尚未准备好
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">进程 A
+</span></span><span class="line"><span class="cl">   |
+</span></span><span class="line"><span class="cl">   v
+</span></span><span class="line"><span class="cl">加入等待队列
+</span></span><span class="line"><span class="cl">   |
+</span></span><span class="line"><span class="cl">   v
+</span></span><span class="line"><span class="cl">设置状态为 TASK_INTERRUPTIBLE
+</span></span><span class="line"><span class="cl">   |
+</span></span><span class="line"><span class="cl">   v
+</span></span><span class="line"><span class="cl">调用 schedule()
+</span></span><span class="line"><span class="cl">   |
+</span></span><span class="line"><span class="cl">   v
+</span></span><span class="line"><span class="cl">CPU 执行其他进程
+</span></span></code></pre></div><p>等待的事件发生后：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">磁盘数据准备完成
+</span></span><span class="line"><span class="cl">       |
+</span></span><span class="line"><span class="cl">       v
+</span></span><span class="line"><span class="cl">调用 wake_up()
+</span></span><span class="line"><span class="cl">       |
+</span></span><span class="line"><span class="cl">       v
+</span></span><span class="line"><span class="cl">唤醒等待队列中的进程
+</span></span><span class="line"><span class="cl">       |
+</span></span><span class="line"><span class="cl">       v
+</span></span><span class="line"><span class="cl">进程状态变为 TASK_RUNNING
+</span></span><span class="line"><span class="cl">       |
+</span></span><span class="line"><span class="cl">       v
+</span></span><span class="line"><span class="cl">重新加入运行队列
+</span></span></code></pre></div><p>需要注意：</p>
+<p><code>TASK_RUNNING</code> 在 Linux 中既可以表示正在运行，也可以表示可运行但正在等待 CPU。</p>
+<p>它并不等同于进程此刻一定正在 CPU 上执行。</p>
+<h3 id="睡眠的基本流程">睡眠的基本流程<a hidden class="anchor" aria-hidden="true" href="#睡眠的基本流程">#</a></h3>
+<p>原书介绍了一种典型的等待队列使用模式：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">DEFINE_WAIT</span><span class="p">(</span><span class="n">wait</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">add_wait_queue</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">wait</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">condition</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">prepare_to_wait</span><span class="p">(</span><span class="o">&amp;</span><span class="n">q</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">wait</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">TASK_INTERRUPTIBLE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="nf">signal_pending</span><span class="p">(</span><span class="n">current</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">        <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">schedule</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">finish_wait</span><span class="p">(</span><span class="o">&amp;</span><span class="n">q</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">wait</span><span class="p">);</span>
+</span></span></code></pre></div><p>理解这段代码需要注意几个细节：</p>
+<ol>
+<li><code>DEFINE_WAIT()</code>：创建等待队列项。</li>
+<li><code>add_wait_queue()</code>：将当前任务加入等待队列。</li>
+<li><code>prepare_to_wait()</code>：设置当前任务的睡眠状态，并确保其处于等待队列中。</li>
+<li><code>schedule()</code>：主动让出 CPU。</li>
+<li><code>finish_wait()</code>：结束等待，清理等待队列项。</li>
+</ol>
+<p>为什么必须使用 <code>while</code> 检查条件，而不是简单使用 <code>if</code>？</p>
+<p>因为可能发生两种情况：</p>
+<p><strong>第一种：虚假唤醒（Spurious Wakeup）</strong></p>
+<p>进程被唤醒，不代表它等待的事件一定已经发生。</p>
+<p>因此，醒来之后必须重新检查条件。</p>
+<p><strong>第二种：避免丢失唤醒（Lost Wakeup）</strong></p>
+<p>假设进程刚刚检查完条件，事件就发生了，而进程随后才进入睡眠。</p>
+<p>如果等待队列和状态设置的顺序不正确，就可能导致事件已经发生，进程却仍然睡眠。</p>
+<p>因此，内核必须正确协调条件检查、等待队列登记和任务状态切换，避免竞态条件。</p>
+<p>实际内核代码还需要根据具体场景使用适当的锁和内存顺序保证。</p>
+<h3 id="唤醒过程">唤醒过程<a hidden class="anchor" aria-hidden="true" href="#唤醒过程">#</a></h3>
+<p>唤醒通常通过：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">wake_up</span><span class="p">()</span>
+</span></span></code></pre></div><p>完成。</p>
+<p>它会进一步调用相关的唤醒逻辑，使等待任务重新进入可运行状态。</p>
+<p>简化过程：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">事件发生
+</span></span><span class="line"><span class="cl">   |
+</span></span><span class="line"><span class="cl">   v
+</span></span><span class="line"><span class="cl">wake_up()
+</span></span><span class="line"><span class="cl">   |
+</span></span><span class="line"><span class="cl">   v
+</span></span><span class="line"><span class="cl">try_to_wake_up()
+</span></span><span class="line"><span class="cl">   |
+</span></span><span class="line"><span class="cl">   v
+</span></span><span class="line"><span class="cl">设置 TASK_RUNNING
+</span></span><span class="line"><span class="cl">   |
+</span></span><span class="line"><span class="cl">   v
+</span></span><span class="line"><span class="cl">加入运行队列
+</span></span><span class="line"><span class="cl">   |
+</span></span><span class="line"><span class="cl">   v
+</span></span><span class="line"><span class="cl">必要时设置 need_resched
+</span></span></code></pre></div><p>这里要注意：</p>
+<p><strong>唤醒进程不意味着它立即开始执行。</strong></p>
+<p>唤醒只意味着它重新具备了运行资格。</p>
+<p>至于什么时候获得 CPU，还需要由调度器决定。</p>
+<hr>
+<h1 id="五抢占与上下文切换">五、抢占与上下文切换<a hidden class="anchor" aria-hidden="true" href="#五抢占与上下文切换">#</a></h1>
+<p>前面介绍了调度器如何选择下一个进程。</p>
+<p>接下来需要回答：</p>
+<p>内核如何从当前进程切换到下一个进程？</p>
+<h2 id="51-context-switch">5.1 Context Switch<a hidden class="anchor" aria-hidden="true" href="#51-context-switch">#</a></h2>
+<p>上下文切换（Context Switch）是从一个正在运行的任务切换到另一个任务的过程。</p>
+<p>在原书介绍的 Linux 2.6 实现中，主要由：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">context_switch</span><span class="p">()</span>
+</span></span></code></pre></div><p>完成。</p>
+<p>它主要执行两项工作。</p>
+<h3 id="1-切换内存地址空间">1. 切换内存地址空间<a hidden class="anchor" aria-hidden="true" href="#1-切换内存地址空间">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">switch_mm</span><span class="p">()</span>
+</span></span></code></pre></div><p>当切换到使用不同地址空间的进程时，内核需要切换相应的内存映射上下文。</p>
+<p>例如：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">进程 A
+</span></span><span class="line"><span class="cl">  |
+</span></span><span class="line"><span class="cl">  v
+</span></span><span class="line"><span class="cl">地址空间 A
+</span></span><span class="line"><span class="cl">  |
+</span></span><span class="line"><span class="cl">  v
+</span></span><span class="line"><span class="cl">切换到进程 B
+</span></span><span class="line"><span class="cl">  |
+</span></span><span class="line"><span class="cl">  v
+</span></span><span class="line"><span class="cl">地址空间 B
+</span></span></code></pre></div><p>实际是否需要切换页表等底层状态，还取决于新旧任务是否共享地址空间以及体系结构的实现。</p>
+<h3 id="2-切换处理器上下文">2. 切换处理器上下文<a hidden class="anchor" aria-hidden="true" href="#2-切换处理器上下文">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">switch_to</span><span class="p">()</span>
+</span></span></code></pre></div><p>它负责切换与任务执行相关的处理器状态，例如：</p>
+<ul>
+<li>内核栈。</li>
+<li>CPU 寄存器。</li>
+<li>指令执行上下文。</li>
+<li>体系结构相关的其他状态。</li>
+</ul>
+<p>可以将其理解为：</p>
+<p><strong>保存旧任务的执行现场，恢复新任务上一次被暂停时的执行现场。</strong></p>
+<p>因此，一个进程被切换出去之后，并不是从头开始执行，而是可以从之前暂停的位置继续执行。</p>
+<h2 id="52-need_resched是否需要重新调度">5.2 need_resched：是否需要重新调度<a hidden class="anchor" aria-hidden="true" href="#52-need_resched是否需要重新调度">#</a></h2>
+<p>内核什么时候应该调用 <code>schedule()</code>？</p>
+<p>如果只在代码显式调用 <code>schedule()</code> 时才发生调度，那么一个始终不主动阻塞的用户进程可能长期占用 CPU。</p>
+<p>因此，Linux 使用 <code>need_resched</code> 标志表示当前任务是否需要重新调度。</p>
+<p>例如：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">进程 A 正在运行
+</span></span><span class="line"><span class="cl">       |
+</span></span><span class="line"><span class="cl">       v
+</span></span><span class="line"><span class="cl">时钟中断发生
+</span></span><span class="line"><span class="cl">       |
+</span></span><span class="line"><span class="cl">       v
+</span></span><span class="line"><span class="cl">scheduler_tick()
+</span></span><span class="line"><span class="cl">       |
+</span></span><span class="line"><span class="cl">       v
+</span></span><span class="line"><span class="cl">发现应该重新调度
+</span></span><span class="line"><span class="cl">       |
+</span></span><span class="line"><span class="cl">       v
+</span></span><span class="line"><span class="cl">设置 need_resched
+</span></span><span class="line"><span class="cl">       |
+</span></span><span class="line"><span class="cl">       v
+</span></span><span class="line"><span class="cl">到达安全调度点
+</span></span><span class="line"><span class="cl">       |
+</span></span><span class="line"><span class="cl">       v
+</span></span><span class="line"><span class="cl">调用 schedule()
+</span></span></code></pre></div><p>此外，当更合适的任务被唤醒时，也可能设置该标志。</p>
+<p>例如：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">进程 A 正在运行
+</span></span><span class="line"><span class="cl">       |
+</span></span><span class="line"><span class="cl">       v
+</span></span><span class="line"><span class="cl">高优先级进程 B 被唤醒
+</span></span><span class="line"><span class="cl">       |
+</span></span><span class="line"><span class="cl">       v
+</span></span><span class="line"><span class="cl">设置 need_resched
+</span></span><span class="line"><span class="cl">       |
+</span></span><span class="line"><span class="cl">       v
+</span></span><span class="line"><span class="cl">内核在合适时机重新调度
+</span></span><span class="line"><span class="cl">       |
+</span></span><span class="line"><span class="cl">       v
+</span></span><span class="line"><span class="cl">B 获得 CPU
+</span></span></code></pre></div><p><code>need_resched</code> 的作用是通知内核：</p>
+<p>当前任务应该尽快让出 CPU，调度器需要重新选择任务。</p>
+<p>它本身并不执行上下文切换。</p>
+<h2 id="53-user-preemption">5.3 User Preemption<a hidden class="anchor" aria-hidden="true" href="#53-user-preemption">#</a></h2>
+<p>用户态抢占比较容易理解。</p>
+<p>当内核准备从系统调用或中断返回用户态时，会检查当前任务是否需要重新调度。</p>
+<p>例如：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">用户态进程 A
+</span></span><span class="line"><span class="cl">       |
+</span></span><span class="line"><span class="cl">       v
+</span></span><span class="line"><span class="cl">发生时钟中断
+</span></span><span class="line"><span class="cl">       |
+</span></span><span class="line"><span class="cl">       v
+</span></span><span class="line"><span class="cl">进入内核处理中断
+</span></span><span class="line"><span class="cl">       |
+</span></span><span class="line"><span class="cl">       v
+</span></span><span class="line"><span class="cl">检查 need_resched
+</span></span><span class="line"><span class="cl">       |
+</span></span><span class="line"><span class="cl">       v
+</span></span><span class="line"><span class="cl">需要重新调度
+</span></span><span class="line"><span class="cl">       |
+</span></span><span class="line"><span class="cl">       v
+</span></span><span class="line"><span class="cl">schedule()
+</span></span><span class="line"><span class="cl">       |
+</span></span><span class="line"><span class="cl">       v
+</span></span><span class="line"><span class="cl">切换到进程 B
+</span></span></code></pre></div><p>为什么选择在返回用户态时进行检查？</p>
+<p>因为此时内核已经处于一个适合切换任务的安全边界。</p>
+<h2 id="54-kernel-preemption">5.4 Kernel Preemption<a hidden class="anchor" aria-hidden="true" href="#54-kernel-preemption">#</a></h2>
+<p>Linux 还有一个重要特点：内核本身也支持抢占。</p>
+<p>这意味着进程即使正在执行内核代码，也可能被另一个任务抢占。</p>
+<p>但并不是任何时候都可以抢占。</p>
+<p>例如，当前进程正在持有自旋锁并访问共享数据结构，此时强行切换任务可能导致并发问题。</p>
+<p>因此，Linux 使用 <code>preempt_count</code> 控制内核抢占。</p>
+<p>其基本逻辑是：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">获取锁
+</span></span><span class="line"><span class="cl">  |
+</span></span><span class="line"><span class="cl">  v
+</span></span><span class="line"><span class="cl">preempt_count 增加
+</span></span><span class="line"><span class="cl">  |
+</span></span><span class="line"><span class="cl">  v
+</span></span><span class="line"><span class="cl">进入不可抢占区
+</span></span><span class="line"><span class="cl">  |
+</span></span><span class="line"><span class="cl">  v
+</span></span><span class="line"><span class="cl">执行临界区代码
+</span></span><span class="line"><span class="cl">  |
+</span></span><span class="line"><span class="cl">  v
+</span></span><span class="line"><span class="cl">释放锁
+</span></span><span class="line"><span class="cl">  |
+</span></span><span class="line"><span class="cl">  v
+</span></span><span class="line"><span class="cl">preempt_count 减少
+</span></span><span class="line"><span class="cl">  |
+</span></span><span class="line"><span class="cl">  v
+</span></span><span class="line"><span class="cl">可以抢占
+</span></span></code></pre></div><p>当 <code>preempt_count</code> 为零时，内核代码处于可抢占状态。</p>
+<p>如果此时：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">need_resched == 1
+</span></span></code></pre></div><p>那么内核就可以在合适的时机执行重新调度。</p>
+<p>原书介绍的内核抢占发生场景包括：</p>
+<ul>
+<li>中断处理程序退出时。</li>
+<li>内核代码重新变得可抢占时。</li>
+<li>进程显式调用 <code>schedule()</code> 时。</li>
+<li>进程在内核中阻塞时。</li>
+</ul>
+<p>这里需要建立一个重要认识：</p>
+<p><strong>抢占式内核不意味着内核代码可以在任意指令位置被无条件切换。锁、抢占计数和安全点共同保证内核并发执行的正确性。</strong></p>
+<hr>
+<h1 id="六实时调度策略real-time-scheduling-policies">六、实时调度策略（Real-Time Scheduling Policies）<a hidden class="anchor" aria-hidden="true" href="#六实时调度策略real-time-scheduling-policies">#</a></h1>
+<p>前面介绍的 CFS 面向普通任务。</p>
+<p>但是，一些任务对执行时间有更严格的要求。</p>
+<p>例如：</p>
+<ul>
+<li>工业控制。</li>
+<li>音视频处理。</li>
+<li>机器人控制。</li>
+<li>实时数据采集。</li>
+</ul>
+<p>这些任务可能需要更明确的优先级和调度行为。</p>
+<p>Linux 提供了实时调度策略。</p>
+<p>原书主要介绍：</p>
+<ul>
+<li><code>SCHED_FIFO</code></li>
+<li><code>SCHED_RR</code></li>
+</ul>
+<h2 id="61-sched_fifo">6.1 SCHED_FIFO<a hidden class="anchor" aria-hidden="true" href="#61-sched_fifo">#</a></h2>
+<p>FIFO 是 First In, First Out。</p>
+<p>它采用固定优先级的先进先出调度策略。</p>
+<p>基本规则：</p>
+<ol>
+<li>实时任务优先级高于普通任务。</li>
+<li>高优先级实时任务可以抢占低优先级实时任务。</li>
+<li>相同优先级的 FIFO 任务按照队列顺序执行。</li>
+<li>FIFO 任务没有普通意义上的时间片。</li>
+<li>任务会持续运行，直到主动阻塞、主动让出 CPU，或者被更高优先级任务抢占。</li>
+</ol>
+<p>例如：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">实时任务 A：Priority 90
+</span></span><span class="line"><span class="cl">实时任务 B：Priority 80
+</span></span><span class="line"><span class="cl">普通任务 C：SCHED_NORMAL
+</span></span></code></pre></div><p>如果 A 一直处于可运行状态，那么 B 和 C 都无法获得 CPU。</p>
+<p>这也是 FIFO 使用时必须谨慎的原因：一个不主动阻塞的高优先级实时任务，可能让普通任务长期得不到执行机会。</p>
+<h2 id="62-sched_rr">6.2 SCHED_RR<a hidden class="anchor" aria-hidden="true" href="#62-sched_rr">#</a></h2>
+<p>RR 是 Round Robin。</p>
+<p>它与 FIFO 非常相似，但增加了时间片机制。</p>
+<p>例如：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">A：Priority 80
+</span></span><span class="line"><span class="cl">B：Priority 80
+</span></span><span class="line"><span class="cl">C：Priority 70
+</span></span></code></pre></div><p>A 和 B 属于同一优先级。</p>
+<p>当 A 的时间片耗尽时，调度器会让 B 运行。</p>
+<p>但是，C 的优先级较低，即使 A 的时间片耗尽，C 也不能因此抢占 A 或 B。</p>
+<p>因此：</p>
+<p><strong>SCHED_RR 可以理解为带有时间片的实时 FIFO 调度。</strong></p>
+<h2 id="63-sched_fifo-与-sched_rr-对比">6.3 SCHED_FIFO 与 SCHED_RR 对比<a hidden class="anchor" aria-hidden="true" href="#63-sched_fifo-与-sched_rr-对比">#</a></h2>
+<table>
+	<thead>
+			<tr>
+					<th>特性</th>
+					<th>SCHED_FIFO</th>
+					<th>SCHED_RR</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>固定实时优先级</td>
+					<td>是</td>
+					<td>是</td>
+			</tr>
+			<tr>
+					<td>时间片</td>
+					<td>无</td>
+					<td>有</td>
+			</tr>
+			<tr>
+					<td>同优先级任务</td>
+					<td>按队列顺序执行</td>
+					<td>时间片轮转</td>
+			</tr>
+			<tr>
+					<td>高优先级任务抢占低优先级任务</td>
+					<td>支持</td>
+					<td>支持</td>
+			</tr>
+			<tr>
+					<td>低优先级任务抢占高优先级任务</td>
+					<td>不支持</td>
+					<td>不支持</td>
+			</tr>
+	</tbody>
+</table>
+<h2 id="64-soft-real-time-与-hard-real-time">6.4 Soft Real-Time 与 Hard Real-Time<a hidden class="anchor" aria-hidden="true" href="#64-soft-real-time-与-hard-real-time">#</a></h2>
+<p>这里还有一个容易混淆的概念。</p>
+<p>Linux 的传统实时调度策略主要提供软实时能力（Soft Real-Time）。</p>
+<p>软实时意味着：</p>
+<p>系统尽可能满足任务的时间要求，但不能保证每次都严格在截止时间之前完成。</p>
+<p>硬实时（Hard Real-Time）则要求：</p>
+<p>在规定的系统假设和约束下，任务必须满足严格的时间截止要求，违反截止时间可能意味着系统失效。</p>
+<p>因此：</p>
+<ul>
+<li>使用 <code>SCHED_FIFO</code> 不代表系统就变成了硬实时系统。</li>
+<li>使用 <code>SCHED_RR</code> 也不代表可以保证任务一定在截止时间前执行。</li>
+</ul>
+<p>现代 Linux 还提供 <code>SCHED_DEADLINE</code>，使用 EDF（Earliest Deadline First）和 CBS（Constant Bandwidth Server）相关机制，为实时任务提供更明确的调度和带宽控制能力。</p>
+<hr>
+<h1 id="七调度相关系统调用scheduler-related-system-calls">七、调度相关系统调用（Scheduler-Related System Calls）<a hidden class="anchor" aria-hidden="true" href="#七调度相关系统调用scheduler-related-system-calls">#</a></h1>
+<p>Linux 提供了一系列系统调用，让用户程序能够查询和修改调度参数。</p>
+<h2 id="71-nice-相关接口">7.1 Nice 相关接口<a hidden class="anchor" aria-hidden="true" href="#71-nice-相关接口">#</a></h2>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">nice</span><span class="p">(</span><span class="kt">int</span> <span class="n">inc</span><span class="p">);</span>
+</span></span></code></pre></div><p>用于调整当前进程的 Nice 值。</p>
+<p>命令行也可以使用：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">nice -n <span class="m">10</span> ./program
+</span></span><span class="line"><span class="cl">renice <span class="m">5</span> -p <span class="m">1234</span>
+</span></span></code></pre></div><p>注意，Nice 值越大，普通进程的 CPU 竞争权重越低。</p>
+<h2 id="72-调度策略相关接口">7.2 调度策略相关接口<a hidden class="anchor" aria-hidden="true" href="#72-调度策略相关接口">#</a></h2>
+<h3 id="sched_setscheduler">sched_setscheduler()<a hidden class="anchor" aria-hidden="true" href="#sched_setscheduler">#</a></h3>
+<p>设置进程的调度策略和优先级。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">sched_setscheduler</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">pid_t</span> <span class="n">pid</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">policy</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="k">const</span> <span class="k">struct</span> <span class="n">sched_param</span> <span class="o">*</span><span class="n">param</span>
+</span></span><span class="line"><span class="cl"><span class="p">);</span>
+</span></span></code></pre></div><p>常见策略包括：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">SCHED_OTHER</span>
+</span></span><span class="line"><span class="cl"><span class="n">SCHED_FIFO</span>
+</span></span><span class="line"><span class="cl"><span class="n">SCHED_RR</span>
+</span></span></code></pre></div><p>现代 Linux 还提供其他调度策略。</p>
+<h3 id="sched_getscheduler">sched_getscheduler()<a hidden class="anchor" aria-hidden="true" href="#sched_getscheduler">#</a></h3>
+<p>获取指定进程当前的调度策略。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">sched_getscheduler</span><span class="p">(</span><span class="kt">pid_t</span> <span class="n">pid</span><span class="p">);</span>
+</span></span></code></pre></div><h3 id="sched_setparam">sched_setparam()<a hidden class="anchor" aria-hidden="true" href="#sched_setparam">#</a></h3>
+<p>设置进程的调度参数。</p>
+<p>通常用于设置实时调度优先级。</p>
+<h3 id="sched_getparam">sched_getparam()<a hidden class="anchor" aria-hidden="true" href="#sched_getparam">#</a></h3>
+<p>获取进程当前的调度参数。</p>
+<h2 id="73-cpu-affinity处理器亲和性">7.3 CPU Affinity：处理器亲和性<a hidden class="anchor" aria-hidden="true" href="#73-cpu-affinity处理器亲和性">#</a></h2>
+<p>Linux 允许用户限制一个进程可以在哪些 CPU 上运行。</p>
+<p>相关接口：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">sched_setaffinity</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"><span class="nf">sched_getaffinity</span><span class="p">()</span>
+</span></span></code></pre></div><p>例如：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 将进程限制在 CPU 0 和 CPU 1 上运行</span>
+</span></span><span class="line"><span class="cl">taskset -c 0,1 ./program
+</span></span></code></pre></div><p>为什么需要 CPU Affinity？</p>
+<p>在多核系统中，进程迁移可能带来额外开销：</p>
+<ul>
+<li>Cache 数据可能不再命中。</li>
+<li>CPU 局部性受到影响。</li>
+<li>NUMA 系统可能访问远端内存。</li>
+</ul>
+<p>因此，有些高性能应用会限制进程的 CPU 运行范围。</p>
+<p>当然，CPU Affinity 也不是越严格越好。过度限制可能造成 CPU 负载不均衡。</p>
+<h2 id="74-sched_yield">7.4 sched_yield()<a hidden class="anchor" aria-hidden="true" href="#74-sched_yield">#</a></h2>
+<p>主动放弃当前 CPU。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">sched_yield</span><span class="p">();</span>
+</span></span></code></pre></div><p>它与 <code>schedule()</code> 不同：</p>
+<ul>
+<li><code>schedule()</code> 是内核内部用于触发调度的函数。</li>
+<li><code>sched_yield()</code> 是用户空间可调用的接口，用来主动让出 CPU。</li>
+</ul>
+<hr>
+<h1 id="八本章知识串联从进程就绪到上下文切换">八、本章知识串联：从进程就绪到上下文切换<a hidden class="anchor" aria-hidden="true" href="#八本章知识串联从进程就绪到上下文切换">#</a></h1>
+<p>学习完第四章后，应该能够把调度器各个部分串起来。</p>
+<p>下面以一个进程等待 I/O，随后被唤醒为例。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">                  进程 A 正在运行
+</span></span><span class="line"><span class="cl">                         |
+</span></span><span class="line"><span class="cl">                         v
+</span></span><span class="line"><span class="cl">                   执行 read()
+</span></span><span class="line"><span class="cl">                         |
+</span></span><span class="line"><span class="cl">                         v
+</span></span><span class="line"><span class="cl">                  数据尚未准备好
+</span></span><span class="line"><span class="cl">                         |
+</span></span><span class="line"><span class="cl">                         v
+</span></span><span class="line"><span class="cl">                  设置睡眠状态
+</span></span><span class="line"><span class="cl">                         |
+</span></span><span class="line"><span class="cl">                         v
+</span></span><span class="line"><span class="cl">                  加入等待队列
+</span></span><span class="line"><span class="cl">                         |
+</span></span><span class="line"><span class="cl">                         v
+</span></span><span class="line"><span class="cl">                    schedule()
+</span></span><span class="line"><span class="cl">                         |
+</span></span><span class="line"><span class="cl">                         v
+</span></span><span class="line"><span class="cl">                  选择进程 B
+</span></span><span class="line"><span class="cl">                         |
+</span></span><span class="line"><span class="cl">                         v
+</span></span><span class="line"><span class="cl">                 context_switch()
+</span></span><span class="line"><span class="cl">                         |
+</span></span><span class="line"><span class="cl">                         v
+</span></span><span class="line"><span class="cl">                   进程 B 运行
+</span></span><span class="line"><span class="cl">                         |
+</span></span><span class="line"><span class="cl">                         |
+</span></span><span class="line"><span class="cl">                  I/O 操作完成
+</span></span><span class="line"><span class="cl">                         |
+</span></span><span class="line"><span class="cl">                         v
+</span></span><span class="line"><span class="cl">                     wake_up()
+</span></span><span class="line"><span class="cl">                         |
+</span></span><span class="line"><span class="cl">                         v
+</span></span><span class="line"><span class="cl">                  try_to_wake_up()
+</span></span><span class="line"><span class="cl">                         |
+</span></span><span class="line"><span class="cl">                         v
+</span></span><span class="line"><span class="cl">                  A 重新变为可运行
+</span></span><span class="line"><span class="cl">                         |
+</span></span><span class="line"><span class="cl">                         v
+</span></span><span class="line"><span class="cl">                    加入运行队列
+</span></span><span class="line"><span class="cl">                         |
+</span></span><span class="line"><span class="cl">                         v
+</span></span><span class="line"><span class="cl">                调度器重新评估任务
+</span></span><span class="line"><span class="cl">                         |
+</span></span><span class="line"><span class="cl">                         v
+</span></span><span class="line"><span class="cl">                 选择合适的进程
+</span></span><span class="line"><span class="cl">                         |
+</span></span><span class="line"><span class="cl">                         v
+</span></span><span class="line"><span class="cl">                  context_switch()
+</span></span><span class="line"><span class="cl">                         |
+</span></span><span class="line"><span class="cl">                         v
+</span></span><span class="line"><span class="cl">                 进程 A 恢复执行
+</span></span></code></pre></div><p>需要区分三个不同的数据结构：</p>
+<table>
+	<thead>
+			<tr>
+					<th>数据结构</th>
+					<th>作用</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>Wait Queue</td>
+					<td>管理等待某个事件的进程</td>
+			</tr>
+			<tr>
+					<td>Runqueue</td>
+					<td>管理可运行任务</td>
+			</tr>
+			<tr>
+					<td>CFS Red-Black Tree</td>
+					<td>在公平调度类中组织可运行调度实体</td>
+			</tr>
+	</tbody>
+</table>
+<p>它们共同组成了进程从运行、阻塞、唤醒到重新获得 CPU 的完整流程。</p>
+<hr>
+<h1 id="九从-lkd-过渡到现代-linuxcfs-与-eevdf">九、从 LKD 过渡到现代 Linux：CFS 与 EEVDF<a hidden class="anchor" aria-hidden="true" href="#九从-lkd-过渡到现代-linuxcfs-与-eevdf">#</a></h1>
+<p>这里需要特别强调版本问题。</p>
+<p>《Linux Kernel Development》第三版出版于 2010 年，主要讲解 Linux 2.6 时代的调度器实现。</p>
+<p>书中介绍的 CFS 在 Linux 2.6.23 引入，是理解现代公平调度思想的重要基础。</p>
+<p>但是，不能将原书中的代码直接视为现代 Linux 的完整实现。</p>
+<p>Linux 6.6 开始引入 EEVDF（Earliest Eligible Virtual Deadline First），公平调度器逐步从传统 CFS 向 EEVDF 演进。</p>
+<h2 id="91-cfs-的局限与进一步演进">9.1 CFS 的局限与进一步演进<a hidden class="anchor" aria-hidden="true" href="#91-cfs-的局限与进一步演进">#</a></h2>
+<p>CFS 的基本策略是：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">根据权重更新 vruntime
+</span></span><span class="line"><span class="cl">          |
+</span></span><span class="line"><span class="cl">          v
+</span></span><span class="line"><span class="cl">选择 vruntime 最小的任务
+</span></span><span class="line"><span class="cl">          |
+</span></span><span class="line"><span class="cl">          v
+</span></span><span class="line"><span class="cl">运行任务
+</span></span><span class="line"><span class="cl">          |
+</span></span><span class="line"><span class="cl">          v
+</span></span><span class="line"><span class="cl">更新 vruntime
+</span></span></code></pre></div><p>它很好地解决了按权重分配 CPU 份额的问题。</p>
+<p>但在实际系统中，除了公平性，还需要考虑任务的延迟需求。</p>
+<p>例如：</p>
+<ul>
+<li>交互式任务希望尽快获得 CPU。</li>
+<li>音频任务希望获得较短的调度延迟。</li>
+<li>后台任务更关注吞吐量。</li>
+</ul>
+<p>EEVDF 在公平调度基础上引入了两个关键概念：</p>
+<p><strong>Lag（滞后量）</strong></p>
+<p>表示任务实际获得的 CPU 时间与其应得 CPU 时间之间的差异。</p>
+<ul>
+<li>正 Lag：任务还应该获得 CPU 时间。</li>
+<li>负 Lag：任务已经获得了超过应得份额的 CPU 时间。</li>
+</ul>
+<p><strong>Virtual Deadline（虚拟截止时间）</strong></p>
+<p>在满足调度资格的任务中，根据虚拟截止时间选择下一个任务。</p>
+<p>EEVDF 的核心过程可以概括为：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">计算任务的 Lag
+</span></span><span class="line"><span class="cl">       |
+</span></span><span class="line"><span class="cl">       v
+</span></span><span class="line"><span class="cl">判断任务是否具有调度资格
+</span></span><span class="line"><span class="cl">       |
+</span></span><span class="line"><span class="cl">       v
+</span></span><span class="line"><span class="cl">计算虚拟截止时间
+</span></span><span class="line"><span class="cl">       |
+</span></span><span class="line"><span class="cl">       v
+</span></span><span class="line"><span class="cl">选择最早虚拟截止时间的合格任务
+</span></span><span class="line"><span class="cl">       |
+</span></span><span class="line"><span class="cl">       v
+</span></span><span class="line"><span class="cl">运行任务
+</span></span></code></pre></div><p>与 CFS 相比，EEVDF 在公平性之外，更明确地考虑了调度延迟和任务的时间需求。</p>
+<p>它是理解现代 Linux 普通任务调度机制的重要入口。</p>
+<hr>
+<h1 id="十本章总结">十、本章总结<a hidden class="anchor" aria-hidden="true" href="#十本章总结">#</a></h1>
+<p>本章的核心并不是记住某几个调度函数，而是理解 Linux 调度器背后的设计思想。</p>
+<p>可以将本章知识归纳为以下几个层次：</p>
+<table>
+	<thead>
+			<tr>
+					<th>层次</th>
+					<th>核心概念</th>
+					<th>需要掌握的内容</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>多任务机制</td>
+					<td>Cooperative / Preemptive</td>
+					<td>为什么需要抢占</td>
+			</tr>
+			<tr>
+					<td>调度策略</td>
+					<td>I/O-Bound / CPU-Bound</td>
+					<td>响应延迟与吞吐量的权衡</td>
+			</tr>
+			<tr>
+					<td>优先级</td>
+					<td>Nice / Real-Time Priority</td>
+					<td>如何影响 CPU 竞争</td>
+			</tr>
+			<tr>
+					<td>公平调度</td>
+					<td>CFS</td>
+					<td>根据权重分配 CPU 份额</td>
+			</tr>
+			<tr>
+					<td>时间记账</td>
+					<td>vruntime</td>
+					<td>如何衡量进程获得的 CPU 资源</td>
+			</tr>
+			<tr>
+					<td>进程选择</td>
+					<td>Red-Black Tree</td>
+					<td>如何高效选择下一个进程</td>
+			</tr>
+			<tr>
+					<td>进程状态</td>
+					<td>Wait Queue</td>
+					<td>睡眠、唤醒与运行队列</td>
+			</tr>
+			<tr>
+					<td>调度执行</td>
+					<td>schedule / context_switch</td>
+					<td>如何完成任务切换</td>
+			</tr>
+			<tr>
+					<td>抢占机制</td>
+					<td>need_resched / preempt_count</td>
+					<td>何时可以重新调度</td>
+			</tr>
+			<tr>
+					<td>实时调度</td>
+					<td>FIFO / RR</td>
+					<td>如何支持固定优先级实时任务</td>
+			</tr>
+	</tbody>
+</table>
+<p>建议重点记住以下五个问题：</p>
+<ol>
+<li>为什么传统 Unix 的绝对时间片分配方式存在问题？</li>
+<li>为什么 CFS 使用虚拟运行时间，而不是简单使用实际运行时间？</li>
+<li>为什么 CFS 选择 vruntime 最小的进程？</li>
+<li>为什么睡眠队列与运行队列必须分开管理？</li>
+<li>为什么 Linux 需要同时支持普通调度类和实时调度类？</li>
+</ol>
+<p>如果能够清楚解释这五个问题，就基本掌握了本章的核心设计思想。</p>
+<hr>
+<h1 id="十一源码阅读与实践建议">十一、源码阅读与实践建议<a hidden class="anchor" aria-hidden="true" href="#十一源码阅读与实践建议">#</a></h1>
+<p>本章最好的学习方式是结合源码追踪，而不是停留在概念层面。</p>
+<p>需要注意，下面的函数和文件主要对应原书介绍的 Linux 2.6 实现。现代内核的文件组织、数据结构和函数实现已经发生变化。</p>
+<h2 id="111-原书对应的源码">11.1 原书对应的源码<a hidden class="anchor" aria-hidden="true" href="#111-原书对应的源码">#</a></h2>
+<table>
+	<thead>
+			<tr>
+					<th>文件</th>
+					<th>重点内容</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>kernel/sched.c</code></td>
+					<td>通用调度器、<code>schedule()</code>、上下文切换</td>
+			</tr>
+			<tr>
+					<td><code>kernel/sched_fair.c</code></td>
+					<td>CFS 实现</td>
+			</tr>
+			<tr>
+					<td><code>kernel/sched_rt.c</code></td>
+					<td>实时调度</td>
+			</tr>
+			<tr>
+					<td><code>include/linux/sched.h</code></td>
+					<td><code>task_struct</code>、<code>sched_entity</code> 等数据结构</td>
+			</tr>
+	</tbody>
+</table>
+<p>建议按照以下顺序追踪：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">schedule()
+</span></span><span class="line"><span class="cl">    |
+</span></span><span class="line"><span class="cl">    v
+</span></span><span class="line"><span class="cl">pick_next_task()
+</span></span><span class="line"><span class="cl">    |
+</span></span><span class="line"><span class="cl">    v
+</span></span><span class="line"><span class="cl">调度类选择
+</span></span><span class="line"><span class="cl">    |
+</span></span><span class="line"><span class="cl">    v
+</span></span><span class="line"><span class="cl">pick_next_task_fair()
+</span></span><span class="line"><span class="cl">    |
+</span></span><span class="line"><span class="cl">    v
+</span></span><span class="line"><span class="cl">__pick_next_entity()
+</span></span><span class="line"><span class="cl">    |
+</span></span><span class="line"><span class="cl">    v
+</span></span><span class="line"><span class="cl">选择 vruntime 最小的实体
+</span></span><span class="line"><span class="cl">    |
+</span></span><span class="line"><span class="cl">    v
+</span></span><span class="line"><span class="cl">context_switch()
+</span></span><span class="line"><span class="cl">    |
+</span></span><span class="line"><span class="cl">    v
+</span></span><span class="line"><span class="cl">switch_mm() / switch_to()
+</span></span></code></pre></div><p>然后再单独研究睡眠与唤醒路径：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">prepare_to_wait()
+</span></span><span class="line"><span class="cl">       |
+</span></span><span class="line"><span class="cl">       v
+</span></span><span class="line"><span class="cl">schedule()
+</span></span><span class="line"><span class="cl">       |
+</span></span><span class="line"><span class="cl">       v
+</span></span><span class="line"><span class="cl">任务阻塞
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">事件发生
+</span></span><span class="line"><span class="cl">       |
+</span></span><span class="line"><span class="cl">       v
+</span></span><span class="line"><span class="cl">wake_up()
+</span></span><span class="line"><span class="cl">       |
+</span></span><span class="line"><span class="cl">       v
+</span></span><span class="line"><span class="cl">try_to_wake_up()
+</span></span><span class="line"><span class="cl">       |
+</span></span><span class="line"><span class="cl">       v
+</span></span><span class="line"><span class="cl">任务重新进入运行队列
+</span></span></code></pre></div><h2 id="112-建议的实验">11.2 建议的实验<a hidden class="anchor" aria-hidden="true" href="#112-建议的实验">#</a></h2>
+<p><strong>实验一：观察 Nice 值对 CPU 份额的影响</strong></p>
+<p>创建两个持续消耗 CPU 的进程：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">nice -n <span class="m">0</span> ./cpu_task <span class="p">&amp;</span>
+</span></span><span class="line"><span class="cl">nice -n <span class="m">10</span> ./cpu_task <span class="p">&amp;</span>
+</span></span></code></pre></div><p>观察它们的 CPU 使用情况。</p>
+<p>可以使用：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">top -H
+</span></span><span class="line"><span class="cl">ps -eo pid,ni,pri,psr,stat,comm
+</span></span></code></pre></div><p>尝试改变 Nice 值，观察 CPU 竞争结果。</p>
+<p>注意：实际结果会受到其他进程、CPU 核数、调度组和系统负载等因素影响。</p>
+<p><strong>实验二：观察 CPU Affinity</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">taskset -c <span class="m">0</span> ./cpu_task
+</span></span><span class="line"><span class="cl">taskset -c <span class="m">1</span> ./cpu_task
+</span></span></code></pre></div><p>观察进程被限制在不同 CPU 上运行时的情况。</p>
+<p><strong>实验三：观察上下文切换</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">vmstat <span class="m">1</span>
+</span></span></code></pre></div><p>重点观察：</p>
+<ul>
+<li><code>r</code>：等待运行或正在运行的进程数。</li>
+<li><code>b</code>：不可中断睡眠进程数。</li>
+<li><code>cs</code>：每秒上下文切换次数。</li>
+</ul>
+<p>还可以使用：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sudo perf sched record -- sleep <span class="m">5</span>
+</span></span><span class="line"><span class="cl">sudo perf sched timehist
+</span></span></code></pre></div><p>观察调度延迟和进程切换情况。</p>
+<p><strong>实验四：使用 ftrace 观察调度事件</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sudo trace-cmd record <span class="se">\
+</span></span></span><span class="line"><span class="cl">    -e sched:sched_switch <span class="se">\
+</span></span></span><span class="line"><span class="cl">    -e sched:sched_wakeup <span class="se">\
+</span></span></span><span class="line"><span class="cl">    sleep <span class="m">5</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">sudo trace-cmd report
+</span></span></code></pre></div><p>可以观察：</p>
+<ul>
+<li>进程什么时候被唤醒。</li>
+<li>进程什么时候发生上下文切换。</li>
+<li>哪个进程被切出。</li>
+<li>哪个进程被切入。</li>
+</ul>
+<p>通过这些实验，可以把本章介绍的抽象调度流程与真实 Linux 内核行为联系起来。</p>
+<h2 id="113-推荐后续阅读">11.3 推荐后续阅读<a hidden class="anchor" aria-hidden="true" href="#113-推荐后续阅读">#</a></h2>
+<ul>
+<li><a href="https://www.kernel.org/doc/html/latest/scheduler/sched-design-CFS.html">Linux Kernel Documentation：CFS Scheduler</a></li>
+<li><a href="https://www.kernel.org/doc/html/latest/scheduler/sched-eevdf.html">Linux Kernel Documentation：EEVDF Scheduler</a></li>
+<li><a href="https://github.com/torvalds/linux/tree/master/kernel/sched">Linux Kernel Source：kernel/sched</a></li>
+<li><a href="https://pdos.csail.mit.edu/6.1810/">MIT 6.1810：Operating System Engineering</a></li>
+</ul>
+<p><strong>学习建议：先理解 LKD 中 CFS 的设计思想，再阅读现代 Linux 的 EEVDF 实现。不要一开始就试图把 2010 年的源码与最新内核逐行对应。</strong></p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="http://localhost:1313/tags/linux%E5%86%85%E6%A0%B8/">Linux内核</a></li>
+      <li><a href="http://localhost:1313/tags/%E8%BF%9B%E7%A8%8B%E8%B0%83%E5%BA%A6/">进程调度</a></li>
+      <li><a href="http://localhost:1313/tags/cfs/">CFS</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="http://localhost:1313/posts/lkdd2/">
+    <span class="title">« Prev</span>
+    <span>Linux设备驱动开发-Ch2-Linux内核模块</span>
+  </a>
+  <a class="next" href="http://localhost:1313/posts/lkd03/">
+    <span class="title">Next »</span>
+    <span>LKD阅读笔记-第三章-进程管理</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="http://localhost:1313/">Minghan的博客</a></span> · 
+
+    
+    
+    <span>
+        Powered by
+        <a href="https://gohugo.io/?utm_source=papermod" rel="noopener" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" id="top-link" class="top-link hidden" aria-label="go to top" title="Go to Top (Alt + G)" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevrons-up">
+        <polyline points="17 11 12 6 7 11"></polyline>
+        <polyline points="17 18 12 13 7 18"></polyline>
+    </svg>
+</a><script src="/js/toc-scrollspy.js" defer></script>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var toplink = document.getElementById("top-link");
+    window.onscroll = function () {
+        const scrollThreshold = window.innerHeight;
+        if (document.body.scrollTop > scrollThreshold || document.documentElement.scrollTop > scrollThreshold) {
+            toplink.classList.remove("hidden");
+        } else {
+            toplink.classList.add("hidden");
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>
