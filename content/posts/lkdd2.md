@@ -2,7 +2,7 @@
 title: "Linux设备驱动开发-Ch2-Linux内核模块"
 date: '2026-11-14T10:56:37+08:00'
 draft: false
-tags: [内核模块, 驱动开发]
+tags: [Linux设备驱动开发]
 categories: [Linux]
 ---
 

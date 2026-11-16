@@ -2,7 +2,7 @@
 title: "LKD阅读笔记-第二章-获取内核"
 date: '2026-11-03T22:11:04+08:00'
 draft: false
-tags: [Linux内核, Linux Kernel Development]
+tags: [Linux内核设计与实现]
 categories: [操作系统]
 ---
 

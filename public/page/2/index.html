@@ -194,6 +194,30 @@
 
 <article class="post-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">LKD阅读笔记-第二章-获取内核
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p> 参考书籍：Robert Love, Linux Kernel Development, Third Edition, Chapter 2: Getting Started with the Kernel。
+1. 本章概览 第一章介绍了 Linux 内核的历史、定位和整体设计，而第二章开始进入实际开发：如何获取内核源码、如何编译和安装内核，以及编写内核代码时需要遵循哪些特殊规则。
+本章主要回答三个问题：
+源码从哪里来？ 如何获取、管理和组织 Linux 内核源码？ 内核如何构建？ 如何配置、编译和安装一个 Linux 内核？ 内核代码有什么特殊之处？ 为什么内核开发不能完全按照普通 C 程序的方式进行？ 其中，第三个问题尤其重要。Linux 内核虽然主要使用 C 语言编写，但它并不是一个普通的 C 应用程序。它运行在特权环境中，直接管理硬件和内存，必须处理异步中断、多处理器并发以及严格的资源限制。
+2. 获取 Linux 内核源码 Linux 内核源码可以从官方网站获取：
+官方网站：https://www.kernel.org/ 官方 Git 仓库：https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git 官方提供两种主要获取方式：
+Tarball：完整源码压缩包。 Git：通过版本控制系统获取和管理源码。 2.1 使用 Git Linux 内核使用 Git 进行版本管理。Git 最初由 Linus Torvalds 创建，具有分布式版本控制的特点。
+相比下载压缩包，使用 Git 更适合长期阅读、修改和研究内核源码。
+获取 Linus 主线仓库：
+git clone https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git cd linux 查看当前版本：
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-11-03 22:11:04 +0800 CST'>November 3, 2026</span>&nbsp;·&nbsp;<span>6 min</span>&nbsp;·&nbsp;<span>1207 words</span></footer>
+  <a class="entry-link" aria-label="post link to LKD阅读笔记-第二章-获取内核" href="http://localhost:1313/posts/lkd02/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">LKD阅读笔记-第一章-内核简介
     </h2>
   </header>
@@ -393,29 +417,6 @@ xv6 kernel is booting hart 1 starting hart 2 starting init: starting sh $ pgtblt
 
 <span title='2026-10-26 17:25:46 +0800 CST'>October 26, 2026</span>&nbsp;·&nbsp;<span>2 min</span>&nbsp;·&nbsp;<span>245 words</span></footer>
   <a class="entry-link" aria-label="post link to 埃拉托色尼筛法（Sieve of Eratosthenes）" href="http://localhost:1313/posts/sieve/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">再探xv6: 并发篇
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>上一篇讲的是内存，这一篇讲并发。并发是 xv6 里最容易写出 bug、也最难调试的部分：对多核的支持让两个 CPU 同时修改同一份数据，中断让内核代码在任意时刻被打断，进程切换又让同一个数据结构被不同的进程轮流访问。
-这一篇先回答&#34;为什么需要锁&#34;，再逐行拆解 xv6 里的两种锁（Spinlock 和 Sleeplock），最后对照 Linux 的并发机制，看看一个通用操作系统为了应付更复杂的场景，做了哪些 xv6 没做的设计。
-一、为什么要提供并发机制？ 1.1 并发的三个来源 并发不等于&#34;多核&#34;。只要存在两个执行流能同时访问同一份内存，并发就存在。在 xv6 里，它有三个来源：
-来源一：多核（SMP）。 kernel/param.h 中定义了 NCPU 8，即最多 8 个 hart（CPU 核）可以同时运行内核代码。它们共享同一片物理内存，也共享同一批外设（virtio 磁盘、uart）。两个核同时修改同一个内存地址，就是一次数据竞争。
-来源二：中断与抢占。 内核代码随时可能被中断打断，而中断处理程序与被中断的代码共享数据结构。最典型的例子在 kernel/console.c 里：键盘中断处理程序 consoleintr() 往输入缓冲区写字符，进程通过 consread() 从同一个缓冲区读字符，两者靠同一把 cons.lock 保护。
-来源三：进程切换。 多个进程通过系统调用共享文件、管道、inode 和页表。struct file 的引用计数、pipe 的环形缓冲区、inode 的引用计数，都会被多个进程并发访问。
-这三个来源有一个共同点：它们都会打断一段正在运行的代码。因此临界区里的代码必须假设&#34;我随时可能被打断，并且被打断后别人也在改同样的数据&#34;。
-1.2 没有同步会发生什么 竞态条件：结果依赖执行顺序 看 kernel/kalloc.c 里分配物理页的代码：
-void * kalloc(void) { struct run *r; acquire(&amp;kmem.lock); r = kmem.freelist; if (r) { kmem.freelist = r-&gt;next; } release(&amp;kmem.lock); if (r) memset((char *)r, 5, PGSIZE); // fill with junk return (void *)r; } 假设去掉 acquire/release。CPU0 和 CPU1 同时进入临界区，可能读到同一个 r：
-...</p>
-  </div>
-  <footer class="entry-footer">
-
-<span title='2026-10-26 11:55:00 +0800 CST'>October 26, 2026</span>&nbsp;·&nbsp;<span>8 min</span>&nbsp;·&nbsp;<span>1577 words</span></footer>
-  <a class="entry-link" aria-label="post link to 再探xv6: 并发篇" href="http://localhost:1313/posts/xv6-03/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">

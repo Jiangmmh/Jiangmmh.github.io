@@ -206,11 +206,36 @@
 
 <article class="post-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">FreeRTOS book 第一章：简介
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Mastering the FreeRTOS Real Time Kernel 第一章：前言与嵌入式多任务系统 一、FreeRTOS 是什么？ 1.1 FreeRTOS 的基本介绍 FreeRTOS 是一套面向嵌入式系统的开源软件，主要由实时内核（Real-Time Kernel）以及一系列提供辅助功能的模块化软件库组成。
+它最初由 Richard Barry 于 2003 年左右开发，后来由 Amazon Web Services（AWS）接手维护。FreeRTOS 使用 MIT 开源许可证，既可以用于个人项目，也可以用于商业产品。
+FreeRTOS 的主要目标是为微控制器（MCU）和小型微处理器提供实时多任务处理能力。
+在没有 RTOS 的传统裸机程序中，应用程序通常由一个主循环控制：
+int main(void) { hardware_init(); while (1) { read_sensor(); process_data(); update_display(); handle_communication(); } } 这种方式也被称为 Super Loop（超级循环）或前后台系统。
+当应用程序比较简单时，这种结构完全可行。但是，随着功能不断增加，系统可能同时需要：
+周期性采集传感器数据。 实时响应外部事件。 更新显示界面。 处理通信协议。 执行控制算法。 管理设备状态。 如果所有功能都放在一个循环中，就需要开发者自行管理每个功能的执行时机、执行顺序以及等待时间。
+例如，通信处理过程中如果需要等待数据，可能会影响传感器采集；如果某个功能执行时间过长，也可能导致其他功能错过执行时机。
+FreeRTOS 通过引入任务（Task）和调度器（Scheduler），将应用程序组织成多个相对独立的执行单元，并由内核决定哪个任务获得 CPU 执行权。
+可以将其理解为：
+Application | &#43;-------------&#43;-------------&#43; | | | Sensor Task Control Task Communication Task | | | &#43;-------------&#43;-------------&#43; | FreeRTOS Kernel | Hardware 每个任务负责一项相对独立的工作，任务之间通过内核提供的通信和同步机制协作。
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-11-16 12:43:57 +0800 CST'>November 16, 2026</span>&nbsp;·&nbsp;<span>4 min</span>&nbsp;·&nbsp;<span>786 words</span></footer>
+  <a class="entry-link" aria-label="post link to FreeRTOS book 第一章：简介" href="http://localhost:1313/posts/freertos1/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">Linux设备驱动开发-Ch2-Linux内核模块
     </h2>
   </header>
   <div class="entry-content">
-    <p>Linux 内核模块（Kernel Modules）详解 一、内核模块简介 1.1 什么是内核模块？ Linux 内核采用模块化设计，允许开发者通过添加独立的软件组件来扩展内核功能，而不需要每次修改内核都重新编译整个内核。
+    <p>一、内核模块简介 1.1 什么是内核模块？ Linux 内核采用模块化设计，允许开发者通过添加独立的软件组件来扩展内核功能，而不需要每次修改内核都重新编译整个内核。
 内核模块（Kernel Module） 是一种能够在运行时动态加载到 Linux 内核中，并在不再需要时动态卸载的软件组件。
 当内核模块用于控制和管理特定硬件设备时，它通常被称为设备驱动程序（Device Driver）。
 例如：
@@ -229,11 +254,12 @@ CONFIG_EXT4_FS=y CONFIG_E1000=y 其中 y 表示将对应功能编译进内核。
 sudo insmod helloworld.ko sudo rmmod helloworld 优点：
 不需要重新编译和启动整个内核即可扩展功能。 可以按需加载功能，减少不必要的内核常驻代码。 便于开发和调试驱动程序。 缺点：
 模块必须与目标内核的版本、配置及符号接口兼容。 模块加载、卸载以及模块间依赖需要额外管理。 模块运行在内核态，错误可能导致整个系统崩溃。 补充： 动态模块虽然能够独立加载，但并不意味着它完全不依赖内核。模块仍然需要使用目标内核提供的头文件、配置、符号和构建环境。
+1.3 内核模块相关配置 Linux 内核提供以下配置选项：
 ...</p>
   </div>
   <footer class="entry-footer">
 
-<span title='2026-11-14 10:56:37 +0800 CST'>November 14, 2026</span>&nbsp;·&nbsp;<span>7 min</span>&nbsp;·&nbsp;<span>1334 words</span></footer>
+<span title='2026-11-14 10:56:37 +0800 CST'>November 14, 2026</span>&nbsp;·&nbsp;<span>10 min</span>&nbsp;·&nbsp;<span>1984 words</span></footer>
   <a class="entry-link" aria-label="post link to Linux设备驱动开发-Ch2-Linux内核模块" href="http://localhost:1313/posts/lkdd2/"></a>
 </article>
 
@@ -433,30 +459,6 @@ $ kalloctest start test1 test1 results: --- lock kmem stats lock: kmem: #test-an
 
 <span title='2026-11-04 11:50:28 +0800 CST'>November 4, 2026</span>&nbsp;·&nbsp;<span>8 min</span>&nbsp;·&nbsp;<span>1632 words</span></footer>
   <a class="entry-link" aria-label="post link to 论文阅读：Practical, Transparent Operating System Support for Superpages" href="http://localhost:1313/posts/huge_page/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">LKD阅读笔记-第二章-获取内核
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p> 参考书籍：Robert Love, Linux Kernel Development, Third Edition, Chapter 2: Getting Started with the Kernel。
-1. 本章概览 第一章介绍了 Linux 内核的历史、定位和整体设计，而第二章开始进入实际开发：如何获取内核源码、如何编译和安装内核，以及编写内核代码时需要遵循哪些特殊规则。
-本章主要回答三个问题：
-源码从哪里来？ 如何获取、管理和组织 Linux 内核源码？ 内核如何构建？ 如何配置、编译和安装一个 Linux 内核？ 内核代码有什么特殊之处？ 为什么内核开发不能完全按照普通 C 程序的方式进行？ 其中，第三个问题尤其重要。Linux 内核虽然主要使用 C 语言编写，但它并不是一个普通的 C 应用程序。它运行在特权环境中，直接管理硬件和内存，必须处理异步中断、多处理器并发以及严格的资源限制。
-2. 获取 Linux 内核源码 Linux 内核源码可以从官方网站获取：
-官方网站：https://www.kernel.org/ 官方 Git 仓库：https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git 官方提供两种主要获取方式：
-Tarball：完整源码压缩包。 Git：通过版本控制系统获取和管理源码。 2.1 使用 Git Linux 内核使用 Git 进行版本管理。Git 最初由 Linus Torvalds 创建，具有分布式版本控制的特点。
-相比下载压缩包，使用 Git 更适合长期阅读、修改和研究内核源码。
-获取 Linus 主线仓库：
-git clone https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git cd linux 查看当前版本：
-...</p>
-  </div>
-  <footer class="entry-footer">
-
-<span title='2026-11-03 22:11:04 +0800 CST'>November 3, 2026</span>&nbsp;·&nbsp;<span>6 min</span>&nbsp;·&nbsp;<span>1207 words</span></footer>
-  <a class="entry-link" aria-label="post link to LKD阅读笔记-第二章-获取内核" href="http://localhost:1313/posts/lkd02/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">

@@ -6,20 +6,27 @@
     <description>Recent content in Tags on Minghan的博客</description>
     <generator>Hugo</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Sat, 14 Nov 2026 10:56:37 +0800</lastBuildDate>
+    <lastBuildDate>Mon, 16 Nov 2026 12:43:57 +0800</lastBuildDate>
     <atom:link href="http://localhost:1313/tags/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>内核模块</title>
-      <link>http://localhost:1313/tags/%E5%86%85%E6%A0%B8%E6%A8%A1%E5%9D%97/</link>
-      <pubDate>Sat, 14 Nov 2026 10:56:37 +0800</pubDate>
-      <guid>http://localhost:1313/tags/%E5%86%85%E6%A0%B8%E6%A8%A1%E5%9D%97/</guid>
+      <title>FreeRTOS</title>
+      <link>http://localhost:1313/tags/freertos/</link>
+      <pubDate>Mon, 16 Nov 2026 12:43:57 +0800</pubDate>
+      <guid>http://localhost:1313/tags/freertos/</guid>
       <description></description>
     </item>
     <item>
-      <title>驱动开发</title>
-      <link>http://localhost:1313/tags/%E9%A9%B1%E5%8A%A8%E5%BC%80%E5%8F%91/</link>
+      <title>实时操作系统</title>
+      <link>http://localhost:1313/tags/%E5%AE%9E%E6%97%B6%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/</link>
+      <pubDate>Mon, 16 Nov 2026 12:43:57 +0800</pubDate>
+      <guid>http://localhost:1313/tags/%E5%AE%9E%E6%97%B6%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Linux设备驱动开发</title>
+      <link>http://localhost:1313/tags/linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8%E5%BC%80%E5%8F%91/</link>
       <pubDate>Sat, 14 Nov 2026 10:56:37 +0800</pubDate>
-      <guid>http://localhost:1313/tags/%E9%A9%B1%E5%8A%A8%E5%BC%80%E5%8F%91/</guid>
+      <guid>http://localhost:1313/tags/linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8%E5%BC%80%E5%8F%91/</guid>
       <description></description>
     </item>
     <item>
@@ -30,10 +37,10 @@
       <description></description>
     </item>
     <item>
-      <title>Linux内核</title>
-      <link>http://localhost:1313/tags/linux%E5%86%85%E6%A0%B8/</link>
+      <title>Linux内核设计与实现</title>
+      <link>http://localhost:1313/tags/linux%E5%86%85%E6%A0%B8%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0/</link>
       <pubDate>Sun, 08 Nov 2026 21:20:53 +0800</pubDate>
-      <guid>http://localhost:1313/tags/linux%E5%86%85%E6%A0%B8/</guid>
+      <guid>http://localhost:1313/tags/linux%E5%86%85%E6%A0%B8%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0/</guid>
       <description></description>
     </item>
     <item>
@@ -41,20 +48,6 @@
       <link>http://localhost:1313/tags/%E8%BF%9B%E7%A8%8B%E8%B0%83%E5%BA%A6/</link>
       <pubDate>Sun, 08 Nov 2026 21:20:53 +0800</pubDate>
       <guid>http://localhost:1313/tags/%E8%BF%9B%E7%A8%8B%E8%B0%83%E5%BA%A6/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>Linux Kernel</title>
-      <link>http://localhost:1313/tags/linux-kernel/</link>
-      <pubDate>Fri, 06 Nov 2026 21:07:12 +0800</pubDate>
-      <guid>http://localhost:1313/tags/linux-kernel/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>Linux Kernel Development</title>
-      <link>http://localhost:1313/tags/linux-kernel-development/</link>
-      <pubDate>Fri, 06 Nov 2026 21:07:12 +0800</pubDate>
-      <guid>http://localhost:1313/tags/linux-kernel-development/</guid>
       <description></description>
     </item>
     <item>
@@ -559,6 +552,41 @@
       <link>http://localhost:1313/tags/%E9%93%BE%E8%A1%A8/</link>
       <pubDate>Wed, 14 Oct 2026 11:00:00 +0800</pubDate>
       <guid>http://localhost:1313/tags/%E9%93%BE%E8%A1%A8/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Linux Kernel</title>
+      <link>http://localhost:1313/tags/linux-kernel/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/tags/linux-kernel/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Linux Kernel Development</title>
+      <link>http://localhost:1313/tags/linux-kernel-development/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/tags/linux-kernel-development/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Linux内核</title>
+      <link>http://localhost:1313/tags/linux%E5%86%85%E6%A0%B8/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/tags/linux%E5%86%85%E6%A0%B8/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>内核模块</title>
+      <link>http://localhost:1313/tags/%E5%86%85%E6%A0%B8%E6%A8%A1%E5%9D%97/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/tags/%E5%86%85%E6%A0%B8%E6%A8%A1%E5%9D%97/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>驱动开发</title>
+      <link>http://localhost:1313/tags/%E9%A9%B1%E5%8A%A8%E5%BC%80%E5%8F%91/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/tags/%E9%A9%B1%E5%8A%A8%E5%BC%80%E5%8F%91/</guid>
       <description></description>
     </item>
   </channel>

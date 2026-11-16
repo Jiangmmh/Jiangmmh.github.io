@@ -2,7 +2,7 @@
 title: "LKD阅读笔记-第四章-进程调度"
 date: '2026-11-08T21:20:53+08:00'
 draft: false
-tags: [Linux内核, 进程调度, CFS]
+tags: [Linux内核设计与实现, 进程调度, CFS]
 categories: [操作系统]
 ---
 

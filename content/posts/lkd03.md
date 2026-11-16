@@ -2,7 +2,7 @@
 title: "LKD阅读笔记-第三章-进程管理"
 date: '2026-11-06T21:07:12+08:00'
 draft: false
-tags: [ Linux Kernel, 进程管理, Linux Kernel Development]
+tags: [ Linux内核设计与实现, 进程管理]
 categories: [操作系统]
 ---
 

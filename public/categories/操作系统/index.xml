@@ -6,8 +6,58 @@
     <description>Recent content in 操作系统 on Minghan的博客</description>
     <generator>Hugo</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Sun, 08 Nov 2026 21:20:53 +0800</lastBuildDate>
+    <lastBuildDate>Mon, 16 Nov 2026 12:43:57 +0800</lastBuildDate>
     <atom:link href="http://localhost:1313/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>FreeRTOS book 第一章：简介</title>
+      <link>http://localhost:1313/posts/freertos1/</link>
+      <pubDate>Mon, 16 Nov 2026 12:43:57 +0800</pubDate>
+      <guid>http://localhost:1313/posts/freertos1/</guid>
+      <description>&lt;h1 id=&#34;mastering-the-freertos-real-time-kernel-第一章前言与嵌入式多任务系统&#34;&gt;Mastering the FreeRTOS Real Time Kernel 第一章：前言与嵌入式多任务系统&lt;/h1&gt;
+&lt;h1 id=&#34;一freertos-是什么&#34;&gt;一、FreeRTOS 是什么？&lt;/h1&gt;
+&lt;h2 id=&#34;11-freertos-的基本介绍&#34;&gt;1.1 FreeRTOS 的基本介绍&lt;/h2&gt;
+&lt;p&gt;FreeRTOS 是一套面向嵌入式系统的开源软件，主要由实时内核（Real-Time Kernel）以及一系列提供辅助功能的模块化软件库组成。&lt;/p&gt;
+&lt;p&gt;它最初由 Richard Barry 于 2003 年左右开发，后来由 Amazon Web Services（AWS）接手维护。FreeRTOS 使用 MIT 开源许可证，既可以用于个人项目，也可以用于商业产品。&lt;/p&gt;
+&lt;p&gt;FreeRTOS 的主要目标是为微控制器（MCU）和小型微处理器提供实时多任务处理能力。&lt;/p&gt;
+&lt;p&gt;在没有 RTOS 的传统裸机程序中，应用程序通常由一个主循环控制：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;main&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;void&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nf&#34;&gt;hardware_init&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;();&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;while&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;nf&#34;&gt;read_sensor&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;();&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;nf&#34;&gt;process_data&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;();&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;nf&#34;&gt;update_display&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;();&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;nf&#34;&gt;handle_communication&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;();&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;这种方式也被称为 Super Loop（超级循环）或前后台系统。&lt;/p&gt;
+&lt;p&gt;当应用程序比较简单时，这种结构完全可行。但是，随着功能不断增加，系统可能同时需要：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;周期性采集传感器数据。&lt;/li&gt;
+&lt;li&gt;实时响应外部事件。&lt;/li&gt;
+&lt;li&gt;更新显示界面。&lt;/li&gt;
+&lt;li&gt;处理通信协议。&lt;/li&gt;
+&lt;li&gt;执行控制算法。&lt;/li&gt;
+&lt;li&gt;管理设备状态。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;如果所有功能都放在一个循环中，就需要开发者自行管理每个功能的执行时机、执行顺序以及等待时间。&lt;/p&gt;
+&lt;p&gt;例如，通信处理过程中如果需要等待数据，可能会影响传感器采集；如果某个功能执行时间过长，也可能导致其他功能错过执行时机。&lt;/p&gt;
+&lt;p&gt;FreeRTOS 通过引入任务（Task）和调度器（Scheduler），将应用程序组织成多个相对独立的执行单元，并由内核决定哪个任务获得 CPU 执行权。&lt;/p&gt;
+&lt;p&gt;可以将其理解为：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                 Application
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                      |
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        +-------------+-------------+
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        |             |             |
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    Sensor Task   Control Task   Communication Task
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        |             |             |
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        +-------------+-------------+
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                      |
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                FreeRTOS Kernel
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                      |
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                  Hardware
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;每个任务负责一项相对独立的工作，任务之间通过内核提供的通信和同步机制协作。&lt;/p&gt;</description>
+    </item>
     <item>
       <title>LKD阅读笔记-第四章-进程调度</title>
       <link>http://localhost:1313/posts/lkd04/</link>
