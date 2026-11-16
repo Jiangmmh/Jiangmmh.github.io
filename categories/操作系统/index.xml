@@ -1,4 +1,46 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>操作系统 on Minghan的博客</title><link>https://Jiangmmh.github.io/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/</link><description>Recent content in 操作系统 on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Sun, 08 Nov 2026 21:20:53 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/index.xml" rel="self" type="application/rss+xml"/><item><title>LKD阅读笔记-第四章-进程调度</title><link>https://Jiangmmh.github.io/posts/lkd04/</link><pubDate>Sun, 08 Nov 2026 21:20:53 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/lkd04/</guid><description>&lt;h1 id="一进程调度what--why">一、进程调度：What &amp;amp; Why？&lt;/h1>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>操作系统 on Minghan的博客</title><link>https://Jiangmmh.github.io/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/</link><description>Recent content in 操作系统 on Minghan的博客</description><generator>Hugo</generator><language>en</language><lastBuildDate>Mon, 16 Nov 2026 12:43:57 +0800</lastBuildDate><atom:link href="https://Jiangmmh.github.io/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/index.xml" rel="self" type="application/rss+xml"/><item><title>FreeRTOS book 第一章：简介</title><link>https://Jiangmmh.github.io/posts/freertos1/</link><pubDate>Mon, 16 Nov 2026 12:43:57 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/freertos1/</guid><description>&lt;h1 id="一freertos-是什么">一、FreeRTOS 是什么？&lt;/h1>
+&lt;h2 id="11-freertos-的基本介绍">1.1 FreeRTOS 的基本介绍&lt;/h2>
+&lt;p>FreeRTOS 是一套面向嵌入式系统的开源软件，主要由实时内核（Real-Time Kernel）以及一系列提供辅助功能的模块化软件库组成。&lt;/p>
+&lt;p>它最初由 Richard Barry 于 2003 年左右开发，后来由 Amazon Web Services（AWS）接手维护。FreeRTOS 使用 MIT 开源许可证，既可以用于个人项目，也可以用于商业产品。&lt;/p>
+&lt;p>FreeRTOS 的主要目标是为微控制器（MCU）和小型微处理器提供实时多任务处理能力。&lt;/p>
+&lt;p>在没有 RTOS 的传统裸机程序中，应用程序通常由一个主循环控制：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-c" data-lang="c">&lt;span class="line">&lt;span class="cl">&lt;span class="kt">int&lt;/span> &lt;span class="nf">main&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="kt">void&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">hardware_init&lt;/span>&lt;span class="p">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">while&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="mi">1&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">read_sensor&lt;/span>&lt;span class="p">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">process_data&lt;/span>&lt;span class="p">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">update_display&lt;/span>&lt;span class="p">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">handle_communication&lt;/span>&lt;span class="p">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>这种方式也被称为 Super Loop（超级循环）或前后台系统。&lt;/p>
+&lt;p>当应用程序比较简单时，这种结构完全可行。但是，随着功能不断增加，系统可能同时需要：&lt;/p>
+&lt;ul>
+&lt;li>周期性采集传感器数据。&lt;/li>
+&lt;li>实时响应外部事件。&lt;/li>
+&lt;li>更新显示界面。&lt;/li>
+&lt;li>处理通信协议。&lt;/li>
+&lt;li>执行控制算法。&lt;/li>
+&lt;li>管理设备状态。&lt;/li>
+&lt;/ul>
+&lt;p>如果所有功能都放在一个循环中，就需要开发者自行管理每个功能的执行时机、执行顺序以及等待时间。&lt;/p>
+&lt;p>例如，通信处理过程中如果需要等待数据，可能会影响传感器采集；如果某个功能执行时间过长，也可能导致其他功能错过执行时机。&lt;/p>
+&lt;p>FreeRTOS 通过引入任务（Task）和调度器（Scheduler），将应用程序组织成多个相对独立的执行单元，并由内核决定哪个任务获得 CPU 执行权。&lt;/p>
+&lt;p>可以将其理解为：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-text" data-lang="text">&lt;span class="line">&lt;span class="cl"> Application
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> |
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> +-------------+-------------+
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> | | |
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> Sensor Task Control Task Communication Task
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> | | |
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> +-------------+-------------+
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> |
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> FreeRTOS Kernel
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> |
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> Hardware
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>每个任务负责一项相对独立的工作，任务之间通过内核提供的通信和同步机制协作。&lt;/p></description></item><item><title>LKD阅读笔记-第四章-进程调度</title><link>https://Jiangmmh.github.io/posts/lkd04/</link><pubDate>Sun, 08 Nov 2026 21:20:53 +0800</pubDate><guid>https://Jiangmmh.github.io/posts/lkd04/</guid><description>&lt;h1 id="一进程调度what--why">一、进程调度：What &amp;amp; Why？&lt;/h1>
 &lt;p>上一章介绍了进程管理，讨论了 Linux 如何创建、管理和销毁进程。本章进一步讨论一个核心问题：&lt;/p>
 &lt;p>&lt;strong>当系统中存在多个可运行进程，但 CPU 资源有限时，内核应该选择哪个进程运行？&lt;/strong>&lt;/p>
 &lt;p>这就是进程调度（Process Scheduling）。&lt;/p>
